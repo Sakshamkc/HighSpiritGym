@@ -1,0 +1,24 @@
+﻿@model HighSpiritApp.Models.CustomerMembership
+@{
+    var cid = ViewBag.CustomerID;
+}
+
+<h2>Add / Renew Membership</h2>
+
+<form method="post">
+    <input type="hidden" name="CustomerID" value="@cid" />
+
+    <label>Plan Name</label><br />
+    <input name="PlanName" /><br />
+
+    <label>Paid Price</label><br />
+    <input name="PaidPrice" /><br />
+
+    <label>Start Date</label><br />
+    <input type="date" name="StartDate" /><br />
+
+    <label>Duration (Months)</label><br />
+    <input name="Duration" /><br /><br />
+
+    <button type="submit">Save</button>
+</form>

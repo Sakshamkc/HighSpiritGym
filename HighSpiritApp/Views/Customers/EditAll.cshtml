@@ -1,0 +1,91 @@
+﻿@model HighSpiritApp.Models.CustomerEditVM
+@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="card shadow">
+    <div class="card-body">
+        <h4>Edit Customer & Membership</h4>
+
+        <form method="post" enctype="multipart/form-data" class="row g-3">
+
+            <input type="hidden" asp-for="CustomerID" />
+            <input type="hidden" asp-for="MembershipID" />
+
+            <h5>Customer Details</h5>
+
+            <div class="col-md-6">
+                <label>Name</label>
+                <input asp-for="FullName" class="form-control" />
+            </div>
+            <div class="col-md-6">
+                <label>Phone</label>
+                <input asp-for="Phone" class="form-control" />
+            </div>
+            <div class="col-md-6">
+                <label>Email</label>
+                <input asp-for="Email" class="form-control" />
+            </div>
+            <div class="col-md-6">
+                <label>Address</label>
+                <input asp-for="Address" class="form-control" />
+            </div>
+            <div class="col-md-6">
+                <label>Gender</label>
+                <select asp-for="Gender" class="form-control">
+                    <option value="">-- Select Gender --</option>
+                    <option value="Male">Male</option>
+                    <option value="Female">Female</option>
+                </select>
+            </div>
+
+            <div class="col-md-6">
+                <label>DOB</label>
+                <input asp-for="DateOfBirth" type="date" class="form-control" />
+            </div>
+            <div class="col-md-6">
+                <label>Height</label>
+                <input asp-for="Height" class="form-control" />
+            </div>
+            <div class="col-md-6">
+                <label>Weight</label>
+                <input asp-for="WeightKG" class="form-control" />
+            </div>
+            <div class="col-md-6">
+                <label>Blood Group</label>
+                <input asp-for="BloodGroup" class="form-control" />
+            </div>
+            <div class="col-md-6">
+                <label>Change Photo</label>
+                <input type="file" name="photoFile" class="form-control" />
+            </div>
+
+            <hr />
+
+            <h5>Membership Details</h5>
+
+            <div class="col-md-6">
+                <label>Plan Name</label>
+                <input asp-for="PlanName" class="form-control" />
+            </div>
+            <div class="col-md-6">
+                <label>Paid Price</label>
+                <input asp-for="PaidPrice" class="form-control" />
+            </div>
+            <div class="col-md-6">
+                <label>Start Date</label>
+                <input asp-for="StartDate" type="date" class="form-control" />
+            </div>
+            <div class="col-md-6">
+                <label>Duration (Months)</label>
+                <input asp-for="Duration" class="form-control" />
+            </div>
+
+            <div class="col-12">
+                <button class="btn btn-success">Save All</button>
+                <a href="/Customers" class="btn btn-secondary">Back</a>
+            </div>
+
+        </form>
+    </div>
+</div>

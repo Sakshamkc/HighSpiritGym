@@ -1,0 +1,30 @@
+﻿@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="card shadow">
+    <div class="card-body">
+        <h4 class="mb-3">Import Members from Excel</h4>
+        <form method="post" enctype="multipart/form-data">
+            <div class="mb-3">
+                <label class="form-label">Select Excel File</label>
+                <input type="file" name="file" class="form-control" />
+            </div>
+            <button class="btn btn-success">Upload</button>
+        </form>
+        <hr />
+        <p class="fw-bold">Excel Columns Order:</p>
+        <ul>
+            <li>1 - FullName</li>
+            <li>2 - Phone</li>
+            <li>3 - Address</li>
+            <li>4 - BloodGroup</li>
+            <li>5 - Height</li>
+            <li>6 - Weight</li>
+            <li>7 - PlanName</li>
+            <li>8 - PaidPrice</li>
+            <li>9 - StartDate</li>
+            <li>10 - Duration</li>
+        </ul>
+    </div>
+</div>

@@ -1,0 +1,84 @@
+﻿@model List<CustomerMembership>
+@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<h3 class="mb-4">Dashboard</h3>
+
+<div class="row g-4 mb-4">
+    <div class="col-md-3">
+        <div class="card shadow text-white" style="background:#4f46e5;">
+            <div class="card-body">
+                <h2>@ViewBag.Total</h2>
+                <p>Total Members</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card shadow text-white" style="background:#16a34a;">
+            <div class="card-body">
+                <h2>@ViewBag.Active</h2>
+                <p>Active</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card shadow text-white" style="background:#dc2626;">
+            <div class="card-body">
+                <h2>@ViewBag.Expired</h2>
+                <p>Expired</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card shadow text-white" style="background:#d97706;">
+            <div class="card-body">
+                <h2>@ViewBag.ExpiringSoon</h2>
+                <p>Expiring Soon</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row mb-4">
+    <div class="col-md-4">
+        <div class="card shadow text-white" style="background:#0891b2;">
+            <div class="card-body">
+                <h2>@ViewBag.JoinedToday</h2>
+                <p>Joined Today</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="card shadow">
+    <div class="card-body">
+        <h5>Expiring in 7 Days</h5>
+        <table class="table table-hover mt-3">
+            <thead class="table-dark">
+                <tr>
+                    <th>Name</th>
+                    <th>Phone</th>
+                    <th>Plan</th>
+                    <th>Expire</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var m in Model)
+                {
+                    <tr>
+                        <td>@m.Customer.FullName</td>
+                        <td>@m.Customer.Phone</td>
+                        <td>@m.PlanName</td>
+                        <td>@m.ExpireDate.ToShortDateString()</td>
+                        <td>
+                            <a class="btn btn-sm btn-primary"
+                               href="/Customers/Details/@m.CustomerID">View</a>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>
