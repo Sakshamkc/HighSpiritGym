@@ -1,11 +1,13 @@
 using HighSpiritApp.DataContext;
 using HighSpiritApp.Models;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using System.Diagnostics;
 
 namespace HighSpiritApp.Controllers
 {
+    [Authorize]
     public class HomeController : Controller
     {
         private readonly GymDbContext _context;

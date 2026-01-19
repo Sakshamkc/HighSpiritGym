@@ -9,9 +9,26 @@
     <div class="input-group">
         <input name="search" value="@ViewBag.Search"
                class="form-control" placeholder="Search by name or phone" />
+        <input type="hidden" name="filter" value="@ViewBag.Filter" />
         <button class="btn btn-primary">Search</button>
     </div>
 </form>
+
+<div class="mb-3">
+    <a class="btn btn-sm @(ViewBag.Filter=="all"?"btn-primary":"btn-outline-primary")"
+       href="?filter=all&search=@ViewBag.Search">All</a>
+
+    <a class="btn btn-sm @(ViewBag.Filter=="active"?"btn-success":"btn-outline-success")"
+       href="?filter=active&search=@ViewBag.Search">Active</a>
+
+    <a class="btn btn-sm @(ViewBag.Filter=="expired"?"btn-danger":"btn-outline-danger")"
+       href="?filter=expired&search=@ViewBag.Search">Expired</a>
+
+    <a class="btn btn-sm @(ViewBag.Filter=="soon"?"btn-warning":"btn-outline-warning")"
+       href="?filter=soon&search=@ViewBag.Search">Expiring in 7 Days</a>
+</div>
+
+
 
 <div class="card shadow">
     <div class="card-body p-0">
@@ -32,7 +49,7 @@
                     <th>Price</th>
 
                     <th>
-                        <a href="?sort=@(ViewBag.Sort == "expire_desc" ? "expire" : "expire_desc")&search=@ViewBag.Search"
+                        <a href="?sort=@(ViewBag.Sort == "expire_desc" ? "expire" : "expire_desc")&search=@ViewBag.Search" &filter=@ViewBag.Filter
                            class="text-white text-decoration-none">
                             Expire
                         </a>
@@ -120,7 +137,8 @@
                 {
                     <li class="page-item @(i == ViewBag.Page ? "active" : "")">
                         <a class="page-link"
-                           href="?page=@i&search=@ViewBag.Search&sort=@ViewBag.Sort">@i</a>
+                           href="?page=@i&search=@ViewBag.Search&sort=@ViewBag.Sort&filter=@ViewBag.Filter">@i</a>
+
                     </li>
                 }
             </ul>

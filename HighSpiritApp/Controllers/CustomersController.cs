@@ -1,11 +1,13 @@
 ﻿using ClosedXML.Excel;
 using HighSpiritApp.DataContext;
 using HighSpiritApp.Models;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
 namespace HighSpiritApp.Controllers
 {
+    [Authorize]
     public class CustomersController : Controller
     {
         private readonly GymDbContext _context;
@@ -15,9 +17,10 @@ namespace HighSpiritApp.Controllers
         }
 
         // List customers with current membership
-        public async Task<IActionResult> Index(string search, string sort, int page = 1)
+        public async Task<IActionResult> Index(string search, string sort, string filter, int page = 1)
         {
             int pageSize = 10;
+            var today = DateTime.Today;
 
             var query = _context.Customers
                 .Include(c => c.Memberships)
@@ -28,6 +31,28 @@ namespace HighSpiritApp.Controllers
                 query = query.Where(c =>
                     c.FullName.Contains(search) ||
                     c.Phone.Contains(search));
+            }
+
+            // Filters
+            filter = filter ?? "all";
+            ViewBag.Filter = filter;
+
+            if (filter == "active")
+            {
+                query = query.Where(c =>
+                    c.Memberships.Any(m => m.DueDaysComputed == 0));
+            }
+            else if (filter == "expired")
+            {
+                query = query.Where(c =>
+                    c.Memberships.Any(m => m.DueDaysComputed > 0));
+            }
+            else if (filter == "soon")
+            {
+                query = query.Where(c =>
+                    c.Memberships.Any(m =>
+                        m.ExpireDate >= today &&
+                        m.ExpireDate <= today.AddDays(7)));
             }
 
             // Sorting
@@ -50,8 +75,7 @@ namespace HighSpiritApp.Controllers
             var data = await query
                 .Skip((page - 1) * pageSize)
                 .Take(pageSize)
-                .ToListAsync()
-                ;
+                .ToListAsync();
 
             ViewBag.Page = page;
             ViewBag.TotalPages = (int)Math.Ceiling(total / (double)pageSize);
@@ -59,6 +83,7 @@ namespace HighSpiritApp.Controllers
 
             return View(data);
         }
+
 
         public async Task<IActionResult> Details(int id)
         {
