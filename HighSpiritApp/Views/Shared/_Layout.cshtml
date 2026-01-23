@@ -88,8 +88,6 @@
                 margin-right: 4px;
             }
 
-
-
     </style>
 </head>
 <body class="bg-light">
@@ -98,7 +96,7 @@
             <img src="/images/highspirit.jpg"
                  style="width:120px;height:auto;display:block;margin-left:20px" />
         </div>
-
+        
         <a href="/"><i class="fa-solid fa-chart-line"></i> Dashboard</a>
         <a href="/Customers"><i class="fa-solid fa-users"></i> Members</a>
         <a href="/Customers/Create"><i class="fa-solid fa-user-plus"></i> Add Member</a>
@@ -118,8 +116,19 @@
     </div>
 
     <div class="content">
+
+        <!-- Top utility bar -->
+        <div class="d-flex justify-content-end mb-2">
+            <button class="btn btn-sm btn-outline-secondary"
+                    onclick="toggleFullScreen()"
+                    title="Toggle Full Screen">
+                <i class="fa-solid fa-expand"></i>
+            </button>
+        </div>
+
         @RenderBody()
     </div>
+
 
 
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
@@ -147,6 +156,25 @@
     {
         <script>toastr.error("@TempData["error"]");</script>
     }
+    <script>
+        function toggleFullScreen() {
+            const icon = document.querySelector(".fa-expand, .fa-compress");
+
+            if (!document.fullscreenElement) {
+                document.documentElement.requestFullscreen();
+                if (icon) {
+                    icon.classList.remove("fa-expand");
+                    icon.classList.add("fa-compress");
+                }
+            } else {
+                document.exitFullscreen();
+                if (icon) {
+                    icon.classList.remove("fa-compress");
+                    icon.classList.add("fa-expand");
+                }
+            }
+        }
+    </script>
 
 </body>
 </html>
