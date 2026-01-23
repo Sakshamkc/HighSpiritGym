@@ -20,24 +20,30 @@ namespace HighSpiritApp.Controllers
         {
             var today = DateTime.Today;
 
-            var memberships = _context.CustomerMemberships;
-
+            // TOTAL CUSTOMERS (always from Customers table)
             var totalMembers = await _context.Customers.CountAsync();
 
-            var activeMembers = await memberships
-                .Where(m => m.DueDaysComputed == 0)
+            // ACTIVE CUSTOMERS
+            var activeMembers = await _context.Customers
+                .Where(c => c.Memberships.Any(m =>
+                    m.IsActive && m.DueDaysComputed == 0))
                 .CountAsync();
 
-            var expiredMembers = await memberships
-                .Where(m => m.DueDaysComputed > 0)
+            // EXPIRED CUSTOMERS
+            var expiredMembers = await _context.Customers
+                .Where(c => c.Memberships.Any(m =>
+                    m.IsActive && m.DueDaysComputed > 0))
                 .CountAsync();
 
-            var expiringSoon = await memberships
-                .Where(m =>
+            // EXPIRING SOON (7 DAYS)
+            var expiringSoon = await _context.Customers
+                .Where(c => c.Memberships.Any(m =>
+                    m.IsActive &&
                     m.ExpireDate >= today &&
-                    m.ExpireDate <= today.AddDays(7))
+                    m.ExpireDate <= today.AddDays(7)))
                 .CountAsync();
 
+            // JOINED TODAY
             var joinedToday = await _context.Customers
                 .Where(c => c.JoinDate.Date == today)
                 .CountAsync();
@@ -48,14 +54,15 @@ namespace HighSpiritApp.Controllers
             ViewBag.ExpiringSoon = expiringSoon;
             ViewBag.JoinedToday = joinedToday;
 
-            var expiringList = await memberships
-                .Include(m => m.Customer)
-                .Where(m =>
-                    m.ExpireDate >= today &&
-                    m.ExpireDate <= today.AddDays(7))
-                .OrderBy(m => m.ExpireDate)
-                .Take(5)
-                .ToListAsync();
+            var expiringList = await _context.CustomerMemberships
+     .Include(m => m.Customer)
+     .Where(m =>
+         m.IsActive &&
+         m.ExpireDate >= today &&
+         m.ExpireDate <= today.AddDays(7))
+     .OrderBy(m => m.ExpireDate)
+     .Take(5)
+     .ToListAsync();
 
             return View(expiringList);
         }

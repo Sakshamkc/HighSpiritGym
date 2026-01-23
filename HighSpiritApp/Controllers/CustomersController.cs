@@ -40,21 +40,22 @@ namespace HighSpiritApp.Controllers
             if (filter == "active")
             {
                 query = query.Where(c =>
-                    c.Memberships.Any(m => m.DueDaysComputed == 0));
+                    c.Memberships.Any(m => m.IsActive && m.DueDaysComputed == 0));
             }
             else if (filter == "expired")
             {
                 query = query.Where(c =>
-                    c.Memberships.Any(m => m.DueDaysComputed > 0));
+                    c.Memberships.Any(m => m.IsActive && m.DueDaysComputed > 0));
             }
+
             else if (filter == "soon")
             {
                 query = query.Where(c =>
                     c.Memberships.Any(m =>
+                        m.IsActive &&
                         m.ExpireDate >= today &&
                         m.ExpireDate <= today.AddDays(7)));
             }
-
             // Sorting
             ViewBag.Sort = sort;
             query = sort switch
@@ -228,10 +229,6 @@ namespace HighSpiritApp.Controllers
 
             if (customer == null) return NotFound();
 
-            var m = customer.Memberships
-                .OrderByDescending(x => x.StartDate)
-                .FirstOrDefault();
-
             var vm = new CustomerEditVM
             {
                 CustomerID = customer.CustomerID,
@@ -244,12 +241,6 @@ namespace HighSpiritApp.Controllers
                 Height = customer.Height,
                 WeightKG = customer.WeightKG,
                 BloodGroup = customer.BloodGroup,
-
-                MembershipID = m?.MembershipID ?? 0,
-                PlanName = m?.PlanName,
-                PaidPrice = m?.PaidPrice ?? 0,
-                StartDate = m?.StartDate ?? DateTime.Now,
-                Duration = m?.Duration ?? 1
             };
 
             return View(vm);
@@ -275,17 +266,6 @@ namespace HighSpiritApp.Controllers
                 using var ms = new MemoryStream();
                 await photoFile.CopyToAsync(ms);
                 customer.Photo = ms.ToArray();
-            }
-
-            var membership = await _context.CustomerMemberships
-                .FindAsync(vm.MembershipID);
-
-            if (membership != null)
-            {
-                membership.PlanName = vm.PlanName;
-                membership.PaidPrice = vm.PaidPrice;
-                membership.StartDate = vm.StartDate;
-                membership.Duration = vm.Duration;
             }
 
             await _context.SaveChangesAsync();

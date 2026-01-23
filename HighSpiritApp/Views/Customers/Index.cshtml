@@ -98,10 +98,19 @@
                         </td>
                         <td>
                             <a class="btn btn-sm btn-primary" href="/Customers/Details/@c.CustomerID">View</a>
+                            <a class="btn btn-sm btn-secondary"
+                               href="/Customers/EditAll/@c.CustomerID">
+                                Edit
+                            </a>
                             @if (m != null)
                             {
-                                <a class="btn btn-sm btn-warning" href="/Customers/EditAll/@c.CustomerID">Edit</a>
+                                <a class="btn btn-sm btn-success"
+                                   href="/Memberships/Renew/@c.CustomerID">
+                                    Renew
+                                </a>
+
                             }
+
                             <button class="btn btn-sm btn-danger"
                                     data-bs-toggle="modal"
                                     data-bs-target="#delModal_@c.CustomerID">

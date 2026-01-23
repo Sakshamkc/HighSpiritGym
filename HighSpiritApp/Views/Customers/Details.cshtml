@@ -3,6 +3,15 @@
     Layout = "~/Views/Shared/_Layout.cshtml";
     var m = Model.Memberships?.OrderByDescending(x => x.StartDate).FirstOrDefault();
 }
+<a class="btn btn-secondary mb-3"
+   href="/Customers/EditAll/@Model.CustomerID">
+    Edit Customer Details
+</a>
+
+<a class="btn btn-success mb-3"
+   href="/Memberships/Renew/@Model.CustomerID">
+    Renew Membership
+</a>
 
 <div class="card shadow">
     <div class="card-body">
@@ -48,29 +57,44 @@
         <hr />
 
         <h5>Membership Details</h5>
-        @if (m != null)
+        @if (Model.Memberships != null && Model.Memberships.Any())
         {
             <table class="table table-bordered">
-                <tr><th>Plan</th><td>@m.PlanName</td></tr>
-                <tr><th>Paid Price</th><td>@m.PaidPrice</td></tr>
-                <tr><th>Start Date</th><td>@m.StartDate.ToShortDateString()</td></tr>
-                <tr><th>Duration</th><td>@m.Duration months</td></tr>
-                <tr><th>Expire Date</th><td>@m.ExpireDate.ToShortDateString()</td></tr>
-                <tr>
-                    <th>Status</th>
-                    <td>
-                        @if (m.DueDaysComputed > 0)
-                        {
-                            <span class="badge bg-danger">Due @m.DueDaysComputed days</span>
-                        }
-                        else
-                        {
-                            <span class="badge bg-success">Active</span>
-                        }
-                    </td>
-                </tr>
+                <thead>
+                    <tr>
+                        <th>Plan</th>
+                        <th>Price</th>
+                        <th>Start</th>
+                        <th>Expire</th>
+                        <th>Duration</th>
+                        <th>Status</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var history in Model.Memberships.OrderByDescending(x => x.StartDate))
+                    {
+                        <tr>
+                            <td>@history.PlanName</td>
+                            <td>@history.PaidPrice</td>
+                            <td>@history.StartDate.ToShortDateString()</td>
+                            <td>@history.ExpireDate.ToShortDateString()</td>
+                            <td>@history.Duration</td>
+                            <td>
+                                @if (history.IsActive)
+                                {
+                                    <span class="badge bg-success">Active</span>
+                                }
+                                else
+                                {
+                                    <span class="badge bg-secondary">Expired</span>
+                                }
+                            </td>
+                        </tr>
+                    }
+                </tbody>
             </table>
         }
+
         else
         {
             <p class="text-danger">No membership found.</p>

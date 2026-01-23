@@ -1,0 +1,34 @@
+﻿@model HighSpiritApp.Models.CustomerMembership
+@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="card shadow">
+    <div class="card-body">
+        <h4>Renew Membership</h4>
+
+        <form method="post" class="row g-3">
+            <input type="hidden" asp-for="CustomerID" />
+
+            <div class="col-md-6">
+                <label>Plan Name</label>
+                <input asp-for="PlanName" class="form-control" />
+            </div>
+
+            <div class="col-md-6">
+                <label>Paid Price</label>
+                <input asp-for="PaidPrice" class="form-control" />
+            </div>
+
+            <div class="col-md-6">
+                <label>Duration (Months)</label>
+                <input asp-for="Duration" class="form-control" />
+            </div>
+
+            <div class="col-12">
+                <button class="btn btn-success">Renew</button>
+                <a href="/Customers" class="btn btn-secondary">Cancel</a>
+            </div>
+        </form>
+    </div>
+</div>
