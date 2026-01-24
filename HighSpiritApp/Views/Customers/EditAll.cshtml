@@ -76,6 +76,28 @@
                 <input type="file" name="photoFile" class="form-control" />
             </div>
 
+            <hr />
+            <h5 class="mt-3">Membership Details</h5>
+
+            <div class="row">
+                <div class="col-md-6">
+                    <label>Plan</label>
+                    <input class="form-control"
+                           value="@Model.PlanName"
+                           disabled />
+                </div>
+
+                <div class="col-md-6">
+                    <label>Paid Price</label>
+                    <input asp-for="PaidPrice"
+                           type="number"
+                           class="form-control"
+                           placeholder="Enter paid amount" />
+                </div>
+
+                <input type="hidden" asp-for="MembershipID" />
+            </div>
+
             
             <div class="col-12">
                 <button class="btn btn-success">Save All</button>

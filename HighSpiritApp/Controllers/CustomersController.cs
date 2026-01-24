@@ -266,6 +266,9 @@ namespace HighSpiritApp.Controllers
 
             if (customer == null) return NotFound();
 
+            var latestMembership = customer.Memberships
+        .OrderByDescending(m => m.StartDate)
+        .FirstOrDefault();
             var vm = new CustomerEditVM
             {
                 CustomerID = customer.CustomerID,
@@ -280,7 +283,10 @@ namespace HighSpiritApp.Controllers
                 BloodGroup = customer.BloodGroup,
                 Occupation = customer.Occupation,
                 Shift = customer.Shift,
-                Remarks = customer.Remarks
+                Remarks = customer.Remarks,
+                MembershipID = latestMembership.MembershipID,
+                PaidPrice = latestMembership.PaidPrice,
+                PlanName = latestMembership.PlanName
             };
 
             return View(vm);
@@ -309,7 +315,16 @@ namespace HighSpiritApp.Controllers
                 await photoFile.CopyToAsync(ms);
                 customer.Photo = ms.ToArray();
             }
+            if (vm.MembershipID != null)
+            {
+                var membership = await _context.CustomerMemberships
+                    .FindAsync(vm.MembershipID);
 
+                if (membership != null)
+                {
+                    membership.PaidPrice = vm.PaidPrice ?? 0;
+                }
+            }
             await _context.SaveChangesAsync();
             TempData["success"] = "User Details updated successfully!";
             return RedirectToAction("Index", "Customers");
