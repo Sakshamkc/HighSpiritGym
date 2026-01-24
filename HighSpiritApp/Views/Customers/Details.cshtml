@@ -3,6 +3,9 @@
     Layout = "~/Views/Shared/_Layout.cshtml";
     var m = Model.Memberships?.OrderByDescending(x => x.StartDate).FirstOrDefault();
 }
+@{
+    var today = DateTime.Today;
+}
 <a class="btn btn-secondary mb-3"
    href="/Customers/EditAll/@Model.CustomerID">
     Edit Customer Details
@@ -50,6 +53,15 @@
                     <tr><th>Blood Group</th><td>@Model.BloodGroup</td></tr>
                     <tr><th>Height</th><td>@Model.Height</td></tr>
                     <tr><th>Weight</th><td>@Model.WeightKG</td></tr>
+                    <tr>
+                        <th>Shift</th>
+                        <td>@Model.Shift</td>
+                    </tr>
+                    <tr>
+                        <th>Remarks</th>
+                        <td>@Model.Remarks</td>
+                    </tr>
+
                 </table>
             </div>
         </div>
@@ -77,16 +89,20 @@
                             <td>@history.PlanName</td>
                             <td>@history.PaidPrice</td>
                             <td>@history.StartDate.ToShortDateString()</td>
-                            <td>@history.ExpireDate.ToShortDateString()</td>
+                            <td>@history.ExpireDate?.ToShortDateString()</td>
                             <td>@history.Duration</td>
                             <td>
-                                @if (history.IsActive)
+                                @if (m == null)
                                 {
-                                    <span class="badge bg-success">Active</span>
+                                    <span class="badge bg-secondary">No Membership</span>
+                                }
+                                else if (m.ExpireDate != null && m.ExpireDate.Value.Date < today)
+                                {
+                                    <span class="badge bg-danger">Expired</span>
                                 }
                                 else
                                 {
-                                    <span class="badge bg-secondary">Expired</span>
+                                    <span class="badge bg-success">Active</span>
                                 }
                             </td>
                         </tr>

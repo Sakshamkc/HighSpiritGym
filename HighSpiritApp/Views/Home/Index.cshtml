@@ -71,7 +71,7 @@
                         <td>@m.Customer.FullName</td>
                         <td>@m.Customer.Phone</td>
                         <td>@m.PlanName</td>
-                        <td>@m.ExpireDate.ToShortDateString()</td>
+                        <td>@m.ExpireDate?.ToShortDateString()</td>
                         <td>
                             <a class="btn btn-sm btn-primary"
                                href="/Customers/Details/@m.CustomerID">View</a>

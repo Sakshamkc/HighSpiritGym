@@ -61,6 +61,20 @@
                 <input asp-for="BloodGroup" class="form-control" />
             </div>
             <div class="col-md-6">
+                <label>Shift</label>
+                <select asp-for="Shift" class="form-control">
+                    <option value="">-- Select Shift --</option>
+                    <option value="Morning">Morning</option>
+                    <option value="Evening">Evening</option>
+                </select>
+            </div>
+
+            <div class="col-md-12">
+                <label>Remarks</label>
+                <textarea asp-for="Remarks" class="form-control" rows="2"></textarea>
+            </div>
+
+            <div class="col-md-6">
                 <label>Upload Photo</label>
                 <input type="file" name="photoFile" class="form-control" />
             </div>

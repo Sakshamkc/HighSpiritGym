@@ -1,4 +1,4 @@
-using HighSpiritApp.DataContext;
+﻿using HighSpiritApp.DataContext;
 using HighSpiritApp.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -20,51 +20,51 @@ namespace HighSpiritApp.Controllers
         {
             var today = DateTime.Today;
 
-            // TOTAL CUSTOMERS (always from Customers table)
-            var totalMembers = await _context.Customers.CountAsync();
+            // TOTAL CUSTOMERS
+            ViewBag.Total = await _context.Customers.CountAsync();
 
-            // ACTIVE CUSTOMERS
-            var activeMembers = await _context.Customers
-                .Where(c => c.Memberships.Any(m =>
-                    m.IsActive && m.DueDaysComputed == 0))
-                .CountAsync();
+            // LOAD MEMBERSHIPS FIRST (ENTITY ROOT)
+            var memberships = await _context.CustomerMemberships
+                .Include(m => m.Customer)
+                .Where(m => m.ExpireDate != null)
+                .ToListAsync();
 
-            // EXPIRED CUSTOMERS
-            var expiredMembers = await _context.Customers
-                .Where(c => c.Memberships.Any(m =>
-                    m.IsActive && m.DueDaysComputed > 0))
-                .CountAsync();
+            // LATEST MEMBERSHIP PER CUSTOMER (IN MEMORY)
+            var latestMemberships = memberships
+                .GroupBy(m => m.CustomerID)
+                .Select(g => g.OrderByDescending(x => x.StartDate).First())
+                .ToList();
 
-            // EXPIRING SOON (7 DAYS)
-            var expiringSoon = await _context.Customers
-                .Where(c => c.Memberships.Any(m =>
-                    m.IsActive &&
+            // DASHBOARD COUNTS
+            ViewBag.Active = latestMemberships.Count(m => m.ExpireDate >= today);
+            ViewBag.Expired = latestMemberships.Count(m => m.ExpireDate < today);
+            ViewBag.ExpiringSoon = latestMemberships.Count(m =>
+                m.ExpireDate >= today && m.ExpireDate <= today.AddDays(7));
+
+            ViewBag.JoinedToday = await _context.Customers
+                .CountAsync(c => c.JoinDate.Date == today);
+
+            // 🔔 BELL DATA (TOP 5 EXPIRED)
+            ViewBag.ExpiredCount = ViewBag.Expired;
+
+            ViewBag.ExpiredList = latestMemberships
+                .Where(m => m.ExpireDate < today)
+                .OrderBy(m => m.ExpireDate)
+                .Take(5)
+                .ToList();
+
+            // EXPIRING SOON TABLE (MODEL)
+            var expiringList = latestMemberships
+                .Where(m =>
                     m.ExpireDate >= today &&
-                    m.ExpireDate <= today.AddDays(7)))
-                .CountAsync();
-
-            // JOINED TODAY
-            var joinedToday = await _context.Customers
-                .Where(c => c.JoinDate.Date == today)
-                .CountAsync();
-
-            ViewBag.Total = totalMembers;
-            ViewBag.Active = activeMembers;
-            ViewBag.Expired = expiredMembers;
-            ViewBag.ExpiringSoon = expiringSoon;
-            ViewBag.JoinedToday = joinedToday;
-
-            var expiringList = await _context.CustomerMemberships
-     .Include(m => m.Customer)
-     .Where(m =>
-         m.IsActive &&
-         m.ExpireDate >= today &&
-         m.ExpireDate <= today.AddDays(7))
-     .OrderBy(m => m.ExpireDate)
-     .Take(5)
-     .ToListAsync();
+                    m.ExpireDate <= today.AddDays(7))
+                .OrderBy(m => m.ExpireDate)
+                .Take(5)
+                .ToList();
 
             return View(expiringList);
         }
+
+
     }
 }

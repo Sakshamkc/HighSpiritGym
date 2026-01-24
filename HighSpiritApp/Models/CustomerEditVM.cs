@@ -14,6 +14,10 @@ public class CustomerEditVM
     public decimal? WeightKG { get; set; }
     public string BloodGroup { get; set; }
 
+    public string? Remarks { get; set; }
+    public string? Shift { get; set; }
+
+
     // Membership (current)
     public int MembershipID { get; set; }
     public string PlanName { get; set; }

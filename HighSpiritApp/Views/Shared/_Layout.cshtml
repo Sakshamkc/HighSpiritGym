@@ -88,6 +88,29 @@
                 margin-right: 4px;
             }
 
+        .top-bar {
+            position: sticky;
+            top: 0;
+            z-index: 1050;
+            background: #f4f6f9;
+            padding: 8px 12px;
+            border-radius: 6px;
+        }
+
+        .notification-dropdown {
+            width: 320px;
+            max-height: 350px;
+            overflow-y: auto;
+        }
+
+            .notification-dropdown li {
+                font-size: 14px;
+            }
+
+            .notification-dropdown .dropdown-item-text {
+                padding: 10px 15px;
+            }
+
     </style>
 </head>
 <body class="bg-light">
@@ -96,7 +119,7 @@
             <img src="/images/highspirit.jpg"
                  style="width:120px;height:auto;display:block;margin-left:20px" />
         </div>
-        
+
         <a href="/"><i class="fa-solid fa-chart-line"></i> Dashboard</a>
         <a href="/Customers"><i class="fa-solid fa-users"></i> Members</a>
         <a href="/Customers/Create"><i class="fa-solid fa-user-plus"></i> Add Member</a>
@@ -119,11 +142,16 @@
 
         <!-- Top utility bar -->
         <div class="d-flex justify-content-end mb-2">
-            <button class="btn btn-sm btn-outline-secondary"
-                    onclick="toggleFullScreen()"
-                    title="Toggle Full Screen">
-                <i class="fa-solid fa-expand"></i>
-            </button>
+            <div class="d-flex justify-content-end align-items-center gap-3 mb-3 top-bar">
+                <button class="btn btn-sm btn-outline-secondary"
+                        onclick="toggleFullScreen()"
+                        title="Toggle Full Screen">
+                    <i class="fa-solid fa-expand"></i>
+                </button>
+                @await Component.InvokeAsync("ExpiredNotification")
+
+            </div>
+
         </div>
 
         @RenderBody()
@@ -132,7 +160,6 @@
 
 
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
-    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
     <script src="~/js/site.js" asp-append-version="true"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
     @await RenderSectionAsync("Scripts", required: false)

@@ -4,27 +4,41 @@
 
 <div class="card shadow">
     <div class="card-body">
-        <h4 class="mb-3">Import Members from Excel</h4>
-        <form method="post" enctype="multipart/form-data">
-            <div class="mb-3">
-                <label class="form-label">Select Excel File</label>
-                <input type="file" name="file" class="form-control" />
-            </div>
-            <button class="btn btn-success">Upload</button>
+
+        <h4>Import Members from Excel</h4>
+        <p class="text-muted">
+            Upload Excel file with the following column order.
+        </p>
+
+        <form method="post" enctype="multipart/form-data" class="mb-3">
+            <input type="file" name="file" class="form-control mb-3" />
+            <button class="btn btn-success">
+                <i class="fa-solid fa-file-excel"></i> Import
+            </button>
         </form>
+
         <hr />
-        <p class="fw-bold">Excel Columns Order:</p>
-        <ul>
-            <li>1 - FullName</li>
-            <li>2 - Phone</li>
-            <li>3 - Address</li>
-            <li>4 - BloodGroup</li>
-            <li>5 - Height</li>
-            <li>6 - Weight</li>
-            <li>7 - PlanName</li>
-            <li>8 - PaidPrice</li>
-            <li>9 - StartDate</li>
-            <li>10 - Duration</li>
-        </ul>
+
+        <h6>Required Excel Format</h6>
+
+        <table class="table table-bordered table-sm">
+            <thead class="table-dark">
+                <tr>
+                    <th>Column</th>
+                    <th>Field</th>
+                    <th>Notes</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr><td>1</td><td>Name</td><td>Required</td></tr>
+                <tr><td>2</td><td>JoinDate</td><td>Date format</td></tr>
+                <tr><td>3</td><td>Package</td><td>Gym / Gym + Cardio</td></tr>
+                <tr><td>4</td><td>Duration</td><td>In months</td></tr>
+                <tr><td>5</td><td>ExpireDate</td><td>Ignored (system calculates)</td></tr>
+                <tr><td>6</td><td>Shift</td><td>Morning / Evening</td></tr>
+                <tr><td>7</td><td>Remarks</td><td>Optional notes</td></tr>
+            </tbody>
+        </table>
+
     </div>
 </div>

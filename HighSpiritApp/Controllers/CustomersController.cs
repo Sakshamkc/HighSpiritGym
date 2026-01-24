@@ -1,4 +1,5 @@
 ﻿using ClosedXML.Excel;
+using DocumentFormat.OpenXml.Spreadsheet;
 using HighSpiritApp.DataContext;
 using HighSpiritApp.Models;
 using Microsoft.AspNetCore.Authorization;
@@ -169,57 +170,93 @@ namespace HighSpiritApp.Controllers
         public async Task<IActionResult> Import(IFormFile file)
         {
             if (file == null || file.Length == 0)
+            {
+                TempData["error"] = "Please select an Excel file.";
                 return View();
+            }
+
+            int imported = 0;
+            int skipped = 0;
 
             using var stream = file.OpenReadStream();
             using var workbook = new XLWorkbook(stream);
-            var sheet = workbook.Worksheet(1);
 
-            var rows = sheet.RangeUsed().RowsUsed().Skip(1); // skip header
-
-            foreach (var row in rows)
+            foreach (var sheet in workbook.Worksheets)
             {
-                int paidPrice = 0;
-                int duration = 0;
-                decimal weight = 0;
+                // 🔥 SAFE ROW DETECTION (WORKS FOR ALL SHEETS)
+                var lastRow = sheet.LastRowUsed();
+                if (lastRow == null) continue;
 
-                int.TryParse(row.Cell(8).GetString(), out paidPrice);
-                int.TryParse(row.Cell(10).GetString(), out duration);
-                decimal.TryParse(row.Cell(6).GetString(), out weight);
+                int rowCount = lastRow.RowNumber();
 
-                DateTime startDate = DateTime.Now;
-                DateTime.TryParse(row.Cell(9).GetString(), out startDate);
-
-                var customer = new Customer
+                // Start from row 2 (skip header)
+                for (int r = 2; r <= rowCount; r++)
                 {
-                    FullName = row.Cell(1).GetString(),
-                    Phone = row.Cell(2).GetString(),
-                    Address = row.Cell(3).GetString(),
-                    BloodGroup = row.Cell(4).GetString(),
-                    Height = row.Cell(5).GetString(),
-                    WeightKG = weight,
-                    JoinDate = DateTime.Now
-                };
+                    var row = sheet.Row(r);
 
-                _context.Customers.Add(customer);
-                await _context.SaveChangesAsync();
+                    string fullName = row.Cell(1).GetString().Trim();
+                    if (string.IsNullOrEmpty(fullName)) continue;
 
-                var membership = new CustomerMembership
-                {
-                    CustomerID = customer.CustomerID,
-                    PlanName = row.Cell(7).GetString(),
-                    PaidPrice = paidPrice,     // now int
-                    StartDate = startDate,
-                    Duration = duration,
-                    IsActive = true
-                };
+                    DateTime joinDate =
+                        row.Cell(2).GetValue<DateTime?>() ?? DateTime.Today;
 
-                _context.CustomerMemberships.Add(membership);
-                await _context.SaveChangesAsync();
+                    // 🔍 FIXED DUPLICATE CHECK
+                    bool exists = await _context.Customers.AnyAsync(c =>
+                        c.FullName == fullName &&
+                        c.JoinDate.Date == joinDate.Date);
+
+                    if (exists)
+                    {
+                        skipped++;
+                        continue;
+                    }
+
+                    string planName = row.Cell(3).GetString();
+                    int duration = row.Cell(4).GetValue<int?>() ?? 1;
+                    string shift = row.Cell(6).GetString();
+                    string remarks = row.Cell(7).GetString();
+
+                    var customer = new Customer
+                    {
+                        FullName = fullName,
+                        JoinDate = joinDate,
+                        Phone = "N/A",
+                        Email = null,
+                        Gender = "Unknown",
+                        Address = "Imported from Excel",
+                        Height = "N/A",
+                        WeightKG = null,
+                        BloodGroup = "N/A",
+                        Shift = string.IsNullOrWhiteSpace(shift) ? "General" : shift,
+                        Remarks = remarks
+                    };
+
+                    _context.Customers.Add(customer);
+                    await _context.SaveChangesAsync();
+
+                    var membership = new CustomerMembership
+                    {
+                        CustomerID = customer.CustomerID,
+                        PlanName = planName,
+                        Duration = duration,
+                        StartDate = joinDate,
+                        PaidPrice = 0,
+                        IsActive = true
+                    };
+
+                    _context.CustomerMemberships.Add(membership);
+                    await _context.SaveChangesAsync();
+
+                    imported++;
+                }
             }
+
+            TempData["success"] =
+                $"Import completed. Imported: {imported}, Skipped duplicates: {skipped}";
 
             return RedirectToAction("Index");
         }
+
 
         public async Task<IActionResult> EditAll(int id)
         {
@@ -241,6 +278,8 @@ namespace HighSpiritApp.Controllers
                 Height = customer.Height,
                 WeightKG = customer.WeightKG,
                 BloodGroup = customer.BloodGroup,
+                Shift = customer.Shift,
+                Remarks = customer.Remarks
             };
 
             return View(vm);
@@ -260,7 +299,8 @@ namespace HighSpiritApp.Controllers
             customer.Height = vm.Height;
             customer.WeightKG = vm.WeightKG;
             customer.BloodGroup = vm.BloodGroup;
-
+            customer.Shift = vm.Shift;
+            customer.Remarks = vm.Remarks;
             if (photoFile != null && photoFile.Length > 0)
             {
                 using var ms = new MemoryStream();
@@ -274,6 +314,14 @@ namespace HighSpiritApp.Controllers
 
         }
 
+        int GetDurationFromSheetName(string sheetName)
+        {
+            if (sheetName.Contains("1")) return 1;
+            if (sheetName.Contains("3")) return 3;
+            if (sheetName.Contains("6")) return 6;
+            if (sheetName.Contains("12")) return 12;
+            return 1; // default
+        }
 
     }
 }
