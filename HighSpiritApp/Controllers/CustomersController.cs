@@ -278,6 +278,7 @@ namespace HighSpiritApp.Controllers
                 Height = customer.Height,
                 WeightKG = customer.WeightKG,
                 BloodGroup = customer.BloodGroup,
+                Occupation = customer.Occupation,
                 Shift = customer.Shift,
                 Remarks = customer.Remarks
             };
@@ -299,6 +300,7 @@ namespace HighSpiritApp.Controllers
             customer.Height = vm.Height;
             customer.WeightKG = vm.WeightKG;
             customer.BloodGroup = vm.BloodGroup;
+            customer.Occupation = vm.Occupation;
             customer.Shift = vm.Shift;
             customer.Remarks = vm.Remarks;
             if (photoFile != null && photoFile.Length > 0)
@@ -309,19 +311,9 @@ namespace HighSpiritApp.Controllers
             }
 
             await _context.SaveChangesAsync();
-            TempData["success"] = "User Details and Membership updated successfully!";
+            TempData["success"] = "User Details updated successfully!";
             return RedirectToAction("Index", "Customers");
 
         }
-
-        int GetDurationFromSheetName(string sheetName)
-        {
-            if (sheetName.Contains("1")) return 1;
-            if (sheetName.Contains("3")) return 3;
-            if (sheetName.Contains("6")) return 6;
-            if (sheetName.Contains("12")) return 12;
-            return 1; // default
-        }
-
     }
 }

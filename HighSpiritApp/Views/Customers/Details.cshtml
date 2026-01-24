@@ -53,6 +53,7 @@
                     <tr><th>Blood Group</th><td>@Model.BloodGroup</td></tr>
                     <tr><th>Height</th><td>@Model.Height</td></tr>
                     <tr><th>Weight</th><td>@Model.WeightKG</td></tr>
+                    <tr><th>Occupation</th><td>@Model.Occupation</td></tr>
                     <tr>
                         <th>Shift</th>
                         <td>@Model.Shift</td>
@@ -79,7 +80,6 @@
                         <th>Start</th>
                         <th>Expire</th>
                         <th>Duration</th>
-                        <th>Status</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -91,21 +91,7 @@
                             <td>@history.StartDate.ToShortDateString()</td>
                             <td>@history.ExpireDate?.ToShortDateString()</td>
                             <td>@history.Duration</td>
-                            <td>
-                                @if (m == null)
-                                {
-                                    <span class="badge bg-secondary">No Membership</span>
-                                }
-                                else if (m.ExpireDate != null && m.ExpireDate.Value.Date < today)
-                                {
-                                    <span class="badge bg-danger">Expired</span>
-                                }
-                                else
-                                {
-                                    <span class="badge bg-success">Active</span>
-                                }
-                            </td>
-                        </tr>
+                           </tr>
                     }
                 </tbody>
             </table>

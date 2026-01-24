@@ -11,6 +11,7 @@
         public string? BloodGroup { get; set; }
         public decimal? WeightKG { get; set; }
         public string? Height { get; set; }
+        public string? Occupation { get; set; }
         public DateTime JoinDate { get; set; }
         public DateTime DateOfBirth { get; set; }
         public byte[]? Photo { get; set; }
