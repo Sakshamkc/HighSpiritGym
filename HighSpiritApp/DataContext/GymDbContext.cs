@@ -1,4 +1,5 @@
 ﻿using HighSpiritApp.Models;
+using HighSpiritApp.Models.Boxing;
 using Microsoft.EntityFrameworkCore;
 
 namespace HighSpiritApp.DataContext
@@ -9,6 +10,7 @@ namespace HighSpiritApp.DataContext
 
         public DbSet<Customer> Customers { get; set; }
         public DbSet<CustomerMembership> CustomerMemberships { get; set; }
+        public DbSet<BoxingMember> BoxingMembers { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {

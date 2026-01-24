@@ -1,0 +1,73 @@
+﻿@model HighSpiritApp.Models.Boxing.BoxingMember
+@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="card shadow">
+    <div class="card-body">
+
+        <h4 class="mb-4">Add Boxing Member (Kids)</h4>
+
+        <form method="post" enctype="multipart/form-data" class="row g-3">
+
+            <div class="col-md-6">
+                <label class="form-label">Kid Name</label>
+                <input asp-for="Name" class="form-control" required />
+            </div>
+
+            <div class="col-md-6">
+                <label class="form-label">Joined Date</label>
+                <input asp-for="JoinDate"
+                       type="date"
+                       class="form-control"
+                       value="@DateTime.Today.ToString("yyyy-MM-dd")" />
+            </div>
+
+            <div class="col-md-6">
+                <label class="form-label">Guardian Name</label>
+                <input asp-for="GuardianName" class="form-control" required />
+            </div>
+
+            <div class="col-md-6">
+                <label class="form-label">Guardian Contact</label>
+                <input asp-for="GuardianContact"
+                       class="form-control"
+                       placeholder="Phone number"
+                       required />
+            </div>
+
+            <div class="col-md-6">
+                <label class="form-label">Price</label>
+                <input asp-for="Price"
+                       type="number"
+                       class="form-control"
+                       placeholder="Amount paid" />
+            </div>
+
+            <div class="col-md-6">
+                <label class="form-label">Remarks</label>
+                <input asp-for="Remarks"
+                       class="form-control"
+                       placeholder="Any notes (optional)" />
+            </div>
+            <div class="col-md-16">
+                <label class="form-label">Kid Photo</label><br />
+                <input type="file"
+                       name="photoFile"
+                       accept="image/*"
+                       class="form-control" />
+            </div>
+
+            <div class="col-12 mt-3">
+                <button class="btn btn-success">
+                    <i class="fa-solid fa-check"></i> Save
+                </button>
+                <a href="/Boxing" class="btn btn-secondary">
+                    Cancel
+                </a>
+            </div>
+
+        </form>
+
+    </div>
+</div>

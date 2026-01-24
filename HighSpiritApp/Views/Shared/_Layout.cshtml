@@ -1,6 +1,7 @@
 ﻿<!DOCTYPE html>
 <html lang="en">
 <head>
+    
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>High Spirit Gym</title>
@@ -111,9 +112,32 @@
                 padding: 10px 15px;
             }
 
+        .sidebar-dropdown > a {
+            cursor: pointer;
+        }
+
+        .sidebar .submenu {
+            padding-left: 45px;
+            font-size: 14px;
+            color: #9ca3af;
+        }
+
+            .sidebar .submenu:hover {
+                background: #1f2933;
+                color: #fff;
+            }
+
+        .sidebar .fa-chevron-down {
+            font-size: 12px;
+            margin-top: 4px;
+        }
+
     </style>
 </head>
 <body class="bg-light">
+    @{
+        var controller = ViewContext.RouteData.Values["controller"]?.ToString();
+    }
     <div class="sidebar">
         <div class="brand">
             <img src="/images/highspirit.jpg"
@@ -121,9 +145,55 @@
         </div>
 
         <a href="/"><i class="fa-solid fa-chart-line"></i> Dashboard</a>
-        <a href="/Customers"><i class="fa-solid fa-users"></i> Members</a>
-        <a href="/Customers/Create"><i class="fa-solid fa-user-plus"></i> Add Member</a>
-        <a href="/Customers/Import"><i class="fa-solid fa-file-excel"></i> Import Excel</a>
+        <div class="sidebar-dropdown">
+            <a href="#"
+               class="dropdown-toggle"
+               data-bs-toggle="collapse"
+               data-bs-target="#gymMenu"
+               aria-expanded="false">
+
+                <i class="fa-solid fa-users"></i>
+                Gym Members
+            </a>
+
+            <div class="collapse" id="gymMenu">
+                <a href="/Customers" class="submenu">
+                    <i class="fa-solid fa-list"></i> View Members
+                </a>
+                <a href="/Customers/Create" class="submenu">
+                    <i class="fa-solid fa-user-plus"></i> Add Member
+                </a>
+                <a href="/Customers/Import" class="submenu">
+                    <i class="fa-solid fa-file-excel"></i> Import Excel
+                </a>
+            </div>
+            <div class="sidebar-dropdown">
+                <a href="#"
+                   class="dropdown-toggle"
+                   data-bs-toggle="collapse"
+                   data-bs-target="#boxingMenu"
+                   aria-expanded="false">
+
+                    <i class="fa-solid fa-hand-fist"></i>
+                    Kids Boxing
+                </a>
+
+                <div class="collapse @(Context.Request.Path.StartsWithSegments("/Boxing") ? "show" : "")"
+                     id="boxingMenu">
+                    <a href="/Boxing" class="submenu">
+                        <i class="fa-solid fa-list"></i> View Members
+                    </a>
+                    <a href="/Boxing/Create" class="submenu">
+                        <i class="fa-solid fa-user-plus"></i> Add Member
+                    </a>
+                    <a href="/Boxing/Import" class="submenu">
+                        <i class="fa-solid fa-file-excel"></i> Import Excel
+                    </a>
+                </div>
+            </div>
+
+        </div>
+
 
         <div class="sidebar-footer">
             <a href="/Account/Logout" class="logout-link">
@@ -148,7 +218,11 @@
                         title="Toggle Full Screen">
                     <i class="fa-solid fa-expand"></i>
                 </button>
-                @await Component.InvokeAsync("ExpiredNotification")
+                @if (controller == "Customers" || controller == "Home" || controller == "Memberships")
+                {
+                    @await Component.InvokeAsync("ExpiredNotification")
+                }
+
 
             </div>
 

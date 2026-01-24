@@ -1,0 +1,107 @@
+﻿@model HighSpiritApp.Models.Boxing.BoxingMember
+@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="card shadow">
+    <div class="card-body">
+
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h4 class="mb-0">
+                Boxing Member Details
+            </h4>
+
+            <a href="/Boxing" class="btn btn-outline-secondary btn-sm">
+                <i class="fa-solid fa-arrow-left"></i> Back
+            </a>
+        </div>
+
+        <!-- Kid Info -->
+        <div class="row mb-4">
+            <div class="col-md-12 text-center mb-4">
+                @if (Model.Photo != null)
+                {
+                    <img src="data:image/jpeg;base64,@Convert.ToBase64String(Model.Photo)"
+                         class="rounded shadow"
+                         style="width:180px;height:180px;object-fit:cover;" />
+
+                }
+                else
+                {
+                    <i class="fa-solid fa-child fa-6x text-secondary"></i>
+                    <div class="text-muted mt-2" style="font-size:13px;">
+                        No photo uploaded
+                    </div>
+                }
+            </div>
+            <div class="col-md-6">
+                <div class="border rounded p-3 h-100">
+                    <h6 class="text-muted mb-2">Kid Information</h6>
+
+                    <p><strong>Name:</strong> @Model.Name</p>
+                    <p>
+                        <strong>Joined Date:</strong>
+                        @Model.JoinDate?.ToString("dd MMM yyyy")
+                    </p>
+                </div>
+            </div>
+
+            <!-- Guardian Info -->
+            <div class="col-md-6">
+                <div class="border rounded p-3 h-100 bg-light">
+                    <h6 class="text-muted mb-2">Guardian Information</h6>
+
+                    <p><strong>Guardian Name:</strong> @Model.GuardianName</p>
+                    <p>
+                        <strong>Contact:</strong>
+                        <a href="tel:@Model.GuardianContact">
+                            @Model.GuardianContact
+                        </a>
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Payment & Remarks -->
+        <div class="row mb-4">
+            <div class="col-md-6">
+                <div class="border rounded p-3 h-100">
+                    <h6 class="text-muted mb-2">Payment</h6>
+
+                    <p>
+                        <strong>Price:</strong>
+                        <span class="badge bg-success fs-6">
+                            @Model.Price
+                        </span>
+                    </p>
+                </div>
+            </div>
+
+            <div class="col-md-6">
+                <div class="border rounded p-3 h-100">
+                    <h6 class="text-muted mb-2">Remarks</h6>
+
+                    <p>
+                        @(string.IsNullOrWhiteSpace(Model.Remarks)
+                            ? "—"
+                            : Model.Remarks)
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Actions -->
+        <div class="d-flex gap-2">
+            <a href="/Boxing/Edit/@Model.BoxingMemberID"
+               class="btn btn-primary">
+                <i class="fa-solid fa-pen"></i> Edit
+            </a>
+
+            <a href="/Boxing"
+               class="btn btn-secondary">
+                Close
+            </a>
+        </div>
+
+    </div>
+</div>
