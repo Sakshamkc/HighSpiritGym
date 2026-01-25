@@ -174,9 +174,17 @@ public class BoxingController : Controller
                 DateTime joinDate;
                 var joinDateText = row.Cell(2).GetString().Trim();
 
-                if (!DateTime.TryParse(joinDateText, out joinDate))
+                // Handles: "5th Aug 2024", "05/08/2024", etc.
+                if (!DateTime.TryParseExact(
+                        joinDateText.Replace("st", "")
+                                    .Replace("nd", "")
+                                    .Replace("rd", "")
+                                    .Replace("th", ""),
+                        new[] { "d MMM yyyy", "dd MMM yyyy", "d MMMM yyyy", "dd/MM/yyyy", "yyyy-MM-dd" },
+                        System.Globalization.CultureInfo.InvariantCulture,
+                        System.Globalization.DateTimeStyles.None,
+                        out joinDate))
                 {
-                    // fallback if date is invalid or empty
                     joinDate = DateTime.Today;
                 }
                 string guardianName = row.Cell(3).GetString().Trim();
