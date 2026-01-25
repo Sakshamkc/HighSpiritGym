@@ -63,22 +63,63 @@
         </div>
 
         <!-- Payment & Remarks -->
+        <!-- Class & Payment -->
         <div class="row mb-4">
+
+            <!-- Class Tracking -->
             <div class="col-md-6">
                 <div class="border rounded p-3 h-100">
-                    <h6 class="text-muted mb-2">Payment</h6>
+                    <h6 class="text-muted mb-2">Monthly Class Tracking</h6>
 
                     <p>
-                        <strong>Price:</strong>
-                        <span class="badge bg-success fs-6">
-                            @Model.Price
+                        <strong>Per Month Class:</strong>
+                        <span class="badge bg-info fs-6">
+                            @Model.PerMonthClass
                         </span>
                     </p>
                 </div>
             </div>
 
+            <!-- Payment Info -->
             <div class="col-md-6">
                 <div class="border rounded p-3 h-100">
+                    <h6 class="text-muted mb-2">Payment Breakdown</h6>
+
+                    <p>
+                        <strong>Total Price:</strong>
+                        <span class="badge bg-success fs-6">
+                            @Model.Price
+                        </span>
+                    </p>
+
+                    <p>
+                        <strong>Cash:</strong>
+                        <span class="badge bg-primary">
+                            @Model.CashAmount
+                        </span>
+                    </p>
+
+                    <p>
+                        <strong>eSewa:</strong>
+                        <span class="badge bg-warning text-dark">
+                            @Model.EsewaAmount
+                        </span>
+                    </p>
+
+                    <p>
+                        <strong>Due Amount:</strong>
+                        <span class="badge bg-danger">
+                            @Model.DueAmount
+                        </span>
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Remarks -->
+        <div class="row mb-4">
+            <div class="col-md-12">
+                <div class="border rounded p-3">
                     <h6 class="text-muted mb-2">Remarks</h6>
 
                     <p>
@@ -89,6 +130,7 @@
                 </div>
             </div>
         </div>
+
 
         <!-- Actions -->
         <div class="d-flex gap-2">

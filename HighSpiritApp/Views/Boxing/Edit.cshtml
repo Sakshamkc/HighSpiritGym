@@ -26,6 +26,7 @@
 
             <input type="hidden" asp-for="BoxingMemberID" />
 
+            <!-- Basic Info -->
             <div class="col-md-6">
                 <label class="form-label">Kid Name</label>
                 <input asp-for="Name" class="form-control" required />
@@ -46,22 +47,59 @@
                 <input asp-for="GuardianContact" class="form-control" required />
             </div>
 
-            <div class="col-md-6">
-                <label class="form-label">Price</label>
-                <input asp-for="Price" type="number" class="form-control" />
+            <!-- Excel-style fields -->
+            <div class="col-md-4">
+                <label class="form-label">Per Month Class</label>
+                <input asp-for="PerMonthClass"
+                       class="form-control"
+                       placeholder="1+1+1+1" />
             </div>
 
-            <div class="col-md-6">
+            <div class="col-md-4">
+                <label class="form-label">Cash</label>
+                <input asp-for="CashAmount"
+                       type="number"
+                       class="form-control" />
+            </div>
+
+            <div class="col-md-4">
+                <label class="form-label">eSewa</label>
+                <input asp-for="EsewaAmount"
+                       type="number"
+                       class="form-control" />
+            </div>
+
+            <div class="col-md-4">
+                <label class="form-label">Due Amount</label>
+                <input asp-for="DueAmount"
+                       type="number"
+                       class="form-control" />
+            </div>
+
+            <div class="col-md-4">
+                <label class="form-label">Price</label>
+                <input asp-for="Price"
+                       type="number"
+                       class="form-control bg-light"
+                       readonly />
+            </div>
+
+            <div class="col-md-4">
                 <label class="form-label">Remarks</label>
-                <input asp-for="Remarks" class="form-control" />
+                <input asp-for="Remarks"
+                       class="form-control" />
             </div>
 
             <!-- Upload new photo -->
             <div class="col-md-12">
                 <label class="form-label">Change Photo (optional)</label>
-                <input type="file" name="photoFile" class="form-control" accept="image/*" />
+                <input type="file"
+                       name="photoFile"
+                       class="form-control"
+                       accept="image/*" />
             </div>
 
+            <!-- Actions -->
             <div class="col-12 mt-3">
                 <button class="btn btn-success">
                     <i class="fa-solid fa-check"></i> Update

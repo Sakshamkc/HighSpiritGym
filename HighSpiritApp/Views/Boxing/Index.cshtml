@@ -30,7 +30,11 @@
                     <th>Joined</th>
                     <th>Guardian Name</th>
                     <th>Contact</th>
-                    <th>Price</th>
+                    <th>Per Month Class</th>
+                    <th>Cash</th>
+                    <th>eSewa</th>
+                    <th>Total</th>
+                    <th>Due</th>
                     <th>Remarks</th>
                     <th>Actions</th>
                 </tr>
@@ -45,36 +49,90 @@
                 {
                     <tr>
                         <td>@sn</td>
+
+                        <!-- Photo -->
                         <td>
                             @if (b.Photo != null)
                             {
                                 <img src="data:image/jpeg;base64,@Convert.ToBase64String(b.Photo)"
-                                     class="rounded-circle me-2"
+                                     class="rounded-circle"
                                      style="width:40px;height:40px;object-fit:cover;" />
                             }
                             else
                             {
-                                <i class="fa-solid fa-child fa-lg text-secondary me-2"></i>
+                                <i class="fa-solid fa-child fa-lg text-secondary"></i>
                             }
-                            @b.Name
                         </td>
 
+                        <!-- Name -->
                         <td>@b.Name</td>
+
+                        <!-- Joined -->
                         <td>@b.JoinDate?.ToString("dd MMM yyyy")</td>
+
+                        <!-- Guardian -->
                         <td>@b.GuardianName</td>
+
+                        <!-- Contact -->
                         <td>
                             <a href="tel:@b.GuardianContact">
                                 @b.GuardianContact
                             </a>
                         </td>
-                        <td>@b.Price</td>
+
+                        <!-- Per Month Class -->
+                        <td>
+                            <span class="badge bg-info text-dark">
+                                @b.PerMonthClass
+                            </span>
+                        </td>
+
+                        <!-- Cash -->
+                        <td>
+                            <span class="text-primary fw-semibold">
+                                @b.CashAmount
+                            </span>
+                        </td>
+
+                        <!-- eSewa -->
+                        <td>
+                            <span class="text-warning fw-semibold">
+                                @b.EsewaAmount
+                            </span>
+                        </td>
+
+                        <!-- PRICE = TOTAL (Cash + eSewa) -->
+                        <td>
+                            <span class="fw-bold text-success">
+                                @(b.CashAmount + b.EsewaAmount)
+                            </span>
+                        </td>
+
+                        <!-- Due -->
+                        <td>
+                            @if (b.DueAmount > 0)
+                            {
+                                <span class="badge bg-danger">
+                                    @b.DueAmount
+                                </span>
+                            }
+                            else
+                            {
+                                <span class="badge bg-success">
+                                    0
+                                </span>
+                            }
+                        </td>
+
+                        <!-- Remarks -->
                         <td title="@b.Remarks">
-                            @(string.IsNullOrEmpty(b.Remarks)
+                            @(string.IsNullOrWhiteSpace(b.Remarks)
                                 ? "-"
                                 : (b.Remarks.Length > 20
                                 ? b.Remarks.Substring(0, 20) + "..."
                                 : b.Remarks))
                         </td>
+
                         <td>
                             <a class="btn btn-sm btn-primary"
                                href="/Boxing/Details/@b.BoxingMemberID">
@@ -86,9 +144,11 @@
                             </a>
                         </td>
                     </tr>
+
                     sn++;
                 }
             </tbody>
+
         </table>
 
         <!-- Pagination -->

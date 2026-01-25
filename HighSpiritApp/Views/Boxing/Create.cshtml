@@ -19,8 +19,7 @@
                 <label class="form-label">Joined Date</label>
                 <input asp-for="JoinDate"
                        type="date"
-                       class="form-control"
-                       value="@DateTime.Today.ToString("yyyy-MM-dd")" />
+                       class="form-control"/>
             </div>
 
             <div class="col-md-6">
@@ -36,12 +35,26 @@
                        required />
             </div>
 
-            <div class="col-md-6">
-                <label class="form-label">Price</label>
-                <input asp-for="Price"
-                       type="number"
+           <div class="col-md-3">
+                <label class="form-label">Per Month Class</label>
+                <input asp-for="PerMonthClass"
                        class="form-control"
-                       placeholder="Amount paid" />
+                       placeholder="1+1+1+1" />
+            </div>
+
+            <div class="col-md-3">
+                <label class="form-label">Cash</label>
+                <input asp-for="CashAmount" type="number" class="form-control" />
+            </div>
+
+            <div class="col-md-3">
+                <label class="form-label">eSewa</label>
+                <input asp-for="EsewaAmount" type="number" class="form-control" />
+            </div>
+
+            <div class="col-md-3">
+                <label class="form-label">Due Amount</label>
+                <input asp-for="DueAmount" type="number" class="form-control" />
             </div>
 
             <div class="col-md-6">
@@ -50,7 +63,7 @@
                        class="form-control"
                        placeholder="Any notes (optional)" />
             </div>
-            <div class="col-md-16">
+            <div class="col-md-6">
                 <label class="form-label">Kid Photo</label><br />
                 <input type="file"
                        name="photoFile"
