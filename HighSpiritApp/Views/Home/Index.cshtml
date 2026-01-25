@@ -3,38 +3,44 @@
     Layout = "~/Views/Shared/_Layout.cshtml";
 }
 
-<h3 class="mb-4">Gym Dashboard</h3>
+<h3 class="mb-4">📊 Dashboard</h3>
+
+<!-- ======================= GYM DASHBOARD ======================= -->
+<h5 class="mb-3 text-muted">🏋️ Gym Overview</h5>
 
 <div class="row g-4 mb-4">
     <div class="col-md-3">
         <div class="card shadow text-white" style="background:#4f46e5;">
             <div class="card-body">
                 <h2>@ViewBag.Total</h2>
-                <p>Total Members</p>
+                <p class="mb-0">Total Members</p>
             </div>
         </div>
     </div>
+
     <div class="col-md-3">
         <div class="card shadow text-white" style="background:#16a34a;">
             <div class="card-body">
                 <h2>@ViewBag.Active</h2>
-                <p>Active</p>
+                <p class="mb-0">Active</p>
             </div>
         </div>
     </div>
+
     <div class="col-md-3">
         <div class="card shadow text-white" style="background:#dc2626;">
             <div class="card-body">
                 <h2>@ViewBag.Expired</h2>
-                <p>Expired</p>
+                <p class="mb-0">Expired</p>
             </div>
         </div>
     </div>
+
     <div class="col-md-3">
         <div class="card shadow text-white" style="background:#d97706;">
             <div class="card-body">
                 <h2>@ViewBag.ExpiringSoon</h2>
-                <p>Expiring Soon</p>
+                <p class="mb-0">Expiring Soon</p>
             </div>
         </div>
     </div>
@@ -45,36 +51,145 @@
         <div class="card shadow text-white" style="background:#0891b2;">
             <div class="card-body">
                 <h2>@ViewBag.JoinedToday</h2>
-                <p>Joined Today</p>
+                <p class="mb-0">Joined Today</p>
             </div>
         </div>
     </div>
 </div>
 
-<div class="card shadow">
+<!-- Gym Expiring Table -->
+<div class="card shadow mb-5">
     <div class="card-body">
-        <h5>Expiring in 7 Days</h5>
-        <table class="table table-hover mt-3">
+        <h5 class="mb-3">⏳ Gym Members Expiring in 7 Days</h5>
+
+        <table class="table table-hover">
             <thead class="table-dark">
                 <tr>
                     <th>Name</th>
                     <th>Phone</th>
                     <th>Plan</th>
-                    <th>Expire</th>
+                    <th>Expire Date</th>
                     <th>Action</th>
                 </tr>
             </thead>
             <tbody>
-                @foreach (var m in Model)
+                @if (Model.Any())
+                {
+                    foreach (var m in Model)
+                    {
+                        <tr>
+                            <td>@m.Customer.FullName</td>
+                            <td>@m.Customer.Phone</td>
+                            <td>@m.PlanName</td>
+                            <td>@m.ExpireDate?.ToShortDateString()</td>
+                            <td>
+                                <a class="btn btn-sm btn-primary"
+                                   href="/Customers/Details/@m.CustomerID">
+                                    View
+                                </a>
+                            </td>
+                        </tr>
+                    }
+                }
+                else
                 {
                     <tr>
-                        <td>@m.Customer.FullName</td>
-                        <td>@m.Customer.Phone</td>
-                        <td>@m.PlanName</td>
-                        <td>@m.ExpireDate?.ToShortDateString()</td>
-                        <td>
-                            <a class="btn btn-sm btn-primary"
-                               href="/Customers/Details/@m.CustomerID">View</a>
+                        <td colspan="5" class="text-center text-muted">
+                            No members expiring soon 🎉
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<hr class="my-5" />
+
+<!-- ======================= BOXING DASHBOARD ======================= -->
+<h5 class="mb-3 text-muted">🥊 Boxing Overview</h5>
+
+<div class="row g-4 mb-4">
+    <div class="col-md-3">
+        <div class="card shadow text-white" style="background:#0ea5e9;">
+            <div class="card-body">
+                <h2>@ViewBag.BoxingTotal</h2>
+                <p class="mb-0">Total Boxing Members</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-3">
+        <div class="card shadow text-white" style="background:#16a34a;">
+            <div class="card-body">
+                <h2>@ViewBag.BoxingPaid</h2>
+                <p class="mb-0">Paid Members</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-3">
+        <div class="card shadow text-white" style="background:#dc2626;">
+            <div class="card-body">
+                <h2>@ViewBag.BoxingWithDue</h2>
+                <p class="mb-0">Members with Due</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-3">
+        <div class="card shadow text-white" style="background:#d97706;">
+            <div class="card-body">
+                <h2>Rs @ViewBag.BoxingDue</h2>
+                <p class="mb-0">Total Due Amount</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Boxing Due Table -->
+<div class="card shadow">
+    <div class="card-body">
+        <h5 class="mb-3">⚠️ Boxing Members with Due</h5>
+
+        <table class="table table-hover">
+            <thead class="table-dark">
+                <tr>
+                    <th>Name</th>
+                    <th>Guardian</th>
+                    <th>Contact</th>
+                    <th>Due Amount</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+            <tbody>
+                @if (ViewBag.BoxingDueList != null && ViewBag.BoxingDueList.Count > 0)
+                {
+                    foreach (var b in ViewBag.BoxingDueList)
+                    {
+                        <tr>
+                            <td>@b.Name</td>
+                            <td>@b.GuardianName</td>
+                            <td>@b.GuardianContact</td>
+                            <td>
+                                <span class="badge bg-danger">
+                                    Rs @b.DueAmount
+                                </span>
+                            </td>
+                            <td>
+                                <a class="btn btn-sm btn-primary"
+                                   href="/Boxing/Details/@b.BoxingMemberID">
+                                    View
+                                </a>
+                            </td>
+                        </tr>
+                    }
+                }
+                else
+                {
+                    <tr>
+                        <td colspan="5" class="text-center text-muted">
+                            No boxing dues 🎉
                         </td>
                     </tr>
                 }

@@ -62,6 +62,22 @@ namespace HighSpiritApp.Controllers
                 .Take(5)
                 .ToList();
 
+            ViewBag.BoxingTotal = await _context.BoxingMembers.CountAsync();
+
+            ViewBag.BoxingWithDue = await _context.BoxingMembers
+                .CountAsync(b => b.DueAmount > 0);
+
+            ViewBag.BoxingPaid = await _context.BoxingMembers
+                .CountAsync(b => b.DueAmount == 0);
+
+            ViewBag.BoxingDue = await _context.BoxingMembers
+                .SumAsync(b => b.DueAmount);
+
+            ViewBag.BoxingDueList = await _context.BoxingMembers
+                .Where(b => b.DueAmount > 0)
+                .OrderByDescending(b => b.DueAmount)
+                .Take(5)
+                .ToListAsync();
             return View(expiringList);
         }
 
