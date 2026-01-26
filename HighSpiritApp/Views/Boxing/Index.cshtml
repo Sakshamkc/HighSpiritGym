@@ -157,6 +157,36 @@
                                href="/Boxing/Edit/@b.BoxingMemberID">
                                 Edit
                             </a>
+                            <button class="btn btn-sm btn-danger"
+                                    data-bs-toggle="modal"
+                                    data-bs-target="#delBoxing_@b.BoxingMemberID">
+                                Delete
+                            </button>
+
+                            <div class="modal fade" id="delBoxing_@b.BoxingMemberID" tabindex="-1">
+                                <div class="modal-dialog">
+                                    <div class="modal-content">
+                                        <div class="modal-header">
+                                            <h5>Confirm Delete</h5>
+                                        </div>
+                                        <div class="modal-body">
+                                            Are you sure you want to delete <b>@b.Name</b>?
+                                        </div>
+                                        <div class="modal-footer">
+                                            <button class="btn btn-secondary"
+                                                    data-bs-dismiss="modal">
+                                                Cancel
+                                            </button>
+
+                                            <form method="post" action="/Boxing/Delete/@b.BoxingMemberID">
+                                                <button class="btn btn-danger">
+                                                    Yes, Delete
+                                                </button>
+                                            </form>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
                         </td>
                     </tr>
 

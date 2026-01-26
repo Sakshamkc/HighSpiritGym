@@ -123,18 +123,23 @@ public class BoxingController : Controller
         return View(member);
     }
 
+    [HttpPost]
     public async Task<IActionResult> Delete(int id)
     {
         var member = await _context.BoxingMembers.FindAsync(id);
-        if (member != null)
+        if (member == null)
         {
-            _context.BoxingMembers.Remove(member);
-            await _context.SaveChangesAsync();
+            TempData["error"] = "Boxing member not found.";
+            return RedirectToAction("Index");
         }
 
-        TempData["success"] = "Boxing member removed!";
+        _context.BoxingMembers.Remove(member);
+        await _context.SaveChangesAsync();
+
+        TempData["success"] = "Boxing member deleted successfully.";
         return RedirectToAction("Index");
     }
+
 
     public IActionResult Import()
     {
@@ -298,6 +303,8 @@ public class BoxingController : Controller
             $"Boxing Members Backup.xlsx"
         );
     }
+
+
 
 
 }
