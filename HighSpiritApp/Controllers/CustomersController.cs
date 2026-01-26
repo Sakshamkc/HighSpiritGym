@@ -183,13 +183,11 @@ namespace HighSpiritApp.Controllers
 
             foreach (var sheet in workbook.Worksheets)
             {
-                // 🔥 SAFE ROW DETECTION (WORKS FOR ALL SHEETS)
                 var lastRow = sheet.LastRowUsed();
                 if (lastRow == null) continue;
 
                 int rowCount = lastRow.RowNumber();
 
-                // Start from row 2 (skip header)
                 for (int r = 2; r <= rowCount; r++)
                 {
                     var row = sheet.Row(r);
@@ -197,10 +195,20 @@ namespace HighSpiritApp.Controllers
                     string fullName = row.Cell(1).GetString().Trim();
                     if (string.IsNullOrEmpty(fullName)) continue;
 
-                    DateTime joinDate =
-                        row.Cell(2).GetValue<DateTime?>() ?? DateTime.Today;
+                    DateTime joinDate;
+                    var joinDateText = row.Cell(2).GetString().Trim();
 
-                    // 🔍 FIXED DUPLICATE CHECK
+                    joinDateText = joinDateText
+                        .Replace("st", "")
+                        .Replace("nd", "")
+                        .Replace("rd", "")
+                        .Replace("th", "");
+
+                    if (!DateTime.TryParse(joinDateText, out joinDate))
+                    {
+                        joinDate = DateTime.Today;
+                    }
+
                     bool exists = await _context.Customers.AnyAsync(c =>
                         c.FullName == fullName &&
                         c.JoinDate.Date == joinDate.Date);

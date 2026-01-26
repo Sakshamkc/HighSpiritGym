@@ -1,7 +1,7 @@
 ﻿<!DOCTYPE html>
 <html lang="en">
 <head>
-    
+
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>High Spirit Gym</title>
@@ -132,6 +132,10 @@
             margin-top: 4px;
         }
 
+        .dropdown-toggle::after {
+            display: none !important;
+        }
+
     </style>
 </head>
 <body class="bg-light">
@@ -222,7 +226,10 @@
                 {
                     @await Component.InvokeAsync("ExpiredNotification")
                 }
-
+                @if (controller == "Boxing" || controller == "Home")
+                {
+                    @await Component.InvokeAsync("BoxingDueNotification")
+                }
 
             </div>
 

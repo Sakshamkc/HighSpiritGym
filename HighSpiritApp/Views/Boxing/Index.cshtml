@@ -33,7 +33,6 @@
                     <th>Per Month Class</th>
                     <th>Cash</th>
                     <th>eSewa</th>
-                    <th>Total</th>
                     <th>Due</th>
                     <th>Remarks</th>
                     <th>Actions</th>
@@ -100,14 +99,7 @@
                                 @b.EsewaAmount
                             </span>
                         </td>
-
-                        <!-- PRICE = TOTAL (Cash + eSewa) -->
-                        <td>
-                            <span class="fw-bold text-success">
-                                @(b.CashAmount + b.EsewaAmount)
-                            </span>
-                        </td>
-
+                      
                         <!-- Due -->
                         <td>
                             @if (b.DueAmount > 0)

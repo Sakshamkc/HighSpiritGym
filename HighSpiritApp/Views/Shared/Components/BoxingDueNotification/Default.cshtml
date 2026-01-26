@@ -1,0 +1,49 @@
+﻿@model List<HighSpiritApp.Models.Boxing.BoxingMember>
+
+<div class="nav-item dropdown list-unstyled">
+
+    <a href="#"
+    class="nav-link position-relative dropdown-toggle text-dark"
+    data-bs-toggle="dropdown">
+    <i class="fa-solid fa-bell"></i>
+
+        @if (ViewBag.DueCount > 0)
+        {
+        <span class="position-absolute top-0 start-100 translate-middle
+                         badge rounded-pill bg-danger">
+                @ViewBag.DueCount
+        </span>
+        }
+    </a>
+
+    <ul class="dropdown-menu dropdown-menu-end shadow notification-dropdown">
+        <li class="dropdown-header fw-bold">
+            Boxing Due Members
+        </li>
+
+            @if (!Model.Any())
+            {
+            <li class="px-3 text-muted">
+                No dues 🎉
+            </li>
+            }
+            else
+            {
+                foreach (var b in Model)
+                {
+                <li class="dropdown-item-text border-bottom">
+                    <div class="fw-semibold">@b.Name</div>
+                    <small class="text-danger">
+                        Due: Rs @b.DueAmount
+                    </small>
+                    <div>
+                        <a href="/Boxing/Details/@b.BoxingMemberID"
+                           class="text-primary small">
+                            View
+                        </a>
+                    </div>
+                </li>
+                }
+            }
+    </ul>
+</div>
