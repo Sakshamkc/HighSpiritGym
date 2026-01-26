@@ -5,16 +5,23 @@
 
 <h4 class="mb-3">Boxing Members</h4>
 
-<!-- Search -->
 <form method="get" class="mb-3">
-    <div class="input-group">
-        <input name="search"
-               value="@ViewBag.Search"
-               class="form-control"
-               placeholder="Search by kid or guardian name" />
-        <button class="btn btn-primary">
-            <i class="fa-solid fa-search"></i>
-        </button>
+    <div class="d-flex flex-wrap gap-2 align-items-center">
+        <div class="input-group" style="max-width:1440px;">
+            <input name="search"
+                   value="@ViewBag.Search"
+                   class="form-control"
+                   placeholder="Search by kid or guardian name"
+                   autocomplete="off"/>
+            <button class="btn btn-primary">
+                <i class="fa-solid fa-search"></i>
+            </button>
+        </div>
+
+        <a href="/Boxing/ExportAll"
+           class="btn btn-success btn-lg ms-auto">
+            <i class="fa-solid fa-file-excel"></i> Export Excel
+        </a>
     </div>
 </form>
 
@@ -67,7 +74,23 @@
                         <td>@b.Name</td>
 
                         <!-- Joined -->
-                        <td>@b.JoinDate?.ToString("dd MMM yyyy")</td>
+                        <td>
+                            @if (b.JoinDate != null)
+                            {
+                                var sdeb = b.JoinDate.Value;
+                                string sdebSuffix =
+                                sdeb.Day % 10 == 1 && sdeb.Day != 11 ? "st" :
+                                sdeb.Day % 10 == 2 && sdeb.Day != 12 ? "nd" :
+                                sdeb.Day % 10 == 3 && sdeb.Day != 13 ? "rd" : "th";
+
+                                @($"{sdeb.Day}{sdebSuffix} {sdeb:MMMM yyyy}")
+                            }
+                            else
+                            {
+                                @("-")
+                            }
+                        </td>
+
 
                         <!-- Guardian -->
                         <td>@b.GuardianName</td>

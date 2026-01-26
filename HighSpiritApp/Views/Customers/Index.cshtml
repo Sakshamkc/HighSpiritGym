@@ -8,11 +8,23 @@
 <h4 class="mb-3">Members</h4>
 
 <form method="get" class="mb-3">
-    <div class="input-group">
-        <input name="search" value="@ViewBag.Search"
-               class="form-control" placeholder="Search by name or phone" />
-        <input type="hidden" name="filter" value="@ViewBag.Filter" />
-        <button class="btn btn-primary">Search</button>
+    <div class="d-flex flex-wrap gap-2 align-items-center">
+        <div class="input-group" style="max-width:1440px;">
+            <input name="search"
+                   value="@ViewBag.Search"
+                   class="form-control"
+                   placeholder="Search by name or phone"
+                   autocomplete="off"/>
+            <input type="hidden" name="filter" value="@ViewBag.Filter" />
+            <button class="btn btn-primary">
+                <i class="fa-solid fa-search"></i>
+            </button>
+        </div>
+
+        <a href="/Customers/ExportAll"
+           class="btn btn-success btn-lg ms-auto">
+            <i class="fa-solid fa-file-download"></i> Export Excel
+        </a>
     </div>
 </form>
 
@@ -48,7 +60,6 @@
                     </th>
 
                     <th>Phone</th>
-                    <th>Occupation</th>
                     <th>Plan</th>
                     <th>Price</th>
 
@@ -86,13 +97,23 @@
                         </td>
                         <td>@c.FullName</td>
                         <td>@c.Phone</td>
-                        <td>@c.Occupation</td>
                         <td>@m?.PlanName</td>
                         <td>@(m?.PaidPrice != null ? m.PaidPrice.ToString() : "-")</td>
                         <td>
-                            @(m?.ExpireDate != null
-                                ? m.ExpireDate?.ToShortDateString()
-                                : "-")
+                            @if (m?.ExpireDate != null)
+                            {
+                                var d = m.ExpireDate.Value;
+                                string suffix =
+                                d.Day % 10 == 1 && d.Day != 11 ? "st" :
+                                d.Day % 10 == 2 && d.Day != 12 ? "nd" :
+                                d.Day % 10 == 3 && d.Day != 13 ? "rd" : "th";
+
+                                @($"{d.Day}{suffix} {d:MMMM yyyy}")
+                            }
+                            else
+                            {
+                                @("-")
+                            }
                         </td>
                         <td>@(string.IsNullOrEmpty(c.Shift) ? "-" : c.Shift)</td>
                         <td title="@c.Remarks">

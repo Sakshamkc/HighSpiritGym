@@ -1,4 +1,5 @@
 ﻿using ClosedXML.Excel;
+using DocumentFormat.OpenXml.InkML;
 using DocumentFormat.OpenXml.Spreadsheet;
 using HighSpiritApp.DataContext;
 using HighSpiritApp.Models;
@@ -338,5 +339,88 @@ namespace HighSpiritApp.Controllers
             return RedirectToAction("Index", "Customers");
 
         }
+
+        [HttpGet]
+        public async Task<IActionResult> ExportAll()
+        {
+            var customers = await _context.Customers
+                .Include(c => c.Memberships)
+                .ToListAsync();
+
+            using var workbook = new XLWorkbook();
+            var ws = workbook.Worksheets.Add("Gym Members");
+
+            // HEADER
+            ws.Cell(1, 1).Value = "SN";
+            ws.Cell(1, 2).Value = "Full Name";
+            ws.Cell(1, 3).Value = "Phone";
+            ws.Cell(1, 4).Value = "Email";
+            ws.Cell(1, 5).Value = "Address";
+            ws.Cell(1, 6).Value = "Gender";
+            ws.Cell(1, 7).Value = "Blood Group";
+            ws.Cell(1, 8).Value = "Weight (KG)";
+            ws.Cell(1, 9).Value = "Height";
+            ws.Cell(1, 10).Value = "Occupation";
+            ws.Cell(1, 11).Value = "Join Date";
+            ws.Cell(1, 12).Value = "Date Of Birth";
+            ws.Cell(1, 13).Value = "Shift";
+            ws.Cell(1, 14).Value = "Remarks";
+
+            ws.Cell(1, 15).Value = "Plan Name";
+            ws.Cell(1, 16).Value = "Paid Price";
+            ws.Cell(1, 17).Value = "Start Date";
+            ws.Cell(1, 18).Value = "Duration (Months)";
+            ws.Cell(1, 19).Value = "Expire Date";
+            ws.Cell(1, 20).Value = "Due Days";
+
+            int row = 2;
+            int sn = 1;
+
+            foreach (var c in customers)
+            {
+                var m = c.Memberships?
+                    .OrderByDescending(x => x.StartDate)
+                    .FirstOrDefault();
+
+                ws.Cell(row, 1).Value = sn++;
+                ws.Cell(row, 2).Value = c.FullName;
+                ws.Cell(row, 3).Value = c.Phone;
+                ws.Cell(row, 4).Value = c.Email;
+                ws.Cell(row, 5).Value = c.Address;
+                ws.Cell(row, 6).Value = c.Gender;
+                ws.Cell(row, 7).Value = c.BloodGroup;
+                ws.Cell(row, 8).Value = c.WeightKG;
+                ws.Cell(row, 9).Value = c.Height;
+                ws.Cell(row, 10).Value = c.Occupation;
+                ws.Cell(row, 11).Value = c.JoinDate.ToString("dd MMM yyyy");
+                ws.Cell(row, 12).Value = c.DateOfBirth == DateTime.MinValue
+                                            ? ""
+                                            : c.DateOfBirth.ToString("dd MMM yyyy");
+                ws.Cell(row, 13).Value = c.Shift;
+                ws.Cell(row, 14).Value = c.Remarks;
+
+                ws.Cell(row, 15).Value = m?.PlanName;
+                ws.Cell(row, 16).Value = m?.PaidPrice ?? 0;
+                ws.Cell(row, 17).Value = m?.StartDate.ToString("dd MMM yyyy");
+                ws.Cell(row, 18).Value = m?.Duration ?? 0;
+                ws.Cell(row, 19).Value = m?.ExpireDate?.ToString("dd MMM yyyy");
+                ws.Cell(row, 20).Value = m?.DueDaysComputed ?? 0;
+
+                row++;
+            }
+
+            ws.Columns().AdjustToContents();
+
+            using var stream = new MemoryStream();
+            workbook.SaveAs(stream);
+            stream.Position = 0;
+
+            return File(
+                stream.ToArray(),
+                "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+                $"Gym Members Backup.xlsx"
+            );
+        }
+
     }
 }

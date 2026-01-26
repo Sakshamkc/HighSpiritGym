@@ -248,4 +248,56 @@ public class BoxingController : Controller
         return RedirectToAction("Index");
     }
 
+    [HttpGet]
+    public async Task<IActionResult> ExportAll()
+    {
+        var members = await _context.BoxingMembers.ToListAsync();
+
+        using var workbook = new XLWorkbook();
+        var ws = workbook.Worksheets.Add("BoxingMembers");
+
+        ws.Cell(1, 1).Value = "SN";
+        ws.Cell(1, 2).Value = "Name";
+        ws.Cell(1, 3).Value = "Join Date";
+        ws.Cell(1, 4).Value = "Guardian Name";
+        ws.Cell(1, 5).Value = "Guardian Contact";
+        ws.Cell(1, 6).Value = "Per Month Class";
+        ws.Cell(1, 7).Value = "Cash Amount";
+        ws.Cell(1, 8).Value = "eSewa Amount";
+        ws.Cell(1, 9).Value = "Due Amount";
+        ws.Cell(1, 10).Value = "Remarks";
+
+        int row = 2;
+        int sn = 1;
+
+        foreach (var b in members)
+        {
+            ws.Cell(row, 1).Value = sn++;
+            ws.Cell(row, 2).Value = b.Name;
+            ws.Cell(row, 3).Value = b.JoinDate?.ToString("dd MMM yyyy");
+            ws.Cell(row, 4).Value = b.GuardianName;
+            ws.Cell(row, 5).Value = b.GuardianContact;
+            ws.Cell(row, 6).Value = b.PerMonthClass;
+            ws.Cell(row, 7).Value = b.CashAmount;
+            ws.Cell(row, 8).Value = b.EsewaAmount;
+            ws.Cell(row, 9).Value = b.DueAmount;
+            ws.Cell(row, 10).Value = b.Remarks;
+
+            row++;
+        }
+
+        ws.Columns().AdjustToContents();
+
+        using var stream = new MemoryStream();
+        workbook.SaveAs(stream);
+        stream.Position = 0;
+
+        return File(
+            stream.ToArray(),
+            "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+            $"Boxing Members Backup.xlsx"
+        );
+    }
+
+
 }

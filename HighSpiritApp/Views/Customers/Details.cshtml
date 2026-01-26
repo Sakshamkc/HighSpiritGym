@@ -47,8 +47,32 @@
                 <table class="table table-bordered">
                     <tr><th>Email</th><td>@Model.Email</td></tr>
                     <tr><th>Gender</th><td>@Model.Gender</td></tr>
-                    <tr><th>DOB</th><td>@Model.DateOfBirth.ToShortDateString()</td></tr>
-                    <tr><th>Join Date</th><td>@Model.JoinDate.ToShortDateString()</td></tr>
+                    <tr>
+                        <th>DOB</th>
+                        <td>
+                                @{
+                                var sdee = Model.DateOfBirth;
+                                    string sdeeeSuffix =
+                                sdee.Day % 10 == 1 && sdee.Day != 11 ? "st" :
+                                sdee.Day % 10 == 2 && sdee.Day != 12 ? "nd" :
+                                sdee.Day % 10 == 3 && sdee.Day != 13 ? "rd" : "th";
+                                }
+                            @($"{sdee.Day}{sdeeeSuffix} {sdee:MMMM yyyy}")
+                        </td>
+                    </tr>
+                    <tr>
+                        <th>Join Date</th>
+                        <td>
+                            @{
+                                var sde = Model.JoinDate;
+                                string sdeSuffix =
+                                sde.Day % 10 == 1 && sde.Day != 11 ? "st" :
+                                sde.Day % 10 == 2 && sde.Day != 12 ? "nd" :
+                                sde.Day % 10 == 3 && sde.Day != 13 ? "rd" : "th";
+                            }
+                            @($"{sde.Day}{sdeSuffix} {sde:MMMM yyyy}")
+                        </td>
+                    </tr>
                     <tr><th>Address</th><td>@Model.Address</td></tr>
                     <tr><th>Blood Group</th><td>@Model.BloodGroup</td></tr>
                     <tr><th>Height</th><td>@Model.Height</td></tr>
@@ -88,11 +112,40 @@
                         <tr>
                             <td>@history.PlanName</td>
                             <td>@history.PaidPrice</td>
-                            <td>@history.StartDate.ToShortDateString()</td>
-                            <td>@history.ExpireDate?.ToShortDateString()</td>
+
+                            <td>
+                                @{
+                                    var sd = history.StartDate;
+                                    string sdSuffix =
+                                    sd.Day % 10 == 1 && sd.Day != 11 ? "st" :
+                                    sd.Day % 10 == 2 && sd.Day != 12 ? "nd" :
+                                    sd.Day % 10 == 3 && sd.Day != 13 ? "rd" : "th";
+                                }
+                                @($"{sd.Day}{sdSuffix} {sd:MMMM yyyy}")
+                            </td>
+
+                            <td>
+                                @if (history.ExpireDate != null)
+                                {
+                                    var ed = history.ExpireDate.Value;
+                                    string edSuffix =
+                                    ed.Day % 10 == 1 && ed.Day != 11 ? "st" :
+                                    ed.Day % 10 == 2 && ed.Day != 12 ? "nd" :
+                                    ed.Day % 10 == 3 && ed.Day != 13 ? "rd" : "th";
+
+                                    @($"{ed.Day}{edSuffix} {ed:MMMM yyyy}")
+                                }
+                                else
+                                {
+                                    @("-")
+                                }
+                            </td>
+
                             <td>@history.Duration</td>
-                           </tr>
+                        </tr>
                     }
+
+
                 </tbody>
             </table>
         }
