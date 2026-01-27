@@ -331,6 +331,7 @@ namespace HighSpiritApp.Controllers
 
                 if (membership != null)
                 {
+                    membership.PlanName = vm.PlanName;
                     membership.PaidPrice = vm.PaidPrice ?? 0;
                 }
             }
