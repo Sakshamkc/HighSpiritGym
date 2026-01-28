@@ -114,9 +114,7 @@ namespace HighSpiritApp.Controllers
     DateTime StartDate,
     int Duration)
         {
-            customer.JoinDate = DateTime.Now;
-
-            if (photoFile != null && photoFile.Length > 0)
+           if (photoFile != null && photoFile.Length > 0)
             {
                 using var ms = new MemoryStream();
                 await photoFile.CopyToAsync(ms);
