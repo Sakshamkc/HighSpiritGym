@@ -1,32 +1,37 @@
-﻿using Microsoft.AspNetCore.Authentication;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
-using System.Security.Claims;
 
 namespace HighSpiritApp.Controllers
 {
     public class AccountController : Controller
     {
+        private readonly SignInManager<IdentityUser> _signInManager;
+        private readonly UserManager<IdentityUser> _userManager;
+
+        public AccountController(
+            SignInManager<IdentityUser> signInManager,
+            UserManager<IdentityUser> userManager)
+        {
+            _signInManager = signInManager;
+            _userManager = userManager;
+        }
+
+        [AllowAnonymous]
         public IActionResult Login()
         {
             return View();
         }
 
         [HttpPost]
+        [AllowAnonymous]
         public async Task<IActionResult> Login(string username, string password)
         {
-            // Temporary hardcoded user (you can move to DB later)
-            if (username == "admin" && password == "1234")
-            {
-                var claims = new List<Claim>
-            {
-                new Claim(ClaimTypes.Name, username),
-                new Claim(ClaimTypes.Role, "Owner")
-            };
+            var result = await _signInManager.PasswordSignInAsync(
+                username, password, false, false);
 
-                var identity = new ClaimsIdentity(claims, "GymAuth");
-                var principal = new ClaimsPrincipal(identity);
-
-                await HttpContext.SignInAsync("GymAuth", principal);
+            if (result.Succeeded)
+            {
                 return RedirectToAction("Index", "Home");
             }
 
@@ -36,7 +41,7 @@ namespace HighSpiritApp.Controllers
 
         public async Task<IActionResult> Logout()
         {
-            await HttpContext.SignOutAsync("GymAuth");
+            await _signInManager.SignOutAsync();
             return RedirectToAction("Login");
         }
     }
