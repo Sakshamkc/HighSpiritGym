@@ -14,10 +14,8 @@ namespace HighSpiritApp.Models
         public int Duration { get; set; }   // months
         public bool IsActive { get; set; }
 
-        [DatabaseGenerated(DatabaseGeneratedOption.Computed)]
         public DateTime? ExpireDate { get; private set; }
 
-        [DatabaseGenerated(DatabaseGeneratedOption.Computed)]
         public int DueDaysComputed { get; private set; }
 
         public Customer Customer { get; set; }

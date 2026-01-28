@@ -24,6 +24,15 @@ namespace HighSpiritApp.DataContext
                 .HasOne(m => m.Customer)
                 .WithMany(c => c.Memberships)
                 .HasForeignKey(m => m.CustomerID);
+
+            modelBuilder.Entity<CustomerMembership>(entity =>
+            {
+                entity.Property(e => e.ExpireDate)
+                      .ValueGeneratedNever();
+
+                entity.Property(e => e.DueDaysComputed)
+                      .ValueGeneratedNever();
+            });
         }
     }
 }
