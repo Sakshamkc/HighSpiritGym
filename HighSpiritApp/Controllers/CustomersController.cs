@@ -107,14 +107,16 @@ namespace HighSpiritApp.Controllers
 
         [HttpPost]
         public async Task<IActionResult> Create(
-    Customer customer,
-    IFormFile photoFile,
-    string PlanName,
-    int PaidPrice,
-    DateTime StartDate,
-    int Duration)
+     Customer customer,
+     IFormFile photoFile,
+     string PlanName,
+     int PaidPrice,
+     DateTime StartDate,
+     int Duration,
+     DateTime? ExpireDate
+ )
         {
-           if (photoFile != null && photoFile.Length > 0)
+            if (photoFile != null && photoFile.Length > 0)
             {
                 using var ms = new MemoryStream();
                 await photoFile.CopyToAsync(ms);
@@ -131,6 +133,7 @@ namespace HighSpiritApp.Controllers
                 PaidPrice = PaidPrice,
                 StartDate = StartDate,
                 Duration = Duration,
+                ExpireDate = ExpireDate ?? StartDate.AddMonths(Duration),
                 IsActive = true
             };
 
@@ -185,28 +188,23 @@ namespace HighSpiritApp.Controllers
                 var lastRow = sheet.LastRowUsed();
                 if (lastRow == null) continue;
 
-                int rowCount = lastRow.RowNumber();
-
-                for (int r = 2; r <= rowCount; r++)
+                for (int r = 2; r <= lastRow.RowNumber(); r++)
                 {
                     var row = sheet.Row(r);
 
                     string fullName = row.Cell(1).GetString().Trim();
                     if (string.IsNullOrEmpty(fullName)) continue;
 
+                    // JOIN DATE
                     DateTime joinDate;
-                    var joinDateText = row.Cell(2).GetString().Trim();
-
-                    joinDateText = joinDateText
+                    var joinText = row.Cell(2).GetString().Trim()
                         .Replace("st", "")
                         .Replace("nd", "")
                         .Replace("rd", "")
                         .Replace("th", "");
 
-                    if (!DateTime.TryParse(joinDateText, out joinDate))
-                    {
+                    if (!DateTime.TryParse(joinText, out joinDate))
                         joinDate = DateTime.Today;
-                    }
 
                     bool exists = await _context.Customers.AnyAsync(c =>
                         c.FullName == fullName &&
@@ -218,8 +216,37 @@ namespace HighSpiritApp.Controllers
                         continue;
                     }
 
+                    // PLAN
                     string planName = row.Cell(3).GetString();
-                    int duration = row.Cell(4).GetValue<int?>() ?? 1;
+
+                    // DURATION ("1 Month")
+                    int duration = 1;
+                    var durationText = row.Cell(4).GetString();
+                    var numberPart = new string(durationText.Where(char.IsDigit).ToArray());
+                    if (int.TryParse(numberPart, out int d))
+                        duration = d;
+
+                    // 🔥 EXPIRE DATE FROM EXCEL (COLUMN 5)
+                    DateTime? expireDate = null;
+                    var expireCell = row.Cell(5);
+
+                    if (expireCell.DataType == XLDataType.DateTime)
+                    {
+                        expireDate = expireCell.GetDateTime();
+                    }
+                    else
+                    {
+                        var expireText = expireCell.GetString().Trim()
+                            .Replace("st", "")
+                            .Replace("nd", "")
+                            .Replace("rd", "")
+                            .Replace("th", "");
+
+                        if (DateTime.TryParse(expireText, out DateTime parsedExpire))
+                            expireDate = parsedExpire;
+                    }
+
+
                     string shift = row.Cell(6).GetString();
                     string remarks = row.Cell(7).GetString();
 
@@ -228,11 +255,9 @@ namespace HighSpiritApp.Controllers
                         FullName = fullName,
                         JoinDate = joinDate,
                         Phone = "N/A",
-                        Email = null,
                         Gender = "Unknown",
                         Address = "Imported from Excel",
                         Height = "N/A",
-                        WeightKG = null,
                         BloodGroup = "N/A",
                         Shift = string.IsNullOrWhiteSpace(shift) ? "General" : shift,
                         Remarks = remarks
@@ -245,8 +270,9 @@ namespace HighSpiritApp.Controllers
                     {
                         CustomerID = customer.CustomerID,
                         PlanName = planName,
-                        Duration = duration,
                         StartDate = joinDate,
+                        Duration = duration,
+                        ExpireDate = expireDate.HasValue? expireDate.Value.Date: joinDate.Date.AddMonths(duration),
                         PaidPrice = 0,
                         IsActive = true
                     };
@@ -259,10 +285,11 @@ namespace HighSpiritApp.Controllers
             }
 
             TempData["success"] =
-                $"Import completed. Imported: {imported}, Skipped duplicates: {skipped}";
+                    $"Import completed. Imported: {imported}, Skipped: {skipped}";
 
             return RedirectToAction("Index");
         }
+
 
 
         public async Task<IActionResult> EditAll(int id)
@@ -293,7 +320,8 @@ namespace HighSpiritApp.Controllers
                 Remarks = customer.Remarks,
                 MembershipID = latestMembership.MembershipID,
                 PaidPrice = latestMembership.PaidPrice,
-                PlanName = latestMembership.PlanName
+                PlanName = latestMembership.PlanName,
+                ExpireDate = latestMembership.ExpireDate
             };
 
             return View(vm);
@@ -331,6 +359,8 @@ namespace HighSpiritApp.Controllers
                 {
                     membership.PlanName = vm.PlanName;
                     membership.PaidPrice = vm.PaidPrice ?? 0;
+                    membership.ExpireDate = vm.ExpireDate
+                        ?? membership.StartDate.AddMonths(membership.Duration);
                 }
             }
             await _context.SaveChangesAsync();

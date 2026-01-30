@@ -14,7 +14,7 @@
                    value="@ViewBag.Search"
                    class="form-control"
                    placeholder="Search by name or phone"
-                   autocomplete="off"/>
+                   autocomplete="off" />
             <input type="hidden" name="filter" value="@ViewBag.Filter" />
             <button class="btn btn-primary">
                 <i class="fa-solid fa-search"></i>
@@ -79,7 +79,11 @@
             <tbody>
                 @foreach (var c in Model)
                 {
-                    var m = c.Memberships?.FirstOrDefault(x => x.IsActive);
+                    var m = c.Memberships?
+                    .Where(x => x.IsActive)
+                    .OrderByDescending(x => x.StartDate)
+                    .FirstOrDefault();
+
                     <tr>
                         <td>@(sn++)</td>
                         <td>

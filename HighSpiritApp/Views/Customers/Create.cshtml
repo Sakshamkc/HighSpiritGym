@@ -106,7 +106,16 @@
                 <label>Duration (Months)</label>
                 <input name="Duration" class="form-control" />
             </div>
-
+            <div class="col-md-6">
+                <label>Expire Date</label>
+                <input type="date"
+                       name="ExpireDate"
+                       class="form-control"
+                       placeholder="Optional" />
+                <small class="text-muted">
+                    If empty, system will calculate from Start Date + Duration
+                </small>
+            </div>
 
 
             <div class="col-12">

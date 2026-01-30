@@ -25,4 +25,6 @@ public class CustomerEditVM
     public int? PaidPrice { get; set; }
     public DateTime StartDate { get; set; }
     public int Duration { get; set; }
+    public DateTime? ExpireDate { get; set; }
+
 }
