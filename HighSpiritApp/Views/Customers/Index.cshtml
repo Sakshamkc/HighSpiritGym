@@ -252,3 +252,17 @@
 
     </div>
 </div>
+
+<script>
+    const searchBox = document.querySelector('input[name="search"]');
+
+    searchBox.addEventListener('input', function () {
+        if (this.value.trim() === '') {
+            const url = new URL(window.location.href);
+            url.searchParams.delete('search');
+            url.searchParams.set('page', 1);
+            window.location.href = url.toString();
+        }
+    });
+</script>
+
