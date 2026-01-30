@@ -31,7 +31,7 @@ namespace HighSpiritApp.Controllers
             if (!string.IsNullOrEmpty(search))
             {
                 query = query.Where(c =>
-                    c.FullName.Contains(search) ||
+                    c.FullName.Contains(search) ||                    
                     c.Phone.Contains(search));
             }
 
