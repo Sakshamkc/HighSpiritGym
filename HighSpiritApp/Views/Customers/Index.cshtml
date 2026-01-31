@@ -151,7 +151,7 @@
                         <td>
                             @if (m?.ExpireDate != null)
                             {
-                                var d = m.ExpireDate.Value;
+                                var d = m.ExpireDate;
                                 string suffix =
                                 d.Day % 10 == 1 && d.Day != 11 ? "st" :
                                 d.Day % 10 == 2 && d.Day != 12 ? "nd" :

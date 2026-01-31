@@ -48,16 +48,39 @@ namespace HighSpiritApp.Controllers
         [HttpPost]
         public async Task<IActionResult> Renew(CustomerMembership membership)
         {
-            // Deactivate old memberships
-            var oldMemberships = _context.CustomerMemberships
-                .Where(m => m.CustomerID == membership.CustomerID && m.IsActive);
+            if (membership.ExpireDate < membership.StartDate)
+            {
+                ModelState.AddModelError(
+                    "ExpireDate",
+                    "Expire date cannot be earlier than start date."
+                );
+                return View(membership);
+            }
 
-            foreach (var m in oldMemberships)
-                m.IsActive = false;
+            var lastMembership = await _context.CustomerMemberships
+                .Where(m => m.CustomerID == membership.CustomerID && m.IsActive)
+                .OrderByDescending(m => m.ExpireDate)
+                .FirstOrDefaultAsync();
 
-            // Add new membership
+            if (lastMembership != null)
+            {
+                lastMembership.IsActive = false;
+
+                if (lastMembership.ExpireDate >= DateTime.Today)
+                {
+                    membership.StartDate = lastMembership.ExpireDate.AddDays(1);
+                }
+                else
+                {
+                    membership.StartDate = DateTime.Today;
+                }
+            }
+            else
+            {
+                membership.StartDate = DateTime.Today;
+            }
+
             membership.IsActive = true;
-            membership.StartDate = DateTime.Today;
 
             _context.CustomerMemberships.Add(membership);
             await _context.SaveChangesAsync();

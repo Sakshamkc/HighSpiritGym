@@ -19,7 +19,7 @@ namespace HighSpiritApp.Controllers
         }
 
         // List customers with current membership
-        public async Task<IActionResult> Index(string search, string sort, string filter,int? duration, int page = 1)
+        public async Task<IActionResult> Index(string search, string sort, string filter, int? duration, int page = 1)
         {
             int pageSize = 10;
             var today = DateTime.Today;
@@ -31,7 +31,7 @@ namespace HighSpiritApp.Controllers
             if (!string.IsNullOrEmpty(search))
             {
                 query = query.Where(c =>
-                    c.FullName.Contains(search) ||                    
+                    c.FullName.Contains(search) ||
                     c.Phone.Contains(search));
             }
 
@@ -117,16 +117,9 @@ namespace HighSpiritApp.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> Create(
-     Customer customer,
-     IFormFile photoFile,
-     string PlanName,
-     int PaidPrice,
-     DateTime StartDate,
-     int Duration,
-     DateTime? ExpireDate
- )
+        public async Task<IActionResult> Create(Customer customer, IFormFile photoFile, string PlanName, int PaidPrice, DateTime StartDate, int Duration, DateTime? ExpireDate)
         {
+
             if (photoFile != null && photoFile.Length > 0)
             {
                 using var ms = new MemoryStream();
@@ -147,6 +140,14 @@ namespace HighSpiritApp.Controllers
                 ExpireDate = ExpireDate ?? StartDate.AddMonths(Duration),
                 IsActive = true
             };
+            if (membership.StartDate < customer.JoinDate)
+            {
+                ModelState.AddModelError(
+                    "StartDate",
+                    "Start date cannot be earlier than join date."
+                );
+                return View(membership);
+            }
 
             _context.CustomerMemberships.Add(membership);
             await _context.SaveChangesAsync();
@@ -283,7 +284,7 @@ namespace HighSpiritApp.Controllers
                         PlanName = planName,
                         StartDate = joinDate,
                         Duration = duration,
-                        ExpireDate = expireDate.HasValue? expireDate.Value.Date: joinDate.Date.AddMonths(duration),
+                        ExpireDate = expireDate.HasValue ? expireDate.Value.Date : joinDate.Date.AddMonths(duration),
                         PaidPrice = 0,
                         IsActive = true
                     };
@@ -443,7 +444,7 @@ namespace HighSpiritApp.Controllers
                 ws.Cell(row, 16).Value = m?.PaidPrice ?? 0;
                 ws.Cell(row, 17).Value = m?.StartDate.ToString("dd MMM yyyy");
                 ws.Cell(row, 18).Value = m?.Duration ?? 0;
-                ws.Cell(row, 19).Value = m?.ExpireDate?.ToString("dd MMM yyyy");
+                ws.Cell(row, 19).Value = m?.ExpireDate.ToString("dd MMM yyyy");
                 ws.Cell(row, 20).Value = m?.DueDaysComputed ?? 0;
 
                 row++;

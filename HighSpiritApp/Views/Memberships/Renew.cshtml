@@ -1,13 +1,11 @@
 ﻿@model HighSpiritApp.Models.CustomerMembership
-@{
-    Layout = "~/Views/Shared/_Layout.cshtml";
-}
 
 <div class="card shadow">
     <div class="card-body">
         <h4>Renew Membership</h4>
 
         <form method="post" class="row g-3">
+
             <input type="hidden" asp-for="CustomerID" />
 
             <div class="col-md-6">
@@ -24,11 +22,27 @@
                 <label>Duration (Months)</label>
                 <input asp-for="Duration" class="form-control" />
             </div>
+            <div class="col-md-6">
+                <label>Start Date</label>
+                <input asp-for="StartDate"
+                       type="date"
+                       class="form-control"
+                       readonly />
+            </div>
+
+            <div class="col-md-6">
+                <label>Expire Date</label>
+                <input asp-for="ExpireDate"
+                       type="date"
+                       class="form-control"
+                       min="@Model.StartDate.ToString("yyyy-MM-dd")" />
+            </div>
 
             <div class="col-12">
                 <button class="btn btn-success">Renew</button>
                 <a href="/Customers" class="btn btn-secondary">Cancel</a>
             </div>
+
         </form>
     </div>
 </div>

@@ -14,7 +14,7 @@ namespace HighSpiritApp.Models
         public int Duration { get; set; }   // months
         public bool IsActive { get; set; }
 
-        public DateTime? ExpireDate { get; set; }
+        public DateTime ExpireDate { get; set; }
 
         public int DueDaysComputed { get; private set; }
 

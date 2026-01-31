@@ -127,7 +127,7 @@
                             <td>
                                 @if (history.ExpireDate != null)
                                 {
-                                    var ed = history.ExpireDate.Value;
+                                    var ed = history.ExpireDate;
                                     string edSuffix =
                                     ed.Day % 10 == 1 && ed.Day != 11 ? "st" :
                                     ed.Day % 10 == 2 && ed.Day != 12 ? "nd" :
