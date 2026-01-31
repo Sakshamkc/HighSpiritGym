@@ -19,7 +19,7 @@ namespace HighSpiritApp.Controllers
         }
 
         // List customers with current membership
-        public async Task<IActionResult> Index(string search, string sort, string filter, int page = 1)
+        public async Task<IActionResult> Index(string search, string sort, string filter,int? duration, int page = 1)
         {
             int pageSize = 10;
             var today = DateTime.Today;
@@ -58,6 +58,17 @@ namespace HighSpiritApp.Controllers
                         m.ExpireDate >= today &&
                         m.ExpireDate <= today.AddDays(7)));
             }
+            if (duration.HasValue)
+            {
+                query = query.Where(c =>
+                    c.Memberships
+                        .OrderByDescending(m => m.StartDate)
+                        .FirstOrDefault().Duration == duration.Value
+                );
+            }
+
+            ViewBag.Duration = duration;
+
             // Sorting
             ViewBag.Sort = sort;
             query = sort switch

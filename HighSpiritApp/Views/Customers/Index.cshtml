@@ -29,18 +29,63 @@
 </form>
 
 <div class="mb-3">
-    <a class="btn btn-sm @(ViewBag.Filter == "all" ? "btn-primary" : "btn-outline-primary")"
-       href="?filter=all&search=@ViewBag.Search">All</a>
+    <div class="btn-group" role="group">
+        <a class="btn @(ViewBag.Filter=="all"?"btn-primary":"btn-outline-primary")"
+           href="?filter=all&duration=@ViewBag.Duration&search=@ViewBag.Search">
+            All
+        </a>
 
-    <a class="btn btn-sm @(ViewBag.Filter == "active" ? "btn-success" : "btn-outline-success")"
-       href="?filter=active&search=@ViewBag.Search">Active</a>
+        <a class="btn @(ViewBag.Filter=="active"?"btn-success":"btn-outline-success")"
+           href="?filter=active&duration=@ViewBag.Duration&search=@ViewBag.Search">
+            Active
+        </a>
 
-    <a class="btn btn-sm @(ViewBag.Filter == "expired" ? "btn-danger" : "btn-outline-danger")"
-       href="?filter=expired&search=@ViewBag.Search">Expired</a>
+        <a class="btn @(ViewBag.Filter=="expired"?"btn-danger":"btn-outline-danger")"
+           href="?filter=expired&duration=@ViewBag.Duration&search=@ViewBag.Search">
+            Expired
+        </a>
 
-    <a class="btn btn-sm @(ViewBag.Filter == "soon" ? "btn-warning" : "btn-outline-warning")"
-       href="?filter=soon&search=@ViewBag.Search">Expiring in 7 Days</a>
+        <a class="btn @(ViewBag.Filter=="soon"?"btn-warning":"btn-outline-warning")"
+           href="?filter=soon&duration=@ViewBag.Duration&search=@ViewBag.Search">
+            Expiring (7 Days)
+        </a>
+    </div>
 </div>
+
+<div class="mb-4 d-flex align-items-center gap-2 flex-wrap">
+    <span class="text-muted fw-semibold me-2">Duration</span>
+
+    <a class="btn btn-sm rounded-pill
+       @(ViewBag.Duration==null?"btn-dark":"btn-outline-dark")"
+       href="?duration=&filter=@ViewBag.Filter&search=@ViewBag.Search">
+        All
+    </a>
+
+    <a class="btn btn-sm rounded-pill
+       @(ViewBag.Duration==1?"btn-primary":"btn-outline-primary")"
+       href="?duration=1&filter=@ViewBag.Filter&search=@ViewBag.Search">
+        1M
+    </a>
+
+    <a class="btn btn-sm rounded-pill
+       @(ViewBag.Duration==3?"btn-primary":"btn-outline-primary")"
+       href="?duration=3&filter=@ViewBag.Filter&search=@ViewBag.Search">
+        3M
+    </a>
+
+    <a class="btn btn-sm rounded-pill
+       @(ViewBag.Duration==6?"btn-primary":"btn-outline-primary")"
+       href="?duration=6&filter=@ViewBag.Filter&search=@ViewBag.Search">
+        6M
+    </a>
+
+    <a class="btn btn-sm rounded-pill
+       @(ViewBag.Duration==12?"btn-primary":"btn-outline-primary")"
+       href="?duration=12&filter=@ViewBag.Filter&search=@ViewBag.Search">
+        12M
+    </a>
+</div>
+
 
 
 

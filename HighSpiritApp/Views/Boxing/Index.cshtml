@@ -12,7 +12,7 @@
                    value="@ViewBag.Search"
                    class="form-control"
                    placeholder="Search by kid or guardian name"
-                   autocomplete="off"/>
+                   autocomplete="off" />
             <button class="btn btn-primary">
                 <i class="fa-solid fa-search"></i>
             </button>
@@ -122,7 +122,7 @@
                                 @b.EsewaAmount
                             </span>
                         </td>
-                      
+
                         <!-- Due -->
                         <td>
                             @if (b.DueAmount > 0)
@@ -198,16 +198,85 @@
 
         <!-- Pagination -->
         <nav class="mt-3">
+            @{
+                int current = ViewBag.Page;
+                int total = ViewBag.TotalPages;
+
+                int start = Math.Max(1, current - 2);
+                int end = Math.Min(total, current + 2);
+            }
+
             <ul class="pagination justify-content-center">
-                @for (int i = 1; i <= ViewBag.TotalPages; i++)
+
+                @* Previous *@
+                <li class="page-item @(current == 1 ? "disabled" : "")">
+                    <a class="page-link"
+                       href="?page=@(current - 1)&search=@ViewBag.Search&sort=@ViewBag.Sort&filter=@ViewBag.Filter">
+                        Prev
+                    </a>
+                </li>
+
+                @* First page *@
+                @if (start > 1)
                 {
-                    <li class="page-item @(i == ViewBag.Page ? "active" : "")">
+                    <li class="page-item">
                         <a class="page-link"
-                           href="?page=@i&search=@ViewBag.Search">@i</a>
+                           href="?page=1&search=@ViewBag.Search&sort=@ViewBag.Sort&filter=@ViewBag.Filter">1</a>
+                    </li>
+                    <li class="page-item disabled">
+                        <span class="page-link">…</span>
                     </li>
                 }
+
+                @* Middle pages *@
+                @for (int i = start; i <= end; i++)
+                {
+                    <li class="page-item @(i == current ? "active" : "")">
+                        <a class="page-link"
+                           href="?page=@i&search=@ViewBag.Search&sort=@ViewBag.Sort&filter=@ViewBag.Filter">
+                            @i
+                        </a>
+                    </li>
+                }
+
+                @* Last page *@
+                @if (end < total)
+                {
+                    <li class="page-item disabled">
+                        <span class="page-link">…</span>
+                    </li>
+                    <li class="page-item">
+                        <a class="page-link"
+                           href="?page=@total&search=@ViewBag.Search&sort=@ViewBag.Sort&filter=@ViewBag.Filter">
+                            @total
+                        </a>
+                    </li>
+                }
+
+                @* Next *@
+                <li class="page-item @(current == total ? "disabled" : "")">
+                    <a class="page-link"
+                       href="?page=@(current + 1)&search=@ViewBag.Search&sort=@ViewBag.Sort&filter=@ViewBag.Filter">
+                        Next
+                    </a>
+                </li>
+
             </ul>
         </nav>
 
     </div>
 </div>
+
+<script>
+    const searchBox = document.querySelector('input[name="search"]');
+
+    searchBox.addEventListener('input', function () {
+        if (this.value.trim() === '') {
+            const url = new URL(window.location.href);
+            url.searchParams.delete('search');
+            url.searchParams.set('page', 1);
+            window.location.href = url.toString();
+        }
+    });
+</script>
+
