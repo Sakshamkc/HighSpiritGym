@@ -28,7 +28,7 @@
     </div>
 </form>
 
-<div class="mb-3">
+<div class="d-flex flex-column flex-md-row align-items-start align-items-md-center gap-2 gap-md-3 mb-3">
     <div class="btn-group" role="group">
         <a class="btn @(ViewBag.Filter=="all"?"btn-primary":"btn-outline-primary")"
            href="?filter=all&duration=@ViewBag.Duration&search=@ViewBag.Search">
@@ -50,45 +50,43 @@
             Expiring (7 Days)
         </a>
     </div>
+
+    <div class="vr d-none d-md-block"></div>
+
+    <div class="d-flex align-items-center gap-2 flex-wrap">
+        <span class="text-muted fw-bold">Duration</span>
+
+        <a class="btn btn-sm rounded-pill
+           @(ViewBag.Duration==null?"btn-dark":"btn-outline-dark")"
+           href="?duration=&filter=@ViewBag.Filter&search=@ViewBag.Search">
+            All
+        </a>
+
+        <a class="btn btn-sm rounded-pill
+           @(ViewBag.Duration==1?"btn-primary":"btn-outline-primary")"
+           href="?duration=1&filter=@ViewBag.Filter&search=@ViewBag.Search">
+            1M
+        </a>
+
+        <a class="btn btn-sm rounded-pill
+           @(ViewBag.Duration==3?"btn-primary":"btn-outline-primary")"
+           href="?duration=3&filter=@ViewBag.Filter&search=@ViewBag.Search">
+            3M
+        </a>
+
+        <a class="btn btn-sm rounded-pill
+           @(ViewBag.Duration==6?"btn-primary":"btn-outline-primary")"
+           href="?duration=6&filter=@ViewBag.Filter&search=@ViewBag.Search">
+            6M
+        </a>
+
+        <a class="btn btn-sm rounded-pill
+           @(ViewBag.Duration==12?"btn-primary":"btn-outline-primary")"
+           href="?duration=12&filter=@ViewBag.Filter&search=@ViewBag.Search">
+            12M
+        </a>
+    </div>
 </div>
-
-<div class="mb-4 d-flex align-items-center gap-2 flex-wrap">
-    <span class="text-muted fw-semibold me-2">Duration</span>
-
-    <a class="btn btn-sm rounded-pill
-       @(ViewBag.Duration==null?"btn-dark":"btn-outline-dark")"
-       href="?duration=&filter=@ViewBag.Filter&search=@ViewBag.Search">
-        All
-    </a>
-
-    <a class="btn btn-sm rounded-pill
-       @(ViewBag.Duration==1?"btn-primary":"btn-outline-primary")"
-       href="?duration=1&filter=@ViewBag.Filter&search=@ViewBag.Search">
-        1M
-    </a>
-
-    <a class="btn btn-sm rounded-pill
-       @(ViewBag.Duration==3?"btn-primary":"btn-outline-primary")"
-       href="?duration=3&filter=@ViewBag.Filter&search=@ViewBag.Search">
-        3M
-    </a>
-
-    <a class="btn btn-sm rounded-pill
-       @(ViewBag.Duration==6?"btn-primary":"btn-outline-primary")"
-       href="?duration=6&filter=@ViewBag.Filter&search=@ViewBag.Search">
-        6M
-    </a>
-
-    <a class="btn btn-sm rounded-pill
-       @(ViewBag.Duration==12?"btn-primary":"btn-outline-primary")"
-       href="?duration=12&filter=@ViewBag.Filter&search=@ViewBag.Search">
-        12M
-    </a>
-</div>
-
-
-
-
 <div class="card shadow">
     <div class="table-responsive">
         <table class="table table-striped table-hover mb-0">
@@ -165,12 +163,12 @@
                             {
                                 @("-")
                             }
-                    </td>
-                    <td>@(string.IsNullOrEmpty(c.Shift) ? "-" : c.Shift)</td>
-                    <td title="@c.Remarks">
-                        @(string.IsNullOrEmpty(c.Remarks)
-                                                ? "-"
-                                                : (c.Remarks.Length > 20 ? c.Remarks.Substring(0, 20) + "..." : c.Remarks))
+                        </td>
+                        <td>@(string.IsNullOrEmpty(c.Shift) ? "-" : c.Shift)</td>
+                        <td title="@c.Remarks">
+                            @(string.IsNullOrEmpty(c.Remarks)
+                                ? "-"
+                                : (c.Remarks.Length > 20 ? c.Remarks.Substring(0, 20) + "..." : c.Remarks))
                         </td>
 
                         <td>
