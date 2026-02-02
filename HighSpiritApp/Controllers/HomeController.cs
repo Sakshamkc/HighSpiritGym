@@ -41,10 +41,10 @@ namespace HighSpiritApp.Controllers
             ViewBag.ExpiringSoon = latestMemberships.Count(m =>
                 m.ExpireDate >= today && m.ExpireDate <= today.AddDays(7));
 
-            ViewBag.JoinedToday = await _context.Customers
-                .CountAsync(c => c.JoinDate.Date == today);
+            var firstDayOfMonth = new DateTime(today.Year, today.Month, 1);
+            ViewBag.JoinedThisMonth = await _context.Customers
+                .CountAsync(c => c.JoinDate >= firstDayOfMonth && c.JoinDate <= today);
 
-            // 🔔 BELL DATA (TOP 5 EXPIRED)
             ViewBag.ExpiredCount = ViewBag.Expired;
 
             ViewBag.ExpiredList = latestMemberships
