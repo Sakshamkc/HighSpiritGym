@@ -25,6 +25,8 @@
             bottom: 0;
             background: #111827;
             padding-top: 20px;
+            z-index: 1100;
+            transition: transform 0.3s ease;
         }
 
             .sidebar a {
@@ -46,6 +48,7 @@
         .content {
             margin-left: 240px;
             padding: 25px;
+            transition: margin-left 0.3s ease;
         }
 
         .brand {
@@ -137,19 +140,138 @@
             display: none !important;
         }
 
+        /* Mobile toggle button */
+        .sidebar-toggle {
+            display: none;
+            position: fixed;
+            top: 10px;
+            left: 10px;
+            z-index: 1200;
+            background: #111827;
+            color: white;
+            border: none;
+            padding: 10px 14px;
+            border-radius: 6px;
+            font-size: 18px;
+            cursor: pointer;
+        }
+
+        /* Overlay for mobile */
+        .sidebar-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.5);
+            z-index: 1090;
+        }
+
+        /* Responsive styles */
+        @@media (max-width: 991.98px) {
+            .sidebar {
+                transform: translateX(-100%);
+            }
+
+            .sidebar.show {
+                transform: translateX(0);
+            }
+
+            .content {
+                margin-left: 0;
+                padding: 15px;
+                padding-top: 60px;
+            }
+
+            .sidebar-toggle {
+                display: block;
+            }
+
+            .sidebar-overlay.show {
+                display: block;
+            }
+
+            .top-bar {
+                margin-top: 10px;
+            }
+
+            /* Make tables scroll horizontally */
+            .table-responsive {
+                overflow-x: auto;
+                -webkit-overflow-scrolling: touch;
+            }
+
+            /* Stack cards on mobile */
+            .row.g-4 > [class*="col-md"] {
+                flex: 0 0 100%;
+                max-width: 100%;
+            }
+
+            /* Adjust button groups */
+            .btn-group {
+                flex-wrap: wrap;
+            }
+
+            .btn-group .btn {
+                flex: 1 1 auto;
+                margin-bottom: 5px;
+            }
+        }
+
+        @@media (max-width: 575.98px) {
+            .content {
+                padding: 10px;
+                padding-top: 60px;
+            }
+
+            h3, h4, h5 {
+                font-size: 1.1rem;
+            }
+
+            .card-body h2 {
+                font-size: 1.5rem;
+            }
+
+            .btn {
+                font-size: 0.85rem;
+                padding: 6px 10px;
+            }
+
+            .btn-sm {
+                font-size: 0.75rem;
+                padding: 4px 8px;
+            }
+
+            /* Stack action buttons vertically on very small screens */
+            td .btn {
+                display: block;
+                width: 100%;
+                margin-bottom: 4px;
+            }
+        }
     </style>
 </head>
 <body class="bg-light">
     @{
         var controller = ViewContext.RouteData.Values["controller"]?.ToString();
     }
+
+    <!-- Mobile toggle button -->
+    <button class="sidebar-toggle" onclick="toggleSidebar()">
+        <i class="fa-solid fa-bars"></i>
+    </button>
+
+    <!-- Overlay for mobile -->
+    <div class="sidebar-overlay" onclick="toggleSidebar()"></div>
+
     <div class="sidebar">
         <div class="brand">
             <img src="/images/highspirit.jpg"
                  style="width:120px;height:auto;display:block;margin-left:20px" />
         </div>
 
-        <a href="/"><i class="fa-solid fa-chart-line"></i> Dashboard</a>
+        <a href="/" onclick="closeSidebarOnMobile()"><i class="fa-solid fa-chart-line"></i> Dashboard</a>
         <div class="sidebar-dropdown">
             <a href="#"
                class="dropdown-toggle"
@@ -162,13 +284,13 @@
             </a>
 
             <div class="collapse" id="gymMenu">
-                <a href="/Customers" class="submenu">
+                <a href="/Customers" class="submenu" onclick="closeSidebarOnMobile()">
                     <i class="fa-solid fa-list"></i> View Members
                 </a>
-                <a href="/Customers/Create" class="submenu">
+                <a href="/Customers/Create" class="submenu" onclick="closeSidebarOnMobile()">
                     <i class="fa-solid fa-user-plus"></i> Add Member
                 </a>
-                <a href="/Customers/Import" class="submenu">
+                <a href="/Customers/Import" class="submenu" onclick="closeSidebarOnMobile()">
                     <i class="fa-solid fa-file-excel"></i> Import Excel
                 </a>
             </div>
@@ -185,13 +307,13 @@
 
                 <div class="collapse @(Context.Request.Path.StartsWithSegments("/Boxing") ? "show" : "")"
                      id="boxingMenu">
-                    <a href="/Boxing" class="submenu">
+                    <a href="/Boxing" class="submenu" onclick="closeSidebarOnMobile()">
                         <i class="fa-solid fa-list"></i> View Members
                     </a>
-                    <a href="/Boxing/Create" class="submenu">
+                    <a href="/Boxing/Create" class="submenu" onclick="closeSidebarOnMobile()">
                         <i class="fa-solid fa-user-plus"></i> Add Member
                     </a>
-                    <a href="/Boxing/Import" class="submenu">
+                    <a href="/Boxing/Import" class="submenu" onclick="closeSidebarOnMobile()">
                         <i class="fa-solid fa-file-excel"></i> Import Excel
                     </a>
                 </div>
@@ -283,6 +405,33 @@
                 }
             }
         }
+
+        // Sidebar toggle for mobile
+        function toggleSidebar() {
+            const sidebar = document.querySelector('.sidebar');
+            const overlay = document.querySelector('.sidebar-overlay');
+            sidebar.classList.toggle('show');
+            overlay.classList.toggle('show');
+        }
+
+        function closeSidebarOnMobile() {
+            if (window.innerWidth < 992) {
+                const sidebar = document.querySelector('.sidebar');
+                const overlay = document.querySelector('.sidebar-overlay');
+                sidebar.classList.remove('show');
+                overlay.classList.remove('show');
+            }
+        }
+
+        // Close sidebar when window is resized to desktop
+        window.addEventListener('resize', function() {
+            if (window.innerWidth >= 992) {
+                const sidebar = document.querySelector('.sidebar');
+                const overlay = document.querySelector('.sidebar-overlay');
+                sidebar.classList.remove('show');
+                overlay.classList.remove('show');
+            }
+        });
     </script>
 
 </body>
