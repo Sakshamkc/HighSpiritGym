@@ -239,7 +239,7 @@
                 @* Previous *@
                 <li class="page-item @(current == 1 ? "disabled" : "")">
                     <a class="page-link"
-                       href="?page=@(current - 1)&search=@ViewBag.Search&sort=@ViewBag.Sort&filter=@ViewBag.Filter">
+                       href="?page=@(current - 1)&search=@ViewBag.Search&sort=@ViewBag.Sort&filter=@ViewBag.Filter&duration=@ViewBag.Duration">
                         Prev
                     </a>
                 </li>
@@ -249,7 +249,7 @@
                 {
                     <li class="page-item">
                         <a class="page-link"
-                           href="?page=1&search=@ViewBag.Search&sort=@ViewBag.Sort&filter=@ViewBag.Filter">1</a>
+                           href="?page=1&search=@ViewBag.Search&sort=@ViewBag.Sort&filter=@ViewBag.Filter&duration=@ViewBag.Duration">1</a>
                     </li>
                     <li class="page-item disabled">
                         <span class="page-link">…</span>
@@ -261,7 +261,7 @@
                 {
                     <li class="page-item @(i == current ? "active" : "")">
                         <a class="page-link"
-                           href="?page=@i&search=@ViewBag.Search&sort=@ViewBag.Sort&filter=@ViewBag.Filter">
+                           href="?page=@i&search=@ViewBag.Search&sort=@ViewBag.Sort&filter=@ViewBag.Filter&duration=@ViewBag.Duration">
                             @i
                         </a>
                     </li>
@@ -275,7 +275,7 @@
                     </li>
                     <li class="page-item">
                         <a class="page-link"
-                           href="?page=@total&search=@ViewBag.Search&sort=@ViewBag.Sort&filter=@ViewBag.Filter">
+                           href="?page=@total&search=@ViewBag.Search&sort=@ViewBag.Sort&filter=@ViewBag.Filter&duration=@ViewBag.Duration">
                             @total
                         </a>
                     </li>
@@ -284,7 +284,7 @@
                 @* Next *@
                 <li class="page-item @(current == total ? "disabled" : "")">
                     <a class="page-link"
-                       href="?page=@(current + 1)&search=@ViewBag.Search&sort=@ViewBag.Sort&filter=@ViewBag.Filter">
+                       href="?page=@(current + 1)&search=@ViewBag.Search&sort=@ViewBag.Sort&filter=@ViewBag.Filter&duration=@ViewBag.Duration">
                         Next
                     </a>
                 </li>
