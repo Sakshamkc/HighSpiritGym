@@ -3,42 +3,173 @@
     Layout = "~/Views/Shared/_Layout.cshtml";
 }
 
-<h3 class="mb-4">📊 Dashboard</h3>
+<!-- Dashboard Header -->
+<div class="d-flex align-items-center mb-4">
+    <div class="dashboard-icon me-3">
+        <i class="fa-solid fa-chart-pie"></i>
+    </div>
+    <div>
+        <h3 class="mb-0">Dashboard</h3>
+        <small class="text-muted">Welcome back! Here's your gym overview</small>
+    </div>
+</div>
+
+<style>
+    .dashboard-icon {
+        width: 50px;
+        height: 50px;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-size: 24px;
+    }
+    
+    .section-header {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        margin-bottom: 20px;
+    }
+    
+    .section-icon {
+        width: 40px;
+        height: 40px;
+        border-radius: 10px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 18px;
+    }
+    
+    .section-icon.gym {
+        background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+        color: white;
+    }
+    
+    .section-icon.boxing {
+        background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+        color: white;
+    }
+    
+    .stat-card {
+        border: none;
+        border-radius: 16px;
+        overflow: hidden;
+        transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+    
+    .stat-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 10px 40px rgba(0,0,0,0.15) !important;
+    }
+    
+    .stat-card .card-body {
+        padding: 20px;
+    }
+    
+    .stat-card .stat-icon {
+        width: 50px;
+        height: 50px;
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 22px;
+        background: rgba(255,255,255,0.2);
+        margin-bottom: 15px;
+    }
+    
+    .stat-card h2 {
+        font-size: 2rem;
+        font-weight: 700;
+        margin-bottom: 5px;
+    }
+    
+    .stat-card p {
+        font-size: 0.9rem;
+        opacity: 0.9;
+    }
+    
+    .data-table {
+        border-radius: 12px;
+        overflow: hidden;
+    }
+    
+    .data-table .table {
+        margin-bottom: 0;
+    }
+    
+    .table-header-icon {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+    }
+    
+    .divider {
+        border: none;
+        height: 2px;
+        background: linear-gradient(to right, transparent, #e5e7eb, transparent);
+        margin: 40px 0;
+    }
+</style>
 
 <!-- ======================= GYM DASHBOARD ======================= -->
-<h5 class="mb-3 text-muted">🏋️ Gym Overview</h5>
+<div class="section-header">
+    <div class="section-icon gym">
+        <i class="fa-solid fa-dumbbell"></i>
+    </div>
+    <div>
+        <h5 class="mb-0">Gym Overview</h5>
+        <small class="text-muted">Membership statistics</small>
+    </div>
+</div>
 
 <div class="row g-4 mb-4">
-    <div class="col-md-3">
-        <div class="card shadow text-white" style="background:#4f46e5;">
+    <div class="col-md-3 col-sm-6">
+        <div class="card stat-card shadow text-white" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
             <div class="card-body">
+                <div class="stat-icon">
+                    <i class="fa-solid fa-users"></i>
+                </div>
                 <h2>@ViewBag.Total</h2>
                 <p class="mb-0">Total Members</p>
             </div>
         </div>
     </div>
 
-    <div class="col-md-3">
-        <div class="card shadow text-white" style="background:#16a34a;">
+    <div class="col-md-3 col-sm-6">
+        <div class="card stat-card shadow text-white" style="background: linear-gradient(135deg, #10b981 0%, #059669 100%);">
             <div class="card-body">
+                <div class="stat-icon">
+                    <i class="fa-solid fa-circle-check"></i>
+                </div>
                 <h2>@ViewBag.Active</h2>
-                <p class="mb-0">Active</p>
+                <p class="mb-0">Active Members</p>
             </div>
         </div>
     </div>
 
-    <div class="col-md-3">
-        <div class="card shadow text-white" style="background:#dc2626;">
+    <div class="col-md-3 col-sm-6">
+        <div class="card stat-card shadow text-white" style="background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);">
             <div class="card-body">
+                <div class="stat-icon">
+                    <i class="fa-solid fa-circle-xmark"></i>
+                </div>
                 <h2>@ViewBag.Expired</h2>
                 <p class="mb-0">Expired</p>
             </div>
         </div>
     </div>
 
-    <div class="col-md-3">
-        <div class="card shadow text-white" style="background:#d97706;">
+    <div class="col-md-3 col-sm-6">
+        <div class="card stat-card shadow text-white" style="background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);">
             <div class="card-body">
+                <div class="stat-icon">
+                    <i class="fa-solid fa-clock"></i>
+                </div>
                 <h2>@ViewBag.ExpiringSoon</h2>
                 <p class="mb-0">Expiring Soon</p>
             </div>
@@ -47,9 +178,12 @@
 </div>
 
 <div class="row mb-4">
-    <div class="col-md-4">
-        <div class="card shadow text-white" style="background:#0891b2;">
+    <div class="col-md-4 col-sm-6">
+        <div class="card stat-card shadow text-white" style="background: linear-gradient(135deg, #06b6d4 0%, #0891b2 100%);">
             <div class="card-body">
+                <div class="stat-icon">
+                    <i class="fa-solid fa-user-plus"></i>
+                </div>
                 <h2>@ViewBag.JoinedThisMonth</h2>
                 <p class="mb-0">Joined This Month</p>
             </div>
@@ -58,88 +192,123 @@
 </div>
 
 <!-- Gym Expiring Table -->
-<div class="card shadow mb-5">
+<div class="card shadow data-table mb-4">
     <div class="card-body">
-        <h5 class="mb-3">⏳ Gym Members Expiring in 7 Days</h5>
+        <h5 class="mb-3 table-header-icon">
+            <span class="section-icon gym" style="width:32px;height:32px;font-size:14px;">
+                <i class="fa-solid fa-hourglass-half"></i>
+            </span>
+            Gym Members Expiring in 7 Days
+        </h5>
 
-        <table class="table table-hover">
-            <thead class="table-dark">
-                <tr>
-                    <th>Name</th>
-                    <th>Phone</th>
-                    <th>Plan</th>
-                    <th>Expire Date</th>
-                    <th>Action</th>
-                </tr>
-            </thead>
-            <tbody>
-                @if (Model.Any())
-                {
-                    foreach (var m in Model)
+        <div class="table-responsive">
+            <table class="table table-hover align-middle">
+                <thead class="table-dark">
+                    <tr>
+                        <th>Name</th>
+                        <th>Phone</th>
+                        <th>Plan</th>
+                        <th>Expire Date</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @if (Model.Any())
+                    {
+                        foreach (var m in Model)
+                        {
+                            <tr>
+                                <td class="fw-semibold">@m.Customer.FullName</td>
+                                <td>@m.Customer.Phone</td>
+                                <td><span class="badge bg-secondary">@m.PlanName</span></td>
+                                <td>
+                                    <span class="text-warning fw-semibold">
+                                        <i class="fa-solid fa-calendar-day me-1"></i>
+                                        @m.ExpireDate.ToString("dd MMM yyyy")
+                                    </span>
+                                </td>
+                                <td>
+                                    <a class="btn btn-sm btn-outline-primary" href="/Customers/Details/@m.CustomerID">
+                                        <i class="fa-solid fa-eye"></i> View
+                                    </a>
+                                    <a class="btn btn-sm btn-success" href="/Memberships/Renew/@m.CustomerID">
+                                        <i class="fa-solid fa-rotate"></i> Renew
+                                    </a>
+                                </td>
+                            </tr>
+                        }
+                    }
+                    else
                     {
                         <tr>
-                            <td>@m.Customer.FullName</td>
-                            <td>@m.Customer.Phone</td>
-                            <td>@m.PlanName</td>
-                            <td>@m.ExpireDate.ToShortDateString()</td>
-                            <td>
-                                <a class="btn btn-sm btn-primary"
-                                   href="/Customers/Details/@m.CustomerID">
-                                    View
-                                </a>
+                            <td colspan="5" class="text-center text-muted py-4">
+                                <i class="fa-solid fa-party-horn fa-2x mb-2 d-block"></i>
+                                No members expiring soon 🎉
                             </td>
                         </tr>
                     }
-                }
-                else
-                {
-                    <tr>
-                        <td colspan="5" class="text-center text-muted">
-                            No members expiring soon 🎉
-                        </td>
-                    </tr>
-                }
-            </tbody>
-        </table>
+                </tbody>
+            </table>
+        </div>
     </div>
 </div>
 
-<hr class="my-5" />
+<hr class="divider" />
 
 <!-- ======================= BOXING DASHBOARD ======================= -->
-<h5 class="mb-3 text-muted">🥊 Boxing Overview</h5>
+<div class="section-header">
+    <div class="section-icon boxing">
+        <i class="fa-solid fa-hand-fist"></i>
+    </div>
+    <div>
+        <h5 class="mb-0">Boxing Overview</h5>
+        <small class="text-muted">Boxing member statistics</small>
+    </div>
+</div>
 
 <div class="row g-4 mb-4">
-    <div class="col-md-3">
-        <div class="card shadow text-white" style="background:#0ea5e9;">
+    <div class="col-md-3 col-sm-6">
+        <div class="card stat-card shadow text-white" style="background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);">
             <div class="card-body">
+                <div class="stat-icon">
+                    <i class="fa-solid fa-users"></i>
+                </div>
                 <h2>@ViewBag.BoxingTotal</h2>
-                <p class="mb-0">Total Boxing Members</p>
+                <p class="mb-0">Total Members</p>
             </div>
         </div>
     </div>
 
-    <div class="col-md-3">
-        <div class="card shadow text-white" style="background:#16a34a;">
+    <div class="col-md-3 col-sm-6">
+        <div class="card stat-card shadow text-white" style="background: linear-gradient(135deg, #10b981 0%, #059669 100%);">
             <div class="card-body">
+                <div class="stat-icon">
+                    <i class="fa-solid fa-circle-check"></i>
+                </div>
                 <h2>@ViewBag.BoxingPaid</h2>
-                <p class="mb-0">Paid Members</p>
+                <p class="mb-0">Fully Paid</p>
             </div>
         </div>
     </div>
 
-    <div class="col-md-3">
-        <div class="card shadow text-white" style="background:#dc2626;">
+    <div class="col-md-3 col-sm-6">
+        <div class="card stat-card shadow text-white" style="background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);">
             <div class="card-body">
+                <div class="stat-icon">
+                    <i class="fa-solid fa-user-clock"></i>
+                </div>
                 <h2>@ViewBag.BoxingWithDue</h2>
-                <p class="mb-0">Members with Due</p>
+                <p class="mb-0">With Due</p>
             </div>
         </div>
     </div>
 
-    <div class="col-md-3">
-        <div class="card shadow text-white" style="background:#d97706;">
+    <div class="col-md-3 col-sm-6">
+        <div class="card stat-card shadow text-white" style="background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);">
             <div class="card-body">
+                <div class="stat-icon">
+                    <i class="fa-solid fa-money-bill-wave"></i>
+                </div>
                 <h2>Rs @ViewBag.BoxingDue</h2>
                 <p class="mb-0">Total Due Amount</p>
             </div>
@@ -148,52 +317,62 @@
 </div>
 
 <!-- Boxing Due Table -->
-<div class="card shadow">
+<div class="card shadow data-table">
     <div class="card-body">
-        <h5 class="mb-3">⚠️ Boxing Members with Due</h5>
+        <h5 class="mb-3 table-header-icon">
+            <span class="section-icon boxing" style="width:32px;height:32px;font-size:14px;">
+                <i class="fa-solid fa-triangle-exclamation"></i>
+            </span>
+            Boxing Members with Due
+        </h5>
 
-        <table class="table table-hover">
-            <thead class="table-dark">
-                <tr>
-                    <th>Name</th>
-                    <th>Guardian</th>
-                    <th>Contact</th>
-                    <th>Due Amount</th>
-                    <th>Action</th>
-                </tr>
-            </thead>
-            <tbody>
-                @if (ViewBag.BoxingDueList != null && ViewBag.BoxingDueList.Count > 0)
-                {
-                    foreach (var b in ViewBag.BoxingDueList)
+        <div class="table-responsive">
+            <table class="table table-hover align-middle">
+                <thead class="table-dark">
+                    <tr>
+                        <th>Name</th>
+                        <th>Guardian</th>
+                        <th>Contact</th>
+                        <th>Due Amount</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @if (ViewBag.BoxingDueList != null && ViewBag.BoxingDueList.Count > 0)
+                    {
+                        foreach (var b in ViewBag.BoxingDueList)
+                        {
+                            <tr>
+                                <td class="fw-semibold">@b.Name</td>
+                                <td>@b.GuardianName</td>
+                                <td>
+                                    <i class="fa-solid fa-phone me-1 text-muted"></i>
+                                    @b.GuardianContact
+                                </td>
+                                <td>
+                                    <span class="badge bg-danger fs-6">
+                                        <i class="fa-solid fa-indian-rupee-sign me-1"></i>@b.DueAmount
+                                    </span>
+                                </td>
+                                <td>
+                                    <a class="btn btn-sm btn-outline-primary" href="/Boxing/Details/@b.BoxingMemberID">
+                                        <i class="fa-solid fa-eye"></i> View
+                                    </a>
+                                </td>
+                            </tr>
+                        }
+                    }
+                    else
                     {
                         <tr>
-                            <td>@b.Name</td>
-                            <td>@b.GuardianName</td>
-                            <td>@b.GuardianContact</td>
-                            <td>
-                                <span class="badge bg-danger">
-                                    Rs @b.DueAmount
-                                </span>
-                            </td>
-                            <td>
-                                <a class="btn btn-sm btn-primary"
-                                   href="/Boxing/Details/@b.BoxingMemberID">
-                                    View
-                                </a>
+                            <td colspan="5" class="text-center text-muted py-4">
+                                <i class="fa-solid fa-thumbs-up fa-2x mb-2 d-block"></i>
+                                No boxing dues 🎉
                             </td>
                         </tr>
                     }
-                }
-                else
-                {
-                    <tr>
-                        <td colspan="5" class="text-center text-muted">
-                            No boxing dues 🎉
-                        </td>
-                    </tr>
-                }
-            </tbody>
-        </table>
+                </tbody>
+            </table>
+        </div>
     </div>
 </div>
