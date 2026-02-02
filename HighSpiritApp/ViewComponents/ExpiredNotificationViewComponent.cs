@@ -24,7 +24,7 @@ public class ExpiredNotificationViewComponent : ViewComponent
             .GroupBy(m => m.CustomerID)
             .Select(g => g.OrderByDescending(x => x.StartDate).First())
             .Where(m => m.ExpireDate < today)
-            .OrderBy(m => m.ExpireDate)
+            .OrderByDescending(m => m.ExpireDate) // Most recently expired first (just expired today/yesterday on top)
             .ToList();
 
         return View(latestMemberships);

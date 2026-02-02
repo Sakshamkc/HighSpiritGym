@@ -24,9 +24,10 @@
             left: 0;
             bottom: 0;
             background: #111827;
-            padding-top: 20px;
+            padding-top: 70px;
             z-index: 1100;
-            transition: transform 0.3s ease;
+            transition: width 0.3s ease;
+            overflow-x: hidden;
         }
 
             .sidebar a {
@@ -34,6 +35,7 @@
                 display: block;
                 padding: 12px 20px;
                 text-decoration: none;
+                white-space: nowrap;
             }
 
                 .sidebar a:hover {
@@ -42,21 +44,240 @@
                 }
 
                 .sidebar a i {
+                    min-width: 20px;
+                    text-align: center;
                     margin-right: 10px;
+                    font-size: 16px;
                 }
+
+            /* Hide text in collapsed state */
+            .sidebar.collapsed {
+                width: 70px;
+            }
+
+            .sidebar.collapsed .nav-text,
+            .sidebar.collapsed .footer-text {
+                opacity: 0;
+                visibility: hidden;
+            }
+
+            .sidebar.collapsed .sidebar-footer {
+                padding: 0 5px;
+            }
+
+            .sidebar.collapsed .logout-link {
+                font-size: 0;
+            }
+
+            .sidebar.collapsed .logout-link i {
+                font-size: 16px;
+                margin-right: 0;
+            }
+
+            .sidebar.collapsed a {
+                padding: 12px 25px;
+                text-align: center;
+            }
+
+            .sidebar.collapsed a i {
+                margin-right: 0;
+            }
+
+            .sidebar.collapsed .submenu {
+                padding-left: 25px;
+            }
+
+            /* Hover expand when collapsed */
+            .sidebar.collapsed:hover {
+                width: 240px;
+            }
+
+            .sidebar.collapsed:hover .nav-text,
+            .sidebar.collapsed:hover .footer-text {
+                opacity: 1;
+                visibility: visible;
+            }
+
+            .sidebar.collapsed:hover a {
+                padding: 12px 20px;
+                text-align: left;
+            }
+
+            .sidebar.collapsed:hover a i {
+                margin-right: 10px;
+            }
+
+            .sidebar.collapsed:hover .submenu {
+                padding-left: 45px;
+            }
+
+            .sidebar.collapsed:hover .logout-link {
+                font-size: 14px;
+            }
+
+            .sidebar.collapsed:hover .logout-link i {
+                margin-right: 6px;
+            }
 
         .content {
             margin-left: 240px;
             padding: 25px;
+            padding-top: 80px;
             transition: margin-left 0.3s ease;
         }
 
-        .brand {
+        .content.expanded {
+            margin-left: 70px;
+        }
+
+        /* Fixed header bar with logo and hamburger */
+        .header-bar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 60px;
+            background: #111827;
+            z-index: 1150;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 15px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+        }
+
+        .header-left {
+            display: flex;
+            align-items: center;
+        }
+
+        .header-right {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .header-bar .brand-logo {
+            height: 45px;
+            width: auto;
+            margin-left: 10px;
+        }
+
+        .header-bar .hamburger-btn {
+            background: transparent;
+            border: none;
             color: white;
-            font-size: 18px;
-            text-align: center;
-            margin-bottom: 20px;
+            font-size: 20px;
+            padding: 8px 12px;
+            cursor: pointer;
+            border-radius: 6px;
+            transition: background 0.2s ease;
+        }
+
+        .header-bar .hamburger-btn:hover {
+            background: #374151;
+        }
+
+        /* Profile dropdown styles */
+        .profile-dropdown {
+            position: relative;
+        }
+
+        .profile-btn {
+            background: #1f2937;
+            border: none;
+            color: white;
+            padding: 8px 15px;
+            border-radius: 25px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: background 0.2s ease;
+        }
+
+        .profile-btn:hover {
+            background: #374151;
+        }
+
+        .profile-btn .profile-icon {
+            width: 32px;
+            height: 32px;
+            background: #4f46e5;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
             font-weight: 600;
+        }
+
+        .profile-btn .profile-name {
+            font-size: 14px;
+            font-weight: 500;
+        }
+
+        .profile-menu {
+            position: absolute;
+            top: 100%;
+            right: 0;
+            margin-top: 8px;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+            min-width: 200px;
+            display: none;
+            overflow: hidden;
+            z-index: 1200;
+        }
+
+        .profile-menu.show {
+            display: block;
+        }
+
+        .profile-menu-header {
+            padding: 15px;
+            background: #f8f9fa;
+            border-bottom: 1px solid #e5e7eb;
+        }
+
+        .profile-menu-header .user-name {
+            font-weight: 600;
+            color: #111827;
+            font-size: 14px;
+        }
+
+        .profile-menu-header .user-role {
+            font-size: 12px;
+            color: #6b7280;
+        }
+
+        .profile-menu-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 12px 15px;
+            color: #374151;
+            text-decoration: none;
+            transition: background 0.2s ease;
+        }
+
+        .profile-menu-item:hover {
+            background: #f3f4f6;
+            color: #111827;
+        }
+
+        .profile-menu-item.logout {
+            color: #dc2626;
+            border-top: 1px solid #e5e7eb;
+        }
+
+        .profile-menu-item.logout:hover {
+            background: #fef2f2;
+        }
+
+        .nav-text {
+            transition: opacity 0.3s ease;
         }
 
         .sidebar-footer {
@@ -65,28 +286,14 @@
             width: 100%;
             text-align: center;
             padding: 0 10px;
+            transition: padding 0.3s ease;
         }
-
-        .logout-link {
-            color: #f87171;
-            font-weight: 600;
-            text-decoration: none;
-            font-size: 14px;
-        }
-
-            .logout-link i {
-                margin-right: 6px;
-            }
-
-            .logout-link:hover {
-                text-decoration: underline;
-            }
 
         .footer-text {
-            margin-top: 8px;
             font-size: 11px;
             color: #9ca3af;
             font-style: italic;
+            transition: opacity 0.3s ease;
         }
 
             .footer-text i {
@@ -124,6 +331,7 @@
             padding-left: 45px;
             font-size: 14px;
             color: #9ca3af;
+            transition: padding-left 0.3s ease;
         }
 
             .sidebar .submenu:hover {
@@ -140,27 +348,11 @@
             display: none !important;
         }
 
-        /* Mobile toggle button */
-        .sidebar-toggle {
-            display: none;
-            position: fixed;
-            top: 10px;
-            left: 10px;
-            z-index: 1200;
-            background: #111827;
-            color: white;
-            border: none;
-            padding: 10px 14px;
-            border-radius: 6px;
-            font-size: 18px;
-            cursor: pointer;
-        }
-
         /* Overlay for mobile */
         .sidebar-overlay {
             display: none;
             position: fixed;
-            top: 0;
+            top: 60px;
             left: 0;
             right: 0;
             bottom: 0;
@@ -172,20 +364,22 @@
         @@media (max-width: 991.98px) {
             .sidebar {
                 transform: translateX(-100%);
+                width: 240px !important;
+                padding-top: 70px;
             }
 
             .sidebar.show {
                 transform: translateX(0);
             }
 
-            .content {
-                margin-left: 0;
-                padding: 15px;
-                padding-top: 60px;
+            .sidebar.collapsed {
+                width: 240px !important;
             }
 
-            .sidebar-toggle {
-                display: block;
+            .content {
+                margin-left: 0 !important;
+                padding: 15px;
+                padding-top: 80px;
             }
 
             .sidebar-overlay.show {
@@ -217,12 +411,16 @@
                 flex: 1 1 auto;
                 margin-bottom: 5px;
             }
+
+            .profile-btn .profile-name {
+                display: none;
+            }
         }
 
         @@media (max-width: 575.98px) {
             .content {
                 padding: 10px;
-                padding-top: 60px;
+                padding-top: 70px;
             }
 
             h3, h4, h5 {
@@ -249,49 +447,81 @@
                 width: 100%;
                 margin-bottom: 4px;
             }
+
+            .header-bar .brand-logo {
+                height: 35px;
+            }
         }
     </style>
 </head>
 <body class="bg-light">
     @{
         var controller = ViewContext.RouteData.Values["controller"]?.ToString();
+        var userName = User.Identity?.Name ?? "Admin";
+        var userInitial = !string.IsNullOrEmpty(userName) ? userName[0].ToString().ToUpper() : "A";
     }
 
-    <!-- Mobile toggle button -->
-    <button class="sidebar-toggle" onclick="toggleSidebar()">
-        <i class="fa-solid fa-bars"></i>
-    </button>
+    <!-- Fixed Header Bar with Logo, Hamburger, and Profile -->
+    <div class="header-bar">
+        <div class="header-left">
+            <button class="hamburger-btn" onclick="toggleSidebar()" title="Toggle Sidebar">
+                <i class="fa-solid fa-bars"></i>
+            </button>
+            <img src="/images/highspirit.jpg" class="brand-logo" alt="High Spirit Gym" />
+        </div>
+
+        <div class="header-right">
+            <!-- Profile Dropdown -->
+            <div class="profile-dropdown">
+                <button class="profile-btn" onclick="toggleProfileMenu()">
+                    <div class="profile-icon">@userInitial</div>
+                    <span class="profile-name">@userName</span>
+                    <i class="fa-solid fa-chevron-down" style="font-size: 12px;"></i>
+                </button>
+                <div class="profile-menu" id="profileMenu">
+                    <div class="profile-menu-header">
+                        <div class="user-name">@userName</div>
+                        <div class="user-role">Owner / Admin</div>
+                    </div>
+                    <a href="/Account/Logout" class="profile-menu-item logout">
+                        <i class="fa-solid fa-right-from-bracket"></i>
+                        Logout
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
 
     <!-- Overlay for mobile -->
     <div class="sidebar-overlay" onclick="toggleSidebar()"></div>
 
-    <div class="sidebar">
-        <div class="brand">
-            <img src="/images/highspirit.jpg"
-                 style="width:120px;height:auto;display:block;margin-left:20px" />
-        </div>
-
-        <a href="/" onclick="closeSidebarOnMobile()"><i class="fa-solid fa-chart-line"></i> Dashboard</a>
+    <div class="sidebar" id="sidebar">
+        <a href="/" onclick="closeSidebarOnMobile()">
+            <i class="fa-solid fa-chart-line"></i>
+            <span class="nav-text">Dashboard</span>
+        </a>
         <div class="sidebar-dropdown">
             <a href="#"
                class="dropdown-toggle"
                data-bs-toggle="collapse"
                data-bs-target="#gymMenu"
                aria-expanded="false">
-
                 <i class="fa-solid fa-users"></i>
-                Gym Members
+                <span class="nav-text">Gym Members</span>
             </a>
 
             <div class="collapse" id="gymMenu">
                 <a href="/Customers" class="submenu" onclick="closeSidebarOnMobile()">
-                    <i class="fa-solid fa-list"></i> View Members
+                    <i class="fa-solid fa-list"></i>
+                    <span class="nav-text">View Members</span>
                 </a>
                 <a href="/Customers/Create" class="submenu" onclick="closeSidebarOnMobile()">
-                    <i class="fa-solid fa-user-plus"></i> Add Member
+                    <i class="fa-solid fa-user-plus"></i>
+                    <span class="nav-text">Add Member</span>
                 </a>
                 <a href="/Customers/Import" class="submenu" onclick="closeSidebarOnMobile()">
-                    <i class="fa-solid fa-file-excel"></i> Import Excel
+                    <i class="fa-solid fa-file-excel"></i>
+                    <span class="nav-text">Import Excel</span>
                 </a>
             </div>
             <div class="sidebar-dropdown">
@@ -300,21 +530,23 @@
                    data-bs-toggle="collapse"
                    data-bs-target="#boxingMenu"
                    aria-expanded="false">
-
                     <i class="fa-solid fa-hand-fist"></i>
-                    Boxing Members
+                    <span class="nav-text">Boxing Members</span>
                 </a>
 
                 <div class="collapse @(Context.Request.Path.StartsWithSegments("/Boxing") ? "show" : "")"
                      id="boxingMenu">
                     <a href="/Boxing" class="submenu" onclick="closeSidebarOnMobile()">
-                        <i class="fa-solid fa-list"></i> View Members
+                        <i class="fa-solid fa-list"></i>
+                        <span class="nav-text">View Members</span>
                     </a>
                     <a href="/Boxing/Create" class="submenu" onclick="closeSidebarOnMobile()">
-                        <i class="fa-solid fa-user-plus"></i> Add Member
+                        <i class="fa-solid fa-user-plus"></i>
+                        <span class="nav-text">Add Member</span>
                     </a>
                     <a href="/Boxing/Import" class="submenu" onclick="closeSidebarOnMobile()">
-                        <i class="fa-solid fa-file-excel"></i> Import Excel
+                        <i class="fa-solid fa-file-excel"></i>
+                        <span class="nav-text">Import Excel</span>
                     </a>
                 </div>
             </div>
@@ -323,9 +555,6 @@
 
 
         <div class="sidebar-footer">
-            <a href="/Account/Logout" class="logout-link">
-                <i class="fa-solid fa-right-from-bracket"></i> Logout
-            </a>
             <div class="footer-text">
                 <i class="fa-regular fa-copyright"></i> @DateTime.Now.Year High Spirit Gym
                 <br />
@@ -335,7 +564,7 @@
 
     </div>
 
-    <div class="content">
+    <div class="content" id="content">
 
         <!-- Top utility bar -->
         <div class="d-flex justify-content-end mb-2">
@@ -406,12 +635,41 @@
             }
         }
 
-        // Sidebar toggle for mobile
+        // Profile dropdown toggle
+        function toggleProfileMenu() {
+            const menu = document.getElementById('profileMenu');
+            menu.classList.toggle('show');
+        }
+
+        // Close profile menu when clicking outside
+        document.addEventListener('click', function(event) {
+            const profileDropdown = document.querySelector('.profile-dropdown');
+            const menu = document.getElementById('profileMenu');
+            
+            if (!profileDropdown.contains(event.target)) {
+                menu.classList.remove('show');
+            }
+        });
+
+        // Unified sidebar toggle
         function toggleSidebar() {
-            const sidebar = document.querySelector('.sidebar');
+            const sidebar = document.getElementById('sidebar');
+            const content = document.getElementById('content');
             const overlay = document.querySelector('.sidebar-overlay');
-            sidebar.classList.toggle('show');
-            overlay.classList.toggle('show');
+            
+            if (window.innerWidth >= 992) {
+                // Desktop: collapse/expand
+                sidebar.classList.toggle('collapsed');
+                content.classList.toggle('expanded');
+                
+                // Save state to localStorage
+                const isCollapsed = sidebar.classList.contains('collapsed');
+                localStorage.setItem('sidebarCollapsed', isCollapsed);
+            } else {
+                // Mobile: slide in/out
+                sidebar.classList.toggle('show');
+                overlay.classList.toggle('show');
+            }
         }
 
         function closeSidebarOnMobile() {
@@ -423,13 +681,35 @@
             }
         }
 
-        // Close sidebar when window is resized to desktop
+        // Restore sidebar state on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            const isCollapsed = localStorage.getItem('sidebarCollapsed') === 'true';
+            if (isCollapsed && window.innerWidth >= 992) {
+                document.getElementById('sidebar').classList.add('collapsed');
+                document.getElementById('content').classList.add('expanded');
+            }
+        });
+
+        // Handle window resize
         window.addEventListener('resize', function() {
+            const sidebar = document.getElementById('sidebar');
+            const content = document.getElementById('content');
+            const overlay = document.querySelector('.sidebar-overlay');
+            
             if (window.innerWidth >= 992) {
-                const sidebar = document.querySelector('.sidebar');
-                const overlay = document.querySelector('.sidebar-overlay');
+                // Desktop: restore from localStorage, hide mobile states
                 sidebar.classList.remove('show');
                 overlay.classList.remove('show');
+                
+                const isCollapsed = localStorage.getItem('sidebarCollapsed') === 'true';
+                if (isCollapsed) {
+                    sidebar.classList.add('collapsed');
+                    content.classList.add('expanded');
+                }
+            } else {
+                // Mobile: remove collapsed state
+                sidebar.classList.remove('collapsed');
+                content.classList.remove('expanded');
             }
         });
     </script>
