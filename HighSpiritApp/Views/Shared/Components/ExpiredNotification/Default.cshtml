@@ -2,24 +2,30 @@
 
 <div class="dropdown">
     <a href="#"
-       class="nav-link position-relative dropdown-toggle text-dark"
-       data-bs-toggle="dropdown">
+       class="nav-link position-relative dropdown-toggle"
+       data-bs-toggle="dropdown"
+       title="Gym Expired Members">
 
-        <i class="fa-solid fa-bell fa-lg"></i>
-
-        @if (Model.Count > 0)
-        {
-            <span class="position-absolute top-0 start-100 translate-middle
-                         badge rounded-pill bg-danger">
-                @Model.Count
-            </span>
-        }
+        <!-- Gym Icon: Dumbbell with orange/warning color -->
+        <span class="d-inline-flex align-items-center gap-1 px-2 py-1 rounded bg-warning bg-opacity-10">
+            <i class="fa-solid fa-dumbbell text-warning"></i>
+            @if (Model.Count > 0)
+            {
+                <span class="badge rounded-pill bg-danger">
+                    @Model.Count
+                </span>
+            }
+            else
+            {
+                <span class="badge rounded-pill bg-success">0</span>
+            }
+        </span>
     </a>
 
     <ul class="dropdown-menu dropdown-menu-end shadow notification-dropdown">
 
-        <li class="dropdown-header fw-bold">
-            Expired Gym Memberships
+        <li class="dropdown-header fw-bold text-warning">
+            <i class="fa-solid fa-dumbbell me-2"></i>Expired Gym Memberships
         </li>
 
         @if (Model.Count == 0)
@@ -35,12 +41,18 @@
                 <li class="dropdown-item-text border-bottom">
                     <div class="fw-semibold">@m.Customer.FullName</div>
                     <small class="text-danger">
-                        Expired on @m.ExpireDate.ToShortDateString()
+                        <i class="fa-solid fa-calendar-xmark me-1"></i>
+                        Expired: @m.ExpireDate.ToString("dd MMM yyyy")
+                        <span class="text-muted">(Due @m.DueDaysComputed days)</span>
                     </small>
                     <div>
                         <a href="/Customers/Details/@m.CustomerID"
                            class="text-primary small">
-                            View
+                            <i class="fa-solid fa-eye"></i> View
+                        </a>
+                        <a href="/Memberships/Renew/@m.CustomerID"
+                           class="text-success small ms-2">
+                            <i class="fa-solid fa-rotate"></i> Renew
                         </a>
                     </div>
                 </li>

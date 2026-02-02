@@ -3,47 +3,55 @@
 <div class="nav-item dropdown list-unstyled">
 
     <a href="#"
-    class="nav-link position-relative dropdown-toggle text-dark"
-    data-bs-toggle="dropdown">
-    <i class="fa-solid fa-bell"></i>
+       class="nav-link position-relative dropdown-toggle"
+       data-bs-toggle="dropdown"
+       title="Boxing Due Members">
 
-        @if (ViewBag.DueCount > 0)
-        {
-        <span class="position-absolute top-0 start-100 translate-middle
-                         badge rounded-pill bg-danger">
-                @ViewBag.DueCount
-        </span>
-        }
-    </a>
-
-    <ul class="dropdown-menu dropdown-menu-end shadow notification-dropdown">
-        <li class="dropdown-header fw-bold">
-            Boxing Due Members
-        </li>
-
-            @if (!Model.Any())
+        <!-- Boxing Icon: Fist with red/danger color -->
+        <span class="d-inline-flex align-items-center gap-1 px-2 py-1 rounded bg-danger bg-opacity-10">
+            <i class="fa-solid fa-hand-fist text-danger"></i>
+            @if (ViewBag.DueCount > 0)
             {
-            <li class="px-3 text-muted">
-                No dues 🎉
-            </li>
+                <span class="badge rounded-pill bg-danger">
+                    @ViewBag.DueCount
+                </span>
             }
             else
             {
-                foreach (var b in Model)
-                {
+                <span class="badge rounded-pill bg-success">0</span>
+            }
+        </span>
+    </a>
+
+    <ul class="dropdown-menu dropdown-menu-end shadow notification-dropdown">
+        <li class="dropdown-header fw-bold text-danger">
+            <i class="fa-solid fa-hand-fist me-2"></i>Boxing Due Members
+        </li>
+
+        @if (!Model.Any())
+        {
+            <li class="px-3 text-muted">
+                No dues 🎉
+            </li>
+        }
+        else
+        {
+            foreach (var b in Model)
+            {
                 <li class="dropdown-item-text border-bottom">
                     <div class="fw-semibold">@b.Name</div>
                     <small class="text-danger">
+                        <i class="fa-solid fa-money-bill-wave me-1"></i>
                         Due: Rs @b.DueAmount
                     </small>
                     <div>
                         <a href="/Boxing/Details/@b.BoxingMemberID"
                            class="text-primary small">
-                            View
+                            <i class="fa-solid fa-eye"></i> View
                         </a>
                     </div>
                 </li>
-                }
             }
+        }
     </ul>
 </div>
