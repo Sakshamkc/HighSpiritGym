@@ -13,7 +13,7 @@
         public string? Height { get; set; }
         public string? Occupation { get; set; }
         public DateTime JoinDate { get; set; }
-        public DateTime DateOfBirth { get; set; }
+        public DateTime? DateOfBirth { get; set; }  // Made nullable
         public byte[]? Photo { get; set; }
 
         public string? Remarks { get; set; }

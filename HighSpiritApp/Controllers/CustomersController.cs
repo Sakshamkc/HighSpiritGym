@@ -284,6 +284,7 @@ namespace HighSpiritApp.Controllers
                     {
                         FullName = fullName,
                         JoinDate = joinDate,
+                        DateOfBirth = null, // Not available in import
                         Phone = "N/A",
                         Gender = "Unknown",
                         Address = "Imported from Excel",
@@ -335,8 +336,9 @@ namespace HighSpiritApp.Controllers
             if (customer == null) return NotFound();
 
             var latestMembership = customer.Memberships
-        .OrderByDescending(m => m.StartDate)
-        .FirstOrDefault();
+                .OrderByDescending(m => m.StartDate)
+                .FirstOrDefault();
+
             var vm = new CustomerEditVM
             {
                 CustomerID = customer.CustomerID,
@@ -352,10 +354,12 @@ namespace HighSpiritApp.Controllers
                 Occupation = customer.Occupation,
                 Shift = customer.Shift,
                 Remarks = customer.Remarks,
-                MembershipID = latestMembership.MembershipID,
-                PaidPrice = latestMembership.PaidPrice,
-                PlanName = latestMembership.PlanName,
-                ExpireDate = latestMembership.ExpireDate
+                MembershipID = latestMembership?.MembershipID,
+                PaidPrice = latestMembership?.PaidPrice,
+                PlanName = latestMembership?.PlanName,
+                StartDate = latestMembership?.StartDate ?? DateTime.Today,
+                Duration = latestMembership?.Duration ?? 1,
+                ExpireDate = latestMembership?.ExpireDate
             };
 
             return View(vm);
@@ -371,19 +375,21 @@ namespace HighSpiritApp.Controllers
             customer.Email = vm.Email;
             customer.Address = vm.Address;
             customer.Gender = vm.Gender;
-            customer.DateOfBirth = (DateTime)vm.DateOfBirth;
+            customer.DateOfBirth = vm.DateOfBirth;
             customer.Height = vm.Height;
             customer.WeightKG = vm.WeightKG;
             customer.BloodGroup = vm.BloodGroup;
             customer.Occupation = vm.Occupation;
             customer.Shift = vm.Shift;
             customer.Remarks = vm.Remarks;
+
             if (photoFile != null && photoFile.Length > 0)
             {
                 using var ms = new MemoryStream();
                 await photoFile.CopyToAsync(ms);
                 customer.Photo = ms.ToArray();
             }
+
             if (vm.MembershipID != null)
             {
                 var membership = await _context.CustomerMemberships
@@ -393,10 +399,12 @@ namespace HighSpiritApp.Controllers
                 {
                     membership.PlanName = vm.PlanName;
                     membership.PaidPrice = vm.PaidPrice ?? 0;
+                    membership.StartDate = vm.StartDate;  // Now editable
                     membership.ExpireDate = vm.ExpireDate
-                        ?? membership.StartDate.AddMonths(membership.Duration);
+                        ?? vm.StartDate.AddMonths(vm.Duration > 0 ? vm.Duration : membership.Duration);
                 }
             }
+
             await _context.SaveChangesAsync();
             TempData["success"] = "User Details updated successfully!";
             return RedirectToAction("Index", "Customers");
@@ -507,9 +515,9 @@ namespace HighSpiritApp.Controllers
                 ws.Cell(row, 9).Value = c.Height;
                 ws.Cell(row, 10).Value = c.Occupation;
                 ws.Cell(row, 11).Value = c.JoinDate.ToString("dd MMM yyyy");
-                ws.Cell(row, 12).Value = c.DateOfBirth == DateTime.MinValue
-                                            ? ""
-                                            : c.DateOfBirth.ToString("dd MMM yyyy");
+                ws.Cell(row, 12).Value = c.DateOfBirth.HasValue
+                                            ? c.DateOfBirth.Value.ToString("dd MMM yyyy")
+                                            : "";
                 ws.Cell(row, 13).Value = c.Shift;
                 ws.Cell(row, 14).Value = c.Remarks;
 

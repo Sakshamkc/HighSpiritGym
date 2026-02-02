@@ -50,14 +50,19 @@
                     <tr>
                         <th>DOB</th>
                         <td>
-                                @{
-                                var sdee = Model.DateOfBirth;
-                                    string sdeeeSuffix =
-                                sdee.Day % 10 == 1 && sdee.Day != 11 ? "st" :
-                                sdee.Day % 10 == 2 && sdee.Day != 12 ? "nd" :
-                                sdee.Day % 10 == 3 && sdee.Day != 13 ? "rd" : "th";
-                                }
-                            @($"{sdee.Day}{sdeeeSuffix} {sdee:MMMM yyyy}")
+                            @if (Model.DateOfBirth.HasValue)
+                            {
+                                var sdee = Model.DateOfBirth.Value;
+                                string sdeeeSuffix =
+                                    sdee.Day % 10 == 1 && sdee.Day != 11 ? "st" :
+                                    sdee.Day % 10 == 2 && sdee.Day != 12 ? "nd" :
+                                    sdee.Day % 10 == 3 && sdee.Day != 13 ? "rd" : "th";
+                                @($"{sdee.Day}{sdeeeSuffix} {sdee:MMMM yyyy}")
+                            }
+                            else
+                            {
+                                @("-")
+                            }
                         </td>
                     </tr>
                     <tr>
