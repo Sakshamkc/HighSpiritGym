@@ -2,10 +2,66 @@
 @{
     Layout = "~/Views/Shared/_Layout.cshtml";
     int sn = 1;
-
+    var skippedUsersRaw = TempData["skippedUsers"] as string;
+    var skippedUsers = !string.IsNullOrEmpty(skippedUsersRaw) 
+        ? skippedUsersRaw.Split("||").ToList() 
+        : new List<string>();
 }
 
 <h4 class="mb-3">Members</h4>
+
+<!-- Skipped Users Modal -->
+@if (skippedUsers.Any())
+{
+    <div class="alert alert-warning alert-dismissible fade show" role="alert">
+        <strong>⚠️ @skippedUsers.Count user(s) were skipped during import.</strong>
+        <button type="button" class="btn btn-sm btn-outline-dark ms-2" data-bs-toggle="modal" data-bs-target="#skippedModal">
+            View Details
+        </button>
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+
+    <div class="modal fade" id="skippedModal" tabindex="-1">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header bg-warning">
+                    <h5 class="modal-title">⚠️ Skipped Users During Import</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <table class="table table-striped table-sm">
+                        <thead class="table-dark">
+                            <tr>
+                                <th>#</th>
+                                <th>Details</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @for (int i = 0; i < skippedUsers.Count; i++)
+                            {
+                                <tr>
+                                    <td>@(i + 1)</td>
+                                    <td>@skippedUsers[i]</td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Auto-open modal on page load -->
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            var skippedModal = new bootstrap.Modal(document.getElementById('skippedModal'));
+            skippedModal.show();
+        });
+    </script>
+}
 
 <form method="get" class="mb-3">
     <div class="d-flex flex-wrap gap-2 align-items-center">
@@ -21,12 +77,66 @@
             </button>
         </div>
 
-        <a href="/Customers/ExportAll"
+        <a href="/Customers/ExportAll?search=@ViewBag.Search&filter=@ViewBag.Filter&duration=@ViewBag.Duration"
            class="btn btn-success btn-lg ms-auto">
             <i class="fa-solid fa-file-download"></i> Export Excel
         </a>
     </div>
 </form>
+
+<!-- Duration Stats Cards -->
+<div class="row g-3 mb-4">
+    <div class="col-6 col-md-4 col-lg">
+        <a href="?duration=&filter=@ViewBag.Filter&search=@ViewBag.Search" class="text-decoration-none">
+            <div class="card shadow-sm @(ViewBag.Duration == null ? "border-dark border-2" : "")">
+                <div class="card-body text-center py-3">
+                    <div class="fs-3 fw-bold text-dark">@ViewBag.CountAll</div>
+                    <div class="text-muted small">All Members</div>
+                </div>
+            </div>
+        </a>
+    </div>
+    <div class="col-6 col-md-4 col-lg">
+        <a href="?duration=1&filter=@ViewBag.Filter&search=@ViewBag.Search" class="text-decoration-none">
+            <div class="card shadow-sm @(ViewBag.Duration == 1 ? "border-primary border-2" : "")">
+                <div class="card-body text-center py-3">
+                    <div class="fs-3 fw-bold text-primary">@ViewBag.Count1M</div>
+                    <div class="text-muted small">1 Month</div>
+                </div>
+            </div>
+        </a>
+    </div>
+    <div class="col-6 col-md-4 col-lg">
+        <a href="?duration=3&filter=@ViewBag.Filter&search=@ViewBag.Search" class="text-decoration-none">
+            <div class="card shadow-sm @(ViewBag.Duration == 3 ? "border-success border-2" : "")">
+                <div class="card-body text-center py-3">
+                    <div class="fs-3 fw-bold text-success">@ViewBag.Count3M</div>
+                    <div class="text-muted small">3 Months</div>
+                </div>
+            </div>
+        </a>
+    </div>
+    <div class="col-6 col-md-4 col-lg">
+        <a href="?duration=6&filter=@ViewBag.Filter&search=@ViewBag.Search" class="text-decoration-none">
+            <div class="card shadow-sm @(ViewBag.Duration == 6 ? "border-warning border-2" : "")">
+                <div class="card-body text-center py-3">
+                    <div class="fs-3 fw-bold text-warning">@ViewBag.Count6M</div>
+                    <div class="text-muted small">6 Months</div>
+                </div>
+            </div>
+        </a>
+    </div>
+    <div class="col-6 col-md-4 col-lg">
+        <a href="?duration=12&filter=@ViewBag.Filter&search=@ViewBag.Search" class="text-decoration-none">
+            <div class="card shadow-sm @(ViewBag.Duration == 12 ? "border-danger border-2" : "")">
+                <div class="card-body text-center py-3">
+                    <div class="fs-3 fw-bold text-danger">@ViewBag.Count12M</div>
+                    <div class="text-muted small">12 Months</div>
+                </div>
+            </div>
+        </a>
+    </div>
+</div>
 
 <div class="d-flex flex-column flex-md-row align-items-start align-items-md-center gap-2 gap-md-3 mb-3">
     <div class="btn-group" role="group">
@@ -48,42 +158,6 @@
         <a class="btn @(ViewBag.Filter=="soon"?"btn-warning":"btn-outline-warning")"
            href="?filter=soon&duration=@ViewBag.Duration&search=@ViewBag.Search">
             Expiring (7 Days)
-        </a>
-    </div>
-
-    <div class="vr d-none d-md-block"></div>
-
-    <div class="d-flex align-items-center gap-2 flex-wrap">
-        <span class="text-muted fw-bold">Duration</span>
-
-        <a class="btn btn-sm rounded-pill
-           @(ViewBag.Duration==null?"btn-dark":"btn-outline-dark")"
-           href="?duration=&filter=@ViewBag.Filter&search=@ViewBag.Search">
-            All
-        </a>
-
-        <a class="btn btn-sm rounded-pill
-           @(ViewBag.Duration==1?"btn-primary":"btn-outline-primary")"
-           href="?duration=1&filter=@ViewBag.Filter&search=@ViewBag.Search">
-            1M
-        </a>
-
-        <a class="btn btn-sm rounded-pill
-           @(ViewBag.Duration==3?"btn-primary":"btn-outline-primary")"
-           href="?duration=3&filter=@ViewBag.Filter&search=@ViewBag.Search">
-            3M
-        </a>
-
-        <a class="btn btn-sm rounded-pill
-           @(ViewBag.Duration==6?"btn-primary":"btn-outline-primary")"
-           href="?duration=6&filter=@ViewBag.Filter&search=@ViewBag.Search">
-            6M
-        </a>
-
-        <a class="btn btn-sm rounded-pill
-           @(ViewBag.Duration==12?"btn-primary":"btn-outline-primary")"
-           href="?duration=12&filter=@ViewBag.Filter&search=@ViewBag.Search">
-            12M
         </a>
     </div>
 </div>

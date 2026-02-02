@@ -58,6 +58,20 @@ namespace HighSpiritApp.Controllers
                         m.ExpireDate >= today &&
                         m.ExpireDate <= today.AddDays(7)));
             }
+
+            // Calculate duration counts BEFORE applying duration filter
+            var allCustomersForCounts = await query.Include(c => c.Memberships).ToListAsync();
+            
+            ViewBag.Count1M = allCustomersForCounts.Count(c => 
+                c.Memberships.OrderByDescending(m => m.StartDate).FirstOrDefault()?.Duration == 1);
+            ViewBag.Count3M = allCustomersForCounts.Count(c => 
+                c.Memberships.OrderByDescending(m => m.StartDate).FirstOrDefault()?.Duration == 3);
+            ViewBag.Count6M = allCustomersForCounts.Count(c => 
+                c.Memberships.OrderByDescending(m => m.StartDate).FirstOrDefault()?.Duration == 6);
+            ViewBag.Count12M = allCustomersForCounts.Count(c => 
+                c.Memberships.OrderByDescending(m => m.StartDate).FirstOrDefault()?.Duration == 12);
+            ViewBag.CountAll = allCustomersForCounts.Count;
+
             if (duration.HasValue)
             {
                 query = query.Where(c =>
@@ -191,6 +205,7 @@ namespace HighSpiritApp.Controllers
 
             int imported = 0;
             int skipped = 0;
+            var skippedUsers = new List<string>(); // Track skipped users
 
             using var stream = file.OpenReadStream();
             using var workbook = new XLWorkbook(stream);
@@ -213,7 +228,8 @@ namespace HighSpiritApp.Controllers
                         .Replace("st", "")
                         .Replace("nd", "")
                         .Replace("rd", "")
-                        .Replace("th", "");
+                        .Replace("th", "")
+                        .Replace("Sept", "Sep");
 
                     if (!DateTime.TryParse(joinText, out joinDate))
                         joinDate = DateTime.Today;
@@ -225,6 +241,7 @@ namespace HighSpiritApp.Controllers
                     if (exists)
                     {
                         skipped++;
+                        skippedUsers.Add($"Row {r}: {fullName} (Join: {joinDate:dd MMM yyyy}) - Already exists");
                         continue;
                     }
 
@@ -252,7 +269,8 @@ namespace HighSpiritApp.Controllers
                             .Replace("st", "")
                             .Replace("nd", "")
                             .Replace("rd", "")
-                            .Replace("th", "");
+                            .Replace("th", "")
+                            .Replace("Sept", "Sep");
 
                         if (DateTime.TryParse(expireText, out DateTime parsedExpire))
                             expireDate = parsedExpire;
@@ -296,8 +314,12 @@ namespace HighSpiritApp.Controllers
                 }
             }
 
-            TempData["success"] =
-                    $"Import completed. Imported: {imported}, Skipped: {skipped}";
+            TempData["success"] = $"Import completed. Imported: {imported}, Skipped: {skipped}";
+            
+            if (skippedUsers.Any())
+            {
+                TempData["skippedUsers"] = string.Join("||", skippedUsers);
+            }
 
             return RedirectToAction("Index");
         }
@@ -382,14 +404,65 @@ namespace HighSpiritApp.Controllers
         }
 
         [HttpGet]
-        public async Task<IActionResult> ExportAll()
+        public async Task<IActionResult> ExportAll(string search, string filter, int? duration)
         {
-            var customers = await _context.Customers
+            var today = DateTime.Today;
+
+            var query = _context.Customers
                 .Include(c => c.Memberships)
-                .ToListAsync();
+                .AsQueryable();
+
+            // Apply search filter
+            if (!string.IsNullOrEmpty(search))
+            {
+                query = query.Where(c =>
+                    c.FullName.Contains(search) ||
+                    c.Phone.Contains(search));
+            }
+
+            // Apply status filter
+            filter = filter ?? "all";
+            if (filter == "active")
+            {
+                query = query.Where(c =>
+                    c.Memberships.Any(m => m.IsActive && m.DueDaysComputed == 0));
+            }
+            else if (filter == "expired")
+            {
+                query = query.Where(c =>
+                    c.Memberships.Any(m => m.IsActive && m.DueDaysComputed > 0));
+            }
+            else if (filter == "soon")
+            {
+                query = query.Where(c =>
+                    c.Memberships.Any(m =>
+                        m.IsActive &&
+                        m.ExpireDate >= today &&
+                        m.ExpireDate <= today.AddDays(7)));
+            }
+
+            // Apply duration filter
+            if (duration.HasValue)
+            {
+                query = query.Where(c =>
+                    c.Memberships
+                        .OrderByDescending(m => m.StartDate)
+                        .FirstOrDefault().Duration == duration.Value
+                );
+            }
+
+            var customers = await query.OrderBy(c => c.FullName).ToListAsync();
 
             using var workbook = new XLWorkbook();
-            var ws = workbook.Worksheets.Add("Gym Members");
+            
+            // Dynamic sheet name based on filters
+            string sheetName = "Gym Members";
+            if (duration.HasValue)
+                sheetName = $"{duration}M Members";
+            else if (filter != "all")
+                sheetName = $"{char.ToUpper(filter[0]) + filter.Substring(1)} Members";
+
+            var ws = workbook.Worksheets.Add(sheetName);
 
             // HEADER
             ws.Cell(1, 1).Value = "SN";
@@ -456,12 +529,18 @@ namespace HighSpiritApp.Controllers
             workbook.SaveAs(stream);
             stream.Position = 0;
 
+            // Dynamic file name based on filters
+            string fileName = "Gym Members";
+            if (duration.HasValue)
+                fileName = $"{duration}M Members";
+            if (filter != "all")
+                fileName += $" - {char.ToUpper(filter[0]) + filter.Substring(1)}";
+
             return File(
                 stream.ToArray(),
                 "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-                $"Gym Members Backup.xlsx"
+                $"{fileName}.xlsx"
             );
         }
-
     }
 }
