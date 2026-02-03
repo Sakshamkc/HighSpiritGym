@@ -1,166 +1,518 @@
 ﻿@model HighSpiritApp.Models.Customer
 @{
     Layout = "~/Views/Shared/_Layout.cshtml";
-    var m = Model.Memberships?.OrderByDescending(x => x.StartDate).FirstOrDefault();
-}
-@{
+    var latestMembership = Model.Memberships?.Where(x => x.IsActive).OrderByDescending(x => x.StartDate).FirstOrDefault();
     var today = DateTime.Today;
+    var isExpired = latestMembership != null && latestMembership.ExpireDate < today;
+    var isExpiringSoon = latestMembership != null && latestMembership.ExpireDate >= today && latestMembership.ExpireDate <= today.AddDays(7);
+    var daysLeft = latestMembership != null ? (latestMembership.ExpireDate - today).Days : 0;
+    
+    string FormatDate(DateTime date)
+    {
+        return date.ToString("dd MMM yyyy");
+    }
+    
+    string FormatDateLong(DateTime? date)
+    {
+        if (!date.HasValue) return "-";
+        var d = date.Value;
+        string suffix = d.Day % 10 == 1 && d.Day != 11 ? "st" :
+                       d.Day % 10 == 2 && d.Day != 12 ? "nd" :
+                       d.Day % 10 == 3 && d.Day != 13 ? "rd" : "th";
+        return $"{d.Day}{suffix} {d:MMMM yyyy}";
+    }
 }
-<a class="btn btn-secondary mb-3"
-   href="/Customers/EditAll/@Model.CustomerID">
-    Edit Customer Details
-</a>
 
-<a class="btn btn-success mb-3"
-   href="/Memberships/Renew/@Model.CustomerID">
-    Renew Membership
-</a>
+<style>
+    .profile-header {
+        background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+        border-radius: 20px;
+        padding: 30px;
+        color: white;
+        margin-bottom: 25px;
+    }
+    .profile-photo {
+        width: 150px;
+        height: 150px;
+        border-radius: 20px;
+        object-fit: cover;
+        border: 4px solid rgba(255,255,255,0.2);
+        box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+    }
+    .profile-photo-placeholder {
+        width: 150px;
+        height: 150px;
+        border-radius: 20px;
+        background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 60px;
+        color: white;
+        border: 4px solid rgba(255,255,255,0.2);
+    }
+    .profile-name {
+        font-size: 28px;
+        font-weight: 700;
+        margin-bottom: 5px;
+    }
+    .profile-phone {
+        font-size: 16px;
+        opacity: 0.8;
+    }
+    .profile-phone i {
+        margin-right: 8px;
+    }
+    .status-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        padding: 8px 16px;
+        border-radius: 30px;
+        font-size: 14px;
+        font-weight: 600;
+    }
+    .status-active {
+        background: rgba(16, 185, 129, 0.2);
+        color: #10b981;
+    }
+    .status-expired {
+        background: rgba(239, 68, 68, 0.2);
+        color: #ef4444;
+    }
+    .status-expiring {
+        background: rgba(245, 158, 11, 0.2);
+        color: #f59e0b;
+    }
+    .action-btn {
+        padding: 10px 20px;
+        border-radius: 10px;
+        font-weight: 600;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        transition: all 0.2s ease;
+    }
+    .action-btn:hover {
+        transform: translateY(-2px);
+    }
 
-<div class="card shadow">
-    <div class="card-body">
+    .info-card {
+        background: white;
+        border-radius: 16px;
+        box-shadow: 0 4px 20px rgba(0,0,0,0.05);
+        border: 1px solid #e2e8f0;
+        overflow: hidden;
+        margin-bottom: 25px;
+    }
+    .info-card-header {
+        background: #f8fafc;
+        padding: 16px 20px;
+        border-bottom: 1px solid #e2e8f0;
+        display: flex;
+        align-items: center;
+        gap: 12px;
+    }
+    .info-card-header i {
+        width: 36px;
+        height: 36px;
+        border-radius: 10px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 16px;
+    }
+    .info-card-header.personal i {
+        background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+        color: white;
+    }
+    .info-card-header.membership i {
+        background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+        color: white;
+    }
+    .info-card-header.history i {
+        background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%);
+        color: white;
+    }
+    .info-card-header h5 {
+        margin: 0;
+        font-weight: 600;
+        color: #1e293b;
+    }
+    .info-card-body {
+        padding: 20px;
+    }
 
-        <div class="row">
-            <div class="col-md-4 text-center">
-                @if (Model.Photo != null)
-                {
-                    <img src="data:image/png;base64,@Convert.ToBase64String(Model.Photo)"
-                         class="mb-3 border shadow"
-                         style="
-        width:240px;
-        height:240px;
-        object-fit:cover;
-        border-radius:12px;
-             " />
+    .info-grid {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 20px;
+    }
+    .info-item {
+        padding: 15px;
+        background: #f8fafc;
+        border-radius: 12px;
+    }
+    .info-item label {
+        display: block;
+        font-size: 12px;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        color: #64748b;
+        margin-bottom: 5px;
+    }
+    .info-item span {
+        font-size: 15px;
+        font-weight: 600;
+        color: #1e293b;
+    }
 
-                }
-                else
-                {
-                    <img src="https://via.placeholder.com/180"
-                         class="rounded-circle mb-3" />
-                }
-                <h4>@Model.FullName</h4>
-                <p class="text-muted">@Model.Phone</p>
+    .membership-highlight {
+        background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%);
+        border: 1px solid #bbf7d0;
+        border-radius: 16px;
+        padding: 25px;
+        margin-bottom: 20px;
+    }
+    .membership-highlight.expired {
+        background: linear-gradient(135deg, #fef2f2 0%, #fee2e2 100%);
+        border-color: #fecaca;
+    }
+    .membership-highlight.expiring {
+        background: linear-gradient(135deg, #fffbeb 0%, #fef3c7 100%);
+        border-color: #fde68a;
+    }
+    .membership-stat {
+        text-align: center;
+    }
+    .membership-stat .value {
+        font-size: 28px;
+        font-weight: 700;
+        color: #1e293b;
+    }
+    .membership-stat .label {
+        font-size: 13px;
+        color: #64748b;
+    }
+    .membership-stat.highlight .value {
+        color: #059669;
+    }
+    .membership-stat.expired .value {
+        color: #dc2626;
+    }
+    .membership-stat.expiring .value {
+        color: #d97706;
+    }
+
+    .history-table {
+        width: 100%;
+    }
+    .history-table th {
+        background: #f1f5f9;
+        padding: 12px 15px;
+        font-size: 12px;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        color: #64748b;
+        font-weight: 600;
+        border-bottom: 2px solid #e2e8f0;
+    }
+    .history-table td {
+        padding: 15px;
+        border-bottom: 1px solid #f1f5f9;
+        vertical-align: middle;
+    }
+    .history-table tr:last-child td {
+        border-bottom: none;
+    }
+    .history-table .plan-badge {
+        display: inline-block;
+        padding: 4px 12px;
+        background: #e0e7ff;
+        color: #4338ca;
+        border-radius: 20px;
+        font-size: 13px;
+        font-weight: 500;
+    }
+    .history-table .price {
+        font-weight: 700;
+        color: #059669;
+    }
+    .history-table .duration-badge {
+        display: inline-block;
+        padding: 4px 10px;
+        background: #f1f5f9;
+        color: #475569;
+        border-radius: 6px;
+        font-size: 12px;
+        font-weight: 600;
+    }
+    .history-table .current-tag {
+        display: inline-block;
+        padding: 2px 8px;
+        background: #dcfce7;
+        color: #16a34a;
+        border-radius: 4px;
+        font-size: 11px;
+        font-weight: 600;
+        margin-left: 8px;
+    }
+
+    @@media (max-width: 768px) {
+        .info-grid {
+            grid-template-columns: repeat(2, 1fr);
+        }
+        .profile-header .row {
+            text-align: center;
+        }
+        .profile-header .col-md-8 {
+            margin-top: 20px;
+        }
+    }
+    @@media (max-width: 576px) {
+        .info-grid {
+            grid-template-columns: 1fr;
+        }
+    }
+</style>
+
+<!-- Profile Header -->
+<div class="profile-header">
+    <div class="row align-items-center">
+        <div class="col-md-4 text-center text-md-start">
+            @if (Model.Photo != null)
+            {
+                <img src="data:image/png;base64,@Convert.ToBase64String(Model.Photo)" class="profile-photo" alt="@Model.FullName" />
+            }
+            else
+            {
+                <div class="profile-photo-placeholder">
+                    <i class="fa-solid fa-user"></i>
+                </div>
+            }
+        </div>
+        <div class="col-md-8">
+            <div class="d-flex flex-column flex-md-row align-items-center align-items-md-start justify-content-between">
+                <div class="text-center text-md-start mb-3 mb-md-0">
+                    <h1 class="profile-name">@Model.FullName</h1>
+                    <p class="profile-phone mb-2">
+                        <i class="fa-solid fa-phone"></i> @(Model.Phone ?? "N/A")
+                        @if (!string.IsNullOrEmpty(Model.Email))
+                        {
+                            <span class="ms-3"><i class="fa-solid fa-envelope"></i> @Model.Email</span>
+                        }
+                    </p>
+                    @if (latestMembership != null)
+                    {
+                        if (isExpired)
+                        {
+                            <span class="status-badge status-expired">
+                                <i class="fa-solid fa-circle-xmark"></i> Expired @Math.Abs(daysLeft) days ago
+                            </span>
+                        }
+                        else if (isExpiringSoon)
+                        {
+                            <span class="status-badge status-expiring">
+                                <i class="fa-solid fa-clock"></i> Expires in @daysLeft days
+                            </span>
+                        }
+                        else
+                        {
+                            <span class="status-badge status-active">
+                                <i class="fa-solid fa-circle-check"></i> Active - @daysLeft days left
+                            </span>
+                        }
+                    }
+                </div>
+                <div class="d-flex gap-2 flex-wrap justify-content-center">
+                    <a href="/Customers/EditAll/@Model.CustomerID" class="action-btn btn btn-light">
+                        <i class="fa-solid fa-edit"></i> Edit
+                    </a>
+                    <a href="/Memberships/Renew/@Model.CustomerID" class="action-btn btn btn-success">
+                        <i class="fa-solid fa-rotate"></i> Renew
+                    </a>
+                </div>
             </div>
+        </div>
+    </div>
+</div>
 
-            <div class="col-md-8">
-                <h5>Personal Details</h5>
-                <table class="table table-bordered">
-                    <tr><th>Email</th><td>@Model.Email</td></tr>
-                    <tr><th>Gender</th><td>@Model.Gender</td></tr>
-                    <tr>
-                        <th>DOB</th>
-                        <td>
-                            @if (Model.DateOfBirth.HasValue)
+<!-- Current Membership Highlight -->
+@if (latestMembership != null)
+{
+    <div class="membership-highlight @(isExpired ? "expired" : isExpiringSoon ? "expiring" : "")">
+        <div class="row">
+            <div class="col-6 col-md-3">
+                <div class="membership-stat">
+                    <div class="value">@latestMembership.PlanName?.Split(':')[0].Replace("Package", "").Trim()</div>
+                    <div class="label">Current Plan</div>
+                </div>
+            </div>
+            <div class="col-6 col-md-3">
+                <div class="membership-stat highlight">
+                    <div class="value">Rs. @latestMembership.PaidPrice.ToString("N0")</div>
+                    <div class="label">Paid Amount</div>
+                </div>
+            </div>
+            <div class="col-6 col-md-3">
+                <div class="membership-stat">
+                    <div class="value">@FormatDate(latestMembership.ExpireDate)</div>
+                    <div class="label">Expire Date</div>
+                </div>
+            </div>
+            <div class="col-6 col-md-3">
+                <div class="membership-stat @(isExpired ? "expired" : isExpiringSoon ? "expiring" : "highlight")">
+                    <div class="value">
+                        @if (isExpired)
+                        {
+                            @($"{Math.Abs(daysLeft)} days")
+                        }
+                        else
+                        {
+                            @($"{daysLeft} days")
+                        }
+                    </div>
+                    <div class="label">@(isExpired ? "Overdue" : "Remaining")</div>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+<div class="row">
+    <!-- Personal Details -->
+    <div class="col-lg-6">
+        <div class="info-card">
+            <div class="info-card-header personal">
+                <i class="fa-solid fa-user"></i>
+                <h5>Personal Information</h5>
+            </div>
+            <div class="info-card-body">
+                <div class="info-grid">
+                    <div class="info-item">
+                        <label>Gender</label>
+                        <span>@(Model.Gender ?? "-")</span>
+                    </div>
+                    <div class="info-item">
+                        <label>Date of Birth</label>
+                        <span>@FormatDateLong(Model.DateOfBirth)</span>
+                    </div>
+                    <div class="info-item">
+                        <label>Join Date</label>
+                        <span>@FormatDateLong(Model.JoinDate)</span>
+                    </div>
+                    <div class="info-item">
+                        <label>Blood Group</label>
+                        <span>@(Model.BloodGroup ?? "-")</span>
+                    </div>
+                    <div class="info-item">
+                        <label>Height</label>
+                        <span>@(Model.Height ?? "-")</span>
+                    </div>
+                    <div class="info-item">
+                        <label>Weight</label>
+                        <span>@(Model.WeightKG.HasValue ? Model.WeightKG.Value.ToString() + " kg" : "-")</span>
+                    </div>
+                    <div class="info-item">
+                        <label>Occupation</label>
+                        <span>@(Model.Occupation ?? "-")</span>
+                    </div>
+                    <div class="info-item">
+                        <label>Shift</label>
+                        <span>
+                            @if (!string.IsNullOrEmpty(Model.Shift))
                             {
-                                var sdee = Model.DateOfBirth.Value;
-                                string sdeeeSuffix =
-                                    sdee.Day % 10 == 1 && sdee.Day != 11 ? "st" :
-                                    sdee.Day % 10 == 2 && sdee.Day != 12 ? "nd" :
-                                    sdee.Day % 10 == 3 && sdee.Day != 13 ? "rd" : "th";
-                                @($"{sdee.Day}{sdeeeSuffix} {sdee:MMMM yyyy}")
+                                <span class="badge @(Model.Shift == "Morning" ? "bg-warning text-dark" : "bg-info")">
+                                    <i class="fa-solid @(Model.Shift == "Morning" ? "fa-sun" : "fa-moon") me-1"></i>
+                                    @Model.Shift
+                                </span>
                             }
                             else
                             {
                                 @("-")
                             }
-                        </td>
-                    </tr>
-                    <tr>
-                        <th>Join Date</th>
-                        <td>
-                            @{
-                                var sde = Model.JoinDate;
-                                string sdeSuffix =
-                                sde.Day % 10 == 1 && sde.Day != 11 ? "st" :
-                                sde.Day % 10 == 2 && sde.Day != 12 ? "nd" :
-                                sde.Day % 10 == 3 && sde.Day != 13 ? "rd" : "th";
-                            }
-                            @($"{sde.Day}{sdeSuffix} {sde:MMMM yyyy}")
-                        </td>
-                    </tr>
-                    <tr><th>Address</th><td>@Model.Address</td></tr>
-                    <tr><th>Blood Group</th><td>@Model.BloodGroup</td></tr>
-                    <tr><th>Height</th><td>@Model.Height</td></tr>
-                    <tr><th>Weight</th><td>@Model.WeightKG</td></tr>
-                    <tr><th>Occupation</th><td>@Model.Occupation</td></tr>
-                    <tr>
-                        <th>Shift</th>
-                        <td>@Model.Shift</td>
-                    </tr>
-                    <tr>
-                        <th>Remarks</th>
-                        <td>@Model.Remarks</td>
-                    </tr>
-
-                </table>
+                        </span>
+                    </div>
+                    <div class="info-item">
+                        <label>Address</label>
+                        <span>@(Model.Address ?? "-")</span>
+                    </div>
+                </div>
+                @if (!string.IsNullOrEmpty(Model.Remarks))
+                {
+                    <div class="mt-3 p-3 bg-light rounded">
+                        <label class="d-block text-muted small mb-1">Remarks</label>
+                        <span>@Model.Remarks</span>
+                    </div>
+                }
             </div>
         </div>
-
-        <hr />
-
-        <h5>Membership Details</h5>
-        @if (Model.Memberships != null && Model.Memberships.Any())
-        {
-            <table class="table table-bordered">
-                <thead>
-                    <tr>
-                        <th>Plan</th>
-                        <th>Price</th>
-                        <th>Start</th>
-                        <th>Expire</th>
-                        <th>Duration</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    @foreach (var history in Model.Memberships.OrderByDescending(x => x.StartDate))
-                    {
-                        <tr>
-                            <td>@history.PlanName</td>
-                            <td>@history.PaidPrice</td>
-
-                            <td>
-                                @{
-                                    var sd = history.StartDate;
-                                    string sdSuffix =
-                                    sd.Day % 10 == 1 && sd.Day != 11 ? "st" :
-                                    sd.Day % 10 == 2 && sd.Day != 12 ? "nd" :
-                                    sd.Day % 10 == 3 && sd.Day != 13 ? "rd" : "th";
-                                }
-                                @($"{sd.Day}{sdSuffix} {sd:MMMM yyyy}")
-                            </td>
-
-                            <td>
-                                @if (history.ExpireDate != null)
-                                {
-                                    var ed = history.ExpireDate;
-                                    string edSuffix =
-                                    ed.Day % 10 == 1 && ed.Day != 11 ? "st" :
-                                    ed.Day % 10 == 2 && ed.Day != 12 ? "nd" :
-                                    ed.Day % 10 == 3 && ed.Day != 13 ? "rd" : "th";
-
-                                    @($"{ed.Day}{edSuffix} {ed:MMMM yyyy}")
-                                }
-                                else
-                                {
-                                    @("-")
-                                }
-                            </td>
-
-                            <td>@history.Duration</td>
-                        </tr>
-                    }
-
-
-                </tbody>
-            </table>
-        }
-
-        else
-        {
-            <p class="text-danger">No membership found.</p>
-        }
-
-        <a href="/Customers" class="btn btn-secondary mt-3">Back</a>
-
     </div>
+
+    <!-- Membership History -->
+    <div class="col-lg-6">
+        <div class="info-card">
+            <div class="info-card-header history">
+                <i class="fa-solid fa-clock-rotate-left"></i>
+                <h5>Membership History</h5>
+            </div>
+            <div class="info-card-body p-0">
+                @if (Model.Memberships != null && Model.Memberships.Any())
+                {
+                    <div class="table-responsive">
+                        <table class="history-table">
+                            <thead>
+                                <tr>
+                                    <th>Plan</th>
+                                    <th>Amount</th>
+                                    <th>Period</th>
+                                    <th>Duration</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var history in Model.Memberships.OrderByDescending(x => x.StartDate))
+                                {
+                                    var isCurrent = history.MembershipID == latestMembership?.MembershipID;
+                                    <tr>
+                                        <td>
+                                            <span class="plan-badge">
+                                                @(history.PlanName?.Split(':')[0].Replace("Package", "").Trim() ?? "-")
+                                            </span>
+                                            @if (isCurrent)
+                                            {
+                                                <span class="current-tag">Current</span>
+                                            }
+                                        </td>
+                                        <td class="price">Rs. @history.PaidPrice.ToString("N0")</td>
+                                        <td>
+                                            <small class="text-muted">
+                                                @FormatDate(history.StartDate) - @FormatDate(history.ExpireDate)
+                                            </small>
+                                        </td>
+                                        <td>
+                                            <span class="duration-badge">@history.Duration M</span>
+                                        </td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                }
+                else
+                {
+                    <div class="text-center py-5">
+                        <i class="fa-solid fa-folder-open fa-3x text-muted mb-3"></i>
+                        <p class="text-muted">No membership history found</p>
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Back Button -->
+<div class="mt-4">
+    <a href="/Customers" class="btn btn-outline-secondary btn-lg px-4">
+        <i class="fa-solid fa-arrow-left me-2"></i> Back to Members
+    </a>
 </div>

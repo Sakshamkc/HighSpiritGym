@@ -6,6 +6,29 @@
     var skippedUsers = !string.IsNullOrEmpty(skippedUsersRaw) 
         ? skippedUsersRaw.Split("||").ToList() 
         : new List<string>();
+    
+    // Helper function to shorten plan names
+    string ShortenPlan(string? planName)
+    {
+        if (string.IsNullOrEmpty(planName)) return "-";
+        
+        // Map long names to short codes
+        var plan = planName
+            .Replace("Premium Package", "Premium")
+            .Replace("Customized Package (Any Three):", "Custom-3:")
+            .Replace("Customized Package (Any Three)", "Custom-3")
+            .Replace("Customized Package (Any Two):", "Custom-2:")
+            .Replace("Customized Package (Any Two)", "Custom-2")
+            .Replace("Zumba & Aerobics Package", "Zumba")
+            .Replace("Sauna & Steam Package", "Sauna/Steam")
+            .Replace("Gym Package", "Gym")
+            .Replace("Cardio Package", "Cardio")
+            .Replace("Zumba/Aerobics/Yoga", "Zumba")
+            .Replace("Steam/Sauna", "Steam");
+        
+        // Truncate if still too long
+        return plan.Length > 25 ? plan.Substring(0, 22) + "..." : plan;
+    }
 }
 
 <h4 class="mb-3">Members</h4>
@@ -171,10 +194,9 @@
                     <th>Name</th>
                     <th>Phone</th>
                     <th>Plan</th>
-                    <th>Start Date</th>
-                    <th>Expire Date</th>
+                    <th>Start</th>
+                    <th>Expire</th>
                     <th>Shift</th>
-                    <th>Remarks</th>
                     <th>Status</th>
                     <th>Actions</th>
                 </tr>
@@ -195,27 +217,24 @@
                             {
                                 <img src="data:image/jpeg;base64,@Convert.ToBase64String(c.Photo)"
                                      class="rounded-circle"
-                                     style="width:40px;height:40px;" />
+                                     style="width:40px;height:40px;object-fit:cover;" />
                             }
                             else
                             {
                                 <i class="fa-solid fa-user-circle fa-2x text-secondary"></i>
                             }
-
                         </td>
-                        <td>@c.FullName</td>
+                        <td class="fw-semibold">@c.FullName</td>
                         <td>@c.Phone</td>
-                        <td>@m?.PlanName</td>
+                        <td>
+                            <span class="badge bg-secondary" title="@m?.PlanName">
+                                @ShortenPlan(m?.PlanName)
+                            </span>
+                        </td>
                         <td>
                             @if (m?.StartDate != null)
                             {
-                                var d = m.StartDate;
-                                string suffix =
-                                d.Day % 10 == 1 && d.Day != 11 ? "st" :
-                                d.Day % 10 == 2 && d.Day != 12 ? "nd" :
-                                d.Day % 10 == 3 && d.Day != 13 ? "rd" : "th";
-
-                                @($"{d.Day}{suffix} {d:MMMM yyyy}")
+                                @m.StartDate.ToString("dd MMM yy")
                             }
                             else
                             {
@@ -225,30 +244,29 @@
                         <td>
                             @if (m?.ExpireDate != null)
                             {
-                                var d = m.ExpireDate;
-                                string suffix =
-                                d.Day % 10 == 1 && d.Day != 11 ? "st" :
-                                d.Day % 10 == 2 && d.Day != 12 ? "nd" :
-                                d.Day % 10 == 3 && d.Day != 13 ? "rd" : "th";
-
-                                @($"{d.Day}{suffix} {d:MMMM yyyy}")
+                                @m.ExpireDate.ToString("dd MMM yy")
                             }
                             else
                             {
                                 @("-")
                             }
                         </td>
-                        <td>@(string.IsNullOrEmpty(c.Shift) ? "-" : c.Shift)</td>
-                        <td title="@c.Remarks">
-                            @(string.IsNullOrEmpty(c.Remarks)
-                                ? "-"
-                                : (c.Remarks.Length > 20 ? c.Remarks.Substring(0, 20) + "..." : c.Remarks))
+                        <td>
+                            @if (!string.IsNullOrEmpty(c.Shift))
+                            {
+                                <span class="badge @(c.Shift == "Morning" ? "bg-warning text-dark" : "bg-info")">
+                                    @c.Shift
+                                </span>
+                            }
+                            else
+                            {
+                                @("-")
+                            }
                         </td>
-
                         <td>
                             @if (m != null && m.DueDaysComputed > 0)
                             {
-                                <span class="badge bg-danger">Due @m.DueDaysComputed days</span>
+                                <span class="badge bg-danger">Due @m.DueDaysComputed d</span>
                             }
                             else
                             {
@@ -256,25 +274,24 @@
                             }
                         </td>
                         <td>
-                            <a class="btn btn-sm btn-primary" href="/Customers/Details/@c.CustomerID">View</a>
-                            <a class="btn btn-sm btn-secondary"
-                               href="/Customers/EditAll/@c.CustomerID">
-                                Edit
-                            </a>
-                            @if (m != null)
-                            {
-                                <a class="btn btn-sm btn-success"
-                                   href="/Memberships/Renew/@c.CustomerID">
-                                    Renew
+                            <div class="btn-group btn-group-sm">
+                                <a class="btn btn-outline-primary" href="/Customers/Details/@c.CustomerID" title="View">
+                                    <i class="fa-solid fa-eye"></i>
                                 </a>
-
-                            }
-
-                            <button class="btn btn-sm btn-danger"
-                                    data-bs-toggle="modal"
-                                    data-bs-target="#delModal_@c.CustomerID">
-                                Delete
-                            </button>
+                                <a class="btn btn-outline-secondary" href="/Customers/EditAll/@c.CustomerID" title="Edit">
+                                    <i class="fa-solid fa-edit"></i>
+                                </a>
+                                @if (m != null)
+                                {
+                                    <a class="btn btn-outline-success" href="/Memberships/Renew/@c.CustomerID" title="Renew">
+                                        <i class="fa-solid fa-rotate"></i>
+                                    </a>
+                                }
+                                <button class="btn btn-outline-danger" data-bs-toggle="modal" 
+                                        data-bs-target="#delModal_@c.CustomerID" title="Delete">
+                                    <i class="fa-solid fa-trash"></i>
+                                </button>
+                            </div>
 
                             <div class="modal fade" id="delModal_@c.CustomerID" tabindex="-1">
                                 <div class="modal-dialog">
@@ -292,8 +309,6 @@
                                     </div>
                                 </div>
                             </div>
-
-
                         </td>
                     </tr>
                 }
@@ -303,76 +318,52 @@
             @{
                 int current = ViewBag.Page;
                 int total = ViewBag.TotalPages;
-
                 int start = Math.Max(1, current - 2);
                 int end = Math.Min(total, current + 2);
             }
 
             <ul class="pagination justify-content-center">
-
-                @* Previous *@
                 <li class="page-item @(current == 1 ? "disabled" : "")">
-                    <a class="page-link"
-                       href="?page=@(current - 1)&search=@ViewBag.Search&sort=@ViewBag.Sort&filter=@ViewBag.Filter&duration=@ViewBag.Duration">
+                    <a class="page-link" href="?page=@(current - 1)&search=@ViewBag.Search&sort=@ViewBag.Sort&filter=@ViewBag.Filter&duration=@ViewBag.Duration">
                         Prev
                     </a>
                 </li>
 
-                @* First page *@
                 @if (start > 1)
                 {
                     <li class="page-item">
-                        <a class="page-link"
-                           href="?page=1&search=@ViewBag.Search&sort=@ViewBag.Sort&filter=@ViewBag.Filter&duration=@ViewBag.Duration">1</a>
+                        <a class="page-link" href="?page=1&search=@ViewBag.Search&sort=@ViewBag.Sort&filter=@ViewBag.Filter&duration=@ViewBag.Duration">1</a>
                     </li>
-                    <li class="page-item disabled">
-                        <span class="page-link">…</span>
-                    </li>
+                    <li class="page-item disabled"><span class="page-link">…</span></li>
                 }
 
-                @* Middle pages *@
                 @for (int i = start; i <= end; i++)
                 {
                     <li class="page-item @(i == current ? "active" : "")">
-                        <a class="page-link"
-                           href="?page=@i&search=@ViewBag.Search&sort=@ViewBag.Sort&filter=@ViewBag.Filter&duration=@ViewBag.Duration">
-                            @i
-                        </a>
+                        <a class="page-link" href="?page=@i&search=@ViewBag.Search&sort=@ViewBag.Sort&filter=@ViewBag.Filter&duration=@ViewBag.Duration">@i</a>
                     </li>
                 }
 
-                @* Last page *@
                 @if (end < total)
                 {
-                    <li class="page-item disabled">
-                        <span class="page-link">…</span>
-                    </li>
+                    <li class="page-item disabled"><span class="page-link">…</span></li>
                     <li class="page-item">
-                        <a class="page-link"
-                           href="?page=@total&search=@ViewBag.Search&sort=@ViewBag.Sort&filter=@ViewBag.Filter&duration=@ViewBag.Duration">
-                            @total
-                        </a>
+                        <a class="page-link" href="?page=@total&search=@ViewBag.Search&sort=@ViewBag.Sort&filter=@ViewBag.Filter&duration=@ViewBag.Duration">@total</a>
                     </li>
                 }
 
-                @* Next *@
                 <li class="page-item @(current == total ? "disabled" : "")">
-                    <a class="page-link"
-                       href="?page=@(current + 1)&search=@ViewBag.Search&sort=@ViewBag.Sort&filter=@ViewBag.Filter&duration=@ViewBag.Duration">
+                    <a class="page-link" href="?page=@(current + 1)&search=@ViewBag.Search&sort=@ViewBag.Sort&filter=@ViewBag.Filter&duration=@ViewBag.Duration">
                         Next
                     </a>
                 </li>
-
             </ul>
         </nav>
-
-
     </div>
 </div>
 
 <script>
     const searchBox = document.querySelector('input[name="search"]');
-
     searchBox.addEventListener('input', function () {
         if (this.value.trim() === '') {
             const url = new URL(window.location.href);

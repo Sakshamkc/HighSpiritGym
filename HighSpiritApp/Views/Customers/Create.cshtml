@@ -3,30 +3,39 @@
     Layout = "~/Views/Shared/_Layout.cshtml";
 }
 
+<!-- SweetAlert2 -->
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
 <div class="card shadow">
     <div class="card-body">
-        <h4>Add Member</h4>
+        <h4><i class="fa-solid fa-user-plus me-2 text-primary"></i>Add Member</h4>
 
         <form method="post" enctype="multipart/form-data" class="row g-3">
+            
+            <!-- Personal Information Section -->
+            <div class="col-12">
+                <div class="section-divider">
+                    <span><i class="fa-solid fa-user me-2"></i>Personal Information</span>
+                </div>
+            </div>
+
             <div class="col-md-6">
-                <label>Full Name</label>
-                <input asp-for="FullName" class="form-control" />
+                <label>Full Name <span class="text-danger">*</span></label>
+                <input asp-for="FullName" class="form-control" required />
             </div>
             <div class="col-md-6">
-                <label>Phone</label>
-                <input asp-for="Phone" class="form-control" />
+                <label>Phone <span class="text-danger">*</span></label>
+                <input asp-for="Phone" class="form-control" required />
             </div>
             <div class="col-md-6">
                 <label>Email</label>
                 <input asp-for="Email" class="form-control" />
             </div>
-
             <div class="col-md-6">
                 <label>Address</label>
                 <input asp-for="Address" class="form-control" />
             </div>
-
-            <div class="col-md-6">
+            <div class="col-md-4">
                 <label>Gender</label>
                 <select asp-for="Gender" class="form-control">
                     <option value="">-- Select Gender --</option>
@@ -34,38 +43,37 @@
                     <option value="Female">Female</option>
                 </select>
             </div>
-
-
-            <div class="col-md-6">
+            <div class="col-md-4">
                 <label>Date Of Birth</label>
                 <input type="date" name="DateOfBirth" class="form-control" />
             </div>
-
-            <div class="col-md-6">
-                <label>JoinDate</label>
-                <input type="date" name="JoinDate" class="form-control" />
-
+            <div class="col-md-4">
+                <label>Join Date <span class="text-danger">*</span></label>
+                <input type="date" name="JoinDate" class="form-control" value="@DateTime.Today.ToString("yyyy-MM-dd")" required />
             </div>
-
-            <div class="col-md-6">
+            <div class="col-md-3">
                 <label>Height</label>
-                <input asp-for="Height" class="form-control" />
+                <input asp-for="Height" class="form-control" placeholder="e.g. 5'8&quot;" />
             </div>
-            <div class="col-md-6">
-                <label>Weight</label>
-                <input asp-for="WeightKG" class="form-control" />
+            <div class="col-md-3">
+                <label>Weight (KG)</label>
+                <input asp-for="WeightKG" class="form-control" placeholder="e.g. 70" />
             </div>
-
-            <div class="col-md-6">
-                <label>BloodGroup</label>
-                <input asp-for="BloodGroup" class="form-control" />
+            <div class="col-md-3">
+                <label>Blood Group</label>
+                <select asp-for="BloodGroup" class="form-control">
+                    <option value="">-- Select --</option>
+                    <option value="A+">A+</option>
+                    <option value="A-">A-</option>
+                    <option value="B+">B+</option>
+                    <option value="B-">B-</option>
+                    <option value="O+">O+</option>
+                    <option value="O-">O-</option>
+                    <option value="AB+">AB+</option>
+                    <option value="AB-">AB-</option>
+                </select>
             </div>
-
-            <div class="col-md-6">
-                <label>Occupation</label>
-                <input asp-for="Occupation" class="form-control" />
-            </div>
-            <div class="col-md-6">
+            <div class="col-md-3">
                 <label>Shift</label>
                 <select asp-for="Shift" class="form-control">
                     <option value="">-- Select Shift --</option>
@@ -73,55 +81,522 @@
                     <option value="Evening">Evening</option>
                 </select>
             </div>
-
+            <div class="col-md-6">
+                <label>Occupation</label>
+                <input asp-for="Occupation" class="form-control" />
+            </div>
+            <div class="col-md-6">
+                <label>Upload Photo</label>
+                <input type="file" name="photoFile" class="form-control" accept="image/*" />
+            </div>
             <div class="col-md-12">
                 <label>Remarks</label>
                 <textarea asp-for="Remarks" class="form-control" rows="2"></textarea>
             </div>
 
-            <div class="col-md-6">
-                <label>Upload Photo</label>
-                <input type="file" name="photoFile" class="form-control" />
+            <!-- Membership Section -->
+            <div class="col-12 mt-4">
+                <div class="section-divider">
+                    <span><i class="fa-solid fa-credit-card me-2"></i>Membership Details</span>
+                </div>
             </div>
 
-            <hr />
-            <h5>Membership Details</h5>
-
+            <!-- Plan Selection -->
             <div class="col-md-6">
-                <label>Plan Name</label>
-                <input name="PlanName" class="form-control" />
+                <label>Select Plan <span class="text-danger">*</span></label>
+                <select id="planSelect" class="form-control form-control-lg" required>
+                    <option value="">-- Select Plan --</option>
+                    <optgroup label="Premium">
+                        <option value="Premium Package">Premium Package (All Facilities)</option>
+                    </optgroup>
+                    <optgroup label="Customized">
+                        <option value="Customized Package (Any Three)">Customized (Any 3 Facilities)</option>
+                        <option value="Customized Package (Any Two)">Customized (Any 2 Facilities)</option>
+                    </optgroup>
+                    <optgroup label="Single Facility">
+                        <option value="Gym Package">Gym Package</option>
+                        <option value="Zumba & Aerobics Package">Zumba & Aerobics Package</option>
+                        <option value="Cardio Package">Cardio Package</option>
+                        <option value="Sauna & Steam Package">Sauna & Steam Package</option>
+                    </optgroup>
+                    <optgroup label="Per Session">
+                        <option value="Per Session">Per Session</option>
+                    </optgroup>
+                </select>
             </div>
 
-            <div class="col-md-6">
-                <label>Paid Price</label>
-                <input name="PaidPrice" class="form-control" />
+            <!-- Duration Selection -->
+            <div class="col-md-6" id="durationSection" style="display: none;">
+                <label>Duration <span class="text-danger">*</span></label>
+                <select id="durationSelect" class="form-control form-control-lg" required>
+                    <option value="">-- Select Duration --</option>
+                </select>
             </div>
 
-            <div class="col-md-6">
-                <label>Start Date</label>
-                <input type="date" name="StartDate" class="form-control" />
-            </div>
-
-            <div class="col-md-6">
-                <label>Duration (Months)</label>
-                <input name="Duration" class="form-control" />
-            </div>
-            <div class="col-md-6">
-                <label>Expire Date</label>
-                <input type="date"
-                       name="ExpireDate"
-                       class="form-control"
-                       placeholder="Optional" />
-                <small class="text-muted">
-                    If empty, system will calculate from Start Date + Duration
+            <!-- Facility Selection (for Customized Packages) -->
+            <div class="col-md-12" id="facilitySection" style="display: none;">
+                <label>Select Facilities <span class="text-danger">*</span></label>
+                <div class="facility-grid">
+                    <div class="facility-card">
+                        <input class="facility-check" type="checkbox" value="Gym" id="facilityGym">
+                        <label for="facilityGym">
+                            <i class="fa-solid fa-dumbbell"></i>
+                            <span>Gym</span>
+                        </label>
+                    </div>
+                    <div class="facility-card">
+                        <input class="facility-check" type="checkbox" value="Cardio" id="facilityCardio">
+                        <label for="facilityCardio">
+                            <i class="fa-solid fa-heart-pulse"></i>
+                            <span>Cardio</span>
+                        </label>
+                    </div>
+                    <div class="facility-card">
+                        <input class="facility-check" type="checkbox" value="Steam/Sauna" id="facilitySteam">
+                        <label for="facilitySteam">
+                            <i class="fa-solid fa-hot-tub-person"></i>
+                            <span>Steam/Sauna</span>
+                        </label>
+                    </div>
+                    <div class="facility-card">
+                        <input class="facility-check" type="checkbox" value="Zumba/Aerobics/Yoga" id="facilityZumba">
+                        <label for="facilityZumba">
+                            <i class="fa-solid fa-person-running"></i>
+                            <span>Zumba/Aerobics</span>
+                        </label>
+                    </div>
+                </div>
+                <small class="text-primary fw-semibold mt-2 d-block">
+                    <i class="fa-solid fa-info-circle me-1"></i>
+                    Select <span id="facilityCount">3</span> facilities
                 </small>
             </div>
 
+            <!-- Per Session Options -->
+            <div class="col-md-6" id="sessionSection" style="display: none;">
+                <label>Session Type <span class="text-danger">*</span></label>
+                <select id="sessionType" class="form-control form-control-lg">
+                    <option value="">-- Select Session --</option>
+                    <option value="Sauna Per Session" data-price="500">Sauna - Rs. 500</option>
+                    <option value="Steam Per Session" data-price="500">Steam - Rs. 500</option>
+                    <option value="Sauna & Steam Per Session" data-price="800">Sauna & Steam - Rs. 800</option>
+                </select>
+            </div>
 
-            <div class="col-12">
-                <button class="btn btn-success">Save</button>
-                <a href="/Customers" class="btn btn-secondary">Back</a>
+            <!-- Hidden fields for form submission -->
+            <input type="hidden" name="PlanName" id="hiddenPlanName" />
+            <input type="hidden" name="Duration" id="hiddenDuration" />
+
+            <!-- Pricing Section -->
+            <div class="col-12 mt-3" id="pricingSection" style="display: none;">
+                <div class="pricing-card">
+                    <div class="row align-items-end">
+                        <div class="col-md-3">
+                            <label class="text-muted small">Standard Price</label>
+                            <div class="price-display">
+                                <span class="currency">Rs.</span>
+                                <span id="priceDisplay">0</span>
+                            </div>
+                            <input type="hidden" id="basePrice" value="0" />
+                        </div>
+                        <div class="col-md-3">
+                            <label class="text-muted small">Discount (%)</label>
+                            <div class="input-group">
+                                <input type="number" id="discountInput" class="form-control form-control-lg text-center" 
+                                       value="0" min="0" max="100" />
+                                <span class="input-group-text">%</span>
+                            </div>
+                        </div>
+                        <div class="col-md-2">
+                            <label class="text-muted small">Discount Amount</label>
+                            <div class="discount-amount text-danger">
+                                - Rs. <span id="discountAmount">0</span>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <label class="text-muted small">Final Amount</label>
+                            <div class="final-price">
+                                <span class="currency">Rs.</span>
+                                <span id="finalPriceDisplay">0</span>
+                            </div>
+                            <input type="hidden" name="PaidPrice" id="hiddenPaidPrice" value="0" />
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Date Section -->
+            <div class="col-md-6">
+                <label>Start Date <span class="text-danger">*</span></label>
+                <input type="date" name="StartDate" id="startDate" class="form-control" 
+                       value="@DateTime.Today.ToString("yyyy-MM-dd")" required />
+            </div>
+            <div class="col-md-6">
+                <label>Expire Date</label>
+                <input type="date" name="ExpireDate" id="expireDate" class="form-control" readonly />
+                <small class="text-muted">Auto-calculated from Start Date + Duration</small>
+            </div>
+
+            <div class="col-12 mt-4">
+                <button type="submit" class="btn btn-success btn-lg px-5">
+                    <i class="fa-solid fa-user-plus me-2"></i> Save Member
+                </button>
+                <a href="/Customers" class="btn btn-outline-secondary btn-lg px-4">Cancel</a>
             </div>
         </form>
     </div>
 </div>
+
+<style>
+    .section-divider {
+        position: relative;
+        text-align: center;
+        margin: 10px 0 20px;
+    }
+    .section-divider::before {
+        content: '';
+        position: absolute;
+        top: 50%;
+        left: 0;
+        right: 0;
+        border-top: 2px solid #e2e8f0;
+    }
+    .section-divider span {
+        background: white;
+        padding: 0 20px;
+        position: relative;
+        color: #64748b;
+        font-weight: 600;
+        font-size: 14px;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+    }
+
+    .facility-grid {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 15px;
+    }
+    .facility-card {
+        position: relative;
+    }
+    .facility-card input {
+        position: absolute;
+        opacity: 0;
+    }
+    .facility-card label {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        padding: 20px 15px;
+        border: 2px solid #e2e8f0;
+        border-radius: 12px;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        background: #f8fafc;
+    }
+    .facility-card label i {
+        font-size: 28px;
+        color: #64748b;
+        margin-bottom: 8px;
+        transition: all 0.2s ease;
+    }
+    .facility-card label span {
+        font-size: 13px;
+        font-weight: 500;
+        color: #475569;
+    }
+    .facility-card input:checked + label {
+        border-color: #3b82f6;
+        background: #eff6ff;
+        box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+    }
+    .facility-card input:checked + label i {
+        color: #3b82f6;
+        transform: scale(1.1);
+    }
+    .facility-card input:checked + label span {
+        color: #1e40af;
+        font-weight: 600;
+    }
+    .facility-card:hover label {
+        border-color: #94a3b8;
+    }
+
+    .pricing-card {
+        background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%);
+        border: 1px solid #bae6fd;
+        border-radius: 16px;
+        padding: 25px;
+    }
+    .price-display {
+        font-size: 24px;
+        font-weight: 700;
+        color: #475569;
+    }
+    .price-display .currency {
+        font-size: 14px;
+        font-weight: 500;
+        color: #64748b;
+    }
+    .discount-amount {
+        font-size: 18px;
+        font-weight: 600;
+    }
+    .final-price {
+        font-size: 32px;
+        font-weight: 700;
+        color: #059669;
+    }
+    .final-price .currency {
+        font-size: 16px;
+        font-weight: 500;
+    }
+
+    @@media (max-width: 768px) {
+        .facility-grid {
+            grid-template-columns: repeat(2, 1fr);
+        }
+        .pricing-card .row > div {
+            margin-bottom: 15px;
+        }
+    }
+</style>
+
+@section Scripts {
+<script>
+    // Pricing Data
+    const pricing = {
+        'Premium Package': { 12: 50000, 6: 30000, 3: 18000, 1: 7000 },
+        'Customized Package (Any Three)': { 12: 45000, 6: 25000, 3: 15000, 1: 6000 },
+        'Customized Package (Any Two)': { 12: 30000, 6: 18000, 3: 12000, 1: 5000 },
+        'Gym Package': { 12: 25000, 6: 15000, 3: 9000, 1: 3500 },
+        'Zumba & Aerobics Package': { 12: 25000, 6: 15000, 3: 9000, 1: 3500 },
+        'Cardio Package': { 12: 25000, 6: 15000, 3: 9000, 1: 3500 },
+        'Sauna & Steam Package': { 12: 25000, 6: 15000, 3: 9000 }
+    };
+
+    // Elements
+    const planSelect = document.getElementById('planSelect');
+    const durationSelect = document.getElementById('durationSelect');
+    const durationSection = document.getElementById('durationSection');
+    const facilitySection = document.getElementById('facilitySection');
+    const sessionSection = document.getElementById('sessionSection');
+    const sessionType = document.getElementById('sessionType');
+    const pricingSection = document.getElementById('pricingSection');
+    const basePrice = document.getElementById('basePrice');
+    const priceDisplay = document.getElementById('priceDisplay');
+    const discountInput = document.getElementById('discountInput');
+    const discountAmount = document.getElementById('discountAmount');
+    const finalPriceDisplay = document.getElementById('finalPriceDisplay');
+    const hiddenPaidPrice = document.getElementById('hiddenPaidPrice');
+    const startDate = document.getElementById('startDate');
+    const expireDate = document.getElementById('expireDate');
+    const hiddenPlanName = document.getElementById('hiddenPlanName');
+    const hiddenDuration = document.getElementById('hiddenDuration');
+    const facilityChecks = document.querySelectorAll('.facility-check');
+    const facilityCount = document.getElementById('facilityCount');
+
+    let requiredFacilities = 0;
+
+    // Show toast notification
+    function showToast(icon, title, text) {
+        Swal.fire({
+            icon: icon,
+            title: title,
+            text: text,
+            toast: true,
+            position: 'top-end',
+            showConfirmButton: false,
+            timer: 3000,
+            timerProgressBar: true,
+            didOpen: (toast) => {
+                toast.addEventListener('mouseenter', Swal.stopTimer);
+                toast.addEventListener('mouseleave', Swal.resumeTimer);
+            }
+        });
+    }
+
+    // Plan Selection
+    planSelect.addEventListener('change', function() {
+        const plan = this.value;
+        
+        // Reset all
+        durationSection.style.display = 'none';
+        facilitySection.style.display = 'none';
+        sessionSection.style.display = 'none';
+        pricingSection.style.display = 'none';
+        durationSelect.innerHTML = '<option value="">-- Select Duration --</option>';
+        resetPricing();
+        facilityChecks.forEach(c => c.checked = false);
+
+        if (!plan) return;
+
+        // Handle Per Session
+        if (plan === 'Per Session') {
+            sessionSection.style.display = 'block';
+            hiddenPlanName.value = '';
+            hiddenDuration.value = '0';
+            return;
+        }
+
+        // Handle Customized Packages
+        if (plan.includes('Any Three')) {
+            facilitySection.style.display = 'block';
+            requiredFacilities = 3;
+            facilityCount.textContent = '3';
+        } else if (plan.includes('Any Two')) {
+            facilitySection.style.display = 'block';
+            requiredFacilities = 2;
+            facilityCount.textContent = '2';
+        } else {
+            requiredFacilities = 0;
+        }
+
+        // Show duration options
+        durationSection.style.display = 'block';
+        const durations = pricing[plan];
+        
+        if (durations) {
+            Object.keys(durations).sort((a, b) => b - a).forEach(months => {
+                const option = document.createElement('option');
+                option.value = months;
+                option.textContent = months == 1 ? '1 Month - Rs. ' + durations[months].toLocaleString() 
+                                                : `${months} Months - Rs. ${durations[months].toLocaleString()}`;
+                option.dataset.price = durations[months];
+                durationSelect.appendChild(option);
+            });
+        }
+
+        updatePlanName();
+    });
+
+    // Duration Selection
+    durationSelect.addEventListener('change', function() {
+        const selected = this.options[this.selectedIndex];
+        const price = parseInt(selected.dataset.price) || 0;
+        const months = this.value;
+
+        if (price > 0) {
+            basePrice.value = price;
+            priceDisplay.textContent = price.toLocaleString();
+            hiddenDuration.value = months;
+            pricingSection.style.display = 'block';
+            calculateFinalPrice();
+            calculateExpireDate();
+        } else {
+            resetPricing();
+        }
+    });
+
+    // Session Type Selection
+    sessionType.addEventListener('change', function() {
+        const selected = this.options[this.selectedIndex];
+        const price = parseInt(selected.dataset.price) || 0;
+        
+        if (price > 0) {
+            basePrice.value = price;
+            priceDisplay.textContent = price.toLocaleString();
+            hiddenPlanName.value = this.value;
+            hiddenDuration.value = '0';
+            pricingSection.style.display = 'block';
+            calculateFinalPrice();
+        } else {
+            resetPricing();
+        }
+    });
+
+    // Facility Selection with SweetAlert
+    facilityChecks.forEach(check => {
+        check.addEventListener('change', function() {
+            const checked = document.querySelectorAll('.facility-check:checked');
+            
+            if (checked.length > requiredFacilities) {
+                this.checked = false;
+                
+                Swal.fire({
+                    icon: 'warning',
+                    title: 'Selection Limit Reached',
+                    html: `You can only select <strong>${requiredFacilities}</strong> facilities for this package.<br><br>
+                           <small class="text-muted">Please unselect one facility before selecting another.</small>`,
+                    confirmButtonText: 'Got it!',
+                    confirmButtonColor: '#3b82f6',
+                    showClass: {
+                        popup: 'animate__animated animate__shakeX'
+                    }
+                });
+                return;
+            }
+
+            // Show success toast when selection is complete
+            if (checked.length === requiredFacilities) {
+                showToast('success', 'Perfect!', `You've selected ${requiredFacilities} facilities`);
+            }
+
+            updatePlanName();
+        });
+    });
+
+    // Discount Change
+    discountInput.addEventListener('input', calculateFinalPrice);
+
+    // Start Date Change
+    startDate.addEventListener('change', calculateExpireDate);
+
+    function updatePlanName() {
+        const plan = planSelect.value;
+        let planName = plan;
+
+        if (requiredFacilities > 0) {
+            const selected = Array.from(document.querySelectorAll('.facility-check:checked'))
+                .map(c => c.value);
+            
+            if (selected.length > 0) {
+                planName = `${plan}: ${selected.join(', ')}`;
+            }
+        }
+
+        hiddenPlanName.value = planName;
+    }
+
+    function calculateFinalPrice() {
+        const price = parseInt(basePrice.value) || 0;
+        const discountPercent = parseFloat(discountInput.value) || 0;
+        
+        // Calculate discount amount
+        const discountAmt = Math.round(price * (discountPercent / 100));
+        const finalAmt = Math.max(0, price - discountAmt);
+        
+        // Update displays
+        discountAmount.textContent = discountAmt.toLocaleString();
+        finalPriceDisplay.textContent = finalAmt.toLocaleString();
+        hiddenPaidPrice.value = finalAmt;
+    }
+
+    function calculateExpireDate() {
+        const start = new Date(startDate.value);
+        const months = parseInt(hiddenDuration.value) || 0;
+        
+        if (months > 0 && !isNaN(start.getTime())) {
+            start.setMonth(start.getMonth() + months);
+            expireDate.value = start.toISOString().split('T')[0];
+        } else {
+            expireDate.value = '';
+        }
+    }
+
+    function resetPricing() {
+        basePrice.value = 0;
+        priceDisplay.textContent = '0';
+        discountInput.value = 0;
+        discountAmount.textContent = '0';
+        finalPriceDisplay.textContent = '0';
+        hiddenPaidPrice.value = 0;
+        pricingSection.style.display = 'none';
+    }
+
+    // Initialize
+    calculateFinalPrice();
+</script>
+}

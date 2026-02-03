@@ -4,75 +4,512 @@
     var lastExpireDate = ViewBag.LastExpireDate as DateTime?;
 }
 
+<!-- SweetAlert2 -->
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
 <div class="card shadow">
     <div class="card-body">
-        <h4>Renew Membership</h4>
+        <h4>
+            <i class="fa-solid fa-rotate me-2 text-success"></i>
+            Renew Membership
+        </h4>
         
         @if (ViewBag.CustomerName != null)
         {
-            <p class="text-muted mb-3">
-                <i class="fa-solid fa-user"></i> <strong>@ViewBag.CustomerName</strong>
-                @if (lastExpireDate.HasValue)
-                {
-                    <span class="ms-3">
-                        <i class="fa-solid fa-calendar-xmark"></i> 
-                        Last Expire: <strong>@lastExpireDate.Value.ToString("dd MMM yyyy")</strong>
-                    </span>
-                }
-            </p>
+            <div class="customer-info-card mb-4">
+                <div class="d-flex align-items-center">
+                    <div class="customer-avatar">
+                        <i class="fa-solid fa-user"></i>
+                    </div>
+                    <div class="ms-3">
+                        <h5 class="mb-0">@ViewBag.CustomerName</h5>
+                        @if (lastExpireDate.HasValue)
+                        {
+                            <small class="text-muted">
+                                <i class="fa-solid fa-calendar-xmark me-1"></i>
+                                Last Expire: <strong class="text-danger">@lastExpireDate.Value.ToString("dd MMM yyyy")</strong>
+                            </small>
+                        }
+                    </div>
+                </div>
+            </div>
         }
 
         <form method="post" class="row g-3">
-
             <input type="hidden" asp-for="CustomerID" />
 
+            <!-- Plan Selection -->
             <div class="col-md-6">
-                <label>Plan Name</label>
-                <input asp-for="PlanName" class="form-control" />
+                <label>Select Plan <span class="text-danger">*</span></label>
+                <select id="planSelect" class="form-control form-control-lg" required>
+                    <option value="">-- Select Plan --</option>
+                    <optgroup label="Premium">
+                        <option value="Premium Package">Premium Package (All Facilities)</option>
+                    </optgroup>
+                    <optgroup label="Customized">
+                        <option value="Customized Package (Any Three)">Customized (Any 3 Facilities)</option>
+                        <option value="Customized Package (Any Two)">Customized (Any 2 Facilities)</option>
+                    </optgroup>
+                    <optgroup label="Single Facility">
+                        <option value="Gym Package">Gym Package</option>
+                        <option value="Zumba & Aerobics Package">Zumba & Aerobics Package</option>
+                        <option value="Cardio Package">Cardio Package</option>
+                        <option value="Sauna & Steam Package">Sauna & Steam Package</option>
+                    </optgroup>
+                    <optgroup label="Per Session">
+                        <option value="Per Session">Per Session</option>
+                    </optgroup>
+                </select>
             </div>
 
-            <div class="col-md-6">
-                <label>Paid Price</label>
-                <input asp-for="PaidPrice" class="form-control" />
+            <!-- Duration Selection -->
+            <div class="col-md-6" id="durationSection" style="display: none;">
+                <label>Duration <span class="text-danger">*</span></label>
+                <select id="durationSelect" class="form-control form-control-lg" required>
+                    <option value="">-- Select Duration --</option>
+                </select>
             </div>
 
-            <div class="col-md-6">
-                <label>Duration (Months)</label>
-                <input asp-for="Duration" class="form-control" />
-            </div>
-
-            <div class="col-md-6">
-                <label>Start Date</label>
-                <input asp-for="StartDate"
-                       type="date"
-                       class="form-control" />
-                @if (lastExpireDate.HasValue && lastExpireDate.Value >= DateTime.Today)
-                {
-                    <small class="text-success">
-                        <i class="fa-solid fa-info-circle"></i> 
-                        Suggested: Day after last expire (@lastExpireDate.Value.AddDays(1).ToString("dd MMM yyyy"))
-                    </small>
-                }
-            </div>
-
-            <div class="col-md-6">
-                <label>Expire Date <span class="text-muted">(Optional)</span></label>
-                <input name="ExpireDate"
-                       type="date"
-                       class="form-control"
-                       value="" />
-                <small class="text-muted">
-                    <i class="fa-solid fa-calculator"></i> Leave empty to auto-calculate from Start Date + Duration
+            <!-- Facility Selection -->
+            <div class="col-md-12" id="facilitySection" style="display: none;">
+                <label>Select Facilities <span class="text-danger">*</span></label>
+                <div class="facility-grid">
+                    <div class="facility-card">
+                        <input class="facility-check" type="checkbox" value="Gym" id="facilityGym">
+                        <label for="facilityGym">
+                            <i class="fa-solid fa-dumbbell"></i>
+                            <span>Gym</span>
+                        </label>
+                    </div>
+                    <div class="facility-card">
+                        <input class="facility-check" type="checkbox" value="Cardio" id="facilityCardio">
+                        <label for="facilityCardio">
+                            <i class="fa-solid fa-heart-pulse"></i>
+                            <span>Cardio</span>
+                        </label>
+                    </div>
+                    <div class="facility-card">
+                        <input class="facility-check" type="checkbox" value="Steam/Sauna" id="facilitySteam">
+                        <label for="facilitySteam">
+                            <i class="fa-solid fa-hot-tub-person"></i>
+                            <span>Steam/Sauna</span>
+                        </label>
+                    </div>
+                    <div class="facility-card">
+                        <input class="facility-check" type="checkbox" value="Zumba/Aerobics/Yoga" id="facilityZumba">
+                        <label for="facilityZumba">
+                            <i class="fa-solid fa-person-running"></i>
+                            <span>Zumba/Aerobics</span>
+                        </label>
+                    </div>
+                </div>
+                <small class="text-primary fw-semibold mt-2 d-block">
+                    <i class="fa-solid fa-info-circle me-1"></i>
+                    Select <span id="facilityCount">3</span> facilities
                 </small>
             </div>
 
-            <div class="col-12">
-                <button class="btn btn-success">
-                    <i class="fa-solid fa-rotate"></i> Renew Membership
-                </button>
-                <a href="/Customers" class="btn btn-secondary">Cancel</a>
+            <!-- Per Session Options -->
+            <div class="col-md-6" id="sessionSection" style="display: none;">
+                <label>Session Type <span class="text-danger">*</span></label>
+                <select id="sessionType" class="form-control form-control-lg">
+                    <option value="">-- Select Session --</option>
+                    <option value="Sauna Per Session" data-price="500">Sauna - Rs. 500</option>
+                    <option value="Steam Per Session" data-price="500">Steam - Rs. 500</option>
+                    <option value="Sauna & Steam Per Session" data-price="800">Sauna & Steam - Rs. 800</option>
+                </select>
             </div>
 
+            <!-- Hidden fields -->
+            <input type="hidden" name="PlanName" id="hiddenPlanName" />
+            <input type="hidden" name="Duration" id="hiddenDuration" value="@Model.Duration" />
+
+            <!-- Pricing Section -->
+            <div class="col-12 mt-3" id="pricingSection" style="display: none;">
+                <div class="pricing-card">
+                    <div class="row align-items-end">
+                        <div class="col-md-3">
+                            <label class="text-muted small">Standard Price</label>
+                            <div class="price-display">
+                                <span class="currency">Rs.</span>
+                                <span id="priceDisplay">0</span>
+                            </div>
+                            <input type="hidden" id="basePrice" value="0" />
+                        </div>
+                        <div class="col-md-3">
+                            <label class="text-muted small">Discount (%)</label>
+                            <div class="input-group">
+                                <input type="number" id="discountInput" class="form-control form-control-lg text-center" 
+                                       value="0" min="0" max="100" />
+                                <span class="input-group-text">%</span>
+                            </div>
+                        </div>
+                        <div class="col-md-2">
+                            <label class="text-muted small">Discount Amount</label>
+                            <div class="discount-amount text-danger">
+                                - Rs. <span id="discountAmount">0</span>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <label class="text-muted small">Final Amount</label>
+                            <div class="final-price">
+                                <span class="currency">Rs.</span>
+                                <span id="finalPriceDisplay">0</span>
+                            </div>
+                            <input type="hidden" name="PaidPrice" id="hiddenPaidPrice" value="0" />
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Date Section -->
+            <div class="col-md-6">
+                <label>Start Date <span class="text-danger">*</span></label>
+                <input asp-for="StartDate" type="date" id="startDate" class="form-control" required />
+                @if (lastExpireDate.HasValue && lastExpireDate.Value >= DateTime.Today)
+                {
+                    <small class="text-success">
+                        <i class="fa-solid fa-check-circle"></i>
+                        Suggested: @lastExpireDate.Value.AddDays(1).ToString("dd MMM yyyy")
+                    </small>
+                }
+            </div>
+            <div class="col-md-6">
+                <label>Expire Date</label>
+                <input name="ExpireDate" type="date" id="expireDate" class="form-control" readonly />
+                <small class="text-muted">Auto-calculated</small>
+            </div>
+
+            <div class="col-12 mt-4">
+                <button type="submit" class="btn btn-success btn-lg px-5">
+                    <i class="fa-solid fa-rotate me-2"></i> Renew Membership
+                </button>
+                <a href="/Customers" class="btn btn-outline-secondary btn-lg px-4">Cancel</a>
+            </div>
         </form>
     </div>
 </div>
+
+<style>
+    .customer-info-card {
+        background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%);
+        border: 1px solid #bbf7d0;
+        border-radius: 12px;
+        padding: 20px;
+    }
+    .customer-avatar {
+        width: 50px;
+        height: 50px;
+        background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-size: 20px;
+    }
+
+    .facility-grid {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 15px;
+    }
+    .facility-card {
+        position: relative;
+    }
+    .facility-card input {
+        position: absolute;
+        opacity: 0;
+    }
+    .facility-card label {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        padding: 20px 15px;
+        border: 2px solid #e2e8f0;
+        border-radius: 12px;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        background: #f8fafc;
+    }
+    .facility-card label i {
+        font-size: 28px;
+        color: #64748b;
+        margin-bottom: 8px;
+        transition: all 0.2s ease;
+    }
+    .facility-card label span {
+        font-size: 13px;
+        font-weight: 500;
+        color: #475569;
+    }
+    .facility-card input:checked + label {
+        border-color: #3b82f6;
+        background: #eff6ff;
+        box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+    }
+    .facility-card input:checked + label i {
+        color: #3b82f6;
+        transform: scale(1.1);
+    }
+    .facility-card input:checked + label span {
+        color: #1e40af;
+        font-weight: 600;
+    }
+
+    .pricing-card {
+        background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%);
+        border: 1px solid #bae6fd;
+        border-radius: 16px;
+        padding: 25px;
+    }
+    .price-display {
+        font-size: 24px;
+        font-weight: 700;
+        color: #475569;
+    }
+    .price-display .currency {
+        font-size: 14px;
+        font-weight: 500;
+        color: #64748b;
+    }
+    .discount-amount {
+        font-size: 18px;
+        font-weight: 600;
+    }
+    .final-price {
+        font-size: 32px;
+        font-weight: 700;
+        color: #059669;
+    }
+    .final-price .currency {
+        font-size: 16px;
+        font-weight: 500;
+    }
+
+    @@media (max-width: 768px) {
+        .facility-grid {
+            grid-template-columns: repeat(2, 1fr);
+        }
+        .pricing-card .row > div {
+            margin-bottom: 15px;
+        }
+    }
+</style>
+
+@section Scripts {
+<script>
+    const pricing = {
+        'Premium Package': { 12: 50000, 6: 30000, 3: 18000, 1: 7000 },
+        'Customized Package (Any Three)': { 12: 45000, 6: 25000, 3: 15000, 1: 6000 },
+        'Customized Package (Any Two)': { 12: 30000, 6: 18000, 3: 12000, 1: 5000 },
+        'Gym Package': { 12: 25000, 6: 15000, 3: 9000, 1: 3500 },
+        'Zumba & Aerobics Package': { 12: 25000, 6: 15000, 3: 9000, 1: 3500 },
+        'Cardio Package': { 12: 25000, 6: 15000, 3: 9000, 1: 3500 },
+        'Sauna & Steam Package': { 12: 25000, 6: 15000, 3: 9000 }
+    };
+
+    const planSelect = document.getElementById('planSelect');
+    const durationSelect = document.getElementById('durationSelect');
+    const durationSection = document.getElementById('durationSection');
+    const facilitySection = document.getElementById('facilitySection');
+    const sessionSection = document.getElementById('sessionSection');
+    const sessionType = document.getElementById('sessionType');
+    const pricingSection = document.getElementById('pricingSection');
+    const basePrice = document.getElementById('basePrice');
+    const priceDisplay = document.getElementById('priceDisplay');
+    const discountInput = document.getElementById('discountInput');
+    const discountAmount = document.getElementById('discountAmount');
+    const finalPriceDisplay = document.getElementById('finalPriceDisplay');
+    const hiddenPaidPrice = document.getElementById('hiddenPaidPrice');
+    const startDate = document.getElementById('startDate');
+    const expireDate = document.getElementById('expireDate');
+    const hiddenPlanName = document.getElementById('hiddenPlanName');
+    const hiddenDuration = document.getElementById('hiddenDuration');
+    const facilityChecks = document.querySelectorAll('.facility-check');
+    const facilityCount = document.getElementById('facilityCount');
+
+    let requiredFacilities = 0;
+
+    // Show toast notification
+    function showToast(icon, title, text) {
+        Swal.fire({
+            icon: icon,
+            title: title,
+            text: text,
+            toast: true,
+            position: 'top-end',
+            showConfirmButton: false,
+            timer: 3000,
+            timerProgressBar: true,
+            didOpen: (toast) => {
+                toast.addEventListener('mouseenter', Swal.stopTimer);
+                toast.addEventListener('mouseleave', Swal.resumeTimer);
+            }
+        });
+    }
+
+    planSelect.addEventListener('change', function() {
+        const plan = this.value;
+        
+        durationSection.style.display = 'none';
+        facilitySection.style.display = 'none';
+        sessionSection.style.display = 'none';
+        pricingSection.style.display = 'none';
+        durationSelect.innerHTML = '<option value="">-- Select Duration --</option>';
+        resetPricing();
+        facilityChecks.forEach(c => c.checked = false);
+
+        if (!plan) return;
+
+        if (plan === 'Per Session') {
+            sessionSection.style.display = 'block';
+            hiddenPlanName.value = '';
+            hiddenDuration.value = '0';
+            return;
+        }
+
+        if (plan.includes('Any Three')) {
+            facilitySection.style.display = 'block';
+            requiredFacilities = 3;
+            facilityCount.textContent = '3';
+        } else if (plan.includes('Any Two')) {
+            facilitySection.style.display = 'block';
+            requiredFacilities = 2;
+            facilityCount.textContent = '2';
+        } else {
+            requiredFacilities = 0;
+        }
+
+        durationSection.style.display = 'block';
+        const durations = pricing[plan];
+        
+        if (durations) {
+            Object.keys(durations).sort((a, b) => b - a).forEach(months => {
+                const option = document.createElement('option');
+                option.value = months;
+                option.textContent = months == 1 ? '1 Month - Rs. ' + durations[months].toLocaleString() 
+                                                : `${months} Months - Rs. ${durations[months].toLocaleString()}`;
+                option.dataset.price = durations[months];
+                durationSelect.appendChild(option);
+            });
+        }
+
+        updatePlanName();
+    });
+
+    durationSelect.addEventListener('change', function() {
+        const selected = this.options[this.selectedIndex];
+        const price = parseInt(selected.dataset.price) || 0;
+        const months = this.value;
+
+        if (price > 0) {
+            basePrice.value = price;
+            priceDisplay.textContent = price.toLocaleString();
+            hiddenDuration.value = months;
+            pricingSection.style.display = 'block';
+            calculateFinalPrice();
+            calculateExpireDate();
+        } else {
+            resetPricing();
+        }
+    });
+
+    sessionType.addEventListener('change', function() {
+        const selected = this.options[this.selectedIndex];
+        const price = parseInt(selected.dataset.price) || 0;
+        
+        if (price > 0) {
+            basePrice.value = price;
+            priceDisplay.textContent = price.toLocaleString();
+            hiddenPlanName.value = this.value;
+            hiddenDuration.value = '0';
+            pricingSection.style.display = 'block';
+            calculateFinalPrice();
+        } else {
+            resetPricing();
+        }
+    });
+
+    // Facility Selection with SweetAlert
+    facilityChecks.forEach(check => {
+        check.addEventListener('change', function() {
+            const checked = document.querySelectorAll('.facility-check:checked');
+            
+            if (checked.length > requiredFacilities) {
+                this.checked = false;
+                
+                Swal.fire({
+                    icon: 'warning',
+                    title: 'Selection Limit Reached',
+                    html: `You can only select <strong>${requiredFacilities}</strong> facilities for this package.<br><br>
+                           <small class="text-muted">Please unselect one facility before selecting another.</small>`,
+                    confirmButtonText: 'Got it!',
+                    confirmButtonColor: '#3b82f6',
+                    showClass: {
+                        popup: 'animate__animated animate__shakeX'
+                    }
+                });
+                return;
+            }
+
+            // Show success toast when selection is complete
+            if (checked.length === requiredFacilities) {
+                showToast('success', 'Perfect!', `You've selected ${requiredFacilities} facilities`);
+            }
+
+            updatePlanName();
+        });
+    });
+
+    discountInput.addEventListener('input', calculateFinalPrice);
+    startDate.addEventListener('change', calculateExpireDate);
+
+    function updatePlanName() {
+        const plan = planSelect.value;
+        let planName = plan;
+        if (requiredFacilities > 0) {
+            const selected = Array.from(document.querySelectorAll('.facility-check:checked')).map(c => c.value);
+            if (selected.length > 0) {
+                planName = `${plan}: ${selected.join(', ')}`;
+            }
+        }
+        hiddenPlanName.value = planName;
+    }
+
+    function calculateFinalPrice() {
+        const price = parseInt(basePrice.value) || 0;
+        const discountPercent = parseFloat(discountInput.value) || 0;
+        const discountAmt = Math.round(price * (discountPercent / 100));
+        const finalAmt = Math.max(0, price - discountAmt);
+        
+        discountAmount.textContent = discountAmt.toLocaleString();
+        finalPriceDisplay.textContent = finalAmt.toLocaleString();
+        hiddenPaidPrice.value = finalAmt;
+    }
+
+    function calculateExpireDate() {
+        const start = new Date(startDate.value);
+        const months = parseInt(hiddenDuration.value) || 0;
+        if (months > 0 && !isNaN(start.getTime())) {
+            start.setMonth(start.getMonth() + months);
+            expireDate.value = start.toISOString().split('T')[0];
+        } else {
+            expireDate.value = '';
+        }
+    }
+
+    function resetPricing() {
+        basePrice.value = 0;
+        priceDisplay.textContent = '0';
+        discountInput.value = 0;
+        discountAmount.textContent = '0';
+        finalPriceDisplay.textContent = '0';
+        hiddenPaidPrice.value = 0;
+        pricingSection.style.display = 'none';
+    }
+
+    calculateFinalPrice();
+</script>
+}
