@@ -128,7 +128,8 @@
             <div class="col-12 mt-3" id="pricingSection" style="display: none;">
                 <div class="pricing-card">
                     <div class="row align-items-end">
-                        <div class="col-md-3">
+                        <!-- Standard Price -->
+                        <div class="col-md-3 col-6 mb-3">
                             <label class="text-muted small">Standard Price</label>
                             <div class="price-display">
                                 <span class="currency">Rs.</span>
@@ -136,21 +137,40 @@
                             </div>
                             <input type="hidden" id="basePrice" value="0" />
                         </div>
-                        <div class="col-md-3">
-                            <label class="text-muted small">Discount (%)</label>
-                            <div class="input-group">
-                                <input type="number" id="discountInput" class="form-control form-control-lg text-center" 
-                                       value="0" min="0" max="100" />
-                                <span class="input-group-text">%</span>
+
+                        <!-- Discount Type Toggle -->
+                        <div class="col-md-2 col-6 mb-3">
+                            <label class="text-muted small">Discount Type</label>
+                            <div class="discount-toggle">
+                                <button type="button" class="toggle-btn active" data-type="percent" id="btnPercent">
+                                    <i class="fa-solid fa-percent"></i> %
+                                </button>
+                                <button type="button" class="toggle-btn" data-type="amount" id="btnAmount">
+                                    <i class="fa-solid fa-indian-rupee-sign"></i> Rs.
+                                </button>
                             </div>
                         </div>
-                        <div class="col-md-2">
+
+                        <!-- Discount Input -->
+                        <div class="col-md-2 col-6 mb-3">
+                            <label class="text-muted small">Discount</label>
+                            <div class="input-group">
+                                <input type="number" id="discountInput" class="form-control form-control-lg text-center" 
+                                       value="0" min="0" />
+                                <span class="input-group-text" id="discountSuffix">%</span>
+                            </div>
+                        </div>
+
+                        <!-- Discount Amount Display -->
+                        <div class="col-md-2 col-6 mb-3">
                             <label class="text-muted small">Discount Amount</label>
                             <div class="discount-amount text-danger">
                                 - Rs. <span id="discountAmount">0</span>
                             </div>
                         </div>
-                        <div class="col-md-4">
+
+                        <!-- Final Amount -->
+                        <div class="col-md-3 col-12 mb-3">
                             <label class="text-muted small">Final Amount</label>
                             <div class="final-price">
                                 <span class="currency">Rs.</span>
@@ -288,12 +308,45 @@
         font-weight: 500;
     }
 
+    /* Discount Toggle Styles */
+    .discount-toggle {
+        display: flex;
+        background: #e2e8f0;
+        border-radius: 8px;
+        padding: 4px;
+        gap: 4px;
+    }
+    .toggle-btn {
+        flex: 1;
+        padding: 8px 12px;
+        border: none;
+        background: transparent;
+        border-radius: 6px;
+        font-size: 13px;
+        font-weight: 600;
+        color: #64748b;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 4px;
+    }
+    .toggle-btn:hover {
+        color: #475569;
+    }
+    .toggle-btn.active {
+        background: white;
+        color: #3b82f6;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+    .toggle-btn i {
+        font-size: 11px;
+    }
+
     @@media (max-width: 768px) {
         .facility-grid {
             grid-template-columns: repeat(2, 1fr);
-        }
-        .pricing-card .row > div {
-            margin-bottom: 15px;
         }
     }
 </style>
@@ -320,6 +373,7 @@
     const basePrice = document.getElementById('basePrice');
     const priceDisplay = document.getElementById('priceDisplay');
     const discountInput = document.getElementById('discountInput');
+    const discountSuffix = document.getElementById('discountSuffix');
     const discountAmount = document.getElementById('discountAmount');
     const finalPriceDisplay = document.getElementById('finalPriceDisplay');
     const hiddenPaidPrice = document.getElementById('hiddenPaidPrice');
@@ -329,8 +383,11 @@
     const hiddenDuration = document.getElementById('hiddenDuration');
     const facilityChecks = document.querySelectorAll('.facility-check');
     const facilityCount = document.getElementById('facilityCount');
+    const btnPercent = document.getElementById('btnPercent');
+    const btnAmount = document.getElementById('btnAmount');
 
     let requiredFacilities = 0;
+    let discountType = 'percent';
 
     // Show toast notification
     function showToast(icon, title, text) {
@@ -349,6 +406,27 @@
             }
         });
     }
+
+    // Discount Type Toggle
+    btnPercent.addEventListener('click', function() {
+        discountType = 'percent';
+        btnPercent.classList.add('active');
+        btnAmount.classList.remove('active');
+        discountSuffix.textContent = '%';
+        discountInput.max = 100;
+        discountInput.value = 0;
+        calculateFinalPrice();
+    });
+
+    btnAmount.addEventListener('click', function() {
+        discountType = 'amount';
+        btnAmount.classList.add('active');
+        btnPercent.classList.remove('active');
+        discountSuffix.textContent = 'Rs.';
+        discountInput.removeAttribute('max');
+        discountInput.value = 0;
+        calculateFinalPrice();
+    });
 
     planSelect.addEventListener('change', function() {
         const plan = this.value;
@@ -480,8 +558,17 @@
 
     function calculateFinalPrice() {
         const price = parseInt(basePrice.value) || 0;
-        const discountPercent = parseFloat(discountInput.value) || 0;
-        const discountAmt = Math.round(price * (discountPercent / 100));
+        const discountValue = parseFloat(discountInput.value) || 0;
+        
+        let discountAmt = 0;
+        
+        if (discountType === 'percent') {
+            discountAmt = Math.round(price * (discountValue / 100));
+        } else {
+            discountAmt = Math.round(discountValue);
+        }
+        
+        discountAmt = Math.min(discountAmt, price);
         const finalAmt = Math.max(0, price - discountAmt);
         
         discountAmount.textContent = discountAmt.toLocaleString();
