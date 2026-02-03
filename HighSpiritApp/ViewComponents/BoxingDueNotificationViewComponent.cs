@@ -1,30 +1,27 @@
-﻿using HighSpiritApp.DataContext;
+﻿using HighSpiritApp.Services.Interfaces;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
 
 namespace HighSpiritApp.ViewComponents
 {
-    public class BoxingDueNotificationViewComponent: ViewComponent
+    /// <summary>
+    /// ViewComponent for displaying boxing members with due amount notifications
+    /// </summary>
+    public class BoxingDueNotificationViewComponent : ViewComponent
     {
-        private readonly GymDbContext _context;
+        private readonly IBoxingService _boxingService;
 
-        public BoxingDueNotificationViewComponent(GymDbContext context)
+        public BoxingDueNotificationViewComponent(IBoxingService boxingService)
         {
-            _context = context;
+            _boxingService = boxingService;
         }
 
         public async Task<IViewComponentResult> InvokeAsync()
         {
-            var dueList = await _context.BoxingMembers
-                .Where(b => b.DueAmount > 0)
-                .OrderByDescending(b => b.DueAmount)
-                .Take(5)
-                .ToListAsync();
+            var dueMembers = (await _boxingService.GetMembersWithDueAsync()).ToList();
 
-            ViewBag.DueCount = await _context.BoxingMembers
-                .CountAsync(b => b.DueAmount > 0);
+            ViewBag.DueCount = dueMembers.Count;
 
-            return View(dueList);
+            return View(dueMembers.Take(5).ToList());
         }
     }
 }

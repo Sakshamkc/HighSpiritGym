@@ -1,18 +1,21 @@
-﻿using HighSpiritApp.DataContext;
-using HighSpiritApp.Models;
+﻿using HighSpiritApp.Models;
+using HighSpiritApp.Services.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
 
 namespace HighSpiritApp.Controllers
 {
+    /// <summary>
+    /// Memberships controller - Membership management and renewal
+    /// </summary>
     [Authorize]
     public class MembershipsController : Controller
     {
-        private readonly GymDbContext _context;
-        public MembershipsController(GymDbContext context)
+        private readonly IMembershipService _membershipService;
+
+        public MembershipsController(IMembershipService membershipService)
         {
-            _context = context;
+            _membershipService = membershipService;
         }
 
         public IActionResult Create(int customerId)
@@ -22,89 +25,49 @@ namespace HighSpiritApp.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> Create(CustomerMembership m)
+        public async Task<IActionResult> Create(CustomerMembership membership)
         {
-            m.IsActive = true;
-            _context.CustomerMemberships.Add(m);
-            await _context.SaveChangesAsync();
+            await _membershipService.CreateAsync(membership);
             return RedirectToAction("Index", "Customers");
         }
+
         public async Task<IActionResult> Renew(int id) // id = CustomerID
         {
-            var customer = await _context.Customers
-                .Include(c => c.Memberships)
-                .FirstOrDefaultAsync(c => c.CustomerID == id);
-
-            if (customer == null) return NotFound();
-
-            // Get the last active membership to calculate suggested start date
-            var lastMembership = customer.Memberships
-                .Where(m => m.IsActive)
-                .OrderByDescending(m => m.ExpireDate)
-                .FirstOrDefault();
-
-            DateTime suggestedStartDate;
-            
-            if (lastMembership != null && lastMembership.ExpireDate >= DateTime.Today)
+            try
             {
-                // If membership hasn't expired yet, new start = day after expire
-                suggestedStartDate = lastMembership.ExpireDate.AddDays(1);
+                var renewalInfo = await _membershipService.GetRenewalInfoAsync(id);
+
+                ViewBag.CustomerName = renewalInfo.CustomerName;
+                ViewBag.LastExpireDate = renewalInfo.LastExpireDate;
+
+                return View(new CustomerMembership
+                {
+                    CustomerID = id,
+                    StartDate = renewalInfo.SuggestedStartDate,
+                    Duration = 1,
+                    PlanName = renewalInfo.LastPlanName
+                });
             }
-            else
+            catch (KeyNotFoundException)
             {
-                // If no active membership or already expired, start from today
-                suggestedStartDate = DateTime.Today;
+                return NotFound();
             }
-
-            ViewBag.CustomerName = customer.FullName;
-            ViewBag.LastExpireDate = lastMembership?.ExpireDate;
-
-            return View(new CustomerMembership
-            {
-                CustomerID = id,
-                StartDate = suggestedStartDate,
-                Duration = 1,
-                PlanName = lastMembership?.PlanName // Pre-fill with last plan
-            });
         }
 
         [HttpPost]
         public async Task<IActionResult> Renew(CustomerMembership membership)
         {
-            // Calculate expire date if not provided
-            if (membership.ExpireDate == DateTime.MinValue || membership.ExpireDate == default)
+            try
             {
-                membership.ExpireDate = membership.StartDate.AddMonths(membership.Duration);
+                await _membershipService.RenewAsync(membership);
+                TempData["success"] = "Membership renewed successfully!";
+                return RedirectToAction("Index", "Customers");
             }
-
-            if (membership.ExpireDate < membership.StartDate)
+            catch (ArgumentException ex)
             {
-                ModelState.AddModelError(
-                    "ExpireDate",
-                    "Expire date cannot be earlier than start date."
-                );
+                ModelState.AddModelError("ExpireDate", ex.Message);
                 return View(membership);
             }
-
-            // Deactivate previous active membership
-            var lastMembership = await _context.CustomerMemberships
-                .Where(m => m.CustomerID == membership.CustomerID && m.IsActive)
-                .OrderByDescending(m => m.ExpireDate)
-                .FirstOrDefaultAsync();
-
-            if (lastMembership != null)
-            {
-                lastMembership.IsActive = false;
-            }
-
-            membership.IsActive = true;
-
-            _context.CustomerMemberships.Add(membership);
-            await _context.SaveChangesAsync();
-
-            TempData["success"] = "Membership renewed successfully!";
-            return RedirectToAction("Index", "Customers");
         }
-
     }
 }

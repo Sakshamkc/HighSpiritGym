@@ -1,310 +1,197 @@
 ﻿using ClosedXML.Excel;
-using DocumentFormat.OpenXml.InkML;
-using HighSpiritApp.DataContext;
-using HighSpiritApp.Models;
 using HighSpiritApp.Models.Boxing;
+using HighSpiritApp.Services.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-using System.ComponentModel;
 
-[Authorize]
-public class BoxingController : Controller
+namespace HighSpiritApp.Controllers
 {
-    private readonly GymDbContext _context;
-
-    public BoxingController(GymDbContext context)
+    /// <summary>
+    /// Boxing controller - Boxing member management
+    /// </summary>
+    [Authorize]
+    public class BoxingController : Controller
     {
-        _context = context;
-    }
+        private readonly IBoxingService _boxingService;
 
-    public async Task<IActionResult> Index(string search, int page = 1)
-    {
-        int pageSize = 10;
-
-        var query = _context.BoxingMembers.AsQueryable();
-
-        if (!string.IsNullOrEmpty(search))
+        public BoxingController(IBoxingService boxingService)
         {
-            query = query.Where(x =>
-                x.Name.Contains(search) ||
-                x.GuardianName.Contains(search));
+            _boxingService = boxingService;
         }
 
-        int total = await query.CountAsync();
-
-        var data = await query
-            .OrderByDescending(x => x.JoinDate)
-            .Skip((page - 1) * pageSize)
-            .Take(pageSize)
-            .ToListAsync();
-
-        ViewBag.Page = page;
-        ViewBag.TotalPages = (int)Math.Ceiling(total / (double)pageSize);
-        ViewBag.Search = search;
-
-        return View(data);
-    }
-
-
-    public IActionResult Create()
-    {
-        return View();
-    }
-
-    [HttpPost]
-    public async Task<IActionResult> Create(BoxingMember model, IFormFile photoFile)
-    {
-        if (photoFile != null && photoFile.Length > 0)
+        public async Task<IActionResult> Index(string search, int page = 1)
         {
-            using var ms = new MemoryStream();
-            await photoFile.CopyToAsync(ms);
-            model.Photo = ms.ToArray();
+            int pageSize = 10;
+
+            var allMembers = string.IsNullOrEmpty(search)
+                ? await _boxingService.GetAllAsync()
+                : await _boxingService.SearchAsync(search);
+
+            var membersList = allMembers.ToList();
+            int total = membersList.Count;
+
+            var data = membersList
+                .OrderByDescending(x => x.JoinDate)
+                .Skip((page - 1) * pageSize)
+                .Take(pageSize)
+                .ToList();
+
+            ViewBag.Page = page;
+            ViewBag.TotalPages = (int)Math.Ceiling(total / (double)pageSize);
+            ViewBag.Search = search;
+
+            return View(data);
         }
 
-        // 🔥 AUTO CALCULATE PRICE
-        model.Price = model.CashAmount + model.EsewaAmount;
-
-        _context.BoxingMembers.Add(model);
-        await _context.SaveChangesAsync();
-
-        TempData["success"] = "Boxing member added successfully!";
-        return RedirectToAction("Index");
-    }
-
-
-    public async Task<IActionResult> Edit(int id)
-    {
-        var member = await _context.BoxingMembers.FindAsync(id);
-        if (member == null) return NotFound();
-
-        return View(member);
-    }
-
-    [HttpPost]
-    public async Task<IActionResult> Edit(BoxingMember model, IFormFile photoFile)
-    {
-        var member = await _context.BoxingMembers.FindAsync(model.BoxingMemberID);
-        if (member == null) return NotFound();
-
-        // Update normal fields
-        member.Name = model.Name;
-        member.JoinDate = model.JoinDate;
-        member.GuardianName = model.GuardianName;
-        member.GuardianContact = model.GuardianContact;
-        member.PerMonthClass = model.PerMonthClass;
-        member.CashAmount = model.CashAmount;
-        member.EsewaAmount = model.EsewaAmount;
-        member.Price = model.CashAmount + model.EsewaAmount;
-        member.DueAmount = model.DueAmount;
-        member.Price = model.Price;
-        member.Remarks = model.Remarks;
-
-
-        if (photoFile != null && photoFile.Length > 0)
+        public IActionResult Create()
         {
-            using var ms = new MemoryStream();
-            await photoFile.CopyToAsync(ms);
-            member.Photo = ms.ToArray();
-        }
-
-        await _context.SaveChangesAsync();
-
-        TempData["success"] = "Boxing member updated successfully!";
-        return RedirectToAction("Index");
-    }
-
-
-    public async Task<IActionResult> Details(int id)
-    {
-        var member = await _context.BoxingMembers.FindAsync(id);
-        if (member == null) return NotFound();
-
-        return View(member);
-    }
-
-    [HttpPost]
-    public async Task<IActionResult> Delete(int id)
-    {
-        var member = await _context.BoxingMembers.FindAsync(id);
-        if (member == null)
-        {
-            TempData["error"] = "Boxing member not found.";
-            return RedirectToAction("Index");
-        }
-
-        _context.BoxingMembers.Remove(member);
-        await _context.SaveChangesAsync();
-
-        TempData["success"] = "Boxing member deleted successfully.";
-        return RedirectToAction("Index");
-    }
-
-
-    public IActionResult Import()
-    {
-        return View();
-    }
-
-    [HttpPost]
-    public async Task<IActionResult> Import(IFormFile file)
-    {
-        if (file == null || file.Length == 0)
-        {
-            TempData["error"] = "Please select an Excel file.";
             return View();
         }
 
-        int imported = 0;
-        int skipped = 0;
-
-        using var stream = file.OpenReadStream();
-        using var workbook = new XLWorkbook(stream);
-
-        foreach (var sheet in workbook.Worksheets)
+        [HttpPost]
+        public async Task<IActionResult> Create(BoxingMember model, IFormFile photoFile)
         {
-            var lastRow = sheet.LastRowUsed();
-            if (lastRow == null) continue;
-
-            int rowCount = lastRow.RowNumber();
-
-            // Start from row 2 (skip header)
-            for (int r = 2; r <= rowCount; r++)
+            if (photoFile != null && photoFile.Length > 0)
             {
-                var row = sheet.Row(r);
-
-                string name = row.Cell(1).GetString().Trim();
-                if (string.IsNullOrEmpty(name))
-                    continue;
-                DateTime joinDate;
-                var joinDateText = row.Cell(2).GetString().Trim();
-
-                // Handles: "5th Aug 2024", "05/08/2024", etc.
-                if (!DateTime.TryParseExact(
-                        joinDateText.Replace("st", "")
-                                    .Replace("nd", "")
-                                    .Replace("rd", "")
-                                    .Replace("th", ""),
-                        new[] { "d MMM yyyy", "dd MMM yyyy", "d MMMM yyyy", "dd/MM/yyyy", "yyyy-MM-dd" },
-                        System.Globalization.CultureInfo.InvariantCulture,
-                        System.Globalization.DateTimeStyles.None,
-                        out joinDate))
-                {
-                    joinDate = DateTime.Today;
-                }
-                string guardianName = row.Cell(3).GetString().Trim();
-                string guardianContact = row.Cell(4).GetString().Trim();
-
-                bool exists = await _context.BoxingMembers.AnyAsync(b =>
-                    b.Name == name &&
-                    b.GuardianContact == guardianContact &&
-                    b.JoinDate.HasValue &&
-                    b.JoinDate.Value.Date == joinDate.Date);
-
-                if (exists)
-                {
-                    skipped++;
-                    continue;
-                }
-
-                string perMonthClass =
-                    string.IsNullOrWhiteSpace(row.Cell(5).GetString())
-                    ? "0+0+0+0"
-                    : row.Cell(5).GetString();
-
-                int cash =
-                    row.Cell(6).GetValue<int?>() ?? 0;
-
-                int esewa =
-                    row.Cell(7).GetValue<int?>() ?? 0;
-
-                int due =
-                    row.Cell(8).GetValue<int?>() ?? 0;
-
-                string remarks =
-                    row.Cell(9).GetString();
-
-                var member = new BoxingMember
-                {
-                    Name = name,
-                    JoinDate = joinDate,
-                    GuardianName = guardianName,
-                    GuardianContact = guardianContact,
-                    PerMonthClass = perMonthClass,
-                    CashAmount = cash,
-                    EsewaAmount = esewa,
-                    DueAmount = due,
-                    Remarks = remarks,
-
-                    // 🔥 AUTO CALCULATED
-                    Price = cash + esewa
-                };
-
-                _context.BoxingMembers.Add(member);
-                imported++;
+                using var ms = new MemoryStream();
+                await photoFile.CopyToAsync(ms);
+                model.Photo = ms.ToArray();
             }
+
+            // Auto calculate price
+            model.Price = model.CashAmount + model.EsewaAmount;
+
+            await _boxingService.CreateAsync(model);
+
+            TempData["success"] = "Boxing member added successfully!";
+            return RedirectToAction("Index");
         }
 
-        await _context.SaveChangesAsync();
-
-        TempData["success"] =
-            $"Import completed. Imported: {imported}, Skipped duplicates: {skipped}";
-
-        return RedirectToAction("Index");
-    }
-
-    [HttpGet]
-    public async Task<IActionResult> ExportAll()
-    {
-        var members = await _context.BoxingMembers.ToListAsync();
-
-        using var workbook = new XLWorkbook();
-        var ws = workbook.Worksheets.Add("BoxingMembers");
-
-        ws.Cell(1, 1).Value = "SN";
-        ws.Cell(1, 2).Value = "Name";
-        ws.Cell(1, 3).Value = "Join Date";
-        ws.Cell(1, 4).Value = "Guardian Name";
-        ws.Cell(1, 5).Value = "Guardian Contact";
-        ws.Cell(1, 6).Value = "Per Month Class";
-        ws.Cell(1, 7).Value = "Cash Amount";
-        ws.Cell(1, 8).Value = "eSewa Amount";
-        ws.Cell(1, 9).Value = "Due Amount";
-        ws.Cell(1, 10).Value = "Remarks";
-
-        int row = 2;
-        int sn = 1;
-
-        foreach (var b in members)
+        public async Task<IActionResult> Edit(int id)
         {
-            ws.Cell(row, 1).Value = sn++;
-            ws.Cell(row, 2).Value = b.Name;
-            ws.Cell(row, 3).Value = b.JoinDate?.ToString("dd MMM yyyy");
-            ws.Cell(row, 4).Value = b.GuardianName;
-            ws.Cell(row, 5).Value = b.GuardianContact;
-            ws.Cell(row, 6).Value = b.PerMonthClass;
-            ws.Cell(row, 7).Value = b.CashAmount;
-            ws.Cell(row, 8).Value = b.EsewaAmount;
-            ws.Cell(row, 9).Value = b.DueAmount;
-            ws.Cell(row, 10).Value = b.Remarks;
+            var member = await _boxingService.GetByIdAsync(id);
+            if (member == null) return NotFound();
 
-            row++;
+            return View(member);
         }
 
-        ws.Columns().AdjustToContents();
+        [HttpPost]
+        public async Task<IActionResult> Edit(BoxingMember model, IFormFile photoFile)
+        {
+            var member = await _boxingService.GetByIdAsync(model.BoxingMemberID);
+            if (member == null) return NotFound();
 
-        using var stream = new MemoryStream();
-        workbook.SaveAs(stream);
-        stream.Position = 0;
+            // Update fields
+            member.Name = model.Name;
+            member.JoinDate = model.JoinDate;
+            member.GuardianName = model.GuardianName;
+            member.GuardianContact = model.GuardianContact;
+            member.PerMonthClass = model.PerMonthClass;
+            member.CashAmount = model.CashAmount;
+            member.EsewaAmount = model.EsewaAmount;
+            member.Price = model.CashAmount + model.EsewaAmount;
+            member.DueAmount = model.DueAmount;
+            member.Remarks = model.Remarks;
 
-        return File(
-            stream.ToArray(),
-            "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-            $"Boxing Members Backup.xlsx"
-        );
+            if (photoFile != null && photoFile.Length > 0)
+            {
+                using var ms = new MemoryStream();
+                await photoFile.CopyToAsync(ms);
+                member.Photo = ms.ToArray();
+            }
+
+            await _boxingService.UpdateAsync(member);
+
+            TempData["success"] = "Boxing member updated successfully!";
+            return RedirectToAction("Index");
+        }
+
+        public async Task<IActionResult> Details(int id)
+        {
+            var member = await _boxingService.GetByIdAsync(id);
+            if (member == null) return NotFound();
+
+            return View(member);
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> Delete(int id)
+        {
+            await _boxingService.DeleteAsync(id);
+            TempData["success"] = "Boxing member deleted successfully.";
+            return RedirectToAction("Index");
+        }
+
+        public IActionResult Import()
+        {
+            return View();
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> Import(IFormFile file)
+        {
+            if (file == null || file.Length == 0)
+            {
+                TempData["error"] = "Please select an Excel file.";
+                return View();
+            }
+
+            using var stream = file.OpenReadStream();
+            var result = await _boxingService.ImportFromExcelAsync(stream);
+
+            if (result.Success)
+            {
+                TempData["success"] = $"Import completed. Imported: {result.Imported}, Skipped: {result.Skipped}";
+            }
+            else
+            {
+                TempData["error"] = $"Import failed: {result.ErrorMessage}";
+            }
+
+            return RedirectToAction("Index");
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> ExportAll()
+        {
+            var members = (await _boxingService.GetAllAsync()).ToList();
+
+            using var workbook = new XLWorkbook();
+            var ws = workbook.Worksheets.Add("BoxingMembers");
+
+            // Headers
+            var headers = new[] { "SN", "Name", "Join Date", "Guardian Name", "Guardian Contact",
+                "Per Month Class", "Cash Amount", "eSewa Amount", "Due Amount", "Remarks" };
+
+            for (int i = 0; i < headers.Length; i++)
+                ws.Cell(1, i + 1).Value = headers[i];
+
+            int row = 2, sn = 1;
+            foreach (var b in members)
+            {
+                ws.Cell(row, 1).Value = sn++;
+                ws.Cell(row, 2).Value = b.Name;
+                ws.Cell(row, 3).Value = b.JoinDate?.ToString("dd MMM yyyy");
+                ws.Cell(row, 4).Value = b.GuardianName;
+                ws.Cell(row, 5).Value = b.GuardianContact;
+                ws.Cell(row, 6).Value = b.PerMonthClass;
+                ws.Cell(row, 7).Value = b.CashAmount;
+                ws.Cell(row, 8).Value = b.EsewaAmount;
+                ws.Cell(row, 9).Value = b.DueAmount;
+                ws.Cell(row, 10).Value = b.Remarks;
+                row++;
+            }
+
+            ws.Columns().AdjustToContents();
+
+            using var stream = new MemoryStream();
+            workbook.SaveAs(stream);
+
+            return File(
+                stream.ToArray(),
+                "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+                "Boxing Members Backup.xlsx"
+            );
+        }
     }
-
-
-
-
 }

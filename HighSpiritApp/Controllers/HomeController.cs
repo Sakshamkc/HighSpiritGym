@@ -1,86 +1,52 @@
-﻿using HighSpiritApp.DataContext;
-using HighSpiritApp.Models;
+﻿using HighSpiritApp.Services.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-using System.Diagnostics;
 
 namespace HighSpiritApp.Controllers
 {
+    /// <summary>
+    /// Home controller - Dashboard
+    /// </summary>
     [Authorize]
     public class HomeController : Controller
     {
-        private readonly GymDbContext _context;
-        public HomeController(GymDbContext context)
+        private readonly IDashboardService _dashboardService;
+        private readonly IMembershipService _membershipService;
+        private readonly IBoxingService _boxingService;
+
+        public HomeController(
+            IDashboardService dashboardService,
+            IMembershipService membershipService,
+            IBoxingService boxingService)
         {
-            _context = context;
+            _dashboardService = dashboardService;
+            _membershipService = membershipService;
+            _boxingService = boxingService;
         }
 
         public async Task<IActionResult> Index()
         {
-            var today = DateTime.Today;
+            // Get dashboard statistics
+            var stats = await _dashboardService.GetDashboardStatsAsync();
 
-            // TOTAL CUSTOMERS
-            ViewBag.Total = await _context.Customers.CountAsync();
+            // Gym stats
+            ViewBag.Total = stats.GymTotal;
+            ViewBag.Active = stats.GymActive;
+            ViewBag.Expired = stats.GymExpired;
+            ViewBag.ExpiringSoon = stats.GymExpiringSoon;
+            ViewBag.JoinedThisMonth = stats.GymJoinedThisMonth;
 
-            // LOAD MEMBERSHIPS FIRST (ENTITY ROOT)
-            var memberships = await _context.CustomerMemberships
-                .Include(m => m.Customer)
-                .Where(m => m.ExpireDate != null)
-                .ToListAsync();
+            // Boxing stats
+            ViewBag.BoxingTotal = stats.BoxingTotal;
+            ViewBag.BoxingPaid = stats.BoxingPaid;
+            ViewBag.BoxingWithDue = stats.BoxingWithDue;
+            ViewBag.BoxingDue = stats.BoxingTotalDue;
 
-            // LATEST MEMBERSHIP PER CUSTOMER (IN MEMORY)
-            var latestMemberships = memberships
-                .GroupBy(m => m.CustomerID)
-                .Select(g => g.OrderByDescending(x => x.StartDate).First())
-                .ToList();
+            // Get lists for tables
+            var expiringList = (await _membershipService.GetExpiringSoonAsync(7)).Take(5).ToList();
+            ViewBag.BoxingDueList = (await _boxingService.GetMembersWithDueAsync()).Take(5).ToList();
 
-            // DASHBOARD COUNTS
-            ViewBag.Active = latestMemberships.Count(m => m.ExpireDate >= today);
-            ViewBag.Expired = latestMemberships.Count(m => m.ExpireDate < today);
-            ViewBag.ExpiringSoon = latestMemberships.Count(m =>
-                m.ExpireDate >= today && m.ExpireDate <= today.AddDays(7));
-
-            var firstDayOfMonth = new DateTime(today.Year, today.Month, 1);
-            ViewBag.JoinedThisMonth = await _context.Customers
-                .CountAsync(c => c.JoinDate >= firstDayOfMonth && c.JoinDate <= today);
-
-            ViewBag.ExpiredCount = ViewBag.Expired;
-
-            ViewBag.ExpiredList = latestMemberships
-                .Where(m => m.ExpireDate < today)
-                .OrderBy(m => m.ExpireDate)
-                .Take(5)
-                .ToList();
-
-            // EXPIRING SOON TABLE (MODEL)
-            var expiringList = latestMemberships
-                .Where(m =>
-                    m.ExpireDate >= today &&
-                    m.ExpireDate <= today.AddDays(7))
-                .OrderBy(m => m.ExpireDate)
-                .Take(5)
-                .ToList();
-
-            ViewBag.BoxingTotal = await _context.BoxingMembers.CountAsync();
-
-            ViewBag.BoxingWithDue = await _context.BoxingMembers
-                .CountAsync(b => b.DueAmount > 0);
-
-            ViewBag.BoxingPaid = await _context.BoxingMembers
-                .CountAsync(b => b.DueAmount == 0);
-
-            ViewBag.BoxingDue = await _context.BoxingMembers
-                .SumAsync(b => b.DueAmount);
-
-            ViewBag.BoxingDueList = await _context.BoxingMembers
-                .Where(b => b.DueAmount > 0)
-                .OrderByDescending(b => b.DueAmount)
-                .Take(5)
-                .ToListAsync();
             return View(expiringList);
         }
-
-
     }
 }

@@ -1,20 +1,19 @@
-﻿using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Identity;
+﻿using HighSpiritApp.Services.Interfaces;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace HighSpiritApp.Controllers
 {
+    /// <summary>
+    /// Account controller - Authentication
+    /// </summary>
     public class AccountController : Controller
     {
-        private readonly SignInManager<IdentityUser> _signInManager;
-        private readonly UserManager<IdentityUser> _userManager;
+        private readonly IAuthService _authService;
 
-        public AccountController(
-            SignInManager<IdentityUser> signInManager,
-            UserManager<IdentityUser> userManager)
+        public AccountController(IAuthService authService)
         {
-            _signInManager = signInManager;
-            _userManager = userManager;
+            _authService = authService;
         }
 
         [AllowAnonymous]
@@ -27,21 +26,20 @@ namespace HighSpiritApp.Controllers
         [AllowAnonymous]
         public async Task<IActionResult> Login(string username, string password)
         {
-            var result = await _signInManager.PasswordSignInAsync(
-                username, password, false, false);
+            var result = await _authService.LoginAsync(username, password);
 
-            if (result.Succeeded)
+            if (result.Success)
             {
                 return RedirectToAction("Index", "Home");
             }
 
-            ViewBag.Error = "Invalid username or password";
+            ViewBag.Error = result.ErrorMessage;
             return View();
         }
 
         public async Task<IActionResult> Logout()
         {
-            await _signInManager.SignOutAsync();
+            await _authService.LogoutAsync();
             return RedirectToAction("Login");
         }
     }

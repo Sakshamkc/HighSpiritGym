@@ -1,32 +1,24 @@
-﻿using HighSpiritApp.DataContext;
+﻿using HighSpiritApp.Services.Interfaces;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
 
-public class ExpiredNotificationViewComponent : ViewComponent
+namespace HighSpiritApp.ViewComponents
 {
-    private readonly GymDbContext _context;
-
-    public ExpiredNotificationViewComponent(GymDbContext context)
+    /// <summary>
+    /// ViewComponent for displaying expired gym membership notifications
+    /// </summary>
+    public class ExpiredNotificationViewComponent : ViewComponent
     {
-        _context = context;
-    }
+        private readonly IMembershipService _membershipService;
 
-    public async Task<IViewComponentResult> InvokeAsync()
-    {
-        var today = DateTime.Today;
+        public ExpiredNotificationViewComponent(IMembershipService membershipService)
+        {
+            _membershipService = membershipService;
+        }
 
-        var memberships = await _context.CustomerMemberships
-            .Include(m => m.Customer)
-            .Where(m => m.ExpireDate != null)
-            .ToListAsync();
-
-        var latestMemberships = memberships
-            .GroupBy(m => m.CustomerID)
-            .Select(g => g.OrderByDescending(x => x.StartDate).First())
-            .Where(m => m.ExpireDate < today)
-            .OrderByDescending(m => m.ExpireDate) // Most recently expired first (just expired today/yesterday on top)
-            .ToList();
-
-        return View(latestMemberships);
+        public async Task<IViewComponentResult> InvokeAsync()
+        {
+            var expiredMemberships = await _membershipService.GetExpiredMembershipsAsync();
+            return View(expiredMemberships.ToList());
+        }
     }
 }

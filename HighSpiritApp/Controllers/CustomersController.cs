@@ -1,124 +1,56 @@
-﻿using ClosedXML.Excel;
-using DocumentFormat.OpenXml.InkML;
-using DocumentFormat.OpenXml.Spreadsheet;
-using HighSpiritApp.DataContext;
-using HighSpiritApp.Models;
+﻿using HighSpiritApp.Models;
+using HighSpiritApp.Services.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
 
 namespace HighSpiritApp.Controllers
 {
+    /// <summary>
+    /// Customers controller - Gym member management
+    /// </summary>
     [Authorize]
     public class CustomersController : Controller
     {
-        private readonly GymDbContext _context;
-        public CustomersController(GymDbContext context)
+        private readonly ICustomerService _customerService;
+        private readonly IMembershipService _membershipService;
+
+        public CustomersController(
+            ICustomerService customerService,
+            IMembershipService membershipService)
         {
-            _context = context;
+            _customerService = customerService;
+            _membershipService = membershipService;
         }
 
-        // List customers with current membership
         public async Task<IActionResult> Index(string search, string sort, string filter, int? duration, int page = 1)
         {
-            int pageSize = 10;
-            var today = DateTime.Today;
-
-            var query = _context.Customers
-                .Include(c => c.Memberships)
-                .AsQueryable();
-
-            if (!string.IsNullOrEmpty(search))
+            var result = await _customerService.GetFilteredCustomersAsync(new CustomerFilterRequest
             {
-                query = query.Where(c =>
-                    c.FullName.Contains(search) ||
-                    c.Phone.Contains(search));
-            }
+                Search = search,
+                Sort = sort,
+                Filter = filter,
+                Duration = duration,
+                Page = page
+            });
 
-            // Filters
-            filter = filter ?? "all";
-            ViewBag.Filter = filter;
-
-            if (filter == "active")
-            {
-                query = query.Where(c =>
-                    c.Memberships.Any(m => m.IsActive && m.DueDaysComputed == 0));
-            }
-            else if (filter == "expired")
-            {
-                query = query.Where(c =>
-                    c.Memberships.Any(m => m.IsActive && m.DueDaysComputed > 0));
-            }
-
-            else if (filter == "soon")
-            {
-                query = query.Where(c =>
-                    c.Memberships.Any(m =>
-                        m.IsActive &&
-                        m.ExpireDate >= today &&
-                        m.ExpireDate <= today.AddDays(7)));
-            }
-
-            // Calculate duration counts BEFORE applying duration filter
-            var allCustomersForCounts = await query.Include(c => c.Memberships).ToListAsync();
-            
-            ViewBag.Count1M = allCustomersForCounts.Count(c => 
-                c.Memberships.OrderByDescending(m => m.StartDate).FirstOrDefault()?.Duration == 1);
-            ViewBag.Count3M = allCustomersForCounts.Count(c => 
-                c.Memberships.OrderByDescending(m => m.StartDate).FirstOrDefault()?.Duration == 3);
-            ViewBag.Count6M = allCustomersForCounts.Count(c => 
-                c.Memberships.OrderByDescending(m => m.StartDate).FirstOrDefault()?.Duration == 6);
-            ViewBag.Count12M = allCustomersForCounts.Count(c => 
-                c.Memberships.OrderByDescending(m => m.StartDate).FirstOrDefault()?.Duration == 12);
-            ViewBag.CountAll = allCustomersForCounts.Count;
-
-            if (duration.HasValue)
-            {
-                query = query.Where(c =>
-                    c.Memberships
-                        .OrderByDescending(m => m.StartDate)
-                        .FirstOrDefault().Duration == duration.Value
-                );
-            }
-
-            ViewBag.Duration = duration;
-
-            // Sorting
-            ViewBag.Sort = sort;
-            query = sort switch
-            {
-                "name_desc" => query.OrderByDescending(c => c.FullName),
-                "expire" => query.OrderBy(c =>
-                    c.Memberships.OrderByDescending(m => m.StartDate)
-                                 .Select(m => m.ExpireDate)
-                                 .FirstOrDefault()),
-                "expire_desc" => query.OrderByDescending(c =>
-                    c.Memberships.OrderByDescending(m => m.StartDate)
-                                 .Select(m => m.ExpireDate)
-                                 .FirstOrDefault()),
-                _ => query.OrderBy(c => c.FullName),
-            };
-
-            int total = await query.CountAsync();
-            var data = await query
-                .Skip((page - 1) * pageSize)
-                .Take(pageSize)
-                .ToListAsync();
-
-            ViewBag.Page = page;
-            ViewBag.TotalPages = (int)Math.Ceiling(total / (double)pageSize);
+            ViewBag.Page = result.CurrentPage;
+            ViewBag.TotalPages = result.TotalPages;
             ViewBag.Search = search;
+            ViewBag.Sort = sort;
+            ViewBag.Filter = filter ?? "all";
+            ViewBag.Duration = duration;
+            ViewBag.Count1M = result.DurationCounts.Count1M;
+            ViewBag.Count3M = result.DurationCounts.Count3M;
+            ViewBag.Count6M = result.DurationCounts.Count6M;
+            ViewBag.Count12M = result.DurationCounts.Count12M;
+            ViewBag.CountAll = result.DurationCounts.CountAll;
 
-            return View(data);
+            return View(result.Customers);
         }
-
 
         public async Task<IActionResult> Details(int id)
         {
-            var customer = await _context.Customers
-                .Include(c => c.Memberships)
-                .FirstOrDefaultAsync(c => c.CustomerID == id);
-
+            var customer = await _customerService.GetByIdWithMembershipsAsync(id);
             if (customer == null)
                 return NotFound();
 
@@ -131,22 +63,29 @@ namespace HighSpiritApp.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> Create(Customer customer, IFormFile photoFile, string PlanName, int PaidPrice, DateTime StartDate, int Duration, DateTime? ExpireDate)
+        public async Task<IActionResult> Create(
+            Customer customer,
+            IFormFile photoFile,
+            string PlanName,
+            int PaidPrice,
+            DateTime StartDate,
+            int Duration,
+            DateTime? ExpireDate)
         {
-
+            byte[]? photo = null;
             if (photoFile != null && photoFile.Length > 0)
             {
                 using var ms = new MemoryStream();
                 await photoFile.CopyToAsync(ms);
-                customer.Photo = ms.ToArray();
+                photo = ms.ToArray();
             }
 
-            _context.Customers.Add(customer);
-            await _context.SaveChangesAsync();
+            var createdCustomer = await _customerService.CreateAsync(customer, photo);
 
+            // Create initial membership
             var membership = new CustomerMembership
             {
-                CustomerID = customer.CustomerID,
+                CustomerID = createdCustomer.CustomerID,
                 PlanName = PlanName,
                 PaidPrice = PaidPrice,
                 StartDate = StartDate,
@@ -154,38 +93,22 @@ namespace HighSpiritApp.Controllers
                 ExpireDate = ExpireDate ?? StartDate.AddMonths(Duration),
                 IsActive = true
             };
+
             if (membership.StartDate < customer.JoinDate)
             {
-                ModelState.AddModelError(
-                    "StartDate",
-                    "Start date cannot be earlier than join date."
-                );
-                return View(membership);
+                ModelState.AddModelError("StartDate", "Start date cannot be earlier than join date.");
+                return View(customer);
             }
 
-            _context.CustomerMemberships.Add(membership);
-            await _context.SaveChangesAsync();
+            await _membershipService.CreateAsync(membership);
 
             TempData["success"] = "Customer added successfully!";
             return RedirectToAction("Index");
         }
 
-
-
         public async Task<IActionResult> Delete(int id)
         {
-            var memberships = _context.CustomerMemberships
-                                      .Where(m => m.CustomerID == id);
-
-            _context.CustomerMemberships.RemoveRange(memberships);
-
-            var customer = await _context.Customers.FindAsync(id);
-            if (customer != null)
-            {
-                _context.Customers.Remove(customer);
-            }
-
-            await _context.SaveChangesAsync();
+            await _customerService.DeleteAsync(id);
             TempData["success"] = "Customer deleted successfully!";
             return RedirectToAction("Index");
         }
@@ -194,6 +117,7 @@ namespace HighSpiritApp.Controllers
         {
             return View();
         }
+
         [HttpPost]
         public async Task<IActionResult> Import(IFormFile file)
         {
@@ -203,139 +127,32 @@ namespace HighSpiritApp.Controllers
                 return View();
             }
 
-            int imported = 0;
-            int skipped = 0;
-            var skippedUsers = new List<string>(); // Track skipped users
-
             using var stream = file.OpenReadStream();
-            using var workbook = new XLWorkbook(stream);
+            var result = await _customerService.ImportFromExcelAsync(stream);
 
-            foreach (var sheet in workbook.Worksheets)
+            if (result.Success)
             {
-                var lastRow = sheet.LastRowUsed();
-                if (lastRow == null) continue;
+                TempData["success"] = $"Import completed. Imported: {result.Imported}, Skipped: {result.Skipped}";
 
-                for (int r = 2; r <= lastRow.RowNumber(); r++)
+                if (result.SkippedUsers.Any())
                 {
-                    var row = sheet.Row(r);
-
-                    string fullName = row.Cell(1).GetString().Trim();
-                    if (string.IsNullOrEmpty(fullName)) continue;
-
-                    // JOIN DATE
-                    DateTime joinDate;
-                    var joinText = row.Cell(2).GetString().Trim()
-                        .Replace("st", "")
-                        .Replace("nd", "")
-                        .Replace("rd", "")
-                        .Replace("th", "")
-                        .Replace("Sept", "Sep");
-
-                    if (!DateTime.TryParse(joinText, out joinDate))
-                        joinDate = DateTime.Today;
-
-                    bool exists = await _context.Customers.AnyAsync(c =>
-                        c.FullName == fullName &&
-                        c.JoinDate.Date == joinDate.Date);
-
-                    if (exists)
-                    {
-                        skipped++;
-                        skippedUsers.Add($"Row {r}: {fullName} (Join: {joinDate:dd MMM yyyy}) - Already exists");
-                        continue;
-                    }
-
-                    // PLAN
-                    string planName = row.Cell(3).GetString();
-
-                    // DURATION ("1 Month")
-                    int duration = 1;
-                    var durationText = row.Cell(4).GetString();
-                    var numberPart = new string(durationText.Where(char.IsDigit).ToArray());
-                    if (int.TryParse(numberPart, out int d))
-                        duration = d;
-
-                    // 🔥 EXPIRE DATE FROM EXCEL (COLUMN 5)
-                    DateTime? expireDate = null;
-                    var expireCell = row.Cell(5);
-
-                    if (expireCell.DataType == XLDataType.DateTime)
-                    {
-                        expireDate = expireCell.GetDateTime();
-                    }
-                    else
-                    {
-                        var expireText = expireCell.GetString().Trim()
-                            .Replace("st", "")
-                            .Replace("nd", "")
-                            .Replace("rd", "")
-                            .Replace("th", "")
-                            .Replace("Sept", "Sep");
-
-                        if (DateTime.TryParse(expireText, out DateTime parsedExpire))
-                            expireDate = parsedExpire;
-                    }
-
-
-                    string shift = row.Cell(6).GetString();
-                    string remarks = row.Cell(7).GetString();
-
-                    var customer = new Customer
-                    {
-                        FullName = fullName,
-                        JoinDate = joinDate,
-                        DateOfBirth = null, // Not available in import
-                        Phone = "N/A",
-                        Gender = "Unknown",
-                        Address = "Imported from Excel",
-                        Height = "N/A",
-                        BloodGroup = "N/A",
-                        Shift = string.IsNullOrWhiteSpace(shift) ? "General" : shift,
-                        Remarks = remarks
-                    };
-
-                    _context.Customers.Add(customer);
-                    await _context.SaveChangesAsync();
-
-                    var membership = new CustomerMembership
-                    {
-                        CustomerID = customer.CustomerID,
-                        PlanName = planName,
-                        StartDate = joinDate,
-                        Duration = duration,
-                        ExpireDate = expireDate.HasValue ? expireDate.Value.Date : joinDate.Date.AddMonths(duration),
-                        PaidPrice = 0,
-                        IsActive = true
-                    };
-
-                    _context.CustomerMemberships.Add(membership);
-                    await _context.SaveChangesAsync();
-
-                    imported++;
+                    TempData["skippedUsers"] = string.Join("||", result.SkippedUsers);
                 }
             }
-
-            TempData["success"] = $"Import completed. Imported: {imported}, Skipped: {skipped}";
-            
-            if (skippedUsers.Any())
+            else
             {
-                TempData["skippedUsers"] = string.Join("||", skippedUsers);
+                TempData["error"] = $"Import failed: {result.ErrorMessage}";
             }
 
             return RedirectToAction("Index");
         }
 
-
-
         public async Task<IActionResult> EditAll(int id)
         {
-            var customer = await _context.Customers
-                .Include(c => c.Memberships)
-                .FirstOrDefaultAsync(c => c.CustomerID == id);
-
+            var customer = await _customerService.GetByIdWithMembershipsAsync(id);
             if (customer == null) return NotFound();
 
-            var latestMembership = customer.Memberships
+            var latestMembership = customer.Memberships?
                 .OrderByDescending(m => m.StartDate)
                 .FirstOrDefault();
 
@@ -364,188 +181,40 @@ namespace HighSpiritApp.Controllers
 
             return View(vm);
         }
+
         [HttpPost]
         public async Task<IActionResult> EditAll(CustomerEditVM vm, IFormFile photoFile)
         {
-            var customer = await _context.Customers.FindAsync(vm.CustomerID);
-            if (customer == null) return NotFound();
-
-            customer.FullName = vm.FullName;
-            customer.Phone = vm.Phone;
-            customer.Email = vm.Email;
-            customer.Address = vm.Address;
-            customer.Gender = vm.Gender;
-            customer.DateOfBirth = vm.DateOfBirth;
-            customer.Height = vm.Height;
-            customer.WeightKG = vm.WeightKG;
-            customer.BloodGroup = vm.BloodGroup;
-            customer.Occupation = vm.Occupation;
-            customer.Shift = vm.Shift;
-            customer.Remarks = vm.Remarks;
-
+            byte[]? photo = null;
             if (photoFile != null && photoFile.Length > 0)
             {
                 using var ms = new MemoryStream();
                 await photoFile.CopyToAsync(ms);
-                customer.Photo = ms.ToArray();
+                photo = ms.ToArray();
             }
 
-            if (vm.MembershipID != null)
-            {
-                var membership = await _context.CustomerMemberships
-                    .FindAsync(vm.MembershipID);
+            await _customerService.UpdateAsync(vm, photo);
 
-                if (membership != null)
-                {
-                    membership.PlanName = vm.PlanName;
-                    membership.PaidPrice = vm.PaidPrice ?? 0;
-                    membership.StartDate = vm.StartDate;  // Now editable
-                    membership.ExpireDate = vm.ExpireDate
-                        ?? vm.StartDate.AddMonths(vm.Duration > 0 ? vm.Duration : membership.Duration);
-                }
-            }
-
-            await _context.SaveChangesAsync();
             TempData["success"] = "User Details updated successfully!";
-            return RedirectToAction("Index", "Customers");
-
+            return RedirectToAction("Index");
         }
 
         [HttpGet]
         public async Task<IActionResult> ExportAll(string search, string filter, int? duration)
         {
-            var today = DateTime.Today;
-
-            var query = _context.Customers
-                .Include(c => c.Memberships)
-                .AsQueryable();
-
-            // Apply search filter
-            if (!string.IsNullOrEmpty(search))
+            var fileBytes = await _customerService.ExportToExcelAsync(new CustomerFilterRequest
             {
-                query = query.Where(c =>
-                    c.FullName.Contains(search) ||
-                    c.Phone.Contains(search));
-            }
+                Search = search,
+                Filter = filter ?? "all",
+                Duration = duration
+            });
 
-            // Apply status filter
-            filter = filter ?? "all";
-            if (filter == "active")
-            {
-                query = query.Where(c =>
-                    c.Memberships.Any(m => m.IsActive && m.DueDaysComputed == 0));
-            }
-            else if (filter == "expired")
-            {
-                query = query.Where(c =>
-                    c.Memberships.Any(m => m.IsActive && m.DueDaysComputed > 0));
-            }
-            else if (filter == "soon")
-            {
-                query = query.Where(c =>
-                    c.Memberships.Any(m =>
-                        m.IsActive &&
-                        m.ExpireDate >= today &&
-                        m.ExpireDate <= today.AddDays(7)));
-            }
-
-            // Apply duration filter
-            if (duration.HasValue)
-            {
-                query = query.Where(c =>
-                    c.Memberships
-                        .OrderByDescending(m => m.StartDate)
-                        .FirstOrDefault().Duration == duration.Value
-                );
-            }
-
-            var customers = await query.OrderBy(c => c.FullName).ToListAsync();
-
-            using var workbook = new XLWorkbook();
-            
-            // Dynamic sheet name based on filters
-            string sheetName = "Gym Members";
-            if (duration.HasValue)
-                sheetName = $"{duration}M Members";
-            else if (filter != "all")
-                sheetName = $"{char.ToUpper(filter[0]) + filter.Substring(1)} Members";
-
-            var ws = workbook.Worksheets.Add(sheetName);
-
-            // HEADER
-            ws.Cell(1, 1).Value = "SN";
-            ws.Cell(1, 2).Value = "Full Name";
-            ws.Cell(1, 3).Value = "Phone";
-            ws.Cell(1, 4).Value = "Email";
-            ws.Cell(1, 5).Value = "Address";
-            ws.Cell(1, 6).Value = "Gender";
-            ws.Cell(1, 7).Value = "Blood Group";
-            ws.Cell(1, 8).Value = "Weight (KG)";
-            ws.Cell(1, 9).Value = "Height";
-            ws.Cell(1, 10).Value = "Occupation";
-            ws.Cell(1, 11).Value = "Join Date";
-            ws.Cell(1, 12).Value = "Date Of Birth";
-            ws.Cell(1, 13).Value = "Shift";
-            ws.Cell(1, 14).Value = "Remarks";
-
-            ws.Cell(1, 15).Value = "Plan Name";
-            ws.Cell(1, 16).Value = "Paid Price";
-            ws.Cell(1, 17).Value = "Start Date";
-            ws.Cell(1, 18).Value = "Duration (Months)";
-            ws.Cell(1, 19).Value = "Expire Date";
-            ws.Cell(1, 20).Value = "Due Days";
-
-            int row = 2;
-            int sn = 1;
-
-            foreach (var c in customers)
-            {
-                var m = c.Memberships?
-                    .OrderByDescending(x => x.StartDate)
-                    .FirstOrDefault();
-
-                ws.Cell(row, 1).Value = sn++;
-                ws.Cell(row, 2).Value = c.FullName;
-                ws.Cell(row, 3).Value = c.Phone;
-                ws.Cell(row, 4).Value = c.Email;
-                ws.Cell(row, 5).Value = c.Address;
-                ws.Cell(row, 6).Value = c.Gender;
-                ws.Cell(row, 7).Value = c.BloodGroup;
-                ws.Cell(row, 8).Value = c.WeightKG;
-                ws.Cell(row, 9).Value = c.Height;
-                ws.Cell(row, 10).Value = c.Occupation;
-                ws.Cell(row, 11).Value = c.JoinDate.ToString("dd MMM yyyy");
-                ws.Cell(row, 12).Value = c.DateOfBirth.HasValue
-                                            ? c.DateOfBirth.Value.ToString("dd MMM yyyy")
-                                            : "";
-                ws.Cell(row, 13).Value = c.Shift;
-                ws.Cell(row, 14).Value = c.Remarks;
-
-                ws.Cell(row, 15).Value = m?.PlanName;
-                ws.Cell(row, 16).Value = m?.PaidPrice ?? 0;
-                ws.Cell(row, 17).Value = m?.StartDate.ToString("dd MMM yyyy");
-                ws.Cell(row, 18).Value = m?.Duration ?? 0;
-                ws.Cell(row, 19).Value = m?.ExpireDate.ToString("dd MMM yyyy");
-                ws.Cell(row, 20).Value = m?.DueDaysComputed ?? 0;
-
-                row++;
-            }
-
-            ws.Columns().AdjustToContents();
-
-            using var stream = new MemoryStream();
-            workbook.SaveAs(stream);
-            stream.Position = 0;
-
-            // Dynamic file name based on filters
-            string fileName = "Gym Members";
-            if (duration.HasValue)
-                fileName = $"{duration}M Members";
-            if (filter != "all")
+            var fileName = duration.HasValue ? $"{duration}M Members" : "Gym Members";
+            if (filter != null && filter != "all")
                 fileName += $" - {char.ToUpper(filter[0]) + filter.Substring(1)}";
 
             return File(
-                stream.ToArray(),
+                fileBytes,
                 "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
                 $"{fileName}.xlsx"
             );
