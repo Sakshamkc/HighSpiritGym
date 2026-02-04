@@ -52,6 +52,10 @@ namespace HighSpiritApp.Services
                 x.LatestMembership!.ExpireDate >= today &&
                 x.LatestMembership.ExpireDate <= today.AddDays(7));
             var gymJoinedThisMonth = customers.Count(c => c.JoinDate >= monthStart);
+            
+            // Gym total due amount from latest memberships
+            var gymTotalDue = customerMemberships
+                .Sum(x => x.LatestMembership!.DueAmount);
 
             // Boxing stats
             var boxingMembers = (await _boxingRepository.GetAllAsync()).ToList();
@@ -67,6 +71,7 @@ namespace HighSpiritApp.Services
                 GymExpired = gymExpired,
                 GymExpiringSoon = gymExpiringSoon,
                 GymJoinedThisMonth = gymJoinedThisMonth,
+                GymTotalDue = gymTotalDue,
                 BoxingTotal = boxingTotal,
                 BoxingPaid = boxingPaid,
                 BoxingWithDue = boxingWithDue,

@@ -16,6 +16,7 @@ namespace HighSpiritApp.Services.Interfaces
         public int GymExpired { get; set; }
         public int GymExpiringSoon { get; set; }
         public int GymJoinedThisMonth { get; set; }
+        public int GymTotalDue { get; set; }
 
         // Boxing Stats
         public int BoxingTotal { get; set; }

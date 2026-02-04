@@ -103,12 +103,13 @@
                    placeholder="Search by name or phone"
                    autocomplete="off" />
             <input type="hidden" name="filter" value="@ViewBag.Filter" />
+            <input type="hidden" name="planName" value="@ViewBag.PlanName" />
             <button class="btn btn-primary">
                 <i class="fa-solid fa-search"></i>
             </button>
         </div>
 
-        <a href="/Customers/ExportAll?search=@ViewBag.Search&filter=@ViewBag.Filter&duration=@ViewBag.Duration"
+        <a href="/Customers/ExportAll?search=@ViewBag.Search&filter=@ViewBag.Filter&duration=@ViewBag.Duration&planName=@ViewBag.PlanName"
            class="btn btn-success btn-lg ms-auto">
             <i class="fa-solid fa-file-download"></i> Export Excel
         </a>
@@ -118,7 +119,7 @@
 <!-- Duration Stats Cards -->
 <div class="row g-3 mb-4">
     <div class="col-6 col-md-4 col-lg">
-        <a href="?duration=&filter=@ViewBag.Filter&search=@ViewBag.Search" class="text-decoration-none">
+        <a href="?duration=&filter=@ViewBag.Filter&search=@ViewBag.Search&planName=@ViewBag.PlanName" class="text-decoration-none">
             <div class="card shadow-sm @(ViewBag.Duration == null ? "border-dark border-2" : "")">
                 <div class="card-body text-center py-3">
                     <div class="fs-3 fw-bold text-dark">@ViewBag.CountAll</div>
@@ -128,7 +129,7 @@
         </a>
     </div>
     <div class="col-6 col-md-4 col-lg">
-        <a href="?duration=1&filter=@ViewBag.Filter&search=@ViewBag.Search" class="text-decoration-none">
+        <a href="?duration=1&filter=@ViewBag.Filter&search=@ViewBag.Search&planName=@ViewBag.PlanName" class="text-decoration-none">
             <div class="card shadow-sm @(ViewBag.Duration == 1 ? "border-primary border-2" : "")">
                 <div class="card-body text-center py-3">
                     <div class="fs-3 fw-bold text-primary">@ViewBag.Count1M</div>
@@ -138,7 +139,7 @@
         </a>
     </div>
     <div class="col-6 col-md-4 col-lg">
-        <a href="?duration=3&filter=@ViewBag.Filter&search=@ViewBag.Search" class="text-decoration-none">
+        <a href="?duration=3&filter=@ViewBag.Filter&search=@ViewBag.Search&planName=@ViewBag.PlanName" class="text-decoration-none">
             <div class="card shadow-sm @(ViewBag.Duration == 3 ? "border-success border-2" : "")">
                 <div class="card-body text-center py-3">
                     <div class="fs-3 fw-bold text-success">@ViewBag.Count3M</div>
@@ -148,7 +149,7 @@
         </a>
     </div>
     <div class="col-6 col-md-4 col-lg">
-        <a href="?duration=6&filter=@ViewBag.Filter&search=@ViewBag.Search" class="text-decoration-none">
+        <a href="?duration=6&filter=@ViewBag.Filter&search=@ViewBag.Search&planName=@ViewBag.PlanName" class="text-decoration-none">
             <div class="card shadow-sm @(ViewBag.Duration == 6 ? "border-warning border-2" : "")">
                 <div class="card-body text-center py-3">
                     <div class="fs-3 fw-bold text-warning">@ViewBag.Count6M</div>
@@ -158,7 +159,7 @@
         </a>
     </div>
     <div class="col-6 col-md-4 col-lg">
-        <a href="?duration=12&filter=@ViewBag.Filter&search=@ViewBag.Search" class="text-decoration-none">
+        <a href="?duration=12&filter=@ViewBag.Filter&search=@ViewBag.Search&planName=@ViewBag.PlanName" class="text-decoration-none">
             <div class="card shadow-sm @(ViewBag.Duration == 12 ? "border-danger border-2" : "")">
                 <div class="card-body text-center py-3">
                     <div class="fs-3 fw-bold text-danger">@ViewBag.Count12M</div>
@@ -172,24 +173,78 @@
 <div class="d-flex flex-column flex-md-row align-items-start align-items-md-center gap-2 gap-md-3 mb-3">
     <div class="btn-group" role="group">
         <a class="btn @(ViewBag.Filter=="all"?"btn-primary":"btn-outline-primary")"
-           href="?filter=all&duration=@ViewBag.Duration&search=@ViewBag.Search">
+           href="?filter=all&duration=@ViewBag.Duration&search=@ViewBag.Search&planName=@ViewBag.PlanName">
             All
         </a>
 
         <a class="btn @(ViewBag.Filter=="active"?"btn-success":"btn-outline-success")"
-           href="?filter=active&duration=@ViewBag.Duration&search=@ViewBag.Search">
+           href="?filter=active&duration=@ViewBag.Duration&search=@ViewBag.Search&planName=@ViewBag.PlanName">
             Active
         </a>
 
         <a class="btn @(ViewBag.Filter=="expired"?"btn-danger":"btn-outline-danger")"
-           href="?filter=expired&duration=@ViewBag.Duration&search=@ViewBag.Search">
+           href="?filter=expired&duration=@ViewBag.Duration&search=@ViewBag.Search&planName=@ViewBag.PlanName">
             Expired
         </a>
 
         <a class="btn @(ViewBag.Filter=="soon"?"btn-warning":"btn-outline-warning")"
-           href="?filter=soon&duration=@ViewBag.Duration&search=@ViewBag.Search">
+           href="?filter=soon&duration=@ViewBag.Duration&search=@ViewBag.Search&planName=@ViewBag.PlanName">
             Expiring (7 Days)
         </a>
+    </div>
+    
+    <!-- Plan Name Filter Dropdown -->
+    <div class="dropdown">
+        <button class="btn @(!string.IsNullOrEmpty((string)ViewBag.PlanName) ? "btn-info" : "btn-outline-info") dropdown-toggle" 
+                type="button" data-bs-toggle="dropdown">
+            <i class="fa-solid fa-box me-1"></i>
+            @(string.IsNullOrEmpty((string)ViewBag.PlanName) ? "All Plans" : ViewBag.PlanName)
+        </button>
+        <ul class="dropdown-menu">
+            <li>
+                <a class="dropdown-item @(string.IsNullOrEmpty((string)ViewBag.PlanName) ? "active" : "")" 
+                   href="?filter=@ViewBag.Filter&duration=@ViewBag.Duration&search=@ViewBag.Search">
+                    <i class="fa-solid fa-list me-2"></i>All Plans
+                </a>
+            </li>
+            <li><hr class="dropdown-divider"></li>
+            <li>
+                <a class="dropdown-item @(ViewBag.PlanName == "Premium" ? "active" : "")" 
+                   href="?filter=@ViewBag.Filter&duration=@ViewBag.Duration&search=@ViewBag.Search&planName=Premium">
+                    <i class="fa-solid fa-crown me-2 text-warning"></i>Premium Package
+                </a>
+            </li>
+            <li>
+                <a class="dropdown-item @(ViewBag.PlanName == "Gym" ? "active" : "")" 
+                   href="?filter=@ViewBag.Filter&duration=@ViewBag.Duration&search=@ViewBag.Search&planName=Gym">
+                    <i class="fa-solid fa-dumbbell me-2 text-primary"></i>Gym Package
+                </a>
+            </li>
+            <li>
+                <a class="dropdown-item @(ViewBag.PlanName == "Cardio" ? "active" : "")" 
+                   href="?filter=@ViewBag.Filter&duration=@ViewBag.Duration&search=@ViewBag.Search&planName=Cardio">
+                    <i class="fa-solid fa-heart-pulse me-2 text-danger"></i>Cardio Package
+                </a>
+            </li>
+            <li>
+                <a class="dropdown-item @(ViewBag.PlanName == "Customized" ? "active" : "")" 
+                   href="?filter=@ViewBag.Filter&duration=@ViewBag.Duration&search=@ViewBag.Search&planName=Customized">
+                    <i class="fa-solid fa-sliders me-2 text-success"></i>Customized Package
+                </a>
+            </li>
+            <li>
+                <a class="dropdown-item @(ViewBag.PlanName == "Zumba" ? "active" : "")" 
+                   href="?filter=@ViewBag.Filter&duration=@ViewBag.Duration&search=@ViewBag.Search&planName=Zumba">
+                    <i class="fa-solid fa-music me-2 text-info"></i>Zumba & Aerobics
+                </a>
+            </li>
+            <li>
+                <a class="dropdown-item @(ViewBag.PlanName == "Sauna" ? "active" : "")" 
+                   href="?filter=@ViewBag.Filter&duration=@ViewBag.Duration&search=@ViewBag.Search&planName=Sauna">
+                    <i class="fa-solid fa-hot-tub-person me-2 text-secondary"></i>Sauna & Steam
+                </a>
+            </li>
+        </ul>
     </div>
 </div>
 
@@ -388,7 +443,7 @@
 
             <ul class="pagination justify-content-center">
                 <li class="page-item @(current == 1 ? "disabled" : "")">
-                    <a class="page-link" href="?page=@(current - 1)&search=@ViewBag.Search&sort=@ViewBag.Sort&filter=@ViewBag.Filter&duration=@ViewBag.Duration">
+                    <a class="page-link" href="?page=@(current - 1)&search=@ViewBag.Search&sort=@ViewBag.Sort&filter=@ViewBag.Filter&duration=@ViewBag.Duration&planName=@ViewBag.PlanName">
                         Prev
                     </a>
                 </li>
@@ -396,7 +451,7 @@
                 @if (start > 1)
                 {
                     <li class="page-item">
-                        <a class="page-link" href="?page=1&search=@ViewBag.Search&sort=@ViewBag.Sort&filter=@ViewBag.Filter&duration=@ViewBag.Duration">1</a>
+                        <a class="page-link" href="?page=1&search=@ViewBag.Search&sort=@ViewBag.Sort&filter=@ViewBag.Filter&duration=@ViewBag.Duration&planName=@ViewBag.PlanName">1</a>
                     </li>
                     <li class="page-item disabled"><span class="page-link">…</span></li>
                 }
@@ -404,7 +459,7 @@
                 @for (int i = start; i <= end; i++)
                 {
                     <li class="page-item @(i == current ? "active" : "")">
-                        <a class="page-link" href="?page=@i&search=@ViewBag.Search&sort=@ViewBag.Sort&filter=@ViewBag.Filter&duration=@ViewBag.Duration">@i</a>
+                        <a class="page-link" href="?page=@i&search=@ViewBag.Search&sort=@ViewBag.Sort&filter=@ViewBag.Filter&duration=@ViewBag.Duration&planName=@ViewBag.PlanName">@i</a>
                     </li>
                 }
 
@@ -412,12 +467,12 @@
                 {
                     <li class="page-item disabled"><span class="page-link">…</span></li>
                     <li class="page-item">
-                        <a class="page-link" href="?page=@total&search=@ViewBag.Search&sort=@ViewBag.Sort&filter=@ViewBag.Filter&duration=@ViewBag.Duration">@total</a>
+                        <a class="page-link" href="?page=@total&search=@ViewBag.Search&sort=@ViewBag.Sort&filter=@ViewBag.Filter&duration=@ViewBag.Duration&planName=@ViewBag.PlanName">@total</a>
                     </li>
                 }
 
                 <li class="page-item @(current == total ? "disabled" : "")">
-                    <a class="page-link" href="?page=@(current + 1)&search=@ViewBag.Search&sort=@ViewBag.Sort&filter=@ViewBag.Filter&duration=@ViewBag.Duration">
+                    <a class="page-link" href="?page=@(current + 1)&search=@ViewBag.Search&sort=@ViewBag.Sort&filter=@ViewBag.Filter&duration=@ViewBag.Duration&planName=@ViewBag.PlanName">
                         Next
                     </a>
                 </li>

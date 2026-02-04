@@ -35,6 +35,7 @@ namespace HighSpiritApp.Controllers
             ViewBag.Expired = stats.GymExpired;
             ViewBag.ExpiringSoon = stats.GymExpiringSoon;
             ViewBag.JoinedThisMonth = stats.GymJoinedThisMonth;
+            ViewBag.GymTotalDue = stats.GymTotalDue;
 
             // Boxing stats
             ViewBag.BoxingTotal = stats.BoxingTotal;

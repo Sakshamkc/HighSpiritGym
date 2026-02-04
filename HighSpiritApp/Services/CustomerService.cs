@@ -67,6 +67,15 @@ namespace HighSpiritApp.Services
                 _ => query
             };
 
+            // Plan name filter
+            if (!string.IsNullOrEmpty(filter.PlanName))
+            {
+                query = query.Where(c =>
+                    c.Memberships.Any() &&
+                    c.Memberships.OrderByDescending(m => m.StartDate).First().PlanName != null &&
+                    c.Memberships.OrderByDescending(m => m.StartDate).First().PlanName!.Contains(filter.PlanName));
+            }
+
             // Get all for duration counts before applying duration filter
             var allCustomers = await query.ToListAsync();
             var durationCounts = new DurationCounts
@@ -298,6 +307,7 @@ namespace HighSpiritApp.Services
                 Search = filter.Search,
                 Filter = filter.Filter,
                 Duration = filter.Duration,
+                PlanName = filter.PlanName,
                 PageSize = int.MaxValue
             })).Customers.OrderBy(c => c.FullName);
 

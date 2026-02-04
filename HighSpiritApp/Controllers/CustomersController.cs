@@ -22,7 +22,7 @@ namespace HighSpiritApp.Controllers
             _membershipService = membershipService;
         }
 
-        public async Task<IActionResult> Index(string search, string sort, string filter, int? duration, int page = 1)
+        public async Task<IActionResult> Index(string search, string sort, string filter, int? duration, string planName, int page = 1)
         {
             var result = await _customerService.GetFilteredCustomersAsync(new CustomerFilterRequest
             {
@@ -30,6 +30,7 @@ namespace HighSpiritApp.Controllers
                 Sort = sort,
                 Filter = filter,
                 Duration = duration,
+                PlanName = planName,
                 Page = page
             });
 
@@ -39,6 +40,7 @@ namespace HighSpiritApp.Controllers
             ViewBag.Sort = sort;
             ViewBag.Filter = filter ?? "all";
             ViewBag.Duration = duration;
+            ViewBag.PlanName = planName;
             ViewBag.Count1M = result.DurationCounts.Count1M;
             ViewBag.Count3M = result.DurationCounts.Count3M;
             ViewBag.Count6M = result.DurationCounts.Count6M;
@@ -204,18 +206,21 @@ namespace HighSpiritApp.Controllers
         }
 
         [HttpGet]
-        public async Task<IActionResult> ExportAll(string search, string filter, int? duration)
+        public async Task<IActionResult> ExportAll(string search, string filter, int? duration, string planName)
         {
             var fileBytes = await _customerService.ExportToExcelAsync(new CustomerFilterRequest
             {
                 Search = search,
                 Filter = filter ?? "all",
-                Duration = duration
+                Duration = duration,
+                PlanName = planName
             });
 
             var fileName = duration.HasValue ? $"{duration}M Members" : "Gym Members";
             if (filter != null && filter != "all")
                 fileName += $" - {char.ToUpper(filter[0]) + filter.Substring(1)}";
+            if (!string.IsNullOrEmpty(planName))
+                fileName += $" - {planName}";
 
             return File(
                 fileBytes,
