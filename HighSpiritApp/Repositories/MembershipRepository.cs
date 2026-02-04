@@ -33,11 +33,12 @@ namespace HighSpiritApp.Repositories
         {
             var today = DateTime.Today;
 
+            // Get all memberships, no IsActive filter
             var memberships = await _context.CustomerMemberships
                 .Include(m => m.Customer)
-                .Where(m => m.ExpireDate != null && m.IsActive)
                 .ToListAsync();
 
+            // Group by customer and get the latest by StartDate, then filter expired
             return memberships
                 .GroupBy(m => m.CustomerID)
                 .Select(g => g.OrderByDescending(x => x.StartDate).First())
@@ -51,11 +52,12 @@ namespace HighSpiritApp.Repositories
             var today = DateTime.Today;
             var endDate = today.AddDays(days);
 
+            // Get all memberships, no IsActive filter
             var memberships = await _context.CustomerMemberships
                 .Include(m => m.Customer)
-                .Where(m => m.IsActive)
                 .ToListAsync();
 
+            // Group by customer and get the latest by StartDate, then filter expiring soon
             return memberships
                 .GroupBy(m => m.CustomerID)
                 .Select(g => g.OrderByDescending(x => x.StartDate).First())
@@ -66,9 +68,10 @@ namespace HighSpiritApp.Repositories
 
         public async Task<CustomerMembership?> GetActiveByCustomerIdAsync(int customerId)
         {
+            // Get latest membership by StartDate, no IsActive filter
             return await _context.CustomerMemberships
-                .Where(m => m.CustomerID == customerId && m.IsActive)
-                .OrderByDescending(m => m.ExpireDate)
+                .Where(m => m.CustomerID == customerId)
+                .OrderByDescending(m => m.StartDate)
                 .FirstOrDefaultAsync();
         }
 

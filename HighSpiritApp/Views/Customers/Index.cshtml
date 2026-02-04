@@ -29,6 +29,14 @@
         // Truncate if still too long
         return plan.Length > 25 ? plan.Substring(0, 22) + "..." : plan;
     }
+    
+    // Helper to get current membership - get latest by StartDate (no IsActive filter)
+    HighSpiritApp.Models.CustomerMembership? GetCurrentMembership(HighSpiritApp.Models.Customer c)
+    {
+        return c.Memberships?
+            .OrderByDescending(x => x.StartDate)
+            .FirstOrDefault();
+    }
 }
 
 <h4 class="mb-3">Members</h4>
@@ -235,10 +243,8 @@
             <tbody>
                 @foreach (var c in Model)
                 {
-                    var m = c.Memberships?
-                    .Where(x => x.IsActive)
-                    .OrderByDescending(x => x.StartDate)
-                    .FirstOrDefault();
+                    // Get current membership - prioritize by ExpireDate (latest = current)
+                    var m = GetCurrentMembership(c);
 
                     <tr>
                         <td>@(sn++)</td>

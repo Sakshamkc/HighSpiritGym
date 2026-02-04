@@ -1,8 +1,13 @@
-﻿@model HighSpiritApp.Models.Customer
+@model HighSpiritApp.Models.Customer
 @{
     Layout = "~/Views/Shared/_Layout.cshtml";
-    var latestMembership = Model.Memberships?.Where(x => x.IsActive).OrderByDescending(x => x.StartDate).FirstOrDefault();
     var today = DateTime.Today;
+    
+    // Get the CURRENT membership - get latest by StartDate (no IsActive filter)
+    var latestMembership = Model.Memberships?
+        .OrderByDescending(x => x.StartDate)
+        .FirstOrDefault();
+    
     var isExpired = latestMembership != null && latestMembership.ExpireDate < today;
     var isExpiringSoon = latestMembership != null && latestMembership.ExpireDate >= today && latestMembership.ExpireDate <= today.AddDays(7);
     var daysLeft = latestMembership != null ? (latestMembership.ExpireDate - today).Days : 0;
@@ -14,7 +19,7 @@
     
     string FormatDateLong(DateTime? date)
     {
-        if (!date.HasValue) return "-";
+        if (!date.HasValue || date.Value.Year < 1900) return "-";
         var d = date.Value;
         string suffix = d.Day % 10 == 1 && d.Day != 11 ? "st" :
                        d.Day % 10 == 2 && d.Day != 12 ? "nd" :
@@ -344,7 +349,7 @@
         <div class="row">
             <div class="col-6 col-md-3">
                 <div class="membership-stat">
-                    <div class="value">@latestMembership.PlanName?.Split(':')[0].Replace("Package", "").Trim()</div>
+                    <div class="value">@(latestMembership.PlanName?.Split(':')[0].Replace("Package", "").Trim() ?? "-")</div>
                     <div class="label">Current Plan</div>
                 </div>
             </div>

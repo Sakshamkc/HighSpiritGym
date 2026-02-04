@@ -30,7 +30,7 @@ namespace HighSpiritApp.Services
             // Get all customers with memberships
             var customers = (await _customerRepository.GetAllWithMembershipsAsync()).ToList();
 
-            // Get latest membership for each customer
+            // Get latest membership for each customer (by StartDate, no IsActive filter)
             var customerMemberships = customers
                 .Select(c => new
                 {
@@ -42,15 +42,14 @@ namespace HighSpiritApp.Services
                 .Where(x => x.LatestMembership != null)
                 .ToList();
 
-            // Gym stats
+            // Gym stats - based on latest membership's ExpireDate, no IsActive check
             var gymTotal = customers.Count;
             var gymActive = customerMemberships.Count(x =>
-                x.LatestMembership!.IsActive && x.LatestMembership.ExpireDate >= today);
+                x.LatestMembership!.ExpireDate >= today);
             var gymExpired = customerMemberships.Count(x =>
-                x.LatestMembership!.IsActive && x.LatestMembership.ExpireDate < today);
+                x.LatestMembership!.ExpireDate < today);
             var gymExpiringSoon = customerMemberships.Count(x =>
-                x.LatestMembership!.IsActive &&
-                x.LatestMembership.ExpireDate >= today &&
+                x.LatestMembership!.ExpireDate >= today &&
                 x.LatestMembership.ExpireDate <= today.AddDays(7));
             var gymJoinedThisMonth = customers.Count(c => c.JoinDate >= monthStart);
 

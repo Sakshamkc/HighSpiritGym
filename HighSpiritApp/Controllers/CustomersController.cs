@@ -154,6 +154,7 @@ namespace HighSpiritApp.Controllers
             var customer = await _customerService.GetByIdWithMembershipsAsync(id);
             if (customer == null) return NotFound();
 
+            // Get current membership - get latest by StartDate (no IsActive filter)
             var latestMembership = customer.Memberships?
                 .OrderByDescending(m => m.StartDate)
                 .FirstOrDefault();

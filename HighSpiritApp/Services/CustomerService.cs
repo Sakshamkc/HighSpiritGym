@@ -50,19 +50,20 @@ namespace HighSpiritApp.Services
                     (c.Phone != null && c.Phone.Contains(filter.Search)));
             }
 
-            // Status filter
+            // Status filter - based on latest membership's ExpireDate, no IsActive check
             filter.Filter ??= "all";
             query = filter.Filter switch
             {
                 "active" => query.Where(c =>
-                    c.Memberships.Any(m => m.IsActive && m.DueDaysComputed == 0)),
+                    c.Memberships.Any() &&
+                    c.Memberships.OrderByDescending(m => m.StartDate).First().ExpireDate >= today),
                 "expired" => query.Where(c =>
-                    c.Memberships.Any(m => m.IsActive && m.DueDaysComputed > 0)),
+                    c.Memberships.Any() &&
+                    c.Memberships.OrderByDescending(m => m.StartDate).First().ExpireDate < today),
                 "soon" => query.Where(c =>
-                    c.Memberships.Any(m =>
-                        m.IsActive &&
-                        m.ExpireDate >= today &&
-                        m.ExpireDate <= today.AddDays(7))),
+                    c.Memberships.Any() &&
+                    c.Memberships.OrderByDescending(m => m.StartDate).First().ExpireDate >= today &&
+                    c.Memberships.OrderByDescending(m => m.StartDate).First().ExpireDate <= today.AddDays(7)),
                 _ => query
             };
 

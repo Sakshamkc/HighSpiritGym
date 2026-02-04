@@ -115,9 +115,9 @@ namespace HighSpiritApp.Services
             if (customer == null)
                 throw new KeyNotFoundException($"Customer with ID {customerId} not found.");
 
+            // Get latest membership by StartDate (no IsActive filter)
             var lastMembership = customer.Memberships?
-                .Where(m => m.IsActive)
-                .OrderByDescending(m => m.ExpireDate)
+                .OrderByDescending(m => m.StartDate)
                 .FirstOrDefault();
 
             DateTime suggestedStart;
