@@ -68,6 +68,7 @@ namespace HighSpiritApp.Controllers
             IFormFile photoFile,
             string PlanName,
             int PaidPrice,
+            int DueAmount,
             DateTime StartDate,
             int Duration,
             DateTime? ExpireDate)
@@ -88,6 +89,7 @@ namespace HighSpiritApp.Controllers
                 CustomerID = createdCustomer.CustomerID,
                 PlanName = PlanName,
                 PaidPrice = PaidPrice,
+                DueAmount = DueAmount,
                 StartDate = StartDate,
                 Duration = Duration,
                 ExpireDate = ExpireDate ?? StartDate.AddMonths(Duration),
@@ -173,6 +175,7 @@ namespace HighSpiritApp.Controllers
                 Remarks = customer.Remarks,
                 MembershipID = latestMembership?.MembershipID,
                 PaidPrice = latestMembership?.PaidPrice,
+                DueAmount = latestMembership?.DueAmount,
                 PlanName = latestMembership?.PlanName,
                 StartDate = latestMembership?.StartDate ?? DateTime.Today,
                 Duration = latestMembership?.Duration ?? 1,

@@ -22,6 +22,8 @@
             --accent-color: #3b82f6;
             --accent-hover: #60a5fa;
             --accent-glow: rgba(59, 130, 246, 0.3);
+            --sidebar-width: 260px;
+            --sidebar-collapsed-width: 75px;
         }
 
         body {
@@ -31,7 +33,7 @@
 
         /* Modern Sidebar */
         .sidebar {
-            width: 260px;
+            width: var(--sidebar-width);
             position: fixed;
             top: 0;
             left: 0;
@@ -39,14 +41,16 @@
             background: var(--sidebar-bg);
             padding-top: 80px;
             z-index: 1100;
-            transition: width 0.3s ease;
+            transition: all 0.3s ease;
             overflow-x: hidden;
+            overflow-y: auto;
             border-right: 1px solid rgba(255,255,255,0.05);
         }
 
         .sidebar-nav {
             position: relative;
             z-index: 1;
+            padding-bottom: 100px;
         }
 
         .nav-section {
@@ -62,6 +66,9 @@
             color: #64748b;
             padding: 20px 15px 10px;
             margin: 0;
+            white-space: nowrap;
+            overflow: hidden;
+            transition: opacity 0.2s ease;
         }
 
         .sidebar .nav-item {
@@ -96,6 +103,7 @@
         .sidebar .nav-link i {
             width: 32px;
             height: 32px;
+            min-width: 32px;
             display: flex;
             align-items: center;
             justify-content: center;
@@ -104,6 +112,11 @@
             font-size: 14px;
             background: rgba(255,255,255,0.05);
             transition: all 0.2s ease;
+        }
+
+        .sidebar .nav-link .nav-text {
+            transition: opacity 0.2s ease, width 0.2s ease;
+            overflow: hidden;
         }
 
         .sidebar .nav-link:hover i {
@@ -133,6 +146,8 @@
         .sidebar .submenu-container {
             margin-left: 12px;
             margin-right: 12px;
+            overflow: hidden;
+            transition: max-height 0.3s ease;
         }
 
         .sidebar .submenu {
@@ -158,14 +173,25 @@
 
         /* Collapsed state */
         .sidebar.collapsed {
-            width: 75px;
+            width: var(--sidebar-collapsed-width);
         }
 
-        .sidebar.collapsed .nav-text,
-        .sidebar.collapsed .nav-section-title,
+        .sidebar.collapsed .nav-text {
+            opacity: 0;
+            width: 0;
+            overflow: hidden;
+        }
+
+        .sidebar.collapsed .nav-section-title {
+            opacity: 0;
+            height: 0;
+            padding: 0;
+            margin: 0;
+            overflow: hidden;
+        }
+
         .sidebar.collapsed .footer-text {
             opacity: 0;
-            visibility: hidden;
         }
 
         .sidebar.collapsed .nav-link {
@@ -186,34 +212,34 @@
             border-left: none;
         }
 
-        /* Hover expand */
-        .sidebar.collapsed:hover {
-            width: 260px;
+        /* Hamburger Button with Animation */
+        .header-bar .hamburger-btn {
+            background: rgba(255,255,255,0.05);
+            border: 1px solid rgba(255,255,255,0.1);
+            color: #94a3b8;
+            width: 40px;
+            height: 40px;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 16px;
+            position: relative;
         }
 
-        .sidebar.collapsed:hover .nav-text,
-        .sidebar.collapsed:hover .nav-section-title,
-        .sidebar.collapsed:hover .footer-text {
-            opacity: 1;
-            visibility: visible;
+        .header-bar .hamburger-btn:hover {
+            background: rgba(255,255,255,0.1);
+            color: #f1f5f9;
         }
 
-        .sidebar.collapsed:hover .nav-link {
-            justify-content: flex-start;
-            padding: 11px 14px;
+        .hamburger-btn i {
+            transition: transform 0.3s ease;
         }
 
-        .sidebar.collapsed:hover .nav-link i {
-            margin-right: 12px;
-        }
-
-        .sidebar.collapsed:hover .submenu-container {
-            display: block;
-        }
-
-        .sidebar.collapsed:hover .nav-link.active {
-            margin-left: 9px;
-            border-left: 3px solid var(--accent-color);
+        .hamburger-btn.active i {
+            transform: rotate(90deg);
         }
 
         /* Modern Header */
@@ -259,26 +285,6 @@
 
         .header-bar .brand-text span {
             color: var(--accent-color);
-        }
-
-        .header-bar .hamburger-btn {
-            background: rgba(255,255,255,0.05);
-            border: 1px solid rgba(255,255,255,0.1);
-            color: #94a3b8;
-            width: 40px;
-            height: 40px;
-            border-radius: 8px;
-            cursor: pointer;
-            transition: all 0.2s ease;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 16px;
-        }
-
-        .header-bar .hamburger-btn:hover {
-            background: rgba(255,255,255,0.1);
-            color: #f1f5f9;
         }
 
         /* Profile dropdown */
@@ -413,7 +419,7 @@
 
         /* Content area */
         .content {
-            margin-left: 260px;
+            margin-left: var(--sidebar-width);
             padding: 25px;
             padding-top: 90px;
             transition: margin-left 0.3s ease;
@@ -421,7 +427,7 @@
         }
 
         .content.expanded {
-            margin-left: 75px;
+            margin-left: var(--sidebar-collapsed-width);
         }
 
         /* Top bar with notifications */
@@ -435,33 +441,6 @@
             box-shadow: 0 1px 3px rgba(0,0,0,0.05);
             border: 1px solid #e2e8f0;
             margin-bottom: 20px;
-        }
-
-        /* Sidebar footer - More visible */
-        .sidebar-footer {
-            position: absolute;
-            bottom: 0;
-            width: 100%;
-            padding: 20px 16px;
-            background: rgba(0,0,0,0.2);
-            border-top: 1px solid rgba(255,255,255,0.08);
-            text-align: center;
-        }
-
-        .footer-text {
-            font-size: 11px;
-            color: #94a3b8;
-            line-height: 1.8;
-        }
-
-        .footer-text i {
-            margin-right: 5px;
-            opacity: 0.7;
-        }
-
-        .footer-text .footer-brand {
-            color: #e2e8f0;
-            font-weight: 600;
         }
 
         /* Notification dropdowns */
@@ -508,12 +487,41 @@
         @@media (max-width: 991.98px) {
             .sidebar {
                 transform: translateX(-100%);
-                width: 260px !important;
+                width: var(--sidebar-width) !important;
                 padding-top: 75px;
             }
 
             .sidebar.show {
                 transform: translateX(0);
+            }
+
+            /* Reset collapsed styles on mobile - always show full sidebar */
+            .sidebar.show .nav-text {
+                opacity: 1 !important;
+                width: auto !important;
+            }
+
+            .sidebar.show .nav-section-title {
+                opacity: 1 !important;
+                height: auto !important;
+                padding: 20px 15px 10px !important;
+            }
+
+            .sidebar.show .footer-text {
+                opacity: 1 !important;
+            }
+
+            .sidebar.show .nav-link {
+                justify-content: flex-start !important;
+                padding: 11px 14px !important;
+            }
+
+            .sidebar.show .nav-link i {
+                margin-right: 12px !important;
+            }
+
+            .sidebar.show .submenu-container {
+                display: block !important;
             }
 
             .content {
@@ -593,7 +601,7 @@
     <!-- Modern Header Bar -->
     <div class="header-bar">
         <div class="header-left">
-            <button class="hamburger-btn" onclick="toggleSidebar()" title="Toggle Sidebar">
+            <button class="hamburger-btn" id="hamburgerBtn" onclick="toggleSidebar()" title="Toggle Sidebar">
                 <i class="fa-solid fa-bars"></i>
             </button>
             <img src="/images/highspirit.jpg" class="brand-logo" alt="High Spirit Gym" />
@@ -793,47 +801,77 @@
             const sidebar = document.getElementById('sidebar');
             const content = document.getElementById('content');
             const overlay = document.querySelector('.sidebar-overlay');
+            const hamburger = document.getElementById('hamburgerBtn');
             
             if (window.innerWidth >= 992) {
+                // Desktop: Toggle collapsed state
                 sidebar.classList.toggle('collapsed');
                 content.classList.toggle('expanded');
+                hamburger.classList.toggle('active');
                 localStorage.setItem('sidebarCollapsed', sidebar.classList.contains('collapsed'));
             } else {
+                // Mobile: Slide in/out
                 sidebar.classList.toggle('show');
                 overlay.classList.toggle('show');
+                hamburger.classList.toggle('active');
             }
         }
 
         function closeSidebarOnMobile() {
             if (window.innerWidth < 992) {
-                document.querySelector('.sidebar').classList.remove('show');
-                document.querySelector('.sidebar-overlay').classList.remove('show');
+                const sidebar = document.getElementById('sidebar');
+                const overlay = document.querySelector('.sidebar-overlay');
+                const hamburger = document.getElementById('hamburgerBtn');
+                
+                sidebar.classList.remove('show');
+                overlay.classList.remove('show');
+                hamburger.classList.remove('active');
             }
         }
 
+        // Initialize on page load
         document.addEventListener('DOMContentLoaded', function() {
             const isCollapsed = localStorage.getItem('sidebarCollapsed') === 'true';
+            const hamburger = document.getElementById('hamburgerBtn');
+            
             if (isCollapsed && window.innerWidth >= 992) {
                 document.getElementById('sidebar').classList.add('collapsed');
                 document.getElementById('content').classList.add('expanded');
+                hamburger.classList.add('active');
             }
         });
 
+        // Handle window resize
         window.addEventListener('resize', function() {
             const sidebar = document.getElementById('sidebar');
             const content = document.getElementById('content');
             const overlay = document.querySelector('.sidebar-overlay');
+            const hamburger = document.getElementById('hamburgerBtn');
             
             if (window.innerWidth >= 992) {
+                // Desktop mode
                 sidebar.classList.remove('show');
                 overlay.classList.remove('show');
+                
+                // Restore collapsed state from localStorage
                 if (localStorage.getItem('sidebarCollapsed') === 'true') {
                     sidebar.classList.add('collapsed');
                     content.classList.add('expanded');
+                    hamburger.classList.add('active');
+                } else {
+                    sidebar.classList.remove('collapsed');
+                    content.classList.remove('expanded');
+                    hamburger.classList.remove('active');
                 }
             } else {
+                // Mobile mode - reset collapsed state
                 sidebar.classList.remove('collapsed');
                 content.classList.remove('expanded');
+                
+                // Update hamburger based on sidebar visibility
+                if (!sidebar.classList.contains('show')) {
+                    hamburger.classList.remove('active');
+                }
             }
         });
     </script>

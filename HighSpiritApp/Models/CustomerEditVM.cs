@@ -23,6 +23,7 @@ public class CustomerEditVM
     public int? MembershipID { get; set; }
     public string? PlanName { get; set; }
     public int? PaidPrice { get; set; }
+    public int? DueAmount { get; set; }
     public DateTime StartDate { get; set; }
     public int Duration { get; set; }
     public DateTime? ExpireDate { get; set; }

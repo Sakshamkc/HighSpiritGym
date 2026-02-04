@@ -45,6 +45,7 @@ namespace HighSpiritApp.Controllers
                     CustomerID = id,
                     StartDate = renewalInfo.SuggestedStartDate,
                     Duration = 1,
+                    DueAmount = 0,
                     PlanName = renewalInfo.LastPlanName
                 });
             }
@@ -55,10 +56,11 @@ namespace HighSpiritApp.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> Renew(CustomerMembership membership)
+        public async Task<IActionResult> Renew(CustomerMembership membership, int DueAmount)
         {
             try
             {
+                membership.DueAmount = DueAmount;
                 await _membershipService.RenewAsync(membership);
                 TempData["success"] = "Membership renewed successfully!";
                 return RedirectToAction("Index", "Customers");

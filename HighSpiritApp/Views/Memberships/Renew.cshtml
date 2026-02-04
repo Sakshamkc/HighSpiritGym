@@ -127,9 +127,9 @@
             <!-- Pricing Section -->
             <div class="col-12 mt-3" id="pricingSection" style="display: none;">
                 <div class="pricing-card">
-                    <div class="row align-items-end">
-                        <!-- Standard Price -->
-                        <div class="col-md-3 col-6 mb-3">
+                    <!-- Row 1: Price and Discount -->
+                    <div class="row align-items-end mb-3">
+                        <div class="col-md-3 col-6 mb-2">
                             <label class="text-muted small">Standard Price</label>
                             <div class="price-display">
                                 <span class="currency">Rs.</span>
@@ -137,9 +137,7 @@
                             </div>
                             <input type="hidden" id="basePrice" value="0" />
                         </div>
-
-                        <!-- Discount Type Toggle -->
-                        <div class="col-md-2 col-6 mb-3">
+                        <div class="col-md-2 col-6 mb-2">
                             <label class="text-muted small">Discount Type</label>
                             <div class="discount-toggle">
                                 <button type="button" class="toggle-btn active" data-type="percent" id="btnPercent">
@@ -150,9 +148,7 @@
                                 </button>
                             </div>
                         </div>
-
-                        <!-- Discount Input -->
-                        <div class="col-md-2 col-6 mb-3">
+                        <div class="col-md-2 col-6 mb-2">
                             <label class="text-muted small">Discount</label>
                             <div class="input-group">
                                 <input type="number" id="discountInput" class="form-control form-control-lg text-center" 
@@ -160,23 +156,53 @@
                                 <span class="input-group-text" id="discountSuffix">%</span>
                             </div>
                         </div>
-
-                        <!-- Discount Amount Display -->
-                        <div class="col-md-2 col-6 mb-3">
+                        <div class="col-md-2 col-6 mb-2">
                             <label class="text-muted small">Discount Amount</label>
                             <div class="discount-amount text-danger">
                                 - Rs. <span id="discountAmount">0</span>
                             </div>
                         </div>
-
-                        <!-- Final Amount -->
-                        <div class="col-md-3 col-12 mb-3">
-                            <label class="text-muted small">Final Amount</label>
-                            <div class="final-price">
+                        <div class="col-md-3 col-12 mb-2">
+                            <label class="text-muted small">Total Payable</label>
+                            <div class="total-payable">
                                 <span class="currency">Rs.</span>
-                                <span id="finalPriceDisplay">0</span>
+                                <span id="totalPayableDisplay">0</span>
                             </div>
-                            <input type="hidden" name="PaidPrice" id="hiddenPaidPrice" value="0" />
+                        </div>
+                    </div>
+
+                    <!-- Divider -->
+                    <hr class="my-3" style="border-color: #bae6fd;">
+
+                    <!-- Row 2: Payment Split -->
+                    <div class="row align-items-end">
+                        <div class="col-md-4 col-6 mb-2">
+                            <label class="text-muted small">
+                                <i class="fa-solid fa-money-bill-wave me-1 text-success"></i>Paid Now
+                            </label>
+                            <div class="input-group">
+                                <span class="input-group-text">Rs.</span>
+                                <input type="number" id="paidNowInput" name="PaidPrice" 
+                                       class="form-control form-control-lg text-center paid-input" 
+                                       value="0" min="0" />
+                            </div>
+                        </div>
+                        <div class="col-md-4 col-6 mb-2">
+                            <label class="text-muted small">
+                                <i class="fa-solid fa-clock me-1 text-warning"></i>Due Amount
+                            </label>
+                            <div class="input-group">
+                                <span class="input-group-text">Rs.</span>
+                                <input type="number" id="dueAmountInput" name="DueAmount" 
+                                       class="form-control form-control-lg text-center due-input" 
+                                       value="0" min="0" readonly />
+                            </div>
+                        </div>
+                        <div class="col-md-4 col-12 mb-2">
+                            <div class="payment-status" id="paymentStatus">
+                                <i class="fa-solid fa-check-circle"></i>
+                                <span>Full Payment</span>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -298,13 +324,13 @@
         font-size: 18px;
         font-weight: 600;
     }
-    .final-price {
-        font-size: 32px;
+    .total-payable {
+        font-size: 28px;
         font-weight: 700;
-        color: #059669;
+        color: #1e40af;
     }
-    .final-price .currency {
-        font-size: 16px;
+    .total-payable .currency {
+        font-size: 14px;
         font-weight: 500;
     }
 
@@ -344,6 +370,50 @@
         font-size: 11px;
     }
 
+    /* Payment Input Styles */
+    .paid-input {
+        background-color: #f0fdf4 !important;
+        border-color: #86efac !important;
+        font-weight: 600;
+        color: #166534 !important;
+    }
+    .due-input {
+        background-color: #fefce8 !important;
+        border-color: #fde047 !important;
+        font-weight: 600;
+        color: #854d0e !important;
+    }
+    .due-input.has-due {
+        background-color: #fef2f2 !important;
+        border-color: #fca5a5 !important;
+        color: #991b1b !important;
+    }
+
+    /* Payment Status */
+    .payment-status {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        padding: 12px 20px;
+        border-radius: 10px;
+        font-weight: 600;
+        font-size: 14px;
+        background: #dcfce7;
+        color: #166534;
+    }
+    .payment-status i {
+        font-size: 18px;
+    }
+    .payment-status.partial {
+        background: #fef3c7;
+        color: #92400e;
+    }
+    .payment-status.unpaid {
+        background: #fee2e2;
+        color: #991b1b;
+    }
+
     @@media (max-width: 768px) {
         .facility-grid {
             grid-template-columns: repeat(2, 1fr);
@@ -375,8 +445,10 @@
     const discountInput = document.getElementById('discountInput');
     const discountSuffix = document.getElementById('discountSuffix');
     const discountAmount = document.getElementById('discountAmount');
-    const finalPriceDisplay = document.getElementById('finalPriceDisplay');
-    const hiddenPaidPrice = document.getElementById('hiddenPaidPrice');
+    const totalPayableDisplay = document.getElementById('totalPayableDisplay');
+    const paidNowInput = document.getElementById('paidNowInput');
+    const dueAmountInput = document.getElementById('dueAmountInput');
+    const paymentStatus = document.getElementById('paymentStatus');
     const startDate = document.getElementById('startDate');
     const expireDate = document.getElementById('expireDate');
     const hiddenPlanName = document.getElementById('hiddenPlanName');
@@ -388,26 +460,15 @@
 
     let requiredFacilities = 0;
     let discountType = 'percent';
+    let totalPayable = 0;
 
-    // Show toast notification
     function showToast(icon, title, text) {
         Swal.fire({
-            icon: icon,
-            title: title,
-            text: text,
-            toast: true,
-            position: 'top-end',
-            showConfirmButton: false,
-            timer: 3000,
-            timerProgressBar: true,
-            didOpen: (toast) => {
-                toast.addEventListener('mouseenter', Swal.stopTimer);
-                toast.addEventListener('mouseleave', Swal.resumeTimer);
-            }
+            icon: icon, title: title, text: text, toast: true, position: 'top-end',
+            showConfirmButton: false, timer: 3000, timerProgressBar: true
         });
     }
 
-    // Discount Type Toggle
     btnPercent.addEventListener('click', function() {
         discountType = 'percent';
         btnPercent.classList.add('active');
@@ -430,7 +491,6 @@
 
     planSelect.addEventListener('change', function() {
         const plan = this.value;
-        
         durationSection.style.display = 'none';
         facilitySection.style.display = 'none';
         sessionSection.style.display = 'none';
@@ -462,7 +522,6 @@
 
         durationSection.style.display = 'block';
         const durations = pricing[plan];
-        
         if (durations) {
             Object.keys(durations).sort((a, b) => b - a).forEach(months => {
                 const option = document.createElement('option');
@@ -473,7 +532,6 @@
                 durationSelect.appendChild(option);
             });
         }
-
         updatePlanName();
     });
 
@@ -481,7 +539,6 @@
         const selected = this.options[this.selectedIndex];
         const price = parseInt(selected.dataset.price) || 0;
         const months = this.value;
-
         if (price > 0) {
             basePrice.value = price;
             priceDisplay.textContent = price.toLocaleString();
@@ -497,7 +554,6 @@
     sessionType.addEventListener('change', function() {
         const selected = this.options[this.selectedIndex];
         const price = parseInt(selected.dataset.price) || 0;
-        
         if (price > 0) {
             basePrice.value = price;
             priceDisplay.textContent = price.toLocaleString();
@@ -510,38 +566,34 @@
         }
     });
 
-    // Facility Selection with SweetAlert
     facilityChecks.forEach(check => {
         check.addEventListener('change', function() {
             const checked = document.querySelectorAll('.facility-check:checked');
-            
             if (checked.length > requiredFacilities) {
                 this.checked = false;
-                
                 Swal.fire({
-                    icon: 'warning',
-                    title: 'Selection Limit Reached',
-                    html: `You can only select <strong>${requiredFacilities}</strong> facilities for this package.<br><br>
-                           <small class="text-muted">Please unselect one facility before selecting another.</small>`,
-                    confirmButtonText: 'Got it!',
-                    confirmButtonColor: '#3b82f6',
-                    showClass: {
-                        popup: 'animate__animated animate__shakeX'
-                    }
+                    icon: 'warning', title: 'Selection Limit Reached',
+                    html: `You can only select <strong>${requiredFacilities}</strong> facilities.`,
+                    confirmButtonText: 'Got it!', confirmButtonColor: '#3b82f6'
                 });
                 return;
             }
-
-            // Show success toast when selection is complete
             if (checked.length === requiredFacilities) {
                 showToast('success', 'Perfect!', `You've selected ${requiredFacilities} facilities`);
             }
-
             updatePlanName();
         });
     });
 
     discountInput.addEventListener('input', calculateFinalPrice);
+    
+    paidNowInput.addEventListener('input', function() {
+        const paid = parseInt(this.value) || 0;
+        const due = Math.max(0, totalPayable - paid);
+        dueAmountInput.value = due;
+        updatePaymentStatus(paid, due);
+    });
+
     startDate.addEventListener('change', calculateExpireDate);
 
     function updatePlanName() {
@@ -549,9 +601,7 @@
         let planName = plan;
         if (requiredFacilities > 0) {
             const selected = Array.from(document.querySelectorAll('.facility-check:checked')).map(c => c.value);
-            if (selected.length > 0) {
-                planName = `${plan}: ${selected.join(', ')}`;
-            }
+            if (selected.length > 0) planName = `${plan}: ${selected.join(', ')}`;
         }
         hiddenPlanName.value = planName;
     }
@@ -559,21 +609,36 @@
     function calculateFinalPrice() {
         const price = parseInt(basePrice.value) || 0;
         const discountValue = parseFloat(discountInput.value) || 0;
-        
         let discountAmt = 0;
-        
         if (discountType === 'percent') {
             discountAmt = Math.round(price * (discountValue / 100));
         } else {
             discountAmt = Math.round(discountValue);
         }
-        
         discountAmt = Math.min(discountAmt, price);
-        const finalAmt = Math.max(0, price - discountAmt);
+        totalPayable = Math.max(0, price - discountAmt);
         
         discountAmount.textContent = discountAmt.toLocaleString();
-        finalPriceDisplay.textContent = finalAmt.toLocaleString();
-        hiddenPaidPrice.value = finalAmt;
+        totalPayableDisplay.textContent = totalPayable.toLocaleString();
+        paidNowInput.value = totalPayable;
+        dueAmountInput.value = 0;
+        updatePaymentStatus(totalPayable, 0);
+    }
+
+    function updatePaymentStatus(paid, due) {
+        if (due === 0) {
+            paymentStatus.className = 'payment-status';
+            paymentStatus.innerHTML = '<i class="fa-solid fa-check-circle"></i><span>Full Payment</span>';
+            dueAmountInput.classList.remove('has-due');
+        } else if (paid === 0) {
+            paymentStatus.className = 'payment-status unpaid';
+            paymentStatus.innerHTML = '<i class="fa-solid fa-times-circle"></i><span>Unpaid</span>';
+            dueAmountInput.classList.add('has-due');
+        } else {
+            paymentStatus.className = 'payment-status partial';
+            paymentStatus.innerHTML = '<i class="fa-solid fa-clock"></i><span>Partial Payment</span>';
+            dueAmountInput.classList.add('has-due');
+        }
     }
 
     function calculateExpireDate() {
@@ -592,9 +657,12 @@
         priceDisplay.textContent = '0';
         discountInput.value = 0;
         discountAmount.textContent = '0';
-        finalPriceDisplay.textContent = '0';
-        hiddenPaidPrice.value = 0;
+        totalPayableDisplay.textContent = '0';
+        paidNowInput.value = 0;
+        dueAmountInput.value = 0;
+        totalPayable = 0;
         pricingSection.style.display = 'none';
+        updatePaymentStatus(0, 0);
     }
 
     calculateFinalPrice();
