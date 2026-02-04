@@ -22,7 +22,7 @@ namespace HighSpiritApp.Controllers
             _membershipService = membershipService;
         }
 
-        public async Task<IActionResult> Index(string search, string sort, string filter, int? duration, string planName, int page = 1)
+        public async Task<IActionResult> Index(string search, string sort, string filter, int? duration, string planName, string shift, string gender, string paymentStatus, int page = 1)
         {
             var result = await _customerService.GetFilteredCustomersAsync(new CustomerFilterRequest
             {
@@ -31,6 +31,9 @@ namespace HighSpiritApp.Controllers
                 Filter = filter,
                 Duration = duration,
                 PlanName = planName,
+                Shift = shift,
+                Gender = gender,
+                PaymentStatus = paymentStatus,
                 Page = page
             });
 
@@ -41,6 +44,9 @@ namespace HighSpiritApp.Controllers
             ViewBag.Filter = filter ?? "all";
             ViewBag.Duration = duration;
             ViewBag.PlanName = planName;
+            ViewBag.Shift = shift;
+            ViewBag.Gender = gender;
+            ViewBag.PaymentStatus = paymentStatus;
             ViewBag.Count1M = result.DurationCounts.Count1M;
             ViewBag.Count3M = result.DurationCounts.Count3M;
             ViewBag.Count6M = result.DurationCounts.Count6M;
@@ -206,14 +212,17 @@ namespace HighSpiritApp.Controllers
         }
 
         [HttpGet]
-        public async Task<IActionResult> ExportAll(string search, string filter, int? duration, string planName)
+        public async Task<IActionResult> ExportAll(string search, string filter, int? duration, string planName, string shift, string gender, string paymentStatus)
         {
             var fileBytes = await _customerService.ExportToExcelAsync(new CustomerFilterRequest
             {
                 Search = search,
                 Filter = filter ?? "all",
                 Duration = duration,
-                PlanName = planName
+                PlanName = planName,
+                Shift = shift,
+                Gender = gender,
+                PaymentStatus = paymentStatus
             });
 
             var fileName = duration.HasValue ? $"{duration}M Members" : "Gym Members";
@@ -221,6 +230,8 @@ namespace HighSpiritApp.Controllers
                 fileName += $" - {char.ToUpper(filter[0]) + filter.Substring(1)}";
             if (!string.IsNullOrEmpty(planName))
                 fileName += $" - {planName}";
+            if (!string.IsNullOrEmpty(shift))
+                fileName += $" - {shift}";
 
             return File(
                 fileBytes,

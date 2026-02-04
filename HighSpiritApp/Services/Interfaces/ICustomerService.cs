@@ -25,6 +25,9 @@ namespace HighSpiritApp.Services.Interfaces
         public string? Sort { get; set; }
         public int? Duration { get; set; }
         public string? PlanName { get; set; }
+        public string? Shift { get; set; }
+        public string? Gender { get; set; }
+        public string? PaymentStatus { get; set; }  // "paid", "due", or null for all
         public int Page { get; set; } = 1;
         public int PageSize { get; set; } = 10;
     }

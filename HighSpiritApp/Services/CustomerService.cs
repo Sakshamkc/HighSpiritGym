@@ -76,6 +76,33 @@ namespace HighSpiritApp.Services
                     c.Memberships.OrderByDescending(m => m.StartDate).First().PlanName!.Contains(filter.PlanName));
             }
 
+            // Shift filter
+            if (!string.IsNullOrEmpty(filter.Shift))
+            {
+                query = query.Where(c => c.Shift == filter.Shift);
+            }
+
+            // Gender filter
+            if (!string.IsNullOrEmpty(filter.Gender))
+            {
+                query = query.Where(c => c.Gender == filter.Gender);
+            }
+
+            // Payment status filter
+            if (!string.IsNullOrEmpty(filter.PaymentStatus))
+            {
+                query = filter.PaymentStatus switch
+                {
+                    "paid" => query.Where(c =>
+                        c.Memberships.Any() &&
+                        c.Memberships.OrderByDescending(m => m.StartDate).First().DueAmount == 0),
+                    "due" => query.Where(c =>
+                        c.Memberships.Any() &&
+                        c.Memberships.OrderByDescending(m => m.StartDate).First().DueAmount > 0),
+                    _ => query
+                };
+            }
+
             // Get all for duration counts before applying duration filter
             var allCustomers = await query.ToListAsync();
             var durationCounts = new DurationCounts
@@ -308,6 +335,9 @@ namespace HighSpiritApp.Services
                 Filter = filter.Filter,
                 Duration = filter.Duration,
                 PlanName = filter.PlanName,
+                Shift = filter.Shift,
+                Gender = filter.Gender,
+                PaymentStatus = filter.PaymentStatus,
                 PageSize = int.MaxValue
             })).Customers.OrderBy(c => c.FullName);
 
