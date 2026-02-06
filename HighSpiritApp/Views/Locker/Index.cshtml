@@ -1,0 +1,640 @@
+@model List<HighSpiritApp.Models.Locker.Locker>
+@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    
+    string BuildQuery(string? overrideStatus = null, string? overrideSize = null, int? overridePage = null)
+    {
+        var parts = new List<string>();
+        if (!string.IsNullOrEmpty(ViewBag.Search as string))
+            parts.Add($"search={ViewBag.Search}");
+        if (!string.IsNullOrEmpty(overrideStatus) || !string.IsNullOrEmpty(ViewBag.Status as string))
+            parts.Add($"status={overrideStatus ?? ViewBag.Status}");
+        if (!string.IsNullOrEmpty(overrideSize) || !string.IsNullOrEmpty(ViewBag.Size as string))
+            parts.Add($"size={overrideSize ?? ViewBag.Size}");
+        if (overridePage.HasValue)
+            parts.Add($"page={overridePage}");
+        return parts.Count > 0 ? "?" + string.Join("&", parts) : "";
+    }
+    
+    bool hasActiveFilters = !string.IsNullOrEmpty(ViewBag.Status as string) || !string.IsNullOrEmpty(ViewBag.Size as string);
+}
+
+<h4 class="mb-3 page-title">
+    <i class="fa-solid fa-lock me-2 text-purple"></i>
+    <span>Locker Management</span>
+</h4>
+
+<!-- Search and Actions -->
+<form method="get" class="mb-3" id="searchForm">
+    <div class="d-flex flex-wrap gap-2 align-items-center">
+        <div class="search-container">
+            <i class="fa-solid fa-search search-icon"></i>
+            <input name="search"
+                   id="searchInput"
+                   value="@ViewBag.Search"
+                   class="form-control search-input"
+                   placeholder="Search by locker #, member name, phone..."
+                   autocomplete="off" />
+            @if (!string.IsNullOrEmpty(ViewBag.Search as string))
+            {
+                <button type="button" class="search-clear" id="clearSearch" title="Clear search">
+                    <i class="fa-solid fa-times"></i>
+                </button>
+            }
+            <button type="submit" class="search-btn" title="Search">
+                <i class="fa-solid fa-magnifying-glass"></i>
+                <span>Search</span>
+            </button>
+        </div>
+        <input type="hidden" name="status" value="@ViewBag.Status" />
+        <input type="hidden" name="size" value="@ViewBag.Size" />
+
+        <div class="ms-auto d-flex gap-2">
+            <a href="/Locker/BulkCreate" class="btn btn-outline-primary">
+                <i class="fa-solid fa-layer-group me-1"></i> Bulk Add
+            </a>
+            <a href="/Locker/Create" class="btn btn-success">
+                <i class="fa-solid fa-plus me-1"></i> Add Locker
+            </a>
+        </div>
+    </div>
+</form>
+
+<!-- Stats Cards -->
+<div class="row g-3 mb-4">
+    <div class="col-6 col-md-4 col-lg-2">
+        <a href="@BuildQuery(overrideStatus: "")" class="text-decoration-none">
+            <div class="card shadow-sm stats-card stats-all @(string.IsNullOrEmpty(ViewBag.Status as string) ? "active" : "")">
+                <div class="card-body text-center py-3">
+                    <div class="stats-icon"><i class="fa-solid fa-lock"></i></div>
+                    <div class="fs-3 fw-bold">@ViewBag.CountAll</div>
+                    <div class="text-muted small">Total</div>
+                </div>
+            </div>
+        </a>
+    </div>
+    <div class="col-6 col-md-4 col-lg-2">
+        <a href="@BuildQuery(overrideStatus: "available")" class="text-decoration-none">
+            <div class="card shadow-sm stats-card stats-available @(ViewBag.Status == "available" ? "active" : "")">
+                <div class="card-body text-center py-3">
+                    <div class="stats-icon"><i class="fa-solid fa-lock-open"></i></div>
+                    <div class="fs-3 fw-bold">@ViewBag.CountAvailable</div>
+                    <div class="text-muted small">Available</div>
+                </div>
+            </div>
+        </a>
+    </div>
+    <div class="col-6 col-md-4 col-lg-2">
+        <a href="@BuildQuery(overrideStatus: "occupied")" class="text-decoration-none">
+            <div class="card shadow-sm stats-card stats-occupied @(ViewBag.Status == "occupied" ? "active" : "")">
+                <div class="card-body text-center py-3">
+                    <div class="stats-icon"><i class="fa-solid fa-user-lock"></i></div>
+                    <div class="fs-3 fw-bold">@ViewBag.CountOccupied</div>
+                    <div class="text-muted small">Occupied</div>
+                </div>
+            </div>
+        </a>
+    </div>
+    <div class="col-6 col-md-4 col-lg-2">
+        <a href="@BuildQuery(overrideStatus: "expired")" class="text-decoration-none">
+            <div class="card shadow-sm stats-card stats-expired @(ViewBag.Status == "expired" ? "active" : "")">
+                <div class="card-body text-center py-3">
+                    <div class="stats-icon"><i class="fa-solid fa-clock"></i></div>
+                    <div class="fs-3 fw-bold">@ViewBag.CountExpired</div>
+                    <div class="text-muted small">Expired</div>
+                </div>
+            </div>
+        </a>
+    </div>
+    <div class="col-6 col-md-4 col-lg-2">
+        <a href="@BuildQuery(overrideStatus: "expiring")" class="text-decoration-none">
+            <div class="card shadow-sm stats-card stats-expiring @(ViewBag.Status == "expiring" ? "active" : "")">
+                <div class="card-body text-center py-3">
+                    <div class="stats-icon"><i class="fa-solid fa-hourglass-half"></i></div>
+                    <div class="fs-3 fw-bold">@ViewBag.CountExpiringSoon</div>
+                    <div class="text-muted small">Expiring</div>
+                </div>
+            </div>
+        </a>
+    </div>
+    <div class="col-6 col-md-4 col-lg-2">
+        <div class="card shadow-sm stats-card stats-revenue">
+            <div class="card-body text-center py-3">
+                <div class="stats-icon"><i class="fa-solid fa-indian-rupee-sign"></i></div>
+                <div class="fs-4 fw-bold">@(((decimal)ViewBag.TotalRevenue).ToString("N0"))</div>
+                <div class="text-muted small">Revenue</div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Filter Bar -->
+<div class="filter-bar card shadow-sm mb-4">
+    <div class="card-body py-3">
+        <div class="d-flex flex-wrap align-items-center gap-2">
+            <div class="filter-label me-2">
+                <i class="fa-solid fa-filter text-purple"></i>
+                <span class="fw-semibold text-muted ms-1">Filters:</span>
+            </div>
+            
+            <!-- Size Filter -->
+            <div class="dropdown">
+                <button class="btn filter-dropdown filter-size @(!string.IsNullOrEmpty((string)ViewBag.Size) ? "active" : "")" 
+                        type="button" data-bs-toggle="dropdown">
+                    <i class="fa-solid fa-ruler me-1"></i>
+                    @(string.IsNullOrEmpty((string)ViewBag.Size) ? "Size" : ViewBag.Size)
+                    <i class="fa-solid fa-chevron-down ms-1 small"></i>
+                </button>
+                <ul class="dropdown-menu dropdown-menu-modern">
+                    <li class="dropdown-header">Select Size</li>
+                    <li><a class="dropdown-item @(string.IsNullOrEmpty((string)ViewBag.Size) ? "active" : "")" href="@BuildQuery(overrideSize: "")"><i class="fa-solid fa-list me-2 text-muted"></i>All Sizes</a></li>
+                    <li><hr class="dropdown-divider"></li>
+                    <li><a class="dropdown-item @(ViewBag.Size == "Small" ? "active" : "")" href="@BuildQuery(overrideSize: "Small")"><i class="fa-solid fa-s me-2 text-info"></i>Small</a></li>
+                    <li><a class="dropdown-item @(ViewBag.Size == "Medium" ? "active" : "")" href="@BuildQuery(overrideSize: "Medium")"><i class="fa-solid fa-m me-2 text-warning"></i>Medium</a></li>
+                    <li><a class="dropdown-item @(ViewBag.Size == "Large" ? "active" : "")" href="@BuildQuery(overrideSize: "Large")"><i class="fa-solid fa-l me-2 text-danger"></i>Large</a></li>
+                </ul>
+            </div>
+            
+            @if (hasActiveFilters)
+            {
+                <div class="ms-auto">
+                    <a href="/Locker" class="btn btn-clear-filters">
+                        <i class="fa-solid fa-times me-1"></i>Clear
+                    </a>
+                </div>
+            }
+        </div>
+    </div>
+</div>
+
+<style>
+    .page-title {
+        color: #1e293b;
+        font-weight: 600;
+        display: flex;
+        align-items: center;
+    }
+    .page-title span { color: #334155; }
+    .text-purple { color: #8b5cf6 !important; }
+
+    /* Search */
+    .search-container {
+        position: relative;
+        display: flex;
+        align-items: center;
+        max-width: 450px;
+        width: 100%;
+    }
+    .search-icon {
+        position: absolute;
+        left: 16px;
+        color: #94a3b8;
+        font-size: 14px;
+        z-index: 1;
+    }
+    .search-input {
+        padding: 12px 120px 12px 44px;
+        border: 2px solid #e2e8f0;
+        border-radius: 12px;
+        font-size: 14px;
+        transition: all 0.2s ease;
+        background: #f8fafc;
+        width: 100%;
+    }
+    .search-input:focus {
+        border-color: #8b5cf6;
+        background: white;
+        box-shadow: 0 0 0 4px rgba(139, 92, 246, 0.1);
+        outline: none;
+    }
+    .search-clear {
+        position: absolute;
+        right: 95px;
+        background: #f1f5f9;
+        border: none;
+        width: 24px;
+        height: 24px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        color: #64748b;
+        font-size: 11px;
+        transition: all 0.15s ease;
+    }
+    .search-clear:hover {
+        background: #fee2e2;
+        color: #dc2626;
+    }
+    .search-btn {
+        position: absolute;
+        right: 6px;
+        background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%);
+        border: none;
+        border-radius: 8px;
+        padding: 8px 16px;
+        color: white;
+        font-size: 13px;
+        font-weight: 500;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        transition: all 0.2s ease;
+    }
+    .search-btn:hover {
+        background: linear-gradient(135deg, #7c3aed 0%, #6d28d9 100%);
+        transform: translateY(-1px);
+        box-shadow: 0 4px 12px rgba(139, 92, 246, 0.3);
+    }
+
+    /* Stats Cards */
+    .stats-card {
+        border: 2px solid transparent;
+        border-radius: 16px;
+        transition: all 0.25s ease;
+    }
+    .stats-card .stats-icon {
+        font-size: 1.3rem;
+        margin-bottom: 5px;
+        opacity: 0.8;
+    }
+    .stats-card:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 8px 25px rgba(0,0,0,0.1);
+    }
+    
+    .stats-card.stats-all { background: linear-gradient(135deg, #f5f3ff 0%, #ede9fe 100%); }
+    .stats-card.stats-all .stats-icon, .stats-card.stats-all .fs-3 { color: #7c3aed; }
+    .stats-card.stats-all.active { border-color: #8b5cf6; background: linear-gradient(135deg, #ede9fe 0%, #ddd6fe 100%); }
+    
+    .stats-card.stats-available { background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%); }
+    .stats-card.stats-available .stats-icon, .stats-card.stats-available .fs-3 { color: #16a34a; }
+    .stats-card.stats-available.active { border-color: #22c55e; }
+    
+    .stats-card.stats-occupied { background: linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%); }
+    .stats-card.stats-occupied .stats-icon, .stats-card.stats-occupied .fs-3 { color: #2563eb; }
+    .stats-card.stats-occupied.active { border-color: #3b82f6; }
+    
+    .stats-card.stats-expired { background: linear-gradient(135deg, #fef2f2 0%, #fee2e2 100%); }
+    .stats-card.stats-expired .stats-icon, .stats-card.stats-expired .fs-3 { color: #dc2626; }
+    .stats-card.stats-expired.active { border-color: #ef4444; }
+    
+    .stats-card.stats-expiring { background: linear-gradient(135deg, #fffbeb 0%, #fef3c7 100%); }
+    .stats-card.stats-expiring .stats-icon, .stats-card.stats-expiring .fs-3 { color: #d97706; }
+    .stats-card.stats-expiring.active { border-color: #f59e0b; }
+    
+    .stats-card.stats-revenue { background: linear-gradient(135deg, #ecfdf5 0%, #d1fae5 100%); }
+    .stats-card.stats-revenue .stats-icon, .stats-card.stats-revenue .fs-4 { color: #059669; }
+
+    /* Filter Bar */
+    .filter-bar {
+        background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+        border: none;
+        border-radius: 16px;
+    }
+    .filter-dropdown {
+        border-radius: 10px;
+        padding: 0.45rem 0.85rem;
+        font-size: 0.85rem;
+        font-weight: 500;
+        transition: all 0.2s ease;
+        background: linear-gradient(135deg, #f5f3ff 0%, #ede9fe 100%);
+        border: 1px solid #c4b5fd;
+        color: #7c3aed;
+    }
+    .filter-dropdown:hover {
+        background: linear-gradient(135deg, #ede9fe 0%, #ddd6fe 100%);
+    }
+    .filter-dropdown.active {
+        background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%);
+        color: white;
+    }
+    .dropdown-menu-modern {
+        border: none;
+        border-radius: 12px;
+        box-shadow: 0 10px 40px rgba(0,0,0,0.12);
+        padding: 0.5rem;
+    }
+    .dropdown-menu-modern .dropdown-item {
+        border-radius: 8px;
+        padding: 0.5rem 1rem;
+        font-size: 0.875rem;
+    }
+    .dropdown-menu-modern .dropdown-item.active {
+        background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%);
+        color: white;
+    }
+    .btn-clear-filters {
+        background: linear-gradient(135deg, #fef2f2 0%, #fee2e2 100%);
+        border: 1px solid #fca5a5;
+        border-radius: 10px;
+        font-size: 0.85rem;
+        padding: 0.45rem 0.85rem;
+        color: #dc2626;
+        font-weight: 500;
+    }
+
+    /* Locker Grid */
+    .locker-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+        gap: 20px;
+    }
+    .locker-card {
+        background: white;
+        border-radius: 16px;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+        border: 2px solid #e2e8f0;
+        overflow: hidden;
+        transition: all 0.25s ease;
+    }
+    .locker-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 12px 30px rgba(0,0,0,0.1);
+    }
+    .locker-card.available { border-color: #86efac; }
+    .locker-card.occupied { border-color: #93c5fd; }
+    .locker-card.expired { border-color: #fca5a5; }
+    .locker-card.expiring { border-color: #fde047; }
+    .locker-card.maintenance { border-color: #cbd5e1; }
+
+    .locker-header {
+        padding: 16px 20px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+    }
+    .locker-header.available { background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%); }
+    .locker-header.occupied { background: linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%); }
+    .locker-header.expired { background: linear-gradient(135deg, #fef2f2 0%, #fee2e2 100%); }
+    .locker-header.expiring { background: linear-gradient(135deg, #fffbeb 0%, #fef3c7 100%); }
+    .locker-header.maintenance { background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%); }
+
+    .locker-number {
+        font-size: 24px;
+        font-weight: 700;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+    .locker-number i {
+        font-size: 20px;
+    }
+    .locker-number.available { color: #16a34a; }
+    .locker-number.occupied { color: #2563eb; }
+    .locker-number.expired { color: #dc2626; }
+    .locker-number.expiring { color: #d97706; }
+    .locker-number.maintenance { color: #64748b; }
+
+    .locker-status {
+        padding: 4px 12px;
+        border-radius: 20px;
+        font-size: 11px;
+        font-weight: 600;
+        text-transform: uppercase;
+    }
+    .locker-status.available { background: #dcfce7; color: #166534; }
+    .locker-status.occupied { background: #dbeafe; color: #1e40af; }
+    .locker-status.expired { background: #fee2e2; color: #991b1b; }
+    .locker-status.expiring { background: #fef3c7; color: #92400e; }
+    .locker-status.maintenance { background: #e2e8f0; color: #475569; }
+
+    .locker-body {
+        padding: 20px;
+    }
+    .locker-info {
+        margin-bottom: 15px;
+    }
+    .locker-info-row {
+        display: flex;
+        justify-content: space-between;
+        padding: 8px 0;
+        border-bottom: 1px solid #f1f5f9;
+    }
+    .locker-info-row:last-child { border-bottom: none; }
+    .locker-info-label {
+        color: #64748b;
+        font-size: 13px;
+    }
+    .locker-info-value {
+        font-weight: 600;
+        color: #1e293b;
+        font-size: 13px;
+    }
+    .locker-info-value.due { color: #dc2626; }
+    .locker-info-value.paid { color: #16a34a; }
+
+    .locker-actions {
+        display: flex;
+        gap: 8px;
+        flex-wrap: wrap;
+    }
+    .locker-actions .btn {
+        flex: 1;
+        min-width: 80px;
+        padding: 8px 12px;
+        font-size: 12px;
+        font-weight: 600;
+        border-radius: 8px;
+    }
+
+    .size-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 4px;
+        padding: 3px 10px;
+        border-radius: 6px;
+        font-size: 11px;
+        font-weight: 600;
+    }
+    .size-badge.small { background: #e0f2fe; color: #0369a1; }
+    .size-badge.medium { background: #fef3c7; color: #92400e; }
+    .size-badge.large { background: #fee2e2; color: #991b1b; }
+
+    @@media (max-width: 576px) {
+        .search-btn span { display: none; }
+        .search-btn { padding: 8px 12px; }
+        .search-input { padding-right: 100px; }
+        .search-clear { right: 55px; }
+        .locker-grid { grid-template-columns: 1fr; }
+    }
+</style>
+
+<!-- Locker Grid -->
+<div class="locker-grid">
+    @foreach (var locker in Model)
+    {
+        var statusClass = locker.Status.ToLower();
+        if (locker.Status == "Occupied" && locker.IsExpired) statusClass = "expired";
+        else if (locker.Status == "Occupied" && locker.IsExpiringSoon) statusClass = "expiring";
+
+        <div class="locker-card @statusClass">
+            <div class="locker-header @statusClass">
+                <div class="locker-number @statusClass">
+                    <i class="fa-solid @(locker.Status == "Available" ? "fa-lock-open" : locker.Status == "Maintenance" ? "fa-wrench" : "fa-lock")"></i>
+                    @locker.LockerNumber
+                </div>
+                <span class="locker-status @statusClass">
+                    @if (locker.IsExpired) { @("Expired") }
+                    else if (locker.IsExpiringSoon) { @("Expiring") }
+                    else { @locker.Status }
+                </span>
+            </div>
+            <div class="locker-body">
+                <div class="locker-info">
+                    <div class="locker-info-row">
+                        <span class="locker-info-label">Size</span>
+                        <span class="size-badge @locker.Size.ToLower()">
+                            <i class="fa-solid fa-ruler-combined"></i> @locker.Size
+                        </span>
+                    </div>
+                    <div class="locker-info-row">
+                        <span class="locker-info-label">Monthly Rate</span>
+                        <span class="locker-info-value">Rs. @locker.MonthlyRate.ToString("N0")</span>
+                    </div>
+                    @if (locker.Status == "Occupied")
+                    {
+                        <div class="locker-info-row">
+                            <span class="locker-info-label">Assigned To</span>
+                            <span class="locker-info-value">@(locker.AssignedTo ?? "-")</span>
+                        </div>
+                        <div class="locker-info-row">
+                            <span class="locker-info-label">Expires</span>
+                            <span class="locker-info-value @(locker.IsExpired ? "due" : locker.IsExpiringSoon ? "text-warning" : "")">
+                                @(locker.EndDate?.ToString("dd MMM yy") ?? "-")
+                                @if (locker.IsExpired)
+                                {
+                                    <i class="fa-solid fa-exclamation-circle ms-1"></i>
+                                }
+                            </span>
+                        </div>
+                        @if (locker.DueAmount > 0)
+                        {
+                            <div class="locker-info-row">
+                                <span class="locker-info-label">Due Amount</span>
+                                <span class="locker-info-value due">Rs. @locker.DueAmount.ToString("N0")</span>
+                            </div>
+                        }
+                    }
+                    @if (!string.IsNullOrEmpty(locker.KeyNumber))
+                    {
+                        <div class="locker-info-row">
+                            <span class="locker-info-label">Key #</span>
+                            <span class="locker-info-value"><i class="fa-solid fa-key me-1 text-warning"></i>@locker.KeyNumber</span>
+                        </div>
+                    }
+                </div>
+                <div class="locker-actions">
+                    @if (locker.Status == "Available")
+                    {
+                        <a href="/Locker/Assign/@locker.LockerID" class="btn btn-success">
+                            <i class="fa-solid fa-user-plus me-1"></i> Assign
+                        </a>
+                    }
+                    else if (locker.Status == "Occupied")
+                    {
+                        <a href="/Locker/Renew/@locker.LockerID" class="btn btn-primary">
+                            <i class="fa-solid fa-rotate me-1"></i> Renew
+                        </a>
+                        <button class="btn btn-outline-danger" data-bs-toggle="modal" data-bs-target="#releaseModal_@locker.LockerID">
+                            <i class="fa-solid fa-lock-open me-1"></i> Release
+                        </button>
+                    }
+                    <a href="/Locker/Details/@locker.LockerID" class="btn btn-outline-secondary">
+                        <i class="fa-solid fa-eye"></i>
+                    </a>
+                    <a href="/Locker/Edit/@locker.LockerID" class="btn btn-outline-secondary">
+                        <i class="fa-solid fa-edit"></i>
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Release Modal -->
+        <div class="modal fade" id="releaseModal_@locker.LockerID" tabindex="-1">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header bg-warning">
+                        <h5 class="modal-title"><i class="fa-solid fa-lock-open me-2"></i>Release Locker</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                    </div>
+                    <div class="modal-body">
+                        <p>Are you sure you want to release locker <strong>@locker.LockerNumber</strong>?</p>
+                        @if (!string.IsNullOrEmpty(locker.AssignedTo))
+                        {
+                            <p class="text-muted">Currently assigned to: <strong>@locker.AssignedTo</strong></p>
+                        }
+                        @if (locker.DueAmount > 0)
+                        {
+                            <div class="alert alert-danger">
+                                <i class="fa-solid fa-exclamation-triangle me-2"></i>
+                                Outstanding due: <strong>Rs. @locker.DueAmount.ToString("N0")</strong>
+                            </div>
+                        }
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                        <form method="post" action="/Locker/Release/@locker.LockerID" style="display:inline;">
+                            <button type="submit" class="btn btn-warning">Yes, Release</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+</div>
+
+@if (!Model.Any())
+{
+    <div class="text-center py-5">
+        <i class="fa-solid fa-lock fa-4x text-muted mb-3"></i>
+        <h5 class="text-muted">No lockers found</h5>
+        <p class="text-muted">Get started by adding your first locker.</p>
+        <a href="/Locker/Create" class="btn btn-primary mt-2">
+            <i class="fa-solid fa-plus me-2"></i> Add Locker
+        </a>
+    </div>
+}
+
+<!-- Pagination -->
+@if (Model.Any())
+{
+    <nav class="mt-4">
+        @{
+            int current = ViewBag.Page;
+            int total = ViewBag.TotalPages;
+            int start = Math.Max(1, current - 2);
+            int end = Math.Min(total, current + 2);
+        }
+        <ul class="pagination justify-content-center">
+            <li class="page-item @(current == 1 ? "disabled" : "")">
+                <a class="page-link" href="@BuildQuery(overridePage: current - 1)">Prev</a>
+            </li>
+            @for (int i = start; i <= end; i++)
+            {
+                <li class="page-item @(i == current ? "active" : "")">
+                    <a class="page-link" href="@BuildQuery(overridePage: i)">@i</a>
+                </li>
+            }
+            <li class="page-item @(current == total ? "disabled" : "")">
+                <a class="page-link" href="@BuildQuery(overridePage: current + 1)">Next</a>
+            </li>
+        </ul>
+    </nav>
+}
+
+<script>
+    const clearBtn = document.getElementById('clearSearch');
+    const searchInput = document.getElementById('searchInput');
+    
+    if (clearBtn) {
+        clearBtn.addEventListener('click', function() {
+            const url = new URL(window.location.href);
+            url.searchParams.delete('search');
+            url.searchParams.set('page', '1');
+            window.location.href = url.toString();
+        });
+    }
+</script>

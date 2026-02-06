@@ -1,0 +1,390 @@
+@model HighSpiritApp.Models.Locker.Locker
+@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    var statusClass = Model.Status.ToLower();
+    if (Model.Status == "Occupied" && Model.IsExpired) statusClass = "expired";
+    else if (Model.Status == "Occupied" && Model.IsExpiringSoon) statusClass = "expiring";
+}
+
+<style>
+    .locker-header {
+        border-radius: 20px;
+        padding: 30px;
+        color: white;
+        margin-bottom: 25px;
+    }
+    .locker-header.available { background: linear-gradient(135deg, #16a34a 0%, #15803d 100%); }
+    .locker-header.occupied { background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%); }
+    .locker-header.expired { background: linear-gradient(135deg, #dc2626 0%, #b91c1c 100%); }
+    .locker-header.expiring { background: linear-gradient(135deg, #d97706 0%, #b45309 100%); }
+    .locker-header.maintenance { background: linear-gradient(135deg, #475569 0%, #334155 100%); }
+
+    .locker-icon {
+        width: 100px;
+        height: 100px;
+        border-radius: 20px;
+        background: rgba(255,255,255,0.2);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 48px;
+    }
+    .locker-title {
+        font-size: 36px;
+        font-weight: 700;
+        margin-bottom: 5px;
+    }
+    .locker-subtitle {
+        font-size: 16px;
+        opacity: 0.9;
+    }
+    .status-badge-lg {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        padding: 10px 20px;
+        border-radius: 30px;
+        font-size: 14px;
+        font-weight: 600;
+        background: rgba(255,255,255,0.2);
+    }
+    .action-btn {
+        padding: 10px 20px;
+        border-radius: 10px;
+        font-weight: 600;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .info-card {
+        background: white;
+        border-radius: 16px;
+        box-shadow: 0 4px 20px rgba(0,0,0,0.05);
+        border: 1px solid #e2e8f0;
+        overflow: hidden;
+        margin-bottom: 25px;
+    }
+    .info-card-header {
+        background: #f8fafc;
+        padding: 16px 20px;
+        border-bottom: 1px solid #e2e8f0;
+        display: flex;
+        align-items: center;
+        gap: 12px;
+    }
+    .info-card-header i {
+        width: 36px;
+        height: 36px;
+        border-radius: 10px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 16px;
+        color: white;
+    }
+    .info-card-header.locker i { background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%); }
+    .info-card-header.member i { background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%); }
+    .info-card-header.payment i { background: linear-gradient(135deg, #10b981 0%, #059669 100%); }
+    .info-card-header.dates i { background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%); }
+    .info-card-header h5 {
+        margin: 0;
+        font-weight: 600;
+        color: #1e293b;
+    }
+    .info-card-body {
+        padding: 20px;
+    }
+
+    .info-grid {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 20px;
+    }
+    .info-item {
+        padding: 15px;
+        background: #f8fafc;
+        border-radius: 12px;
+    }
+    .info-item label {
+        display: block;
+        font-size: 12px;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        color: #64748b;
+        margin-bottom: 5px;
+    }
+    .info-item span {
+        font-size: 16px;
+        font-weight: 600;
+        color: #1e293b;
+    }
+    .info-item span.success { color: #16a34a; }
+    .info-item span.danger { color: #dc2626; }
+    .info-item span.warning { color: #d97706; }
+
+    .payment-summary {
+        border-radius: 16px;
+        padding: 25px;
+        margin-bottom: 20px;
+    }
+    .payment-summary.paid { background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%); border: 1px solid #bbf7d0; }
+    .payment-summary.due { background: linear-gradient(135deg, #fef2f2 0%, #fee2e2 100%); border: 1px solid #fecaca; }
+    .payment-stat {
+        text-align: center;
+    }
+    .payment-stat .value {
+        font-size: 28px;
+        font-weight: 700;
+    }
+    .payment-stat .label {
+        font-size: 13px;
+        color: #64748b;
+    }
+    .payment-stat.paid .value { color: #16a34a; }
+    .payment-stat.due .value { color: #dc2626; }
+    .payment-stat.total .value { color: #1e293b; }
+
+    .size-badge-lg {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        padding: 8px 16px;
+        border-radius: 10px;
+        font-weight: 600;
+    }
+    .size-badge-lg.small { background: #e0f2fe; color: #0369a1; }
+    .size-badge-lg.medium { background: #fef3c7; color: #92400e; }
+    .size-badge-lg.large { background: #fee2e2; color: #991b1b; }
+
+    @@media (max-width: 768px) {
+        .info-grid { grid-template-columns: 1fr; }
+    }
+</style>
+
+<!-- Header -->
+<div class="locker-header @statusClass">
+    <div class="row align-items-center">
+        <div class="col-md-8">
+            <div class="d-flex align-items-center gap-4">
+                <div class="locker-icon">
+                    <i class="fa-solid @(Model.Status == "Available" ? "fa-lock-open" : Model.Status == "Maintenance" ? "fa-wrench" : "fa-lock")"></i>
+                </div>
+                <div>
+                    <h1 class="locker-title">Locker @Model.LockerNumber</h1>
+                    <p class="locker-subtitle mb-2">
+                        @if (!string.IsNullOrEmpty(Model.KeyNumber))
+                        {
+                            <i class="fa-solid fa-key me-1"></i> @("Key: " + Model.KeyNumber)
+                        }
+                    </p>
+                    <span class="status-badge-lg">
+                        <i class="fa-solid @(Model.IsExpired ? "fa-exclamation-circle" : Model.IsExpiringSoon ? "fa-clock" : Model.Status == "Available" ? "fa-check-circle" : "fa-user")"></i>
+                        @if (Model.IsExpired) { @("Expired") }
+                        else if (Model.IsExpiringSoon) { @("Expiring Soon") }
+                        else { @Model.Status }
+                    </span>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4 text-md-end mt-3 mt-md-0">
+            <div class="d-flex gap-2 justify-content-md-end flex-wrap">
+                <a href="/Locker/Edit/@Model.LockerID" class="action-btn btn btn-light">
+                    <i class="fa-solid fa-edit"></i> Edit
+                </a>
+                @if (Model.Status == "Available")
+                {
+                    <a href="/Locker/Assign/@Model.LockerID" class="action-btn btn btn-success">
+                        <i class="fa-solid fa-user-plus"></i> Assign
+                    </a>
+                }
+                else if (Model.Status == "Occupied")
+                {
+                    <a href="/Locker/Renew/@Model.LockerID" class="action-btn btn btn-warning">
+                        <i class="fa-solid fa-rotate"></i> Renew
+                    </a>
+                }
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Payment Summary (if occupied) -->
+@if (Model.Status == "Occupied")
+{
+    <div class="payment-summary @(Model.DueAmount > 0 ? "due" : "paid")">
+        <div class="row">
+            <div class="col-4">
+                <div class="payment-stat total">
+                    <div class="value">Rs. @Model.TotalAmount.ToString("N0")</div>
+                    <div class="label">Total Amount</div>
+                </div>
+            </div>
+            <div class="col-4">
+                <div class="payment-stat paid">
+                    <div class="value">Rs. @Model.PaidAmount.ToString("N0")</div>
+                    <div class="label">Paid</div>
+                </div>
+            </div>
+            <div class="col-4">
+                <div class="payment-stat due">
+                    <div class="value">Rs. @Model.DueAmount.ToString("N0")</div>
+                    <div class="label">Due</div>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+<div class="row">
+    <!-- Locker Details -->
+    <div class="col-lg-6">
+        <div class="info-card">
+            <div class="info-card-header locker">
+                <i class="fa-solid fa-lock"></i>
+                <h5>Locker Details</h5>
+            </div>
+            <div class="info-card-body">
+                <div class="info-grid">
+                    <div class="info-item">
+                        <label>Locker Number</label>
+                        <span>@Model.LockerNumber</span>
+                    </div>
+                    <div class="info-item">
+                        <label>Size</label>
+                        <span class="size-badge-lg @Model.Size.ToLower()">
+                            <i class="fa-solid fa-ruler-combined"></i> @Model.Size
+                        </span>
+                    </div>
+                    <div class="info-item">
+                        <label>Key Number</label>
+                        <span>@(Model.KeyNumber ?? "-")</span>
+                    </div>
+                    <div class="info-item">
+                        <label>Monthly Rate</label>
+                        <span class="success">Rs. @Model.MonthlyRate.ToString("N0")</span>
+                    </div>
+                    <div class="info-item">
+                        <label>Key Deposit</label>
+                        <span>@(Model.KeyDeposit ? $"Rs. {Model.KeyDepositAmount:N0}" : "Not Taken")</span>
+                    </div>
+                    <div class="info-item">
+                        <label>Status</label>
+                        <span class="badge @(Model.Status == "Available" ? "bg-success" : Model.Status == "Occupied" ? "bg-primary" : "bg-secondary") fs-6">
+                            @Model.Status
+                        </span>
+                    </div>
+                </div>
+                @if (!string.IsNullOrEmpty(Model.Remarks))
+                {
+                    <div class="mt-3 p-3 bg-light rounded">
+                        <label class="d-block text-muted small mb-1">Remarks</label>
+                        <span>@Model.Remarks</span>
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+
+    <!-- Member & Rental Details -->
+    <div class="col-lg-6">
+        @if (Model.Status == "Occupied")
+        {
+            <div class="info-card">
+                <div class="info-card-header member">
+                    <i class="fa-solid fa-user"></i>
+                    <h5>Assigned Member</h5>
+                </div>
+                <div class="info-card-body">
+                    <div class="info-grid">
+                        <div class="info-item">
+                            <label>Member Name</label>
+                            <span>@(Model.AssignedTo ?? "-")</span>
+                        </div>
+                        <div class="info-item">
+                            <label>Phone</label>
+                            <span>
+                                @if (!string.IsNullOrEmpty(Model.AssignedPhone))
+                                {
+                                    <a href="tel:@Model.AssignedPhone" class="text-decoration-none">
+                                        <i class="fa-solid fa-phone me-1 text-success"></i>@Model.AssignedPhone
+                                    </a>
+                                }
+                                else
+                                {
+                                    @("-")
+                                }
+                            </span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="info-card">
+                <div class="info-card-header dates">
+                    <i class="fa-solid fa-calendar"></i>
+                    <h5>Rental Period</h5>
+                </div>
+                <div class="info-card-body">
+                    <div class="info-grid">
+                        <div class="info-item">
+                            <label>Start Date</label>
+                            <span>@(Model.StartDate?.ToString("dd MMM yyyy") ?? "-")</span>
+                        </div>
+                        <div class="info-item">
+                            <label>End Date</label>
+                            <span class="@(Model.IsExpired ? "danger" : Model.IsExpiringSoon ? "warning" : "")">
+                                @(Model.EndDate?.ToString("dd MMM yyyy") ?? "-")
+                                @if (Model.IsExpired)
+                                {
+                                    <i class="fa-solid fa-exclamation-circle ms-1"></i>
+                                }
+                            </span>
+                        </div>
+                        <div class="info-item">
+                            <label>Duration</label>
+                            <span>@Model.RentalMonths Month(s)</span>
+                        </div>
+                        <div class="info-item">
+                            <label>Days Remaining</label>
+                            <span class="@(Model.IsExpired ? "danger" : Model.DaysRemaining <= 7 ? "warning" : "success")">
+                                @if (Model.IsExpired)
+                                {
+                                    @("Expired")
+                                }
+                                else
+                                {
+                                    @($"{Model.DaysRemaining} days")
+                                }
+                            </span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        }
+        else
+        {
+            <div class="info-card">
+                <div class="info-card-header member">
+                    <i class="fa-solid fa-user"></i>
+                    <h5>Assignment</h5>
+                </div>
+                <div class="info-card-body text-center py-5">
+                    <i class="fa-solid fa-lock-open fa-4x text-success mb-3"></i>
+                    <h5>Locker Available</h5>
+                    <p class="text-muted">This locker is currently available for assignment.</p>
+                    <a href="/Locker/Assign/@Model.LockerID" class="btn btn-success mt-2">
+                        <i class="fa-solid fa-user-plus me-2"></i> Assign Now
+                    </a>
+                </div>
+            </div>
+        }
+    </div>
+</div>
+
+<!-- Back Button -->
+<div class="mt-4">
+    <a href="/Locker" class="btn btn-outline-secondary btn-lg px-4">
+        <i class="fa-solid fa-arrow-left me-2"></i> Back to Lockers
+    </a>
+</div>

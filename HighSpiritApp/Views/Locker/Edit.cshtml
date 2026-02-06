@@ -1,0 +1,383 @@
+@model HighSpiritApp.Models.Locker.Locker
+@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    var startDateValue = Model.StartDate?.ToString("yyyy-MM-dd") ?? "";
+    var endDateValue = Model.EndDate?.ToString("yyyy-MM-dd") ?? "";
+}
+
+<style>
+    .edit-header {
+        background: linear-gradient(135deg, #6d28d9 0%, #7c3aed 100%);
+        border-radius: 16px;
+        padding: 20px 25px;
+        color: white;
+        margin-bottom: 25px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+    }
+    .edit-header h4 {
+        margin: 0;
+        font-weight: 600;
+        display: flex;
+        align-items: center;
+        gap: 12px;
+    }
+
+    .form-card {
+        background: white;
+        border-radius: 16px;
+        box-shadow: 0 4px 20px rgba(0,0,0,0.05);
+        border: 1px solid #e2e8f0;
+        overflow: hidden;
+        margin-bottom: 25px;
+    }
+    .form-card-header {
+        background: #f8fafc;
+        padding: 16px 20px;
+        border-bottom: 1px solid #e2e8f0;
+        display: flex;
+        align-items: center;
+        gap: 12px;
+    }
+    .form-card-header i {
+        width: 36px;
+        height: 36px;
+        border-radius: 10px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 16px;
+    }
+    .form-card-header.locker i { background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%); color: white; }
+    .form-card-header.member i { background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%); color: white; }
+    .form-card-header.payment i { background: linear-gradient(135deg, #10b981 0%, #059669 100%); color: white; }
+    .form-card-header h5 {
+        margin: 0;
+        font-weight: 600;
+        color: #1e293b;
+    }
+    .form-card-body {
+        padding: 25px;
+    }
+
+    .form-label {
+        font-weight: 600;
+        color: #475569;
+        margin-bottom: 8px;
+    }
+    .form-label .required { color: #ef4444; }
+
+    .form-control, .form-select {
+        border-radius: 10px;
+        border: 2px solid #e2e8f0;
+        padding: 10px 14px;
+        transition: all 0.2s ease;
+    }
+    .form-control:focus, .form-select:focus {
+        border-color: #8b5cf6;
+        box-shadow: 0 0 0 4px rgba(139, 92, 246, 0.1);
+    }
+
+    .status-selector {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 15px;
+    }
+    .status-option {
+        position: relative;
+    }
+    .status-option input {
+        position: absolute;
+        opacity: 0;
+    }
+    .status-option label {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        padding: 15px;
+        border: 2px solid #e2e8f0;
+        border-radius: 12px;
+        cursor: pointer;
+        transition: all 0.2s ease;
+    }
+    .status-option label i {
+        font-size: 24px;
+        margin-bottom: 8px;
+    }
+    .status-option.available label { background: #f0fdf4; border-color: #bbf7d0; }
+    .status-option.available label i { color: #16a34a; }
+    .status-option.occupied label { background: #eff6ff; border-color: #bfdbfe; }
+    .status-option.occupied label i { color: #2563eb; }
+    .status-option.maintenance label { background: #f8fafc; border-color: #e2e8f0; }
+    .status-option.maintenance label i { color: #64748b; }
+    .status-option input:checked + label {
+        box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.3);
+        border-color: #8b5cf6;
+    }
+
+    .payment-input {
+        font-size: 18px;
+        font-weight: 600;
+        text-align: center;
+    }
+    .payment-input.paid { background: #f0fdf4; border-color: #86efac; color: #166534; }
+    .payment-input.due { background: #fef2f2; border-color: #fca5a5; color: #991b1b; }
+
+    .btn-save {
+        background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+        border: none;
+        padding: 12px 30px;
+        font-weight: 600;
+        border-radius: 10px;
+    }
+    .btn-save:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 15px rgba(16, 185, 129, 0.3);
+    }
+</style>
+
+<div class="edit-header">
+    <h4>
+        <i class="fa-solid fa-edit"></i>
+        Edit Locker @Model.LockerNumber
+    </h4>
+    <a href="/Locker" class="btn btn-outline-light">
+        <i class="fa-solid fa-arrow-left me-2"></i> Back
+    </a>
+</div>
+
+<form method="post">
+    <input type="hidden" asp-for="LockerID" />
+    <input type="hidden" asp-for="CreatedAt" />
+
+    <div class="row">
+        <div class="col-lg-8">
+            <!-- Locker Information -->
+            <div class="form-card">
+                <div class="form-card-header locker">
+                    <i class="fa-solid fa-lock"></i>
+                    <h5>Locker Information</h5>
+                </div>
+                <div class="form-card-body">
+                    <div class="row g-3">
+                        <div class="col-md-4">
+                            <label class="form-label">Locker Number <span class="required">*</span></label>
+                            <input asp-for="LockerNumber" class="form-control" required />
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label">Key Number</label>
+                            <input asp-for="KeyNumber" class="form-control" />
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label">Size</label>
+                            <select asp-for="Size" class="form-select">
+                                <option value="Small">Small</option>
+                                <option value="Medium">Medium</option>
+                                <option value="Large">Large</option>
+                            </select>
+                        </div>
+                        <div class="col-12">
+                            <label class="form-label">Status</label>
+                            <div class="status-selector">
+                                <div class="status-option available">
+                                    <input type="radio" name="Status" value="Available" id="statusAvailable" @(Model.Status == "Available" ? "checked" : "") />
+                                    <label for="statusAvailable">
+                                        <i class="fa-solid fa-lock-open"></i>
+                                        <span>Available</span>
+                                    </label>
+                                </div>
+                                <div class="status-option occupied">
+                                    <input type="radio" name="Status" value="Occupied" id="statusOccupied" @(Model.Status == "Occupied" ? "checked" : "") />
+                                    <label for="statusOccupied">
+                                        <i class="fa-solid fa-user-lock"></i>
+                                        <span>Occupied</span>
+                                    </label>
+                                </div>
+                                <div class="status-option maintenance">
+                                    <input type="radio" name="Status" value="Maintenance" id="statusMaintenance" @(Model.Status == "Maintenance" ? "checked" : "") />
+                                    <label for="statusMaintenance">
+                                        <i class="fa-solid fa-wrench"></i>
+                                        <span>Maintenance</span>
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Member Information (if occupied) -->
+            <div class="form-card">
+                <div class="form-card-header member">
+                    <i class="fa-solid fa-user"></i>
+                    <h5>Assigned Member</h5>
+                </div>
+                <div class="form-card-body">
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <label class="form-label">Assigned To</label>
+                            <input asp-for="AssignedTo" class="form-control" placeholder="Member name" />
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Phone</label>
+                            <input asp-for="AssignedPhone" class="form-control" placeholder="Phone number" />
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Start Date</label>
+                            <input name="StartDate" type="date" class="form-control" value="@startDateValue" />
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">End Date</label>
+                            <input name="EndDate" type="date" class="form-control" value="@endDateValue" />
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Payment Information -->
+            <div class="form-card">
+                <div class="form-card-header payment">
+                    <i class="fa-solid fa-money-bill-wave"></i>
+                    <h5>Payment Details</h5>
+                </div>
+                <div class="form-card-body">
+                    <div class="row g-3">
+                        <div class="col-md-4">
+                            <label class="form-label">Monthly Rate (Rs.)</label>
+                            <input asp-for="MonthlyRate" type="number" step="0.01" class="form-control" />
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label">Total Amount (Rs.)</label>
+                            <input asp-for="TotalAmount" type="number" step="0.01" class="form-control" id="totalInput" />
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label">Rental Months</label>
+                            <input asp-for="RentalMonths" type="number" class="form-control" />
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Paid Amount (Rs.)</label>
+                            <input asp-for="PaidAmount" type="number" step="0.01" class="form-control payment-input paid" id="paidInput" />
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Due Amount (Rs.)</label>
+                            <input asp-for="DueAmount" type="number" step="0.01" class="form-control payment-input due" id="dueInput" readonly />
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-check mt-2">
+                                <input asp-for="KeyDeposit" class="form-check-input" type="checkbox" />
+                                <label class="form-check-label">Key Deposit Taken</label>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Key Deposit Amount</label>
+                            <input asp-for="KeyDepositAmount" type="number" step="0.01" class="form-control" />
+                        </div>
+                        <div class="col-12">
+                            <label class="form-label">Remarks</label>
+                            <textarea asp-for="Remarks" class="form-control" rows="2"></textarea>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-4">
+            <!-- Summary Card -->
+            <div class="form-card">
+                <div class="form-card-header locker">
+                    <i class="fa-solid fa-chart-pie"></i>
+                    <h5>Summary</h5>
+                </div>
+                <div class="form-card-body">
+                    <div class="d-flex justify-content-between mb-3">
+                        <span class="text-muted">Locker:</span>
+                        <span class="fw-bold">@Model.LockerNumber</span>
+                    </div>
+                    <div class="d-flex justify-content-between mb-3">
+                        <span class="text-muted">Size:</span>
+                        <span class="fw-bold">@Model.Size</span>
+                    </div>
+                    <div class="d-flex justify-content-between mb-3">
+                        <span class="text-muted">Status:</span>
+                        <span class="badge @(Model.Status == "Available" ? "bg-success" : Model.Status == "Occupied" ? "bg-primary" : "bg-secondary")">
+                            @Model.Status
+                        </span>
+                    </div>
+                    @if (Model.Status == "Occupied")
+                    {
+                        <hr>
+                        <div class="d-flex justify-content-between mb-3">
+                            <span class="text-muted">Assigned:</span>
+                            <span class="fw-bold">@(Model.AssignedTo ?? "-")</span>
+                        </div>
+                        <div class="d-flex justify-content-between mb-3">
+                            <span class="text-muted">Expires:</span>
+                            <span class="fw-bold @(Model.IsExpired ? "text-danger" : "")">
+                                @(Model.EndDate?.ToString("dd MMM yy") ?? "-")
+                            </span>
+                        </div>
+                    }
+                </div>
+            </div>
+
+            <!-- Delete Card -->
+            <div class="form-card border-danger">
+                <div class="form-card-header" style="background: #fef2f2;">
+                    <i class="fa-solid fa-trash" style="background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%); color: white;"></i>
+                    <h5 class="text-danger">Danger Zone</h5>
+                </div>
+                <div class="form-card-body">
+                    <p class="text-muted small mb-3">Permanently delete this locker. This action cannot be undone.</p>
+                    <button type="button" class="btn btn-outline-danger w-100" data-bs-toggle="modal" data-bs-target="#deleteModal">
+                        <i class="fa-solid fa-trash me-2"></i> Delete Locker
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="d-flex gap-3">
+        <button type="submit" class="btn btn-success btn-save btn-lg">
+            <i class="fa-solid fa-save me-2"></i> Save Changes
+        </button>
+        <a href="/Locker" class="btn btn-outline-secondary btn-lg">Cancel</a>
+    </div>
+</form>
+
+<!-- Delete Modal -->
+<div class="modal fade" id="deleteModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header bg-danger text-white">
+                <h5 class="modal-title"><i class="fa-solid fa-trash me-2"></i>Delete Locker</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <p>Are you sure you want to delete locker <strong>@Model.LockerNumber</strong>?</p>
+                <p class="text-danger"><i class="fa-solid fa-exclamation-triangle me-2"></i>This action cannot be undone.</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <form method="post" action="/Locker/Delete/@Model.LockerID" style="display:inline;">
+                    <button type="submit" class="btn btn-danger">Yes, Delete</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    const totalInput = document.getElementById('totalInput');
+    const paidInput = document.getElementById('paidInput');
+    const dueInput = document.getElementById('dueInput');
+
+    function updateDue() {
+        const total = parseFloat(totalInput.value) || 0;
+        const paid = parseFloat(paidInput.value) || 0;
+        dueInput.value = Math.max(0, total - paid).toFixed(2);
+    }
+
+    totalInput.addEventListener('input', updateDue);
+    paidInput.addEventListener('input', updateDue);
+</script>

@@ -1,0 +1,340 @@
+@model HighSpiritApp.Models.Locker.Locker
+@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<style>
+    .assign-header {
+        background: linear-gradient(135deg, #16a34a 0%, #15803d 100%);
+        border-radius: 16px;
+        padding: 20px 25px;
+        color: white;
+        margin-bottom: 25px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+    }
+    .assign-header h4 {
+        margin: 0;
+        font-weight: 600;
+        display: flex;
+        align-items: center;
+        gap: 12px;
+    }
+
+    .form-card {
+        background: white;
+        border-radius: 16px;
+        box-shadow: 0 4px 20px rgba(0,0,0,0.05);
+        border: 1px solid #e2e8f0;
+        overflow: hidden;
+        margin-bottom: 25px;
+    }
+    .form-card-header {
+        background: #f8fafc;
+        padding: 16px 20px;
+        border-bottom: 1px solid #e2e8f0;
+        display: flex;
+        align-items: center;
+        gap: 12px;
+    }
+    .form-card-header i {
+        width: 36px;
+        height: 36px;
+        border-radius: 10px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 16px;
+        background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+        color: white;
+    }
+    .form-card-header h5 {
+        margin: 0;
+        font-weight: 600;
+        color: #1e293b;
+    }
+    .form-card-body {
+        padding: 25px;
+    }
+
+    .locker-preview {
+        background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%);
+        border: 2px solid #86efac;
+        border-radius: 16px;
+        padding: 25px;
+        text-align: center;
+    }
+    .locker-preview .locker-number {
+        font-size: 48px;
+        font-weight: 700;
+        color: #16a34a;
+    }
+    .locker-preview .locker-size {
+        display: inline-block;
+        padding: 6px 16px;
+        background: white;
+        border-radius: 20px;
+        font-weight: 600;
+        color: #15803d;
+        margin-top: 10px;
+    }
+    .locker-preview .monthly-rate {
+        font-size: 24px;
+        font-weight: 700;
+        color: #166534;
+        margin-top: 15px;
+    }
+
+    .duration-selector {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 12px;
+    }
+    .duration-option {
+        position: relative;
+    }
+    .duration-option input {
+        position: absolute;
+        opacity: 0;
+    }
+    .duration-option label {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        padding: 15px;
+        border: 2px solid #e2e8f0;
+        border-radius: 12px;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        background: #f8fafc;
+    }
+    .duration-option label .months {
+        font-size: 24px;
+        font-weight: 700;
+        color: #1e293b;
+    }
+    .duration-option label .price {
+        font-size: 12px;
+        color: #64748b;
+    }
+    .duration-option input:checked + label {
+        border-color: #10b981;
+        background: #f0fdf4;
+        box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.2);
+    }
+
+    .payment-summary {
+        background: linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%);
+        border: 1px solid #bfdbfe;
+        border-radius: 12px;
+        padding: 20px;
+        margin-top: 20px;
+    }
+    .payment-row {
+        display: flex;
+        justify-content: space-between;
+        padding: 8px 0;
+    }
+    .payment-row.total {
+        border-top: 2px solid #93c5fd;
+        margin-top: 10px;
+        padding-top: 15px;
+        font-size: 18px;
+        font-weight: 700;
+    }
+
+    .form-label {
+        font-weight: 600;
+        color: #475569;
+        margin-bottom: 8px;
+    }
+    .form-control {
+        border-radius: 10px;
+        border: 2px solid #e2e8f0;
+        padding: 10px 14px;
+    }
+    .form-control:focus {
+        border-color: #10b981;
+        box-shadow: 0 0 0 4px rgba(16, 185, 129, 0.1);
+    }
+
+    .btn-assign {
+        background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+        border: none;
+        padding: 12px 30px;
+        font-weight: 600;
+        border-radius: 10px;
+    }
+    .btn-assign:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 15px rgba(16, 185, 129, 0.3);
+    }
+
+    @@media (max-width: 576px) {
+        .duration-selector { grid-template-columns: repeat(2, 1fr); }
+    }
+</style>
+
+<div class="assign-header">
+    <h4>
+        <i class="fa-solid fa-user-plus"></i>
+        Assign Locker
+    </h4>
+    <a href="/Locker" class="btn btn-outline-light">
+        <i class="fa-solid fa-arrow-left me-2"></i> Back
+    </a>
+</div>
+
+<form method="post">
+    <input type="hidden" name="id" value="@Model.LockerID" />
+
+    <div class="row">
+        <div class="col-lg-4">
+            <!-- Locker Preview -->
+            <div class="locker-preview mb-4">
+                <div class="locker-number">
+                    <i class="fa-solid fa-lock-open me-2"></i>@Model.LockerNumber
+                </div>
+                <div class="locker-size">
+                    <i class="fa-solid fa-ruler-combined me-1"></i> @Model.Size
+                </div>
+                <div class="monthly-rate">
+                    Rs. @Model.MonthlyRate.ToString("N0")/month
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-8">
+            <!-- Member Information -->
+            <div class="form-card">
+                <div class="form-card-header">
+                    <i class="fa-solid fa-user"></i>
+                    <h5>Member Information</h5>
+                </div>
+                <div class="form-card-body">
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <label class="form-label">Member Name <span class="text-danger">*</span></label>
+                            <input type="text" name="memberName" class="form-control" placeholder="Enter member name" required />
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Phone Number</label>
+                            <input type="text" name="phone" class="form-control" placeholder="Enter phone number" />
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Rental Duration -->
+            <div class="form-card">
+                <div class="form-card-header">
+                    <i class="fa-solid fa-calendar"></i>
+                    <h5>Rental Duration</h5>
+                </div>
+                <div class="form-card-body">
+                    <div class="duration-selector">
+                        <div class="duration-option">
+                            <input type="radio" name="months" value="1" id="dur1" checked />
+                            <label for="dur1">
+                                <span class="months">1</span>
+                                <span class="price">Rs. @Model.MonthlyRate.ToString("N0")</span>
+                            </label>
+                        </div>
+                        <div class="duration-option">
+                            <input type="radio" name="months" value="3" id="dur3" />
+                            <label for="dur3">
+                                <span class="months">3</span>
+                                <span class="price">Rs. @((Model.MonthlyRate * 3).ToString("N0"))</span>
+                            </label>
+                        </div>
+                        <div class="duration-option">
+                            <input type="radio" name="months" value="6" id="dur6" />
+                            <label for="dur6">
+                                <span class="months">6</span>
+                                <span class="price">Rs. @((Model.MonthlyRate * 6).ToString("N0"))</span>
+                            </label>
+                        </div>
+                        <div class="duration-option">
+                            <input type="radio" name="months" value="12" id="dur12" />
+                            <label for="dur12">
+                                <span class="months">12</span>
+                                <span class="price">Rs. @((Model.MonthlyRate * 12).ToString("N0"))</span>
+                            </label>
+                        </div>
+                    </div>
+
+                    <div class="payment-summary">
+                        <div class="payment-row">
+                            <span>Monthly Rate:</span>
+                            <span>Rs. @Model.MonthlyRate.ToString("N0")</span>
+                        </div>
+                        <div class="payment-row">
+                            <span>Duration:</span>
+                            <span id="durationText">1 month</span>
+                        </div>
+                        <div class="payment-row total">
+                            <span>Total Amount:</span>
+                            <span id="totalAmount">Rs. @Model.MonthlyRate.ToString("N0")</span>
+                        </div>
+                    </div>
+
+                    <div class="row g-3 mt-3">
+                        <div class="col-md-6">
+                            <label class="form-label">Amount Paid Now <span class="text-danger">*</span></label>
+                            <input type="number" name="paidAmount" id="paidInput" class="form-control" 
+                                   value="@Model.MonthlyRate" min="0" required />
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Due Amount</label>
+                            <input type="text" id="dueDisplay" class="form-control" value="Rs. 0" readonly 
+                                   style="background: #fef2f2; font-weight: 600;" />
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="d-flex gap-3">
+        <button type="submit" class="btn btn-success btn-assign btn-lg">
+            <i class="fa-solid fa-check me-2"></i> Assign Locker
+        </button>
+        <a href="/Locker" class="btn btn-outline-secondary btn-lg">Cancel</a>
+    </div>
+</form>
+
+<script>
+    const monthlyRate = @Model.MonthlyRate;
+    const durationInputs = document.querySelectorAll('input[name="months"]');
+    const paidInput = document.getElementById('paidInput');
+    const totalAmountEl = document.getElementById('totalAmount');
+    const durationTextEl = document.getElementById('durationText');
+    const dueDisplayEl = document.getElementById('dueDisplay');
+
+    let currentTotal = monthlyRate;
+
+    function updateCalculations() {
+        const selectedDuration = document.querySelector('input[name="months"]:checked').value;
+        currentTotal = monthlyRate * parseInt(selectedDuration);
+        
+        totalAmountEl.textContent = 'Rs. ' + currentTotal.toLocaleString();
+        durationTextEl.textContent = selectedDuration + (selectedDuration == 1 ? ' month' : ' months');
+        paidInput.value = currentTotal;
+        updateDue();
+    }
+
+    function updateDue() {
+        const paid = parseFloat(paidInput.value) || 0;
+        const due = Math.max(0, currentTotal - paid);
+        dueDisplayEl.value = 'Rs. ' + due.toLocaleString();
+        dueDisplayEl.style.background = due > 0 ? '#fef2f2' : '#f0fdf4';
+        dueDisplayEl.style.color = due > 0 ? '#991b1b' : '#166534';
+    }
+
+    durationInputs.forEach(input => {
+        input.addEventListener('change', updateCalculations);
+    });
+
+    paidInput.addEventListener('input', updateDue);
+</script>

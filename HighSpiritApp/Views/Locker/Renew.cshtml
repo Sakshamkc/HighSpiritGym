@@ -1,0 +1,342 @@
+@model HighSpiritApp.Models.Locker.Locker
+@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<style>
+    .renew-header {
+        background: linear-gradient(135deg, #d97706 0%, #b45309 100%);
+        border-radius: 16px;
+        padding: 20px 25px;
+        color: white;
+        margin-bottom: 25px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+    }
+    .renew-header h4 {
+        margin: 0;
+        font-weight: 600;
+        display: flex;
+        align-items: center;
+        gap: 12px;
+    }
+
+    .form-card {
+        background: white;
+        border-radius: 16px;
+        box-shadow: 0 4px 20px rgba(0,0,0,0.05);
+        border: 1px solid #e2e8f0;
+        overflow: hidden;
+        margin-bottom: 25px;
+    }
+    .form-card-header {
+        background: #f8fafc;
+        padding: 16px 20px;
+        border-bottom: 1px solid #e2e8f0;
+        display: flex;
+        align-items: center;
+        gap: 12px;
+    }
+    .form-card-header i {
+        width: 36px;
+        height: 36px;
+        border-radius: 10px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 16px;
+        background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+        color: white;
+    }
+    .form-card-header h5 {
+        margin: 0;
+        font-weight: 600;
+        color: #1e293b;
+    }
+    .form-card-body {
+        padding: 25px;
+    }
+
+    .current-status {
+        background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+        border: 2px solid #fbbf24;
+        border-radius: 16px;
+        padding: 25px;
+    }
+    .current-status .locker-number {
+        font-size: 32px;
+        font-weight: 700;
+        color: #92400e;
+    }
+    .current-status .member-name {
+        font-size: 18px;
+        color: #78350f;
+        margin-top: 5px;
+    }
+    .status-row {
+        display: flex;
+        justify-content: space-between;
+        padding: 10px 0;
+        border-bottom: 1px solid rgba(0,0,0,0.1);
+    }
+    .status-row:last-child { border-bottom: none; }
+    .status-row .label { color: #78350f; }
+    .status-row .value { font-weight: 600; color: #92400e; }
+    .status-row .value.danger { color: #dc2626; }
+    .status-row .value.success { color: #16a34a; }
+
+    .duration-selector {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 12px;
+    }
+    .duration-option {
+        position: relative;
+    }
+    .duration-option input {
+        position: absolute;
+        opacity: 0;
+    }
+    .duration-option label {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        padding: 15px;
+        border: 2px solid #e2e8f0;
+        border-radius: 12px;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        background: #f8fafc;
+    }
+    .duration-option label .months {
+        font-size: 24px;
+        font-weight: 700;
+        color: #1e293b;
+    }
+    .duration-option label .price {
+        font-size: 12px;
+        color: #64748b;
+    }
+    .duration-option input:checked + label {
+        border-color: #f59e0b;
+        background: #fffbeb;
+        box-shadow: 0 0 0 3px rgba(245, 158, 11, 0.2);
+    }
+
+    .new-dates {
+        background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%);
+        border: 1px solid #bbf7d0;
+        border-radius: 12px;
+        padding: 20px;
+        margin-top: 20px;
+    }
+
+    .form-label {
+        font-weight: 600;
+        color: #475569;
+    }
+    .form-control {
+        border-radius: 10px;
+        border: 2px solid #e2e8f0;
+        padding: 10px 14px;
+    }
+    .form-control:focus {
+        border-color: #f59e0b;
+        box-shadow: 0 0 0 4px rgba(245, 158, 11, 0.1);
+    }
+
+    .btn-renew {
+        background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+        border: none;
+        padding: 12px 30px;
+        font-weight: 600;
+        border-radius: 10px;
+        color: white;
+    }
+    .btn-renew:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 15px rgba(245, 158, 11, 0.3);
+        color: white;
+    }
+
+    @@media (max-width: 576px) {
+        .duration-selector { grid-template-columns: repeat(2, 1fr); }
+    }
+</style>
+
+<div class="renew-header">
+    <h4>
+        <i class="fa-solid fa-rotate"></i>
+        Renew Locker
+    </h4>
+    <a href="/Locker" class="btn btn-outline-light">
+        <i class="fa-solid fa-arrow-left me-2"></i> Back
+    </a>
+</div>
+
+<form method="post">
+    <input type="hidden" name="id" value="@Model.LockerID" />
+
+    <div class="row">
+        <div class="col-lg-5">
+            <!-- Current Status -->
+            <div class="current-status mb-4">
+                <div class="text-center mb-3">
+                    <div class="locker-number">
+                        <i class="fa-solid fa-lock me-2"></i>@Model.LockerNumber
+                    </div>
+                    <div class="member-name">@Model.AssignedTo</div>
+                </div>
+                <div class="status-row">
+                    <span class="label">Current End Date:</span>
+                    <span class="value @(Model.IsExpired ? "danger" : "")">
+                        @(Model.EndDate?.ToString("dd MMM yyyy") ?? "-")
+                        @if (Model.IsExpired) { <i class="fa-solid fa-exclamation-circle ms-1"></i> }
+                    </span>
+                </div>
+                <div class="status-row">
+                    <span class="label">Status:</span>
+                    <span class="value @(Model.IsExpired ? "danger" : Model.IsExpiringSoon ? "text-warning" : "success")">
+                        @if (Model.IsExpired) { @("Expired") }
+                        else if (Model.IsExpiringSoon) { @($"Expiring in {Model.DaysRemaining} days") }
+                        else { @($"{Model.DaysRemaining} days left") }
+                    </span>
+                </div>
+                <div class="status-row">
+                    <span class="label">Monthly Rate:</span>
+                    <span class="value">Rs. @Model.MonthlyRate.ToString("N0")</span>
+                </div>
+                @if (Model.DueAmount > 0)
+                {
+                    <div class="status-row">
+                        <span class="label">Previous Due:</span>
+                        <span class="value danger">Rs. @Model.DueAmount.ToString("N0")</span>
+                    </div>
+                }
+            </div>
+        </div>
+
+        <div class="col-lg-7">
+            <!-- Renewal Options -->
+            <div class="form-card">
+                <div class="form-card-header">
+                    <i class="fa-solid fa-calendar-plus"></i>
+                    <h5>Extend Duration</h5>
+                </div>
+                <div class="form-card-body">
+                    <div class="duration-selector mb-4">
+                        <div class="duration-option">
+                            <input type="radio" name="months" value="1" id="dur1" checked />
+                            <label for="dur1">
+                                <span class="months">+1</span>
+                                <span class="price">Rs. @Model.MonthlyRate.ToString("N0")</span>
+                            </label>
+                        </div>
+                        <div class="duration-option">
+                            <input type="radio" name="months" value="3" id="dur3" />
+                            <label for="dur3">
+                                <span class="months">+3</span>
+                                <span class="price">Rs. @((Model.MonthlyRate * 3).ToString("N0"))</span>
+                            </label>
+                        </div>
+                        <div class="duration-option">
+                            <input type="radio" name="months" value="6" id="dur6" />
+                            <label for="dur6">
+                                <span class="months">+6</span>
+                                <span class="price">Rs. @((Model.MonthlyRate * 6).ToString("N0"))</span>
+                            </label>
+                        </div>
+                        <div class="duration-option">
+                            <input type="radio" name="months" value="12" id="dur12" />
+                            <label for="dur12">
+                                <span class="months">+12</span>
+                                <span class="price">Rs. @((Model.MonthlyRate * 12).ToString("N0"))</span>
+                            </label>
+                        </div>
+                    </div>
+
+                    <div class="new-dates">
+                        <div class="row">
+                            <div class="col-6">
+                                <div class="text-muted small">New End Date</div>
+                                <div class="fs-4 fw-bold text-success" id="newEndDate">
+                                    @{
+                                        var baseDate = Model.EndDate.HasValue && Model.EndDate.Value >= DateTime.Today
+                                            ? Model.EndDate.Value : DateTime.Today;
+                                    }
+                                    @baseDate.AddMonths(1).ToString("dd MMM yyyy")
+                                </div>
+                            </div>
+                            <div class="col-6 text-end">
+                                <div class="text-muted small">Additional Cost</div>
+                                <div class="fs-4 fw-bold text-primary" id="additionalCost">Rs. @Model.MonthlyRate.ToString("N0")</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row g-3 mt-3">
+                        <div class="col-md-6">
+                            <label class="form-label">Amount Paid Now</label>
+                            <input type="number" name="paidAmount" id="paidInput" class="form-control" 
+                                   value="@Model.MonthlyRate" min="0" />
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Will Be Due</label>
+                            <input type="text" id="dueDisplay" class="form-control" value="Rs. 0" readonly 
+                                   style="background: #f0fdf4; font-weight: 600; color: #166534;" />
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="d-flex gap-3">
+        <button type="submit" class="btn btn-renew btn-lg">
+            <i class="fa-solid fa-rotate me-2"></i> Renew Locker
+        </button>
+        <a href="/Locker" class="btn btn-outline-secondary btn-lg">Cancel</a>
+    </div>
+</form>
+
+<script>
+    const monthlyRate = @Model.MonthlyRate;
+    const baseEndDate = new Date('@(Model.EndDate.HasValue && Model.EndDate.Value >= DateTime.Today ? Model.EndDate.Value.ToString("yyyy-MM-dd") : DateTime.Today.ToString("yyyy-MM-dd"))');
+    const durationInputs = document.querySelectorAll('input[name="months"]');
+    const paidInput = document.getElementById('paidInput');
+    const newEndDateEl = document.getElementById('newEndDate');
+    const additionalCostEl = document.getElementById('additionalCost');
+    const dueDisplayEl = document.getElementById('dueDisplay');
+
+    let currentCost = monthlyRate;
+
+    function updateCalculations() {
+        const selectedDuration = parseInt(document.querySelector('input[name="months"]:checked').value);
+        currentCost = monthlyRate * selectedDuration;
+        
+        // Calculate new end date
+        const newDate = new Date(baseEndDate);
+        newDate.setMonth(newDate.getMonth() + selectedDuration);
+        const options = { day: 'numeric', month: 'short', year: 'numeric' };
+        newEndDateEl.textContent = newDate.toLocaleDateString('en-GB', options);
+        
+        additionalCostEl.textContent = 'Rs. ' + currentCost.toLocaleString();
+        paidInput.value = currentCost;
+        updateDue();
+    }
+
+    function updateDue() {
+        const paid = parseFloat(paidInput.value) || 0;
+        const due = Math.max(0, currentCost - paid);
+        dueDisplayEl.value = 'Rs. ' + due.toLocaleString();
+        dueDisplayEl.style.background = due > 0 ? '#fef2f2' : '#f0fdf4';
+        dueDisplayEl.style.color = due > 0 ? '#991b1b' : '#166534';
+    }
+
+    durationInputs.forEach(input => {
+        input.addEventListener('change', updateCalculations);
+    });
+
+    paidInput.addEventListener('input', updateDue);
+</script>

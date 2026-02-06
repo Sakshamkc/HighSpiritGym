@@ -19,7 +19,7 @@ namespace HighSpiritApp.Controllers
             _boxingService = boxingService;
         }
 
-        public async Task<IActionResult> Index(string search, int page = 1)
+        public async Task<IActionResult> Index(string search, string filter = "all", string paymentStatus = "", int page = 1)
         {
             int pageSize = 10;
 
@@ -28,6 +28,23 @@ namespace HighSpiritApp.Controllers
                 : await _boxingService.SearchAsync(search);
 
             var membersList = allMembers.ToList();
+            
+            // Store counts before filtering
+            ViewBag.CountAll = membersList.Count;
+            ViewBag.CountWithDue = membersList.Count(m => m.DueAmount > 0);
+            ViewBag.CountPaid = membersList.Count(m => m.DueAmount == 0);
+            
+            // Apply payment status filter
+            if (!string.IsNullOrEmpty(paymentStatus))
+            {
+                membersList = paymentStatus switch
+                {
+                    "due" => membersList.Where(m => m.DueAmount > 0).ToList(),
+                    "paid" => membersList.Where(m => m.DueAmount == 0).ToList(),
+                    _ => membersList
+                };
+            }
+
             int total = membersList.Count;
 
             var data = membersList
@@ -39,6 +56,8 @@ namespace HighSpiritApp.Controllers
             ViewBag.Page = page;
             ViewBag.TotalPages = (int)Math.Ceiling(total / (double)pageSize);
             ViewBag.Search = search;
+            ViewBag.Filter = filter;
+            ViewBag.PaymentStatus = paymentStatus;
 
             return View(data);
         }

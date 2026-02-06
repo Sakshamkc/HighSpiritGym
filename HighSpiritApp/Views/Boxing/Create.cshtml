@@ -3,84 +3,400 @@
     Layout = "~/Views/Shared/_Layout.cshtml";
 }
 
-<div class="card shadow">
-    <div class="card-body">
+<style>
+    .create-header {
+        background: linear-gradient(135deg, #7f1d1d 0%, #991b1b 100%);
+        border-radius: 16px;
+        padding: 20px 25px;
+        color: white;
+        margin-bottom: 25px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+    }
+    .create-header h4 {
+        margin: 0;
+        font-weight: 600;
+        display: flex;
+        align-items: center;
+        gap: 12px;
+    }
+    .create-header h4 i {
+        font-size: 24px;
+    }
 
-        <h4 class="mb-4">Add Boxing Member (Kids)</h4>
+    .form-card {
+        background: white;
+        border-radius: 16px;
+        box-shadow: 0 4px 20px rgba(0,0,0,0.05);
+        border: 1px solid #e2e8f0;
+        overflow: hidden;
+        margin-bottom: 25px;
+    }
+    .form-card-header {
+        background: #f8fafc;
+        padding: 16px 20px;
+        border-bottom: 1px solid #e2e8f0;
+        display: flex;
+        align-items: center;
+        gap: 12px;
+    }
+    .form-card-header i {
+        width: 36px;
+        height: 36px;
+        border-radius: 10px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 16px;
+    }
+    .form-card-header.kid i {
+        background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+        color: white;
+    }
+    .form-card-header.guardian i {
+        background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+        color: white;
+    }
+    .form-card-header.payment i {
+        background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+        color: white;
+    }
+    .form-card-header.class i {
+        background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%);
+        color: white;
+    }
+    .form-card-header h5 {
+        margin: 0;
+        font-weight: 600;
+        color: #1e293b;
+    }
+    .form-card-body {
+        padding: 25px;
+    }
 
-        <form method="post" enctype="multipart/form-data" class="row g-3">
+    .photo-upload-area {
+        border: 3px dashed #e2e8f0;
+        border-radius: 16px;
+        padding: 30px;
+        text-align: center;
+        background: #f8fafc;
+        transition: all 0.2s ease;
+        cursor: pointer;
+    }
+    .photo-upload-area:hover {
+        border-color: #ef4444;
+        background: #fef2f2;
+    }
+    .photo-upload-area i {
+        font-size: 48px;
+        color: #94a3b8;
+        margin-bottom: 15px;
+    }
+    .photo-upload-area:hover i {
+        color: #ef4444;
+    }
+    .photo-preview {
+        width: 150px;
+        height: 150px;
+        border-radius: 16px;
+        object-fit: cover;
+        border: 3px solid #e2e8f0;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+    }
 
-            <div class="col-md-6">
-                <label class="form-label">Kid Name</label>
-                <input asp-for="Name" class="form-control" required />
-            </div>
+    .form-label {
+        font-weight: 600;
+        color: #475569;
+        margin-bottom: 8px;
+    }
+    .form-label .required {
+        color: #ef4444;
+    }
+    .form-control {
+        border-radius: 10px;
+        border: 2px solid #e2e8f0;
+        padding: 10px 14px;
+        transition: all 0.2s ease;
+    }
+    .form-control:focus {
+        border-color: #ef4444;
+        box-shadow: 0 0 0 4px rgba(239, 68, 68, 0.1);
+    }
 
-            <div class="col-md-6">
-                <label class="form-label">Joined Date</label>
-                <input asp-for="JoinDate"
-                       type="date"
-                       class="form-control"/>
-            </div>
+    .payment-grid {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 20px;
+    }
+    .payment-input-group {
+        position: relative;
+    }
+    .payment-input-group .icon {
+        position: absolute;
+        left: 14px;
+        top: 50%;
+        transform: translateY(-50%);
+        font-size: 18px;
+        z-index: 1;
+    }
+    .payment-input-group .icon.cash { color: #2563eb; }
+    .payment-input-group .icon.esewa { color: #65a30d; }
+    .payment-input-group .icon.due { color: #dc2626; }
+    .payment-input-group input {
+        padding-left: 45px;
+        font-size: 18px;
+        font-weight: 600;
+        text-align: center;
+    }
+    .payment-input-group.cash input {
+        background: #eff6ff;
+        border-color: #bfdbfe;
+    }
+    .payment-input-group.esewa input {
+        background: #f7fee7;
+        border-color: #bef264;
+    }
+    .payment-input-group.due input {
+        background: #fef2f2;
+        border-color: #fecaca;
+    }
 
-            <div class="col-md-6">
-                <label class="form-label">Guardian Name</label>
-                <input asp-for="GuardianName" class="form-control" required />
-            </div>
+    .class-input-hint {
+        background: #f0f9ff;
+        border: 1px solid #bae6fd;
+        border-radius: 10px;
+        padding: 12px 16px;
+        margin-top: 10px;
+    }
+    .class-input-hint i {
+        color: #0284c7;
+    }
 
-            <div class="col-md-6">
-                <label class="form-label">Guardian Contact</label>
-                <input asp-for="GuardianContact"
-                       class="form-control"
-                       placeholder="Phone number"
-                       required />
-            </div>
+    .btn-save {
+        background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+        border: none;
+        padding: 12px 30px;
+        font-weight: 600;
+        border-radius: 10px;
+        transition: all 0.2s ease;
+    }
+    .btn-save:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 15px rgba(16, 185, 129, 0.3);
+    }
+    .btn-cancel {
+        padding: 12px 30px;
+        font-weight: 600;
+        border-radius: 10px;
+    }
 
-           <div class="col-md-3">
-                <label class="form-label">Per Month Class</label>
-                <input asp-for="PerMonthClass"
-                       class="form-control"
-                       placeholder="1+1+1+1" />
-            </div>
+    @@media (max-width: 768px) {
+        .payment-grid {
+            grid-template-columns: 1fr;
+        }
+        .create-header {
+            flex-direction: column;
+            gap: 15px;
+            text-align: center;
+        }
+    }
+</style>
 
-            <div class="col-md-3">
-                <label class="form-label">Cash</label>
-                <input asp-for="CashAmount" type="number" class="form-control" />
-            </div>
-
-            <div class="col-md-3">
-                <label class="form-label">eSewa</label>
-                <input asp-for="EsewaAmount" type="number" class="form-control" />
-            </div>
-
-            <div class="col-md-3">
-                <label class="form-label">Due Amount</label>
-                <input asp-for="DueAmount" type="number" class="form-control" />
-            </div>
-
-            <div class="col-md-6">
-                <label class="form-label">Remarks</label>
-                <input asp-for="Remarks"
-                       class="form-control"
-                       placeholder="Any notes (optional)" />
-            </div>
-            <div class="col-md-6">
-                <label class="form-label">Kid Photo</label><br />
-                <input type="file"
-                       name="photoFile"
-                       accept="image/*"
-                       class="form-control" />
-            </div>
-
-            <div class="col-12 mt-3">
-                <button class="btn btn-success">
-                    <i class="fa-solid fa-check"></i> Save
-                </button>
-                <a href="/Boxing" class="btn btn-secondary">
-                    Cancel
-                </a>
-            </div>
-
-        </form>
-
-    </div>
+<!-- Header -->
+<div class="create-header">
+    <h4>
+        <i class="fa-solid fa-user-plus"></i>
+        Add New Boxing Member
+    </h4>
+    <a href="/Boxing" class="btn btn-outline-light">
+        <i class="fa-solid fa-arrow-left me-2"></i> Back
+    </a>
 </div>
+
+<form method="post" enctype="multipart/form-data">
+    <div class="row">
+        <!-- Left Column -->
+        <div class="col-lg-8">
+            <!-- Kid Information -->
+            <div class="form-card">
+                <div class="form-card-header kid">
+                    <i class="fa-solid fa-child"></i>
+                    <h5>Kid Information</h5>
+                </div>
+                <div class="form-card-body">
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <label class="form-label">Kid Name <span class="required">*</span></label>
+                            <input asp-for="Name" class="form-control" placeholder="Enter kid's full name" required />
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Join Date</label>
+                            <input asp-for="JoinDate" type="date" class="form-control" value="@DateTime.Today.ToString("yyyy-MM-dd")" />
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Guardian Information -->
+            <div class="form-card">
+                <div class="form-card-header guardian">
+                    <i class="fa-solid fa-user-shield"></i>
+                    <h5>Guardian Information</h5>
+                </div>
+                <div class="form-card-body">
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <label class="form-label">Guardian Name <span class="required">*</span></label>
+                            <input asp-for="GuardianName" class="form-control" placeholder="Enter guardian's name" required />
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Contact Number <span class="required">*</span></label>
+                            <input asp-for="GuardianContact" class="form-control" placeholder="Enter phone number" required />
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Class Schedule -->
+            <div class="form-card">
+                <div class="form-card-header class">
+                    <i class="fa-solid fa-calendar-days"></i>
+                    <h5>Class Schedule</h5>
+                </div>
+                <div class="form-card-body">
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <label class="form-label">Per Month Class</label>
+                            <input asp-for="PerMonthClass" class="form-control" placeholder="e.g. 1+1+1+1" value="0+0+0+0" />
+                            <div class="class-input-hint">
+                                <i class="fa-solid fa-lightbulb me-2"></i>
+                                <small>Format: Classes per week (e.g., <strong>1+1+1+1</strong> = 1 class each week)</small>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Remarks</label>
+                            <textarea asp-for="Remarks" class="form-control" rows="3" placeholder="Any additional notes..."></textarea>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Payment Information -->
+            <div class="form-card">
+                <div class="form-card-header payment">
+                    <i class="fa-solid fa-money-bill-wave"></i>
+                    <h5>Payment Information</h5>
+                </div>
+                <div class="form-card-body">
+                    <div class="payment-grid">
+                        <div>
+                            <label class="form-label"><i class="fa-solid fa-money-bill me-2 text-primary"></i>Cash Amount</label>
+                            <div class="payment-input-group cash">
+                                <i class="fa-solid fa-money-bill icon cash"></i>
+                                <input asp-for="CashAmount" type="number" class="form-control" placeholder="0" value="0" />
+                            </div>
+                        </div>
+                        <div>
+                            <label class="form-label"><i class="fa-solid fa-mobile-screen me-2 text-success"></i>eSewa Amount</label>
+                            <div class="payment-input-group esewa">
+                                <i class="fa-solid fa-mobile-screen icon esewa"></i>
+                                <input asp-for="EsewaAmount" type="number" class="form-control" placeholder="0" value="0" />
+                            </div>
+                        </div>
+                        <div>
+                            <label class="form-label"><i class="fa-solid fa-clock me-2 text-danger"></i>Due Amount</label>
+                            <div class="payment-input-group due">
+                                <i class="fa-solid fa-clock icon due"></i>
+                                <input asp-for="DueAmount" type="number" class="form-control" placeholder="0" value="0" />
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Right Column - Photo -->
+        <div class="col-lg-4">
+            <div class="form-card">
+                <div class="form-card-header kid">
+                    <i class="fa-solid fa-camera"></i>
+                    <h5>Photo</h5>
+                </div>
+                <div class="form-card-body text-center">
+                    <div class="photo-upload-area mb-3" onclick="document.getElementById('photoInput').click()">
+                        <div id="photoPlaceholder">
+                            <i class="fa-solid fa-cloud-arrow-up d-block"></i>
+                            <p class="text-muted mb-0">Click to upload photo</p>
+                            <small class="text-muted">JPG, PNG (Max 5MB)</small>
+                        </div>
+                        <img src="" class="photo-preview d-none" alt="Preview" id="photoPreview" />
+                    </div>
+                    <input type="file" name="photoFile" id="photoInput" class="d-none" accept="image/*" 
+                           onchange="previewPhoto(this)" />
+                    <button type="button" class="btn btn-outline-secondary btn-sm" 
+                            onclick="document.getElementById('photoInput').click()">
+                        <i class="fa-solid fa-upload me-2"></i>Choose File
+                    </button>
+                </div>
+            </div>
+
+            <!-- Tips Card -->
+            <div class="form-card">
+                <div class="form-card-header guardian">
+                    <i class="fa-solid fa-circle-info"></i>
+                    <h5>Quick Tips</h5>
+                </div>
+                <div class="form-card-body">
+                    <ul class="list-unstyled mb-0">
+                        <li class="mb-2">
+                            <i class="fa-solid fa-check-circle text-success me-2"></i>
+                            <small>Fields marked with <span class="text-danger">*</span> are required</small>
+                        </li>
+                        <li class="mb-2">
+                            <i class="fa-solid fa-check-circle text-success me-2"></i>
+                            <small>Per Month Class format: Week1+Week2+Week3+Week4</small>
+                        </li>
+                        <li class="mb-2">
+                            <i class="fa-solid fa-check-circle text-success me-2"></i>
+                            <small>Payment can be split between Cash and eSewa</small>
+                        </li>
+                        <li>
+                            <i class="fa-solid fa-check-circle text-success me-2"></i>
+                            <small>Photo is optional but recommended</small>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Action Buttons -->
+    <div class="d-flex gap-3 mt-4">
+        <button type="submit" class="btn btn-success btn-save btn-lg">
+            <i class="fa-solid fa-check me-2"></i> Add Member
+        </button>
+        <a href="/Boxing" class="btn btn-outline-secondary btn-cancel btn-lg">
+            Cancel
+        </a>
+    </div>
+</form>
+
+<script>
+    function previewPhoto(input) {
+        const preview = document.getElementById('photoPreview');
+        const placeholder = document.getElementById('photoPlaceholder');
+        const uploadArea = document.querySelector('.photo-upload-area');
+        
+        if (input.files && input.files[0]) {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                preview.src = e.target.result;
+                preview.classList.remove('d-none');
+                placeholder.classList.add('d-none');
+                uploadArea.style.padding = '10px';
+            }
+            reader.readAsDataURL(input.files[0]);
+        }
+    }
+</script>

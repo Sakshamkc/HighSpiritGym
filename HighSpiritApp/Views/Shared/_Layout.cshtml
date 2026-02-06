@@ -142,6 +142,11 @@
             background: rgba(59, 130, 246, 0.25);
         }
 
+        .sidebar .nav-link.locker-link i {
+            background: rgba(139, 92, 246, 0.15);
+            color: #a78bfa;
+        }
+
         /* Submenu styling */
         .sidebar .submenu-container {
             margin-left: 12px;
@@ -687,6 +692,27 @@
                 <a href="/Boxing/Import" class="nav-link submenu" onclick="closeSidebarOnMobile()">
                     <i class="fa-solid fa-file-import"></i>
                     <span class="nav-text">Import Excel</span>
+                </a>
+            </div>
+
+            <div class="nav-item">
+                <a href="#" class="nav-link locker-link" data-bs-toggle="collapse" data-bs-target="#lockerMenu">
+                    <i class="fa-solid fa-lock"></i>
+                    <span class="nav-text">Locker Management</span>
+                </a>
+            </div>
+            <div class="collapse submenu-container @(controller == "Locker" ? "show" : "")" id="lockerMenu">
+                <a href="/Locker" class="nav-link submenu" onclick="closeSidebarOnMobile()">
+                    <i class="fa-solid fa-grip"></i>
+                    <span class="nav-text">View Lockers</span>
+                </a>
+                <a href="/Locker/Create" class="nav-link submenu" onclick="closeSidebarOnMobile()">
+                    <i class="fa-solid fa-plus"></i>
+                    <span class="nav-text">Add Locker</span>
+                </a>
+                <a href="/Locker/BulkCreate" class="nav-link submenu" onclick="closeSidebarOnMobile()">
+                    <i class="fa-solid fa-layer-group"></i>
+                    <span class="nav-text">Bulk Add</span>
                 </a>
             </div>
         </div>

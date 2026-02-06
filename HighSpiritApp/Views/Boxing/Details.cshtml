@@ -1,139 +1,430 @@
 ﻿@model HighSpiritApp.Models.Boxing.BoxingMember
 @{
     Layout = "~/Views/Shared/_Layout.cshtml";
+    var hasDue = Model.DueAmount > 0;
+    var totalPaid = Model.CashAmount + Model.EsewaAmount;
+    
+    string FormatDateLong(DateTime? date)
+    {
+        if (!date.HasValue || date.Value.Year < 1900) return "-";
+        var d = date.Value;
+        string suffix = d.Day % 10 == 1 && d.Day != 11 ? "st" :
+                       d.Day % 10 == 2 && d.Day != 12 ? "nd" :
+                       d.Day % 10 == 3 && d.Day != 13 ? "rd" : "th";
+        return $"{d.Day}{suffix} {d:MMMM yyyy}";
+    }
 }
 
-<div class="card shadow">
-    <div class="card-body">
+<style>
+    .profile-header {
+        background: linear-gradient(135deg, #7f1d1d 0%, #991b1b 100%);
+        border-radius: 20px;
+        padding: 30px;
+        color: white;
+        margin-bottom: 25px;
+    }
+    .profile-photo {
+        width: 150px;
+        height: 150px;
+        border-radius: 20px;
+        object-fit: cover;
+        border: 4px solid rgba(255,255,255,0.2);
+        box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+    }
+    .profile-photo-placeholder {
+        width: 150px;
+        height: 150px;
+        border-radius: 20px;
+        background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 60px;
+        color: white;
+        border: 4px solid rgba(255,255,255,0.2);
+    }
+    .profile-name {
+        font-size: 28px;
+        font-weight: 700;
+        margin-bottom: 5px;
+    }
+    .profile-info {
+        font-size: 16px;
+        opacity: 0.9;
+    }
+    .profile-info i {
+        margin-right: 8px;
+        width: 20px;
+    }
+    .status-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        padding: 8px 16px;
+        border-radius: 30px;
+        font-size: 14px;
+        font-weight: 600;
+    }
+    .status-paid {
+        background: rgba(16, 185, 129, 0.2);
+        color: #10b981;
+    }
+    .status-due {
+        background: rgba(245, 158, 11, 0.2);
+        color: #f59e0b;
+    }
+    .action-btn {
+        padding: 10px 20px;
+        border-radius: 10px;
+        font-weight: 600;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        transition: all 0.2s ease;
+    }
+    .action-btn:hover {
+        transform: translateY(-2px);
+    }
 
-        <div class="d-flex justify-content-between align-items-center mb-4">
-            <h4 class="mb-0">
-                Boxing Member Details
-            </h4>
+    .info-card {
+        background: white;
+        border-radius: 16px;
+        box-shadow: 0 4px 20px rgba(0,0,0,0.05);
+        border: 1px solid #e2e8f0;
+        overflow: hidden;
+        margin-bottom: 25px;
+    }
+    .info-card-header {
+        background: #f8fafc;
+        padding: 16px 20px;
+        border-bottom: 1px solid #e2e8f0;
+        display: flex;
+        align-items: center;
+        gap: 12px;
+    }
+    .info-card-header i {
+        width: 36px;
+        height: 36px;
+        border-radius: 10px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 16px;
+    }
+    .info-card-header.kid i {
+        background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+        color: white;
+    }
+    .info-card-header.guardian i {
+        background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+        color: white;
+    }
+    .info-card-header.payment i {
+        background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+        color: white;
+    }
+    .info-card-header.class i {
+        background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%);
+        color: white;
+    }
+    .info-card-header h5 {
+        margin: 0;
+        font-weight: 600;
+        color: #1e293b;
+    }
+    .info-card-body {
+        padding: 20px;
+    }
 
-            <a href="/Boxing" class="btn btn-outline-secondary btn-sm">
-                <i class="fa-solid fa-arrow-left"></i> Back
-            </a>
+    .info-grid {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 20px;
+    }
+    .info-item {
+        padding: 15px;
+        background: #f8fafc;
+        border-radius: 12px;
+    }
+    .info-item label {
+        display: block;
+        font-size: 12px;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        color: #64748b;
+        margin-bottom: 5px;
+    }
+    .info-item span {
+        font-size: 15px;
+        font-weight: 600;
+        color: #1e293b;
+    }
+
+    .payment-highlight {
+        background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%);
+        border: 1px solid #bbf7d0;
+        border-radius: 16px;
+        padding: 25px;
+        margin-bottom: 20px;
+    }
+    .payment-highlight.has-due {
+        background: linear-gradient(135deg, #fffbeb 0%, #fef3c7 100%);
+        border-color: #fde68a;
+    }
+    .payment-stat {
+        text-align: center;
+    }
+    .payment-stat .value {
+        font-size: 28px;
+        font-weight: 700;
+        color: #1e293b;
+    }
+    .payment-stat .label {
+        font-size: 13px;
+        color: #64748b;
+    }
+    .payment-stat.cash .value { color: #2563eb; }
+    .payment-stat.esewa .value { color: #65a30d; }
+    .payment-stat.due .value { color: #dc2626; }
+    .payment-stat.paid .value { color: #059669; }
+
+    .class-schedule {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        font-size: 32px;
+        font-weight: 700;
+        color: #1e293b;
+        padding: 20px;
+        background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%);
+        border-radius: 12px;
+    }
+    .class-schedule .plus {
+        color: #3b82f6;
+        font-size: 24px;
+    }
+    .class-number {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 50px;
+        height: 50px;
+        background: white;
+        border-radius: 12px;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    }
+
+    .remarks-box {
+        background: #f8fafc;
+        border-radius: 12px;
+        padding: 20px;
+        min-height: 100px;
+    }
+    .remarks-box.empty {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #94a3b8;
+    }
+
+    @@media (max-width: 768px) {
+        .info-grid {
+            grid-template-columns: 1fr;
+        }
+        .profile-header .row {
+            text-align: center;
+        }
+        .profile-header .col-md-8 {
+            margin-top: 20px;
+        }
+    }
+</style>
+
+<!-- Profile Header -->
+<div class="profile-header">
+    <div class="row align-items-center">
+        <div class="col-md-4 text-center text-md-start">
+            @if (Model.Photo != null)
+            {
+                <img src="data:image/jpeg;base64,@Convert.ToBase64String(Model.Photo)" class="profile-photo" alt="@Model.Name" />
+            }
+            else
+            {
+                <div class="profile-photo-placeholder">
+                    <i class="fa-solid fa-child"></i>
+                </div>
+            }
         </div>
+        <div class="col-md-8">
+            <div class="d-flex flex-column flex-md-row align-items-center align-items-md-start justify-content-between">
+                <div class="text-center text-md-start mb-3 mb-md-0">
+                    <h1 class="profile-name">@Model.Name</h1>
+                    <p class="profile-info mb-2">
+                        <i class="fa-solid fa-user-shield"></i> @Model.GuardianName
+                        <span class="ms-3">
+                            <i class="fa-solid fa-phone"></i> 
+                            <a href="tel:@Model.GuardianContact" class="text-white text-decoration-none">@Model.GuardianContact</a>
+                        </span>
+                    </p>
+                    @if (hasDue)
+                    {
+                        <span class="status-badge status-due">
+                            <i class="fa-solid fa-exclamation-triangle"></i> Rs. @Model.DueAmount Due
+                        </span>
+                    }
+                    else
+                    {
+                        <span class="status-badge status-paid">
+                            <i class="fa-solid fa-check-circle"></i> Fully Paid
+                        </span>
+                    }
+                </div>
+                <div class="d-flex gap-2 flex-wrap justify-content-center">
+                    <a href="/Boxing/Edit/@Model.BoxingMemberID" class="action-btn btn btn-light">
+                        <i class="fa-solid fa-edit"></i> Edit
+                    </a>
+                    <a href="/Boxing" class="action-btn btn btn-outline-light">
+                        <i class="fa-solid fa-arrow-left"></i> Back
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
 
-        <!-- Kid Info -->
-        <div class="row mb-4">
-            <div class="col-md-12 text-center mb-4">
-                @if (Model.Photo != null)
+<!-- Payment Highlight -->
+<div class="payment-highlight @(hasDue ? "has-due" : "")">
+    <div class="row">
+        <div class="col-6 col-md-3">
+            <div class="payment-stat cash">
+                <div class="value">Rs. @Model.CashAmount.ToString("N0")</div>
+                <div class="label"><i class="fa-solid fa-money-bill me-1"></i>Cash Payment</div>
+            </div>
+        </div>
+        <div class="col-6 col-md-3">
+            <div class="payment-stat esewa">
+                <div class="value">Rs. @Model.EsewaAmount.ToString("N0")</div>
+                <div class="label"><i class="fa-solid fa-mobile-screen me-1"></i>eSewa Payment</div>
+            </div>
+        </div>
+        <div class="col-6 col-md-3">
+            <div class="payment-stat paid">
+                <div class="value">Rs. @totalPaid.ToString("N0")</div>
+                <div class="label"><i class="fa-solid fa-check me-1"></i>Total Paid</div>
+            </div>
+        </div>
+        <div class="col-6 col-md-3">
+            <div class="payment-stat @(hasDue ? "due" : "paid")">
+                <div class="value">Rs. @Model.DueAmount.ToString("N0")</div>
+                <div class="label"><i class="fa-solid @(hasDue ? "fa-clock" : "fa-check-circle") me-1"></i>Due Amount</div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <!-- Kid Information -->
+    <div class="col-lg-6">
+        <div class="info-card">
+            <div class="info-card-header kid">
+                <i class="fa-solid fa-child"></i>
+                <h5>Kid Information</h5>
+            </div>
+            <div class="info-card-body">
+                <div class="info-grid">
+                    <div class="info-item">
+                        <label>Full Name</label>
+                        <span>@Model.Name</span>
+                    </div>
+                    <div class="info-item">
+                        <label>Join Date</label>
+                        <span>@FormatDateLong(Model.JoinDate)</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Guardian Information -->
+        <div class="info-card">
+            <div class="info-card-header guardian">
+                <i class="fa-solid fa-user-shield"></i>
+                <h5>Guardian Information</h5>
+            </div>
+            <div class="info-card-body">
+                <div class="info-grid">
+                    <div class="info-item">
+                        <label>Guardian Name</label>
+                        <span>@Model.GuardianName</span>
+                    </div>
+                    <div class="info-item">
+                        <label>Contact Number</label>
+                        <span>
+                            <a href="tel:@Model.GuardianContact" class="text-decoration-none">
+                                <i class="fa-solid fa-phone me-1 text-success"></i>@Model.GuardianContact
+                            </a>
+                        </span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Class Schedule & Remarks -->
+    <div class="col-lg-6">
+        <div class="info-card">
+            <div class="info-card-header class">
+                <i class="fa-solid fa-calendar-days"></i>
+                <h5>Monthly Class Schedule</h5>
+            </div>
+            <div class="info-card-body">
+                <div class="class-schedule">
+                    @{
+                        var classes = Model.PerMonthClass?.Split('+') ?? new[] { "0", "0", "0", "0" };
+                        for (int i = 0; i < classes.Length; i++)
+                        {
+                            if (i > 0)
+                            {
+                                <span class="plus">+</span>
+                            }
+                            <span class="class-number">@classes[i].Trim()</span>
+                        }
+                    }
+                </div>
+                <p class="text-center text-muted mt-3 mb-0">
+                    <i class="fa-solid fa-info-circle me-1"></i>
+                    Classes per week for each week of the month
+                </p>
+            </div>
+        </div>
+        
+        <!-- Remarks -->
+        <div class="info-card">
+            <div class="info-card-header payment">
+                <i class="fa-solid fa-message"></i>
+                <h5>Remarks</h5>
+            </div>
+            <div class="info-card-body">
+                @if (string.IsNullOrWhiteSpace(Model.Remarks))
                 {
-                    <img src="data:image/jpeg;base64,@Convert.ToBase64String(Model.Photo)"
-                         class="rounded shadow"
-                         style="width:180px;height:180px;object-fit:cover;" />
-
+                    <div class="remarks-box empty">
+                        <span><i class="fa-solid fa-comment-slash me-2"></i>No remarks added</span>
+                    </div>
                 }
                 else
                 {
-                    <i class="fa-solid fa-child fa-6x text-secondary"></i>
-                    <div class="text-muted mt-2" style="font-size:13px;">
-                        No photo uploaded
+                    <div class="remarks-box">
+                        <p class="mb-0">@Model.Remarks</p>
                     </div>
                 }
             </div>
-            <div class="col-md-6">
-                <div class="border rounded p-3 h-100">
-                    <h6 class="text-muted mb-2">Kid Information</h6>
-
-                    <p><strong>Name:</strong> @Model.Name</p>
-                    <p>
-                        <strong>Joined Date:</strong>
-                        @Model.JoinDate?.ToString("dd MMM yyyy")
-                    </p>
-                </div>
-            </div>
-
-            <!-- Guardian Info -->
-            <div class="col-md-6">
-                <div class="border rounded p-3 h-100 bg-light">
-                    <h6 class="text-muted mb-2">Guardian Information</h6>
-
-                    <p><strong>Guardian Name:</strong> @Model.GuardianName</p>
-                    <p>
-                        <strong>Contact:</strong>
-                        <a href="tel:@Model.GuardianContact">
-                            @Model.GuardianContact
-                        </a>
-                    </p>
-                </div>
-            </div>
         </div>
-
-        <div class="row mb-4">
-
-            <!-- Class Tracking -->
-            <div class="col-md-6">
-                <div class="border rounded p-3 h-100">
-                    <h6 class="text-muted mb-2">Monthly Class Tracking</h6>
-
-                    <p>
-                        <strong>Per Month Class:</strong>
-                        <span class="badge bg-info fs-6">
-                            @Model.PerMonthClass
-                        </span>
-                    </p>
-                </div>
-            </div>
-
-            <!-- Payment Info -->
-            <div class="col-md-6">
-                <div class="border rounded p-3 h-100">
-                    <h6 class="text-muted mb-2">Payment Breakdown</h6>
-                    <p>
-                        <strong>Cash:</strong>
-                        <span class="badge bg-primary">
-                            @Model.CashAmount
-                        </span>
-                    </p>
-
-                    <p>
-                        <strong>eSewa:</strong>
-                        <span class="badge bg-warning text-dark">
-                            @Model.EsewaAmount
-                        </span>
-                    </p>
-
-                    <p>
-                        <strong>Due Amount:</strong>
-                        <span class="badge bg-danger">
-                            @Model.DueAmount
-                        </span>
-                    </p>
-                </div>
-            </div>
-        </div>
-
-        <!-- Remarks -->
-        <div class="row mb-4">
-            <div class="col-md-12">
-                <div class="border rounded p-3">
-                    <h6 class="text-muted mb-2">Remarks</h6>
-
-                    <p>
-                        @(string.IsNullOrWhiteSpace(Model.Remarks)
-                            ? "—"
-                            : Model.Remarks)
-                    </p>
-                </div>
-            </div>
-        </div>
-
-
-        <!-- Actions -->
-        <div class="d-flex gap-2">
-            <a href="/Boxing/Edit/@Model.BoxingMemberID"
-               class="btn btn-primary">
-                <i class="fa-solid fa-pen"></i> Edit
-            </a>
-
-            <a href="/Boxing"
-               class="btn btn-secondary">
-                Close
-            </a>
-        </div>
-
     </div>
+</div>
+
+<!-- Back Button -->
+<div class="mt-4">
+    <a href="/Boxing" class="btn btn-outline-secondary btn-lg px-4">
+        <i class="fa-solid fa-arrow-left me-2"></i> Back to Boxing Members
+    </a>
 </div>
