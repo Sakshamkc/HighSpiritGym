@@ -12,10 +12,12 @@ namespace HighSpiritApp.Controllers
     public class LockerController : Controller
     {
         private readonly ILockerService _lockerService;
+        private readonly ICustomerService _customerService;
 
-        public LockerController(ILockerService lockerService)
+        public LockerController(ILockerService lockerService, ICustomerService customerService)
         {
             _lockerService = lockerService;
+            _customerService = customerService;
         }
 
         public async Task<IActionResult> Index(string search, string status = "", string size = "", int page = 1)
@@ -155,6 +157,10 @@ namespace HighSpiritApp.Controllers
                 return RedirectToAction("Index");
             }
 
+            // Get all gym members for dropdown
+            var members = await _customerService.GetAllAsync();
+            ViewBag.GymMembers = members.OrderBy(m => m.FullName).ToList();
+
             return View(locker);
         }
 
@@ -265,6 +271,37 @@ namespace HighSpiritApp.Controllers
 
             TempData["success"] = $"Created {created} lockers. Skipped {skipped} (already exist).";
             return RedirectToAction("Index");
+        }
+
+        /// <summary>
+        /// API endpoint to search gym members for locker assignment
+        /// </summary>
+        [HttpGet]
+        public async Task<IActionResult> SearchMembers(string term)
+        {
+            if (string.IsNullOrWhiteSpace(term) || term.Length < 2)
+            {
+                return Json(new List<object>());
+            }
+
+            var filterRequest = new CustomerFilterRequest
+            {
+                Search = term,
+                PageSize = 20
+            };
+
+            var result = await _customerService.GetFilteredCustomersAsync(filterRequest);
+            var members = result.Customers
+                .Select(m => new
+                {
+                    id = m.CustomerID,
+                    name = m.FullName,
+                    phone = m.Phone ?? "",
+                    photo = m.Photo != null ? Convert.ToBase64String(m.Photo) : null
+                })
+                .ToList();
+
+            return Json(members);
         }
     }
 }

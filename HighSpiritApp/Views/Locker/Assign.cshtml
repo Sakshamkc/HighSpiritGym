@@ -1,6 +1,7 @@
 @model HighSpiritApp.Models.Locker.Locker
 @{
     Layout = "~/Views/Shared/_Layout.cshtml";
+    var gymMembers = ViewBag.GymMembers as List<HighSpiritApp.Models.Customer>;
 }
 
 <style>
@@ -171,6 +172,194 @@
         box-shadow: 0 4px 15px rgba(16, 185, 129, 0.3);
     }
 
+    /* Member Search Dropdown Styles */
+    .member-search-container {
+        position: relative;
+    }
+    .member-search-input {
+        padding-right: 80px !important;
+    }
+    .member-search-clear {
+        position: absolute;
+        right: 45px;
+        top: 50%;
+        transform: translateY(-50%);
+        background: #e2e8f0;
+        border: none;
+        width: 24px;
+        height: 24px;
+        border-radius: 50%;
+        display: none;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        color: #64748b;
+        font-size: 11px;
+        z-index: 3;
+    }
+    .member-search-clear:hover {
+        background: #fee2e2;
+        color: #dc2626;
+    }
+    .member-search-icon {
+        position: absolute;
+        right: 14px;
+        top: 50%;
+        transform: translateY(-50%);
+        color: #94a3b8;
+    }
+    .member-dropdown {
+        position: absolute;
+        top: 100%;
+        left: 0;
+        right: 0;
+        background: white;
+        border: 2px solid #e2e8f0;
+        border-top: none;
+        border-radius: 0 0 12px 12px;
+        max-height: 300px;
+        overflow-y: auto;
+        z-index: 100;
+        display: none;
+        box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+    }
+    .member-dropdown.show {
+        display: block;
+    }
+    .member-item {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        padding: 12px 16px;
+        cursor: pointer;
+        transition: background 0.15s ease;
+        border-bottom: 1px solid #f1f5f9;
+    }
+    .member-item:last-child {
+        border-bottom: none;
+    }
+    .member-item:hover {
+        background: #f0fdf4;
+    }
+    .member-item.selected {
+        background: #dcfce7;
+    }
+    .member-item img {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        object-fit: cover;
+        border: 2px solid #e2e8f0;
+    }
+    .member-item .member-avatar {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-weight: 600;
+        font-size: 14px;
+    }
+    .member-item .member-info {
+        flex: 1;
+    }
+    .member-item .member-name {
+        font-weight: 600;
+        color: #1e293b;
+        font-size: 14px;
+    }
+    .member-item .member-phone {
+        font-size: 12px;
+        color: #64748b;
+    }
+    .member-no-results {
+        padding: 20px;
+        text-align: center;
+        color: #64748b;
+    }
+    .member-loading {
+        padding: 20px;
+        text-align: center;
+        color: #64748b;
+    }
+    .selected-member-card {
+        display: none;
+        background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%);
+        border: 2px solid #86efac;
+        border-radius: 12px;
+        padding: 12px 16px;
+        margin-top: 10px;
+        align-items: center;
+        gap: 12px;
+    }
+    .selected-member-card.show {
+        display: flex;
+    }
+    .selected-member-card img {
+        width: 48px;
+        height: 48px;
+        border-radius: 50%;
+        object-fit: cover;
+        border: 2px solid #86efac;
+    }
+    .selected-member-card .member-avatar {
+        width: 48px;
+        height: 48px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-weight: 600;
+        font-size: 18px;
+    }
+    .selected-member-card .member-details {
+        flex: 1;
+    }
+    .selected-member-card .member-name {
+        font-weight: 600;
+        color: #166534;
+    }
+    .selected-member-card .member-phone {
+        font-size: 13px;
+        color: #15803d;
+    }
+    .selected-member-card .btn-remove {
+        background: #fee2e2;
+        border: none;
+        width: 32px;
+        height: 32px;
+        border-radius: 50%;
+        color: #dc2626;
+        cursor: pointer;
+        transition: all 0.15s ease;
+    }
+    .selected-member-card .btn-remove:hover {
+        background: #fecaca;
+    }
+    .or-divider {
+        text-align: center;
+        margin: 15px 0;
+        color: #94a3b8;
+        font-size: 13px;
+        position: relative;
+    }
+    .or-divider::before,
+    .or-divider::after {
+        content: '';
+        position: absolute;
+        top: 50%;
+        width: 40%;
+        height: 1px;
+        background: #e2e8f0;
+    }
+    .or-divider::before { left: 0; }
+    .or-divider::after { right: 0; }
+
     @@media (max-width: 576px) {
         .duration-selector { grid-template-columns: repeat(2, 1fr); }
     }
@@ -186,8 +375,9 @@
     </a>
 </div>
 
-<form method="post">
+<form method="post" id="assignForm">
     <input type="hidden" name="id" value="@Model.LockerID" />
+    <input type="hidden" name="customerId" id="selectedCustomerId" value="" />
 
     <div class="row">
         <div class="col-lg-4">
@@ -214,13 +404,52 @@
                 </div>
                 <div class="form-card-body">
                     <div class="row g-3">
+                        <div class="col-12">
+                            <label class="form-label">
+                                <i class="fa-solid fa-search me-1 text-primary"></i>
+                                Search Gym Member
+                            </label>
+                            <div class="member-search-container">
+                                <input type="text" 
+                                       id="memberSearchInput" 
+                                       class="form-control member-search-input" 
+                                       placeholder="Type to search members by name or phone..."
+                                       autocomplete="off" />
+                                <button type="button" class="member-search-clear" id="memberSearchClear">
+                                    <i class="fa-solid fa-times"></i>
+                                </button>
+                                <i class="fa-solid fa-search member-search-icon"></i>
+                                <div class="member-dropdown" id="memberDropdown">
+                                    <!-- Results will be populated here -->
+                                </div>
+                            </div>
+                            
+                            <!-- Selected Member Card -->
+                            <div class="selected-member-card" id="selectedMemberCard">
+                                <div class="member-avatar" id="selectedAvatar">A</div>
+                                <div class="member-details">
+                                    <div class="member-name" id="selectedName">-</div>
+                                    <div class="member-phone" id="selectedPhone">-</div>
+                                </div>
+                                <button type="button" class="btn-remove" id="removeMember" title="Remove">
+                                    <i class="fa-solid fa-times"></i>
+                                </button>
+                            </div>
+                        </div>
+                        
+                        <div class="col-12">
+                            <div class="or-divider">OR enter manually</div>
+                        </div>
+
                         <div class="col-md-6">
                             <label class="form-label">Member Name <span class="text-danger">*</span></label>
-                            <input type="text" name="memberName" class="form-control" placeholder="Enter member name" required />
+                            <input type="text" name="memberName" id="memberNameInput" class="form-control" 
+                                   placeholder="Enter member name" required />
                         </div>
                         <div class="col-md-6">
                             <label class="form-label">Phone Number</label>
-                            <input type="text" name="phone" class="form-control" placeholder="Enter phone number" />
+                            <input type="text" name="phone" id="phoneInput" class="form-control" 
+                                   placeholder="Enter phone number" />
                         </div>
                     </div>
                 </div>
@@ -305,6 +534,7 @@
 </form>
 
 <script>
+    // Payment calculation
     const monthlyRate = @Model.MonthlyRate;
     const durationInputs = document.querySelectorAll('input[name="months"]');
     const paidInput = document.getElementById('paidInput');
@@ -337,4 +567,144 @@
     });
 
     paidInput.addEventListener('input', updateDue);
+
+    // Member Search functionality
+    const memberSearchInput = document.getElementById('memberSearchInput');
+    const memberSearchClear = document.getElementById('memberSearchClear');
+    const memberDropdown = document.getElementById('memberDropdown');
+    const selectedMemberCard = document.getElementById('selectedMemberCard');
+    const selectedCustomerId = document.getElementById('selectedCustomerId');
+    const memberNameInput = document.getElementById('memberNameInput');
+    const phoneInput = document.getElementById('phoneInput');
+    const removeMemberBtn = document.getElementById('removeMember');
+
+    let searchTimeout;
+
+    // Show/hide clear button
+    function toggleClearButton() {
+        memberSearchClear.style.display = memberSearchInput.value.length > 0 ? 'flex' : 'none';
+    }
+
+    // Search members
+    function searchMembers(term) {
+        if (term.length < 2) {
+            memberDropdown.classList.remove('show');
+            return;
+        }
+
+        memberDropdown.innerHTML = '<div class="member-loading"><i class="fa-solid fa-spinner fa-spin me-2"></i>Searching...</div>';
+        memberDropdown.classList.add('show');
+
+        fetch(`/Locker/SearchMembers?term=${encodeURIComponent(term)}`)
+            .then(response => response.json())
+            .then(data => {
+                if (data.length === 0) {
+                    memberDropdown.innerHTML = '<div class="member-no-results"><i class="fa-solid fa-user-slash me-2"></i>No members found</div>';
+                } else {
+                    memberDropdown.innerHTML = data.map(member => `
+                        <div class="member-item" data-id="${member.id}" data-name="${member.name}" data-phone="${member.phone}" data-photo="${member.photo || ''}">
+                            ${member.photo 
+                                ? `<img src="data:image/jpeg;base64,${member.photo}" alt="${member.name}" />`
+                                : `<div class="member-avatar">${member.name.charAt(0).toUpperCase()}</div>`
+                            }
+                            <div class="member-info">
+                                <div class="member-name">${member.name}</div>
+                                <div class="member-phone"><i class="fa-solid fa-phone me-1"></i>${member.phone || 'No phone'}</div>
+                            </div>
+                        </div>
+                    `).join('');
+
+                    // Add click handlers
+                    memberDropdown.querySelectorAll('.member-item').forEach(item => {
+                        item.addEventListener('click', () => selectMember(item));
+                    });
+                }
+            })
+            .catch(err => {
+                memberDropdown.innerHTML = '<div class="member-no-results text-danger"><i class="fa-solid fa-exclamation-triangle me-2"></i>Error searching</div>';
+            });
+    }
+
+    // Select a member
+    function selectMember(item) {
+        const id = item.dataset.id;
+        const name = item.dataset.name;
+        const phone = item.dataset.phone;
+        const photo = item.dataset.photo;
+
+        // Set values
+        selectedCustomerId.value = id;
+        memberNameInput.value = name;
+        phoneInput.value = phone;
+
+        // Update selected card
+        document.getElementById('selectedName').textContent = name;
+        document.getElementById('selectedPhone').textContent = phone || 'No phone';
+        
+        const avatarEl = document.getElementById('selectedAvatar');
+        if (photo) {
+            avatarEl.outerHTML = `<img src="data:image/jpeg;base64,${photo}" alt="${name}" id="selectedAvatar" />`;
+        } else {
+            avatarEl.textContent = name.charAt(0).toUpperCase();
+        }
+
+        // Show card, hide dropdown
+        selectedMemberCard.classList.add('show');
+        memberDropdown.classList.remove('show');
+        memberSearchInput.value = '';
+        memberSearchClear.style.display = 'none';
+
+        // Disable manual inputs
+        memberNameInput.readOnly = true;
+        phoneInput.readOnly = true;
+        memberNameInput.style.background = '#f0fdf4';
+        phoneInput.style.background = '#f0fdf4';
+    }
+
+    // Remove selected member
+    function removeMember() {
+        selectedCustomerId.value = '';
+        memberNameInput.value = '';
+        phoneInput.value = '';
+        memberNameInput.readOnly = false;
+        phoneInput.readOnly = false;
+        memberNameInput.style.background = '';
+        phoneInput.style.background = '';
+        selectedMemberCard.classList.remove('show');
+        
+        // Reset avatar to div
+        const existingImg = document.querySelector('#selectedMemberCard img');
+        if (existingImg) {
+            existingImg.outerHTML = '<div class="member-avatar" id="selectedAvatar">A</div>';
+        }
+    }
+
+    // Event listeners
+    memberSearchInput.addEventListener('input', function() {
+        toggleClearButton();
+        clearTimeout(searchTimeout);
+        searchTimeout = setTimeout(() => searchMembers(this.value.trim()), 300);
+    });
+
+    memberSearchInput.addEventListener('focus', function() {
+        if (this.value.length >= 2) {
+            memberDropdown.classList.add('show');
+        }
+    });
+
+    memberSearchClear.addEventListener('click', function() {
+        memberSearchInput.value = '';
+        toggleClearButton();
+        memberDropdown.classList.remove('show');
+        memberSearchInput.focus();
+    });
+
+    removeMemberBtn.addEventListener('click', removeMember);
+
+    // Close dropdown when clicking outside
+    document.addEventListener('click', function(e) {
+        if (!memberSearchInput.contains(e.target) && !memberDropdown.contains(e.target)) {
+            memberDropdown.classList.remove('show');
+        }
+    });
 </script>
