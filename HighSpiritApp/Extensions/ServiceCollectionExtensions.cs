@@ -34,6 +34,7 @@ namespace HighSpiritApp.Extensions
             services.AddScoped<IBoxingService, BoxingService>();
             services.AddScoped<ILockerService, LockerService>();
             services.AddScoped<IDashboardService, DashboardService>();
+            services.AddScoped<IReportService, ReportService>();
             services.AddScoped<IAuthService, AuthService>();
 
             return services;

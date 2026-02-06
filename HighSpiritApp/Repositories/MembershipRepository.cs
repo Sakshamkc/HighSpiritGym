@@ -86,5 +86,13 @@ namespace HighSpiritApp.Repositories
                 membership.IsActive = false;
             }
         }
+
+        public async Task<IEnumerable<CustomerMembership>> GetAllWithCustomerAsync()
+        {
+            return await _context.CustomerMemberships
+                .Include(m => m.Customer)
+                .OrderByDescending(m => m.StartDate)
+                .ToListAsync();
+        }
     }
 }

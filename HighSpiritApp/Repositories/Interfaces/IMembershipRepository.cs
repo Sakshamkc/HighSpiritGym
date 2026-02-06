@@ -13,5 +13,6 @@ namespace HighSpiritApp.Repositories.Interfaces
         Task<IEnumerable<CustomerMembership>> GetExpiringSoonAsync(int days = 7);
         Task<CustomerMembership?> GetActiveByCustomerIdAsync(int customerId);
         Task DeactivateByCustomerIdAsync(int customerId);
+        Task<IEnumerable<CustomerMembership>> GetAllWithCustomerAsync();
     }
 }

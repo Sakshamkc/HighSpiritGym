@@ -147,6 +147,11 @@
             color: #a78bfa;
         }
 
+        .sidebar .nav-link.report-link i {
+            background: rgba(16, 185, 129, 0.15);
+            color: #34d399;
+        }
+
         /* Submenu styling */
         .sidebar .submenu-container {
             margin-left: 12px;
@@ -713,6 +718,15 @@
                 <a href="/Locker/BulkCreate" class="nav-link submenu" onclick="closeSidebarOnMobile()">
                     <i class="fa-solid fa-layer-group"></i>
                     <span class="nav-text">Bulk Add</span>
+                </a>
+            </div>
+
+            <p class="nav-section-title">Analytics</p>
+
+            <div class="nav-item">
+                <a href="/Report" class="nav-link report-link @(controller == "Report" ? "active" : "")" onclick="closeSidebarOnMobile()">
+                    <i class="fa-solid fa-chart-line"></i>
+                    <span class="nav-text">Revenue Report</span>
                 </a>
             </div>
         </div>
