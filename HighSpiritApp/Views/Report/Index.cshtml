@@ -4,7 +4,6 @@
     
     var report = ViewBag.RevenueReport as RevenueReport;
     var monthlyData = ViewBag.MonthlyData as MonthlyRevenueData;
-    var transactions = ViewBag.RecentTransactions as List<RecentTransaction>;
     var categoryWise = ViewBag.CategoryWise as CategoryWiseRevenue;
     var selectedYear = (int)ViewBag.SelectedYear;
     var availableYears = ViewBag.AvailableYears as List<int>;
@@ -127,89 +126,6 @@
         padding: 25px;
     }
 
-    /* Category Cards */
-    .category-grid {
-        display: grid;
-        grid-template-columns: repeat(3, 1fr);
-        gap: 20px;
-    }
-    .category-card {
-        text-align: center;
-        padding: 25px;
-        border-radius: 16px;
-        position: relative;
-    }
-    .category-card.gym { background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%); }
-    .category-card.boxing { background: linear-gradient(135deg, #fee2e2 0%, #fecaca 100%); }
-    .category-card.locker { background: linear-gradient(135deg, #f3e8ff 0%, #e9d5ff 100%); }
-    .category-percentage {
-        font-size: 42px;
-        font-weight: 700;
-    }
-    .category-card.gym .category-percentage { color: #d97706; }
-    .category-card.boxing .category-percentage { color: #dc2626; }
-    .category-card.locker .category-percentage { color: #7c3aed; }
-    .category-amount {
-        font-size: 18px;
-        font-weight: 600;
-        margin-top: 5px;
-    }
-    .category-label {
-        font-size: 14px;
-        color: #64748b;
-        margin-top: 8px;
-    }
-
-    /* Transaction Table */
-    .transaction-table {
-        width: 100%;
-    }
-    .transaction-table th {
-        background: #f8fafc;
-        padding: 12px 16px;
-        font-size: 12px;
-        text-transform: uppercase;
-        letter-spacing: 0.5px;
-        color: #64748b;
-        font-weight: 600;
-        border-bottom: 2px solid #e2e8f0;
-    }
-    .transaction-table td {
-        padding: 14px 16px;
-        border-bottom: 1px solid #f1f5f9;
-        vertical-align: middle;
-    }
-    .transaction-table tbody tr:hover {
-        background: #f8fafc;
-    }
-    .type-badge {
-        display: inline-flex;
-        align-items: center;
-        gap: 6px;
-        padding: 4px 12px;
-        border-radius: 20px;
-        font-size: 12px;
-        font-weight: 600;
-    }
-    .type-badge.gym { background: #fef3c7; color: #92400e; }
-    .type-badge.boxing { background: #fee2e2; color: #991b1b; }
-    .type-badge.locker { background: #f3e8ff; color: #6b21a8; }
-
-    .status-badge {
-        padding: 4px 10px;
-        border-radius: 6px;
-        font-size: 11px;
-        font-weight: 600;
-    }
-    .status-badge.paid { background: #dcfce7; color: #166534; }
-    .status-badge.partial { background: #fef3c7; color: #92400e; }
-    .status-badge.due { background: #fee2e2; color: #991b1b; }
-
-    .amount-cell {
-        font-weight: 600;
-        color: #059669;
-    }
-
     /* Year Selector */
     .year-selector {
         display: flex;
@@ -275,9 +191,150 @@
         color: #94a3b8;
     }
 
+    /* Pie Chart Container */
+    .pie-chart-container {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 40px;
+        padding: 20px;
+    }
+    .pie-chart-wrapper {
+        position: relative;
+        width: 280px;
+        height: 280px;
+    }
+    .pie-chart-center {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        text-align: center;
+        pointer-events: none;
+    }
+    .pie-chart-center .total-label {
+        font-size: 12px;
+        color: #64748b;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+    }
+    .pie-chart-center .total-value {
+        font-size: 24px;
+        font-weight: 700;
+        color: #1e293b;
+    }
+    .pie-legend {
+        display: flex;
+        flex-direction: column;
+        gap: 16px;
+    }
+    .pie-legend-item {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        padding: 12px 16px;
+        border-radius: 12px;
+        transition: all 0.2s ease;
+        cursor: pointer;
+    }
+    .pie-legend-item:hover {
+        background: #f8fafc;
+    }
+    .pie-legend-item .legend-color {
+        width: 16px;
+        height: 16px;
+        border-radius: 4px;
+    }
+    .pie-legend-item .legend-color.gym { background: linear-gradient(135deg, #fbbf24, #f59e0b); }
+    .pie-legend-item .legend-color.boxing { background: linear-gradient(135deg, #f87171, #ef4444); }
+    .pie-legend-item .legend-color.locker { background: linear-gradient(135deg, #a78bfa, #8b5cf6); }
+    .pie-legend-item .legend-icon {
+        width: 36px;
+        height: 36px;
+        border-radius: 10px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 14px;
+    }
+    .pie-legend-item .legend-icon.gym { background: #fef3c7; color: #d97706; }
+    .pie-legend-item .legend-icon.boxing { background: #fee2e2; color: #dc2626; }
+    .pie-legend-item .legend-icon.locker { background: #f3e8ff; color: #7c3aed; }
+    .pie-legend-item .legend-info {
+        flex: 1;
+    }
+    .pie-legend-item .legend-name {
+        font-weight: 600;
+        color: #1e293b;
+        font-size: 14px;
+    }
+    .pie-legend-item .legend-amount {
+        font-size: 12px;
+        color: #64748b;
+    }
+    .pie-legend-item .legend-percentage {
+        font-size: 18px;
+        font-weight: 700;
+    }
+    .pie-legend-item .legend-percentage.gym { color: #d97706; }
+    .pie-legend-item .legend-percentage.boxing { color: #dc2626; }
+    .pie-legend-item .legend-percentage.locker { color: #7c3aed; }
+
+    /* Due Summary Cards */
+    .due-summary-grid {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 20px;
+    }
+    .due-card {
+        background: linear-gradient(135deg, #fef2f2 0%, #fee2e2 100%);
+        border: 1px solid #fecaca;
+        border-radius: 16px;
+        padding: 20px;
+        text-align: center;
+    }
+    .due-card.gym {
+        background: linear-gradient(135deg, #fffbeb 0%, #fef3c7 100%);
+        border-color: #fde68a;
+    }
+    .due-card.boxing {
+        background: linear-gradient(135deg, #fef2f2 0%, #fee2e2 100%);
+        border-color: #fecaca;
+    }
+    .due-card.locker {
+        background: linear-gradient(135deg, #faf5ff 0%, #f3e8ff 100%);
+        border-color: #e9d5ff;
+    }
+    .due-card .due-icon {
+        width: 48px;
+        height: 48px;
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 20px;
+        margin: 0 auto 12px;
+    }
+    .due-card.gym .due-icon { background: #fef3c7; color: #d97706; }
+    .due-card.boxing .due-icon { background: #fee2e2; color: #dc2626; }
+    .due-card.locker .due-icon { background: #f3e8ff; color: #7c3aed; }
+    .due-card .due-label {
+        font-size: 13px;
+        color: #64748b;
+        margin-bottom: 5px;
+    }
+    .due-card .due-value {
+        font-size: 24px;
+        font-weight: 700;
+    }
+    .due-card.gym .due-value { color: #92400e; }
+    .due-card.boxing .due-value { color: #991b1b; }
+    .due-card.locker .due-value { color: #6b21a8; }
+
     @@media (max-width: 992px) {
         .stats-row { grid-template-columns: repeat(2, 1fr); }
-        .category-grid { grid-template-columns: 1fr; }
+        .pie-chart-container { flex-direction: column; }
+        .due-summary-grid { grid-template-columns: 1fr; }
     }
     @@media (max-width: 576px) {
         .stats-row { grid-template-columns: 1fr; }
@@ -360,10 +417,10 @@
 
 <div class="row">
     <!-- Monthly Chart -->
-    <div class="col-lg-8">
+    <div class="col-lg-7">
         <div class="chart-card">
             <div class="chart-header">
-                <h5><i class="fa-solid fa-chart-bar"></i> Monthly Revenue</h5>
+                <h5><i class="fa-solid fa-chart-bar"></i> Monthly Revenue (@selectedYear)</h5>
                 <div class="year-selector">
                     @foreach (var yr in availableYears ?? new List<int>())
                     {
@@ -418,28 +475,46 @@
         </div>
     </div>
 
-    <!-- Category Distribution -->
-    <div class="col-lg-4">
-        <div class="chart-card">
+    <!-- Pie Chart - Revenue Distribution -->
+    <div class="col-lg-5">
+        <div class="chart-card" style="height: 100%;">
             <div class="chart-header">
-                <h5><i class="fa-solid fa-pie-chart"></i> Revenue Distribution</h5>
+                <h5><i class="fa-solid fa-chart-pie"></i> Revenue Distribution</h5>
             </div>
             <div class="chart-body">
-                <div class="category-grid" style="grid-template-columns: 1fr;">
-                    <div class="category-card gym">
-                        <div class="category-percentage">@(categoryWise?.GymPercentage.ToString("F1") ?? "0")%</div>
-                        <div class="category-amount">Rs. @(categoryWise?.GymAmount.ToString("N0") ?? "0")</div>
-                        <div class="category-label"><i class="fa-solid fa-dumbbell me-1"></i> Gym Memberships</div>
+                <div class="pie-chart-container">
+                    <div class="pie-chart-wrapper">
+                        <canvas id="revenuePieChart"></canvas>
+                        <div class="pie-chart-center">
+                            <div class="total-label">Total</div>
+                            <div class="total-value">Rs. @((categoryWise?.Total ?? 0).ToString("N0"))</div>
+                        </div>
                     </div>
-                    <div class="category-card boxing">
-                        <div class="category-percentage">@(categoryWise?.BoxingPercentage.ToString("F1") ?? "0")%</div>
-                        <div class="category-amount">Rs. @(categoryWise?.BoxingAmount.ToString("N0") ?? "0")</div>
-                        <div class="category-label"><i class="fa-solid fa-hand-fist me-1"></i> Boxing Classes</div>
+                </div>
+                <div class="pie-legend mt-4">
+                    <div class="pie-legend-item">
+                        <div class="legend-icon gym"><i class="fa-solid fa-dumbbell"></i></div>
+                        <div class="legend-info">
+                            <div class="legend-name">Gym Memberships</div>
+                            <div class="legend-amount">Rs. @((categoryWise?.GymAmount ?? 0).ToString("N0"))</div>
+                        </div>
+                        <div class="legend-percentage gym">@((categoryWise?.GymPercentage ?? 0).ToString("F1"))%</div>
                     </div>
-                    <div class="category-card locker">
-                        <div class="category-percentage">@(categoryWise?.LockerPercentage.ToString("F1") ?? "0")%</div>
-                        <div class="category-amount">Rs. @(categoryWise?.LockerAmount.ToString("N0") ?? "0")</div>
-                        <div class="category-label"><i class="fa-solid fa-lock me-1"></i> Locker Rentals</div>
+                    <div class="pie-legend-item">
+                        <div class="legend-icon boxing"><i class="fa-solid fa-hand-fist"></i></div>
+                        <div class="legend-info">
+                            <div class="legend-name">Boxing Classes</div>
+                            <div class="legend-amount">Rs. @((categoryWise?.BoxingAmount ?? 0).ToString("N0"))</div>
+                        </div>
+                        <div class="legend-percentage boxing">@((categoryWise?.BoxingPercentage ?? 0).ToString("F1"))%</div>
+                    </div>
+                    <div class="pie-legend-item">
+                        <div class="legend-icon locker"><i class="fa-solid fa-lock"></i></div>
+                        <div class="legend-info">
+                            <div class="legend-name">Locker Rentals</div>
+                            <div class="legend-amount">Rs. @((categoryWise?.LockerAmount ?? 0).ToString("N0"))</div>
+                        </div>
+                        <div class="legend-percentage locker">@((categoryWise?.LockerPercentage ?? 0).ToString("F1"))%</div>
                     </div>
                 </div>
             </div>
@@ -447,59 +522,100 @@
     </div>
 </div>
 
-<!-- Recent Transactions -->
+<!-- Due Amount Summary -->
 <div class="chart-card">
     <div class="chart-header">
-        <h5><i class="fa-solid fa-clock-rotate-left"></i> Recent Transactions</h5>
+        <h5><i class="fa-solid fa-exclamation-triangle text-warning"></i> Pending Due Summary</h5>
     </div>
-    <div class="chart-body p-0">
-        <div class="table-responsive">
-            <table class="transaction-table">
-                <thead>
-                    <tr>
-                        <th>Type</th>
-                        <th>Member</th>
-                        <th>Description</th>
-                        <th>Amount</th>
-                        <th>Date</th>
-                        <th>Status</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    @if (transactions != null && transactions.Any())
-                    {
-                        foreach (var t in transactions)
-                        {
-                            <tr>
-                                <td>
-                                    <span class="type-badge @t.Type.ToLower()">
-                                        <i class="fa-solid @(t.Type == "Gym" ? "fa-dumbbell" : t.Type == "Boxing" ? "fa-hand-fist" : "fa-lock")"></i>
-                                        @t.Type
-                                    </span>
-                                </td>
-                                <td><strong>@t.MemberName</strong></td>
-                                <td class="text-muted">@t.Description</td>
-                                <td class="amount-cell">Rs. @t.Amount.ToString("N0")</td>
-                                <td class="text-muted">@t.Date.ToString("dd MMM yyyy")</td>
-                                <td>
-                                    <span class="status-badge @t.Status.ToLower()">
-                                        @t.Status
-                                    </span>
-                                </td>
-                            </tr>
-                        }
-                    }
-                    else
-                    {
-                        <tr>
-                            <td colspan="6" class="text-center text-muted py-4">
-                                <i class="fa-solid fa-inbox fa-2x mb-2 d-block"></i>
-                                No transactions found
-                            </td>
-                        </tr>
-                    }
-                </tbody>
-            </table>
+    <div class="chart-body">
+        <div class="due-summary-grid">
+            <div class="due-card gym">
+                <div class="due-icon"><i class="fa-solid fa-dumbbell"></i></div>
+                <div class="due-label">Gym Membership Due</div>
+                <div class="due-value">Rs. @((report?.GymDue ?? 0).ToString("N0"))</div>
+            </div>
+            <div class="due-card boxing">
+                <div class="due-icon"><i class="fa-solid fa-hand-fist"></i></div>
+                <div class="due-label">Boxing Class Due</div>
+                <div class="due-value">Rs. @((report?.BoxingDue ?? 0).ToString("N0"))</div>
+            </div>
+            <div class="due-card locker">
+                <div class="due-icon"><i class="fa-solid fa-lock"></i></div>
+                <div class="due-label">Locker Rental Due</div>
+                <div class="due-value">Rs. @((report?.LockerDue ?? 0).ToString("N0"))</div>
+            </div>
         </div>
     </div>
 </div>
+
+@section Scripts {
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        // Pie Chart
+        const ctx = document.getElementById('revenuePieChart').getContext('2d');
+        
+        const gymAmount = @(categoryWise?.GymAmount ?? 0);
+        const boxingAmount = @(categoryWise?.BoxingAmount ?? 0);
+        const lockerAmount = @(categoryWise?.LockerAmount ?? 0);
+        
+        // Check if there's any data
+        const hasData = gymAmount > 0 || boxingAmount > 0 || lockerAmount > 0;
+        
+        const pieChart = new Chart(ctx, {
+            type: 'doughnut',
+            data: {
+                labels: ['Gym', 'Boxing', 'Locker'],
+                datasets: [{
+                    data: hasData ? [gymAmount, boxingAmount, lockerAmount] : [1, 1, 1],
+                    backgroundColor: [
+                        '#f59e0b',  // Gym - Amber
+                        '#ef4444',  // Boxing - Red
+                        '#8b5cf6'   // Locker - Purple
+                    ],
+                    borderColor: [
+                        '#fbbf24',
+                        '#f87171',
+                        '#a78bfa'
+                    ],
+                    borderWidth: 2,
+                    hoverOffset: 10
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: true,
+                cutout: '65%',
+                plugins: {
+                    legend: {
+                        display: false
+                    },
+                    tooltip: {
+                        enabled: hasData,
+                        backgroundColor: '#1e293b',
+                        titleFont: {
+                            size: 14,
+                            weight: '600'
+                        },
+                        bodyFont: {
+                            size: 13
+                        },
+                        padding: 12,
+                        cornerRadius: 8,
+                        callbacks: {
+                            label: function(context) {
+                                const value = context.raw;
+                                const total = context.dataset.data.reduce((a, b) => a + b, 0);
+                                const percentage = ((value / total) * 100).toFixed(1);
+                                return `Rs. ${value.toLocaleString()} (${percentage}%)`;
+                            }
+                        }
+                    }
+                },
+                animation: {
+                    animateRotate: true,
+                    animateScale: true
+                }
+            }
+        });
+    </script>
+}
