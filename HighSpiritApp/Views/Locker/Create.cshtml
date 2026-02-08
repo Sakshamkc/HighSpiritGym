@@ -4,146 +4,28 @@
 }
 
 <style>
-    .create-header {
-        background: linear-gradient(135deg, #6d28d9 0%, #7c3aed 100%);
-        border-radius: 16px;
-        padding: 20px 25px;
-        color: white;
-        margin-bottom: 25px;
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-    }
-    .create-header h4 {
-        margin: 0;
-        font-weight: 600;
-        display: flex;
-        align-items: center;
-        gap: 12px;
-    }
-
-    .form-card {
-        background: white;
-        border-radius: 16px;
-        box-shadow: 0 4px 20px rgba(0,0,0,0.05);
-        border: 1px solid #e2e8f0;
-        overflow: hidden;
-        margin-bottom: 25px;
-    }
-    .form-card-header {
-        background: #f8fafc;
-        padding: 16px 20px;
-        border-bottom: 1px solid #e2e8f0;
-        display: flex;
-        align-items: center;
-        gap: 12px;
-    }
-    .form-card-header i {
-        width: 36px;
-        height: 36px;
-        border-radius: 10px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        font-size: 16px;
-        background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%);
-        color: white;
-    }
-    .form-card-header h5 {
-        margin: 0;
-        font-weight: 600;
-        color: #1e293b;
-    }
-    .form-card-body {
-        padding: 25px;
-    }
-
-    .form-label {
-        font-weight: 600;
-        color: #475569;
-        margin-bottom: 8px;
-    }
-    .form-label .required { color: #ef4444; }
-
-    .form-control, .form-select {
-        border-radius: 10px;
-        border: 2px solid #e2e8f0;
-        padding: 10px 14px;
-        transition: all 0.2s ease;
-    }
-    .form-control:focus, .form-select:focus {
-        border-color: #8b5cf6;
-        box-shadow: 0 0 0 4px rgba(139, 92, 246, 0.1);
-    }
-
-    .size-selector {
-        display: grid;
-        grid-template-columns: repeat(3, 1fr);
-        gap: 15px;
-    }
-    .size-option {
-        position: relative;
-    }
-    .size-option input {
-        position: absolute;
-        opacity: 0;
-    }
-    .size-option label {
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        padding: 20px;
-        border: 2px solid #e2e8f0;
-        border-radius: 12px;
-        cursor: pointer;
-        transition: all 0.2s ease;
-        background: #f8fafc;
-    }
-    .size-option label i {
-        font-size: 28px;
-        margin-bottom: 8px;
-        color: #64748b;
-    }
-    .size-option label span {
-        font-weight: 600;
-        color: #475569;
-    }
-    .size-option input:checked + label {
-        border-color: #8b5cf6;
-        background: #f5f3ff;
-        box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.1);
-    }
-    .size-option input:checked + label i {
-        color: #8b5cf6;
-    }
-    .size-option input:checked + label span {
-        color: #6d28d9;
-    }
-
-    .btn-save {
-        background: linear-gradient(135deg, #10b981 0%, #059669 100%);
-        border: none;
-        padding: 12px 30px;
-        font-weight: 600;
-        border-radius: 10px;
-    }
-    .btn-save:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 4px 15px rgba(16, 185, 129, 0.3);
-    }
+    .create-header { background: linear-gradient(135deg, @(Model.Gender == "Gents" ? "#3b82f6 0%, #2563eb" : "#ec4899 0%, #db2777") 100%); border-radius: 16px; padding: 20px 25px; color: white; margin-bottom: 25px; display: flex; align-items: center; justify-content: space-between; }
+    .create-header h4 { margin: 0; font-weight: 600; display: flex; align-items: center; gap: 12px; }
+    .form-card { background: white; border-radius: 16px; box-shadow: 0 4px 20px rgba(0,0,0,0.05); border: 1px solid #e2e8f0; overflow: hidden; margin-bottom: 25px; }
+    .form-card-header { background: #f8fafc; padding: 16px 20px; border-bottom: 1px solid #e2e8f0; display: flex; align-items: center; gap: 12px; }
+    .form-card-header i { width: 36px; height: 36px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 16px; background: linear-gradient(135deg, @(Model.Gender == "Gents" ? "#3b82f6 0%, #2563eb" : "#ec4899 0%, #db2777") 100%); color: white; }
+    .form-card-header h5 { margin: 0; font-weight: 600; color: #1e293b; }
+    .form-card-body { padding: 25px; }
+    .form-label { font-weight: 600; color: #475569; margin-bottom: 8px; }
+    .form-control, .form-select { border-radius: 10px; border: 2px solid #e2e8f0; padding: 10px 14px; }
+    .form-control:focus, .form-select:focus { border-color: @(Model.Gender == "Gents" ? "#3b82f6" : "#ec4899"); box-shadow: 0 0 0 4px @(Model.Gender == "Gents" ? "rgba(59, 130, 246, 0.1)" : "rgba(236, 72, 153, 0.1)"); }
+    .btn-save { background: linear-gradient(135deg, #10b981 0%, #059669 100%); border: none; padding: 12px 30px; font-weight: 600; border-radius: 10px; }
 </style>
 
 <div class="create-header">
-    <h4>
-        <i class="fa-solid fa-plus"></i>
-        Add New Locker
-    </h4>
-    <a href="/Locker" class="btn btn-outline-light">
-        <i class="fa-solid fa-arrow-left me-2"></i> Back
-    </a>
+    <h4><i class="fa-solid fa-plus"></i> Add New @Model.Gender Locker</h4>
+    <a href="/Locker?gender=@Model.Gender" class="btn btn-outline-light"><i class="fa-solid fa-arrow-left me-2"></i> Back</a>
 </div>
 
 <form method="post">
+    <input type="hidden" asp-for="Gender" />
+    <input type="hidden" asp-for="Status" />
+    
     <div class="row">
         <div class="col-lg-8">
             <div class="form-card">
@@ -154,46 +36,15 @@
                 <div class="form-card-body">
                     <div class="row g-3">
                         <div class="col-md-6">
-                            <label class="form-label">Locker Number <span class="required">*</span></label>
-                            <input asp-for="LockerNumber" class="form-control" placeholder="e.g. L001" required />
+                            <label class="form-label">Locker Number <span class="text-danger">*</span></label>
+                            <input asp-for="LockerNumber" class="form-control" placeholder="e.g. 1, 2, 3..." required />
                         </div>
                         <div class="col-md-6">
-                            <label class="form-label">Key Number</label>
-                            <input asp-for="KeyNumber" class="form-control" placeholder="e.g. K001" />
-                        </div>
-                        <div class="col-12">
-                            <label class="form-label">Size <span class="required">*</span></label>
-                            <div class="size-selector">
-                                <div class="size-option">
-                                    <input type="radio" name="Size" value="Small" id="sizeSmall" />
-                                    <label for="sizeSmall">
-                                        <i class="fa-solid fa-box"></i>
-                                        <span>Small</span>
-                                    </label>
-                                </div>
-                                <div class="size-option">
-                                    <input type="radio" name="Size" value="Medium" id="sizeMedium" checked />
-                                    <label for="sizeMedium">
-                                        <i class="fa-solid fa-boxes-stacked"></i>
-                                        <span>Medium</span>
-                                    </label>
-                                </div>
-                                <div class="size-option">
-                                    <input type="radio" name="Size" value="Large" id="sizeLarge" />
-                                    <label for="sizeLarge">
-                                        <i class="fa-solid fa-warehouse"></i>
-                                        <span>Large</span>
-                                    </label>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="col-md-6">
-                            <label class="form-label">Monthly Rate (Rs.) <span class="required">*</span></label>
-                            <input asp-for="MonthlyRate" type="number" class="form-control" value="500" required />
-                        </div>
-                        <div class="col-md-6">
-                            <label class="form-label">Key Deposit Amount (Rs.)</label>
-                            <input asp-for="KeyDepositAmount" type="number" class="form-control" value="0" />
+                            <label class="form-label">Gender</label>
+                            <select asp-for="Gender" class="form-select">
+                                <option value="Gents">Gents</option>
+                                <option value="Ladies">Ladies</option>
+                            </select>
                         </div>
                         <div class="col-12">
                             <label class="form-label">Remarks</label>
@@ -212,22 +63,9 @@
                 </div>
                 <div class="form-card-body">
                     <ul class="list-unstyled mb-0">
-                        <li class="mb-3">
-                            <i class="fa-solid fa-check-circle text-success me-2"></i>
-                            <small>Locker number must be unique</small>
-                        </li>
-                        <li class="mb-3">
-                            <i class="fa-solid fa-check-circle text-success me-2"></i>
-                            <small>Use format like L001, L002 for easy tracking</small>
-                        </li>
-                        <li class="mb-3">
-                            <i class="fa-solid fa-check-circle text-success me-2"></i>
-                            <small>Set monthly rate based on locker size</small>
-                        </li>
-                        <li>
-                            <i class="fa-solid fa-check-circle text-success me-2"></i>
-                            <small>Key deposit is optional but recommended</small>
-                        </li>
+                        <li class="mb-3"><i class="fa-solid fa-check-circle text-success me-2"></i><small>Locker number must be unique per gender</small></li>
+                        <li class="mb-3"><i class="fa-solid fa-check-circle text-success me-2"></i><small>Use simple numbers: 1, 2, 3...</small></li>
+                        <li><i class="fa-solid fa-check-circle text-success me-2"></i><small>Gents: 130 lockers, Ladies: 80 lockers</small></li>
                     </ul>
                 </div>
             </div>
@@ -235,9 +73,7 @@
     </div>
 
     <div class="d-flex gap-3">
-        <button type="submit" class="btn btn-success btn-save btn-lg">
-            <i class="fa-solid fa-check me-2"></i> Create Locker
-        </button>
-        <a href="/Locker" class="btn btn-outline-secondary btn-lg">Cancel</a>
+        <button type="submit" class="btn btn-success btn-save btn-lg"><i class="fa-solid fa-check me-2"></i> Create Locker</button>
+        <a href="/Locker?gender=@Model.Gender" class="btn btn-outline-secondary btn-lg">Cancel</a>
     </div>
 </form>

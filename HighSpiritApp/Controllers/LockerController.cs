@@ -20,67 +20,56 @@ namespace HighSpiritApp.Controllers
             _customerService = customerService;
         }
 
-        public async Task<IActionResult> Index(string search, string status = "", string size = "", int page = 1)
+        public async Task<IActionResult> Index(string search, string gender = "Gents", string status = "", int page = 1)
         {
-            int pageSize = 12;
+            int pageSize = 25;
+            if (string.IsNullOrEmpty(gender)) gender = "Gents";
 
-            var allLockers = string.IsNullOrEmpty(search)
-                ? await _lockerService.GetAllAsync()
-                : await _lockerService.SearchAsync(search);
-
+            var allLockers = await _lockerService.SearchAsync(search, gender);
             var lockersList = allLockers.ToList();
 
-            // Store counts before filtering
-            var stats = await _lockerService.GetStatsAsync();
+            var stats = await _lockerService.GetStatsAsync(gender);
             ViewBag.CountAll = stats.TotalLockers;
-            ViewBag.CountAvailable = stats.AvailableLockers;
             ViewBag.CountOccupied = stats.OccupiedLockers;
-            ViewBag.CountMaintenance = stats.MaintenanceLockers;
+            ViewBag.CountEmpty = stats.EmptyLockers;
+            ViewBag.CountLocked = stats.LockedLockers;
             ViewBag.CountExpired = stats.ExpiredLockers;
-            ViewBag.CountExpiringSoon = stats.ExpiringSoonLockers;
             ViewBag.TotalDue = stats.TotalDueAmount;
-            ViewBag.TotalRevenue = stats.TotalRevenue;
+            ViewBag.GentsTotal = stats.GentsTotal;
+            ViewBag.LadiesTotal = stats.LadiesTotal;
 
-            // Apply status filter
             if (!string.IsNullOrEmpty(status))
             {
                 lockersList = status switch
                 {
-                    "available" => lockersList.Where(l => l.Status == "Available").ToList(),
-                    "occupied" => lockersList.Where(l => l.Status == "Occupied").ToList(),
-                    "maintenance" => lockersList.Where(l => l.Status == "Maintenance").ToList(),
+                    "empty" => lockersList.Where(l => l.Status == "Empty" || (l.Status != "Occupied" && l.Status != "Locked" && string.IsNullOrEmpty(l.AssignedTo))).ToList(),
+                    "occupied" => lockersList.Where(l => l.Status == "Occupied" && !string.IsNullOrEmpty(l.AssignedTo)).ToList(),
+                    "locked" => lockersList.Where(l => l.Status == "Locked").ToList(),
                     "expired" => lockersList.Where(l => l.Status == "Occupied" && l.IsExpired).ToList(),
-                    "expiring" => lockersList.Where(l => l.Status == "Occupied" && l.IsExpiringSoon).ToList(),
                     _ => lockersList
                 };
             }
 
-            // Apply size filter
-            if (!string.IsNullOrEmpty(size))
-            {
-                lockersList = lockersList.Where(l => l.Size == size).ToList();
-            }
+            lockersList = lockersList
+                .OrderBy(l => int.TryParse(l.LockerNumber, out int num) ? num : int.MaxValue)
+                .ThenBy(l => l.LockerNumber)
+                .ToList();
 
             int total = lockersList.Count;
-
-            var data = lockersList
-                .OrderBy(l => l.LockerNumber)
-                .Skip((page - 1) * pageSize)
-                .Take(pageSize)
-                .ToList();
+            var data = lockersList.Skip((page - 1) * pageSize).Take(pageSize).ToList();
 
             ViewBag.Page = page;
             ViewBag.TotalPages = (int)Math.Ceiling(total / (double)pageSize);
             ViewBag.Search = search;
+            ViewBag.Gender = gender;
             ViewBag.Status = status;
-            ViewBag.Size = size;
 
             return View(data);
         }
 
-        public IActionResult Create()
+        public IActionResult Create(string gender = "Gents")
         {
-            return View(new Locker { MonthlyRate = 500 }); // Default monthly rate
+            return View(new Locker { Gender = gender, Status = "Empty" });
         }
 
         [HttpPost]
@@ -90,7 +79,7 @@ namespace HighSpiritApp.Controllers
             {
                 await _lockerService.CreateAsync(model);
                 TempData["success"] = $"Locker {model.LockerNumber} created successfully!";
-                return RedirectToAction("Index");
+                return RedirectToAction("Index", new { gender = model.Gender });
             }
             catch (InvalidOperationException ex)
             {
@@ -103,7 +92,6 @@ namespace HighSpiritApp.Controllers
         {
             var locker = await _lockerService.GetByIdAsync(id);
             if (locker == null) return NotFound();
-
             return View(locker);
         }
 
@@ -112,13 +100,10 @@ namespace HighSpiritApp.Controllers
         {
             try
             {
-                // Recalculate due amount
-                model.DueAmount = model.TotalAmount - model.PaidAmount;
-                model.DueAmount = Math.Max(0, model.DueAmount);
-
+                model.DueAmount = Math.Max(0, model.TotalAmount - model.PaidAmount);
                 await _lockerService.UpdateAsync(model);
                 TempData["success"] = $"Locker {model.LockerNumber} updated successfully!";
-                return RedirectToAction("Index");
+                return RedirectToAction("Index", new { gender = model.Gender });
             }
             catch (Exception ex)
             {
@@ -131,7 +116,6 @@ namespace HighSpiritApp.Controllers
         {
             var locker = await _lockerService.GetByIdAsync(id);
             if (locker == null) return NotFound();
-
             return View(locker);
         }
 
@@ -141,9 +125,10 @@ namespace HighSpiritApp.Controllers
             var locker = await _lockerService.GetByIdAsync(id);
             if (locker == null) return NotFound();
 
+            var gender = locker.Gender;
             await _lockerService.DeleteAsync(id);
             TempData["success"] = $"Locker {locker.LockerNumber} deleted successfully.";
-            return RedirectToAction("Index");
+            return RedirectToAction("Index", new { gender });
         }
 
         public async Task<IActionResult> Assign(int id)
@@ -151,30 +136,26 @@ namespace HighSpiritApp.Controllers
             var locker = await _lockerService.GetByIdAsync(id);
             if (locker == null) return NotFound();
 
-            if (locker.Status == "Occupied")
+            if (locker.Status == "Occupied" && !string.IsNullOrEmpty(locker.AssignedTo))
             {
-                TempData["error"] = "This locker is already occupied.";
-                return RedirectToAction("Index");
+                TempData["error"] = "This locker is already assigned.";
+                return RedirectToAction("Index", new { gender = locker.Gender });
             }
-
-            // Get all gym members for dropdown
-            var members = await _customerService.GetAllAsync();
-            ViewBag.GymMembers = members.OrderBy(m => m.FullName).ToList();
 
             return View(locker);
         }
 
         [HttpPost]
-        public async Task<IActionResult> Assign(int id, string memberName, string? phone, int months, decimal paidAmount)
+        public async Task<IActionResult> Assign(int id, string memberName, string? phone, string? package, int months, decimal totalAmount, decimal paidAmount)
         {
             try
             {
                 var locker = await _lockerService.GetByIdAsync(id);
                 if (locker == null) return NotFound();
 
-                await _lockerService.AssignLockerAsync(id, memberName, phone, null, months, locker.MonthlyRate, paidAmount);
-                TempData["success"] = $"Locker {locker.LockerNumber} assigned to {memberName} successfully!";
-                return RedirectToAction("Index");
+                await _lockerService.AssignLockerAsync(id, memberName, phone, null, package, months, totalAmount, paidAmount);
+                TempData["success"] = $"Locker {locker.LockerNumber} assigned to {memberName}!";
+                return RedirectToAction("Index", new { gender = locker.Gender });
             }
             catch (Exception ex)
             {
@@ -191,15 +172,16 @@ namespace HighSpiritApp.Controllers
                 var locker = await _lockerService.GetByIdAsync(id);
                 if (locker == null) return NotFound();
 
+                var gender = locker.Gender;
                 await _lockerService.ReleaseLockerAsync(id);
-                TempData["success"] = $"Locker {locker.LockerNumber} released successfully!";
+                TempData["success"] = $"Locker {locker.LockerNumber} released!";
+                return RedirectToAction("Index", new { gender });
             }
             catch (Exception ex)
             {
                 TempData["error"] = ex.Message;
+                return RedirectToAction("Index");
             }
-
-            return RedirectToAction("Index");
         }
 
         public async Task<IActionResult> Renew(int id)
@@ -210,7 +192,7 @@ namespace HighSpiritApp.Controllers
             if (locker.Status != "Occupied")
             {
                 TempData["error"] = "Only occupied lockers can be renewed.";
-                return RedirectToAction("Index");
+                return RedirectToAction("Index", new { gender = locker.Gender });
             }
 
             return View(locker);
@@ -226,7 +208,7 @@ namespace HighSpiritApp.Controllers
 
                 await _lockerService.RenewLockerAsync(id, months, paidAmount);
                 TempData["success"] = $"Locker {locker.LockerNumber} renewed for {months} month(s)!";
-                return RedirectToAction("Index");
+                return RedirectToAction("Index", new { gender = locker.Gender });
             }
             catch (Exception ex)
             {
@@ -235,71 +217,68 @@ namespace HighSpiritApp.Controllers
             }
         }
 
-        // Bulk create lockers
-        public IActionResult BulkCreate()
+        public IActionResult Import(string gender = "Gents")
         {
+            ViewBag.Gender = gender;
             return View();
         }
 
         [HttpPost]
-        public async Task<IActionResult> BulkCreate(string prefix, int startNumber, int count, string size, decimal monthlyRate)
+        public async Task<IActionResult> Import(IFormFile file, string gender)
         {
-            int created = 0;
-            int skipped = 0;
-
-            for (int i = 0; i < count; i++)
+            if (file == null || file.Length == 0)
             {
-                var lockerNumber = $"{prefix}{(startNumber + i).ToString().PadLeft(3, '0')}";
-
-                if (await _lockerService.IsLockerNumberExistsAsync(lockerNumber))
-                {
-                    skipped++;
-                    continue;
-                }
-
-                var locker = new Locker
-                {
-                    LockerNumber = lockerNumber,
-                    Size = size,
-                    Status = "Available",
-                    MonthlyRate = monthlyRate
-                };
-
-                await _lockerService.CreateAsync(locker);
-                created++;
+                TempData["error"] = "Please select an Excel file.";
+                return View();
             }
 
-            TempData["success"] = $"Created {created} lockers. Skipped {skipped} (already exist).";
-            return RedirectToAction("Index");
+            using var stream = file.OpenReadStream();
+            var result = await _lockerService.ImportFromExcelAsync(stream, gender);
+
+            if (result.Success)
+            {
+                TempData["success"] = $"Import completed! Imported: {result.Imported}, Updated: {result.Updated}, Skipped: {result.Skipped}";
+            }
+            else
+            {
+                TempData["error"] = $"Import failed: {result.ErrorMessage}";
+            }
+
+            return RedirectToAction("Index", new { gender });
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> InitializeLockers(string gender, int count)
+        {
+            await _lockerService.InitializeLockersAsync(gender, count);
+            TempData["success"] = $"Initialized {count} lockers for {gender}!";
+            return RedirectToAction("Index", new { gender });
         }
 
         /// <summary>
-        /// API endpoint to search gym members for locker assignment
+        /// API endpoint to search gym members - returns full package name
         /// </summary>
         [HttpGet]
         public async Task<IActionResult> SearchMembers(string term)
         {
             if (string.IsNullOrWhiteSpace(term) || term.Length < 2)
-            {
                 return Json(new List<object>());
-            }
 
-            var filterRequest = new CustomerFilterRequest
-            {
-                Search = term,
-                PageSize = 20
-            };
-
+            var filterRequest = new CustomerFilterRequest { Search = term, PageSize = 20 };
             var result = await _customerService.GetFilteredCustomersAsync(filterRequest);
-            var members = result.Customers
-                .Select(m => new
+            
+            var members = result.Customers.Select(m => 
+            {
+                var membership = m.Memberships?.OrderByDescending(x => x.StartDate).FirstOrDefault();
+                return new
                 {
                     id = m.CustomerID,
                     name = m.FullName,
                     phone = m.Phone ?? "",
+                    package = membership?.PlanName ?? "", // Full package name like "Custom 2 - Gym & Cardio"
                     photo = m.Photo != null ? Convert.ToBase64String(m.Photo) : null
-                })
-                .ToList();
+                };
+            }).ToList();
 
             return Json(members);
         }

@@ -15,8 +15,9 @@ namespace HighSpiritApp.Repositories
         public async Task<IEnumerable<Locker>> GetAvailableLockersAsync()
         {
             return await _context.Lockers
-                .Where(l => l.Status == "Available")
-                .OrderBy(l => l.LockerNumber)
+                .Where(l => l.Status == "Available" || l.Status == "Empty")
+                .OrderBy(l => l.Gender)
+                .ThenBy(l => l.LockerNumber)
                 .ToListAsync();
         }
 
@@ -24,7 +25,8 @@ namespace HighSpiritApp.Repositories
         {
             return await _context.Lockers
                 .Where(l => l.Status == "Occupied")
-                .OrderBy(l => l.LockerNumber)
+                .OrderBy(l => l.Gender)
+                .ThenBy(l => l.LockerNumber)
                 .ToListAsync();
         }
 
@@ -51,47 +53,64 @@ namespace HighSpiritApp.Repositories
         {
             return await _context.Lockers
                 .Where(l => l.Status == status)
+                .OrderBy(l => l.Gender)
+                .ThenBy(l => l.LockerNumber)
+                .ToListAsync();
+        }
+
+        public async Task<IEnumerable<Locker>> GetLockersByGenderAsync(string gender)
+        {
+            return await _context.Lockers
+                .Where(l => l.Gender == gender)
                 .OrderBy(l => l.LockerNumber)
                 .ToListAsync();
         }
 
-        public async Task<IEnumerable<Locker>> GetLockersBySizeAsync(string size)
+        public async Task<IEnumerable<Locker>> SearchAsync(string? searchTerm, string? gender = null)
         {
-            return await _context.Lockers
-                .Where(l => l.Size == size)
+            var query = _context.Lockers.AsQueryable();
+
+            if (!string.IsNullOrEmpty(gender))
+            {
+                query = query.Where(l => l.Gender == gender);
+            }
+
+            if (!string.IsNullOrEmpty(searchTerm))
+            {
+                query = query.Where(l => 
+                    l.LockerNumber.Contains(searchTerm) ||
+                    (l.AssignedTo != null && l.AssignedTo.Contains(searchTerm)) ||
+                    (l.AssignedPhone != null && l.AssignedPhone.Contains(searchTerm)) ||
+                    (l.Package != null && l.Package.Contains(searchTerm)));
+            }
+
+            return await query
                 .OrderBy(l => l.LockerNumber)
                 .ToListAsync();
         }
 
-        public async Task<IEnumerable<Locker>> SearchAsync(string? searchTerm)
+        public async Task<Locker?> GetByLockerNumberAsync(string lockerNumber, string gender)
         {
-            if (string.IsNullOrEmpty(searchTerm))
-                return await GetAllAsync();
-
             return await _context.Lockers
-                .Where(l => l.LockerNumber.Contains(searchTerm) ||
-                           (l.AssignedTo != null && l.AssignedTo.Contains(searchTerm)) ||
-                           (l.AssignedPhone != null && l.AssignedPhone.Contains(searchTerm)) ||
-                           (l.KeyNumber != null && l.KeyNumber.Contains(searchTerm)))
-                .OrderBy(l => l.LockerNumber)
-                .ToListAsync();
+                .FirstOrDefaultAsync(l => l.LockerNumber == lockerNumber && l.Gender == gender);
         }
 
-        public async Task<Locker?> GetByLockerNumberAsync(string lockerNumber)
+        public async Task<bool> IsLockerNumberExistsAsync(string lockerNumber, string gender, int? excludeId = null)
         {
             return await _context.Lockers
-                .FirstOrDefaultAsync(l => l.LockerNumber == lockerNumber);
-        }
-
-        public async Task<bool> IsLockerNumberExistsAsync(string lockerNumber, int? excludeId = null)
-        {
-            return await _context.Lockers
-                .AnyAsync(l => l.LockerNumber == lockerNumber && (!excludeId.HasValue || l.LockerID != excludeId.Value));
+                .AnyAsync(l => l.LockerNumber == lockerNumber && 
+                              l.Gender == gender && 
+                              (!excludeId.HasValue || l.LockerID != excludeId.Value));
         }
 
         public async Task<decimal> GetTotalDueAmountAsync()
         {
             return await _context.Lockers.SumAsync(l => l.DueAmount);
+        }
+
+        public async Task<int> GetCountByGenderAsync(string gender)
+        {
+            return await _context.Lockers.CountAsync(l => l.Gender == gender);
         }
     }
 }

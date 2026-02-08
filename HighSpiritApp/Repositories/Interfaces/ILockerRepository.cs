@@ -12,10 +12,11 @@ namespace HighSpiritApp.Repositories.Interfaces
         Task<IEnumerable<Locker>> GetExpiredLockersAsync();
         Task<IEnumerable<Locker>> GetExpiringSoonLockersAsync(int days = 7);
         Task<IEnumerable<Locker>> GetLockersByStatusAsync(string status);
-        Task<IEnumerable<Locker>> GetLockersBySizeAsync(string size);
-        Task<IEnumerable<Locker>> SearchAsync(string? searchTerm);
-        Task<Locker?> GetByLockerNumberAsync(string lockerNumber);
-        Task<bool> IsLockerNumberExistsAsync(string lockerNumber, int? excludeId = null);
+        Task<IEnumerable<Locker>> GetLockersByGenderAsync(string gender);
+        Task<IEnumerable<Locker>> SearchAsync(string? searchTerm, string? gender = null);
+        Task<Locker?> GetByLockerNumberAsync(string lockerNumber, string gender);
+        Task<bool> IsLockerNumberExistsAsync(string lockerNumber, string gender, int? excludeId = null);
         Task<decimal> GetTotalDueAmountAsync();
+        Task<int> GetCountByGenderAsync(string gender);
     }
 }

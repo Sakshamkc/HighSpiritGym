@@ -15,28 +15,26 @@ namespace HighSpiritApp.Models.Locker
         public string LockerNumber { get; set; } = null!;
 
         [Required]
-        public string Size { get; set; } = "Medium"; // Small, Medium, Large
+        public string Gender { get; set; } = "Gents"; // Gents, Ladies
 
-        public string Status { get; set; } = "Available"; // Available, Occupied, Maintenance
+        public string Status { get; set; } = "Empty"; // Empty, Occupied, Locked, Maintenance
 
         // Assigned member info (nullable when not assigned)
         public int? CustomerID { get; set; }
         public string? AssignedTo { get; set; } // Member name
         public string? AssignedPhone { get; set; } // Member phone
 
-        // Rental details
-        public DateTime? StartDate { get; set; }
-        public DateTime? EndDate { get; set; }
-        public int RentalMonths { get; set; }
-        public decimal MonthlyRate { get; set; }
-        public decimal TotalAmount { get; set; }
-        public decimal PaidAmount { get; set; }
-        public decimal DueAmount { get; set; }
+        // Package/Plan linked - stores the full package name from customer
+        public string? Package { get; set; } // e.g., "Custom 2 - Gym & Cardio", "Gym Package", etc.
 
-        // Key management
-        public string? KeyNumber { get; set; }
-        public bool KeyDeposit { get; set; } // Whether key deposit was taken
-        public decimal KeyDepositAmount { get; set; }
+        // Rental details
+        public DateTime? StartDate { get; set; }  // Joined Date
+        public DateTime? EndDate { get; set; }    // Expiry
+        public int RentalMonths { get; set; }     // Duration in months
+        public decimal MonthlyRate { get; set; }
+        public decimal TotalAmount { get; set; }  // Amount
+        public decimal PaidAmount { get; set; }
+        public decimal DueAmount { get; set; }    // Due Amount
 
         public string? Remarks { get; set; }
         public DateTime CreatedAt { get; set; } = DateTime.Now;

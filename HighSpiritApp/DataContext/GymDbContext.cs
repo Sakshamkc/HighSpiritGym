@@ -41,12 +41,16 @@ namespace HighSpiritApp.DataContext
             {
                 entity.HasKey(l => l.LockerID);
                 entity.Property(l => l.LockerNumber).IsRequired().HasMaxLength(20);
-                entity.HasIndex(l => l.LockerNumber).IsUnique();
+                entity.Property(l => l.Gender).IsRequired().HasMaxLength(10).HasDefaultValue("Gents");
+                entity.Property(l => l.Package).HasMaxLength(200);
+                
+                // Unique constraint on LockerNumber + Gender
+                entity.HasIndex(l => new { l.LockerNumber, l.Gender }).IsUnique();
+                
                 entity.Property(l => l.MonthlyRate).HasPrecision(10, 2);
                 entity.Property(l => l.TotalAmount).HasPrecision(10, 2);
                 entity.Property(l => l.PaidAmount).HasPrecision(10, 2);
                 entity.Property(l => l.DueAmount).HasPrecision(10, 2);
-                entity.Property(l => l.KeyDepositAmount).HasPrecision(10, 2);
             });
         }
     }

@@ -1,0 +1,120 @@
+@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    var gender = ViewBag.Gender ?? "Gents";
+}
+
+<div class="container-fluid">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <div class="card shadow-sm border-0" style="border-radius: 16px;">
+                <div class="card-header bg-gradient text-white py-3" style="background: linear-gradient(135deg, @(gender == "Gents" ? "#3b82f6" : "#ec4899") 0%, @(gender == "Gents" ? "#2563eb" : "#db2777") 100%); border-radius: 16px 16px 0 0;">
+                    <h5 class="mb-0">
+                        <i class="fa-solid fa-file-import me-2"></i>
+                        Import @gender Lockers from Excel
+                    </h5>
+                </div>
+                <div class="card-body p-4">
+                    <div class="alert alert-info mb-4">
+                        <h6 class="alert-heading"><i class="fa-solid fa-info-circle me-2"></i>Excel Format</h6>
+                        <p class="mb-2">Your Excel file should have these columns (header row can be row 1-10):</p>
+                        <table class="table table-sm table-bordered mb-0 bg-white">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>A</th><th>B</th><th>C</th><th>D</th><th>E</th><th>F</th><th>G</th><th>H</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td><strong>Locker No.</strong></td>
+                                    <td><strong>Name</strong></td>
+                                    <td><strong>Package</strong></td>
+                                    <td><strong>Duration</strong></td>
+                                    <td><strong>Joined Date</strong></td>
+                                    <td><strong>Amount</strong></td>
+                                    <td><strong>Expiry</strong></td>
+                                    <td><strong>Due Amount</strong></td>
+                                </tr>
+                                <tr class="text-muted small">
+                                    <td>12</td>
+                                    <td>Aagaman Kc</td>
+                                    <td>Gym Pkg</td>
+                                    <td>12 Months</td>
+                                    <td>8th Jan, 2025</td>
+                                    <td>5000</td>
+                                    <td>7th Jan, 2026</td>
+                                    <td>0</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                        <p class="mb-0 mt-2 small">
+                            <strong>Name column values:</strong>
+                            <span class="badge bg-success">Empty</span>
+                            <span class="badge bg-secondary">Locked</span>
+                            <span class="badge bg-warning text-dark">Occupied</span>
+                            or <span class="badge bg-primary">Member Name</span>
+                        </p>
+                    </div>
+
+                    <form method="post" enctype="multipart/form-data">
+                        <input type="hidden" name="gender" value="@gender" />
+                        
+                        <div class="mb-4">
+                            <label class="form-label fw-semibold">
+                                <i class="fa-solid fa-@(gender == "Gents" ? "mars" : "venus") me-1 text-@(gender == "Gents" ? "primary" : "danger")"></i>
+                                Locker Type
+                            </label>
+                            <div class="btn-group w-100" role="group">
+                                <a href="/Locker/Import?gender=Gents" class="btn @(gender == "Gents" ? "btn-primary" : "btn-outline-primary")">
+                                    <i class="fa-solid fa-mars me-1"></i> Gents Lockers
+                                </a>
+                                <a href="/Locker/Import?gender=Ladies" class="btn @(gender == "Ladies" ? "btn-danger" : "btn-outline-danger")">
+                                    <i class="fa-solid fa-venus me-1"></i> Ladies Lockers
+                                </a>
+                            </div>
+                        </div>
+
+                        <div class="mb-4">
+                            <label for="file" class="form-label fw-semibold">
+                                <i class="fa-solid fa-file-excel me-1 text-success"></i>
+                                Select Excel File
+                            </label>
+                            <input type="file" name="file" id="file" class="form-control form-control-lg" accept=".xlsx,.xls" required />
+                            <div class="form-text">Supported formats: .xlsx, .xls</div>
+                        </div>
+
+                        <div class="d-flex gap-2">
+                            <button type="submit" class="btn btn-success btn-lg px-4">
+                                <i class="fa-solid fa-upload me-2"></i> Import Lockers
+                            </button>
+                            <a href="/Locker?gender=@gender" class="btn btn-outline-secondary btn-lg px-4">
+                                <i class="fa-solid fa-arrow-left me-2"></i> Cancel
+                            </a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Quick Initialize (Create Empty Lockers) -->
+            <div class="card shadow-sm border-0 mt-4" style="border-radius: 16px;">
+                <div class="card-header bg-light py-3">
+                    <h6 class="mb-0"><i class="fa-solid fa-magic me-2"></i>Quick Initialize (Create Empty Lockers)</h6>
+                </div>
+                <div class="card-body">
+                    <p class="text-muted mb-3">Create empty lockers numbered from 1 to the specified count.</p>
+                    <form method="post" action="/Locker/InitializeLockers" class="row g-3 align-items-end">
+                        <input type="hidden" name="gender" value="@gender" />
+                        <div class="col-auto">
+                            <label class="form-label">Number of Lockers</label>
+                            <input type="number" name="count" class="form-control" value="@(gender == "Gents" ? "130" : "80")" min="1" max="500" />
+                        </div>
+                        <div class="col-auto">
+                            <button type="submit" class="btn btn-outline-primary">
+                                <i class="fa-solid fa-plus me-1"></i> Create @gender Lockers
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
