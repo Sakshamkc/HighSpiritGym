@@ -646,28 +646,65 @@
                 </a>
             </div>
 
-            <p class="nav-section-title">Management</p>
+            <p class="nav-section-title">Gym Packages</p>
 
             <div class="nav-item">
-                <a href="#" class="nav-link gym-link" data-bs-toggle="collapse" data-bs-target="#gymMenu">
-                    <i class="fa-solid fa-dumbbell"></i>
-                    <span class="nav-text">Gym Members</span>
+                <a href="/Customers" class="nav-link @(controller == "Customers" && string.IsNullOrEmpty(ViewBag.PlanName as string) ? "active" : "")" onclick="closeSidebarOnMobile()">
+                    <i class="fa-solid fa-users" style="background: rgba(100, 116, 139, 0.15); color: #94a3b8;"></i>
+                    <span class="nav-text">All Members</span>
                 </a>
             </div>
-            <div class="collapse submenu-container @(controller == "Customers" || controller == "Memberships" ? "show" : "")" id="gymMenu">
-                <a href="/Customers" class="nav-link submenu" onclick="closeSidebarOnMobile()">
-                    <i class="fa-solid fa-users"></i>
-                    <span class="nav-text">View Members</span>
-                </a>
-                <a href="/Customers/Create" class="nav-link submenu" onclick="closeSidebarOnMobile()">
-                    <i class="fa-solid fa-user-plus"></i>
-                    <span class="nav-text">Add Member</span>
-                </a>
-                <a href="/Customers/Import" class="nav-link submenu" onclick="closeSidebarOnMobile()">
-                    <i class="fa-solid fa-file-import"></i>
-                    <span class="nav-text">Import Excel</span>
+
+            <div class="nav-item">
+                <a href="/Customers?planName=Gym" class="nav-link @(ViewBag.PlanName as string == "Gym" ? "active" : "")" onclick="closeSidebarOnMobile()">
+                    <i class="fa-solid fa-dumbbell" style="background: rgba(59, 130, 246, 0.15); color: #60a5fa;"></i>
+                    <span class="nav-text">Gym Package</span>
                 </a>
             </div>
+
+            <div class="nav-item">
+                <a href="/Customers?planName=Cardio" class="nav-link @(ViewBag.PlanName as string == "Cardio" ? "active" : "")" onclick="closeSidebarOnMobile()">
+                    <i class="fa-solid fa-heart-pulse" style="background: rgba(239, 68, 68, 0.15); color: #f87171;"></i>
+                    <span class="nav-text">Cardio Package</span>
+                </a>
+            </div>
+
+            <div class="nav-item">
+                <a href="/Customers?planName=Premium" class="nav-link @(ViewBag.PlanName as string == "Premium" ? "active" : "")" onclick="closeSidebarOnMobile()">
+                    <i class="fa-solid fa-crown" style="background: rgba(245, 158, 11, 0.15); color: #fbbf24;"></i>
+                    <span class="nav-text">Premium Package</span>
+                </a>
+            </div>
+
+            <div class="nav-item">
+                <a href="/Customers?planName=Custom2" class="nav-link @(ViewBag.PlanName as string == "Custom2" ? "active" : "")" onclick="closeSidebarOnMobile()">
+                    <i class="fa-solid fa-layer-group" style="background: rgba(16, 185, 129, 0.15); color: #34d399;"></i>
+                    <span class="nav-text">Custom-2 Package</span>
+                </a>
+            </div>
+
+            <div class="nav-item">
+                <a href="/Customers?planName=Custom3" class="nav-link @(ViewBag.PlanName as string == "Custom3" ? "active" : "")" onclick="closeSidebarOnMobile()">
+                    <i class="fa-solid fa-cubes" style="background: rgba(20, 184, 166, 0.15); color: #2dd4bf;"></i>
+                    <span class="nav-text">Custom-3 Package</span>
+                </a>
+            </div>
+
+            <div class="nav-item">
+                <a href="/Customers?planName=Zumba" class="nav-link @(ViewBag.PlanName as string == "Zumba" ? "active" : "")" onclick="closeSidebarOnMobile()">
+                    <i class="fa-solid fa-music" style="background: rgba(236, 72, 153, 0.15); color: #f472b6;"></i>
+                    <span class="nav-text">Zumba Package</span>
+                </a>
+            </div>
+
+            <div class="nav-item">
+                <a href="/Customers?planName=Sauna" class="nav-link @(ViewBag.PlanName as string == "Sauna" ? "active" : "")" onclick="closeSidebarOnMobile()">
+                    <i class="fa-solid fa-hot-tub-person" style="background: rgba(139, 92, 246, 0.15); color: #a78bfa;"></i>
+                    <span class="nav-text">Sauna Package</span>
+                </a>
+            </div>
+
+            <p class="nav-section-title">Boxing</p>
 
             <div class="nav-item">
                 <a href="#" class="nav-link boxing-link" data-bs-toggle="collapse" data-bs-target="#boxingMenu">
@@ -686,6 +723,22 @@
                 </a>
                 <a href="/Boxing/Import" class="nav-link submenu" onclick="closeSidebarOnMobile()">
                     <i class="fa-solid fa-file-import"></i>
+                    <span class="nav-text">Import Excel</span>
+                </a>
+            </div>
+
+            <p class="nav-section-title">Actions</p>
+
+            <div class="nav-item">
+                <a href="/Customers/Create" class="nav-link" onclick="closeSidebarOnMobile()">
+                    <i class="fa-solid fa-user-plus" style="background: rgba(59, 130, 246, 0.15); color: #60a5fa;"></i>
+                    <span class="nav-text">Add Member</span>
+                </a>
+            </div>
+
+            <div class="nav-item">
+                <a href="/Customers/Import" class="nav-link" onclick="closeSidebarOnMobile()">
+                    <i class="fa-solid fa-file-import" style="background: rgba(245, 158, 11, 0.15); color: #fbbf24;"></i>
                     <span class="nav-text">Import Excel</span>
                 </a>
             </div>
