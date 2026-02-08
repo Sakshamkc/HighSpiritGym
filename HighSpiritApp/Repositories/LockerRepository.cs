@@ -35,7 +35,7 @@ namespace HighSpiritApp.Repositories
             var today = DateTime.Today;
             return await _context.Lockers
                 .Where(l => l.Status == "Occupied" && l.EndDate < today)
-                .OrderBy(l => l.EndDate)
+                .OrderBy(l => l.LockerNumber)
                 .ToListAsync();
         }
 
