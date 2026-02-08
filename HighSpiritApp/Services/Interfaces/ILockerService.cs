@@ -25,6 +25,7 @@ namespace HighSpiritApp.Services.Interfaces
         Task<bool> IsLockerNumberExistsAsync(string lockerNumber, string gender, int? excludeId = null);
         Task<LockerImportResult> ImportFromExcelAsync(Stream fileStream, string gender);
         Task InitializeLockersAsync(string gender, int count);
+        Task<byte[]> ExportToExcelAsync(string gender, string? status = null);
     }
 
     public class LockerStats

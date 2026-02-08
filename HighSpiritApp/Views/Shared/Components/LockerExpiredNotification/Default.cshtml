@@ -1,0 +1,67 @@
+@model List<HighSpiritApp.Models.Locker.Locker>
+
+<div class="nav-item dropdown list-unstyled">
+
+    <a href="#"
+       class="nav-link position-relative dropdown-toggle"
+       data-bs-toggle="dropdown"
+       title="Expired Lockers">
+
+        <!-- Locker Icon: Lock with purple color -->
+        <span class="d-inline-flex align-items-center gap-1 px-2 py-1 rounded" style="background: rgba(139, 92, 246, 0.1);">
+            <i class="fa-solid fa-lock" style="color: #8b5cf6;"></i>
+            @if (ViewBag.ExpiredCount > 0)
+            {
+                <span class="badge rounded-pill bg-danger">
+                    @ViewBag.ExpiredCount
+                </span>
+            }
+            else
+            {
+                <span class="badge rounded-pill bg-success">0</span>
+            }
+        </span>
+    </a>
+
+    <ul class="dropdown-menu dropdown-menu-end shadow notification-dropdown">
+        <li class="dropdown-header fw-bold" style="color: #8b5cf6;">
+            <i class="fa-solid fa-lock me-2"></i>Expired Lockers
+        </li>
+
+        @if (!Model.Any())
+        {
+            <li class="px-3 text-muted">
+                No expired lockers ??
+            </li>
+        }
+        else
+        {
+            foreach (var l in Model)
+            {
+                <li class="dropdown-item-text border-bottom">
+                    <div class="d-flex align-items-center gap-2">
+                        <span class="badge @(l.Gender == "Gents" ? "bg-primary" : "bg-danger")">
+                            <i class="fa-solid fa-@(l.Gender == "Gents" ? "mars" : "venus")"></i>
+                        </span>
+                        <span class="fw-semibold">#@l.LockerNumber</span>
+                        <span class="text-muted">- @l.AssignedTo</span>
+                    </div>
+                    <small class="text-danger">
+                        <i class="fa-solid fa-calendar-xmark me-1"></i>
+                        Expired: @(l.EndDate?.ToString("dd MMM yyyy") ?? "-")
+                    </small>
+                    <div>
+                        <a href="/Locker/Details/@l.LockerID"
+                           class="text-primary small">
+                            <i class="fa-solid fa-eye"></i> View
+                        </a>
+                        <a href="/Locker/Renew/@l.LockerID"
+                           class="text-success small ms-2">
+                            <i class="fa-solid fa-rotate"></i> Renew
+                        </a>
+                    </div>
+                </li>
+            }
+        }
+    </ul>
+</div>

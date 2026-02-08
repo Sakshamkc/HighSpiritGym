@@ -429,5 +429,95 @@ namespace HighSpiritApp.Services
 
             return result;
         }
+
+        public async Task<byte[]> ExportToExcelAsync(string gender, string? status = null)
+        {
+            var lockers = (await _lockerRepository.GetLockersByGenderAsync(gender)).ToList();
+
+            // Apply status filter if specified
+            if (!string.IsNullOrEmpty(status))
+            {
+                var today = DateTime.Today;
+                lockers = status switch
+                {
+                    "empty" => lockers.Where(l => l.Status == "Empty" || (l.Status != "Occupied" && l.Status != "Locked" && string.IsNullOrEmpty(l.AssignedTo))).ToList(),
+                    "occupied" => lockers.Where(l => l.Status == "Occupied" && !string.IsNullOrEmpty(l.AssignedTo)).ToList(),
+                    "locked" => lockers.Where(l => l.Status == "Locked").ToList(),
+                    "expired" => lockers.Where(l => l.Status == "Occupied" && l.EndDate < today).ToList(),
+                    _ => lockers
+                };
+            }
+
+            // Sort by locker number
+            lockers = lockers
+                .OrderBy(l => int.TryParse(l.LockerNumber, out int num) ? num : int.MaxValue)
+                .ThenBy(l => l.LockerNumber)
+                .ToList();
+
+            using var workbook = new XLWorkbook();
+            var sheetName = $"{gender} Lockers";
+            if (!string.IsNullOrEmpty(status))
+            {
+                sheetName += $" - {char.ToUpper(status[0]) + status.Substring(1)}";
+            }
+
+            var ws = workbook.Worksheets.Add(sheetName);
+
+            // Headers
+            var headers = new[] { "SN", "Locker No", "Status", "Assigned To", "Phone", "Package", 
+                "Duration (Months)", "Start Date", "Expiry Date", "Total Amount", "Paid Amount", 
+                "Due Amount", "Days Remaining", "Remarks" };
+
+            for (int i = 0; i < headers.Length; i++)
+            {
+                ws.Cell(1, i + 1).Value = headers[i];
+                ws.Cell(1, i + 1).Style.Font.Bold = true;
+                ws.Cell(1, i + 1).Style.Fill.BackgroundColor = gender == "Gents" 
+                    ? XLColor.FromHtml("#3b82f6") 
+                    : XLColor.FromHtml("#ec4899");
+                ws.Cell(1, i + 1).Style.Font.FontColor = XLColor.White;
+            }
+
+            int row = 2, sn = 1;
+            foreach (var l in lockers)
+            {
+                ws.Cell(row, 1).Value = sn++;
+                ws.Cell(row, 2).Value = l.LockerNumber;
+                ws.Cell(row, 3).Value = l.Status;
+                ws.Cell(row, 4).Value = l.AssignedTo ?? "";
+                ws.Cell(row, 5).Value = l.AssignedPhone ?? "";
+                ws.Cell(row, 6).Value = l.Package ?? "";
+                ws.Cell(row, 7).Value = l.RentalMonths;
+                ws.Cell(row, 8).Value = l.StartDate?.ToString("dd MMM yyyy") ?? "";
+                ws.Cell(row, 9).Value = l.EndDate?.ToString("dd MMM yyyy") ?? "";
+                ws.Cell(row, 10).Value = l.TotalAmount;
+                ws.Cell(row, 11).Value = l.PaidAmount;
+                ws.Cell(row, 12).Value = l.DueAmount;
+                ws.Cell(row, 13).Value = l.IsExpired ? "Expired" : (l.DaysRemaining > 0 ? l.DaysRemaining.ToString() : "-");
+                ws.Cell(row, 14).Value = l.Remarks ?? "";
+
+                // Color coding for status
+                if (l.Status == "Occupied" && l.IsExpired)
+                {
+                    ws.Row(row).Style.Fill.BackgroundColor = XLColor.FromHtml("#fee2e2"); // Red for expired
+                }
+                else if (l.Status == "Empty")
+                {
+                    ws.Row(row).Style.Fill.BackgroundColor = XLColor.FromHtml("#dcfce7"); // Green for empty
+                }
+                else if (l.Status == "Locked")
+                {
+                    ws.Row(row).Style.Fill.BackgroundColor = XLColor.FromHtml("#f1f5f9"); // Gray for locked
+                }
+
+                row++;
+            }
+
+            ws.Columns().AdjustToContents();
+
+            using var stream = new MemoryStream();
+            workbook.SaveAs(stream);
+            return stream.ToArray();
+        }
     }
 }

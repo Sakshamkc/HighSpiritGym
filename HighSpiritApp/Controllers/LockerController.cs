@@ -256,6 +256,28 @@ namespace HighSpiritApp.Controllers
         }
 
         /// <summary>
+        /// Export lockers to Excel based on gender and optional status filter
+        /// </summary>
+        [HttpGet]
+        public async Task<IActionResult> Export(string gender = "Gents", string? status = null)
+        {
+            var fileBytes = await _lockerService.ExportToExcelAsync(gender, status);
+
+            var fileName = $"{gender} Lockers";
+            if (!string.IsNullOrEmpty(status))
+            {
+                fileName += $" - {char.ToUpper(status[0]) + status.Substring(1)}";
+            }
+            fileName += ".xlsx";
+
+            return File(
+                fileBytes,
+                "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+                fileName
+            );
+        }
+
+        /// <summary>
         /// API endpoint to search gym members - returns full package name
         /// </summary>
         [HttpGet]

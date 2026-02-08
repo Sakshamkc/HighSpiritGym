@@ -778,6 +778,10 @@
             {
                 @await Component.InvokeAsync("ExpiredNotification")
             }
+            @if (controller == "Locker" || controller == "Home")
+            {
+                @await Component.InvokeAsync("LockerExpiredNotification")
+            }
             @if (controller == "Boxing" || controller == "Home")
             {
                 @await Component.InvokeAsync("BoxingDueNotification")

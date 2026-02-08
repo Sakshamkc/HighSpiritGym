@@ -38,6 +38,8 @@
     .filter-select { padding: 10px 36px 10px 14px; border: 1px solid #e2e8f0; border-radius: 10px; font-size: 14px; font-family: inherit; background: #fff url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%2364748b' d='M6 8L1 3h10z'/%3E%3C/svg%3E") no-repeat right 12px center; appearance: none; cursor: pointer; min-width: 140px; }
     .filter-select:focus { outline: none; border-color: #8b5cf6; }
     .btn-action { padding: 10px 18px; border-radius: 10px; font-size: 14px; font-weight: 600; font-family: inherit; display: inline-flex; align-items: center; gap: 8px; transition: all 0.2s; text-decoration: none; }
+    .btn-export { background: #dcfce7; color: #16a34a; border: 1px solid #bbf7d0; }
+    .btn-export:hover { background: #bbf7d0; color: #15803d; }
     .btn-import { background: #f0fdf4; color: #16a34a; border: 1px solid #bbf7d0; }
     .btn-import:hover { background: #dcfce7; color: #15803d; }
     .btn-add { background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%); color: white; border: none; }
@@ -142,6 +144,10 @@
         <input type="hidden" name="status" value="@ViewBag.Status" />
         
         <div class="ms-auto d-flex gap-2">
+            <a href="/Locker/Export?gender=@currentGender@(string.IsNullOrEmpty(ViewBag.Status as string) ? "" : $"&status={ViewBag.Status}")" 
+               class="btn-action btn-export" title="Export to Excel">
+                <i class="fa-solid fa-file-excel"></i> Export
+            </a>
             <a href="/Locker/Import?gender=@currentGender" class="btn-action btn-import">
                 <i class="fa-solid fa-file-import"></i> Import
             </a>
