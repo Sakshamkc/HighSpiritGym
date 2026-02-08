@@ -11,15 +11,18 @@ namespace HighSpiritApp.Services
         private readonly ICustomerRepository _customerRepository;
         private readonly IMembershipRepository _membershipRepository;
         private readonly IBoxingRepository _boxingRepository;
+        private readonly ILockerRepository _lockerRepository;
 
         public DashboardService(
             ICustomerRepository customerRepository,
             IMembershipRepository membershipRepository,
-            IBoxingRepository boxingRepository)
+            IBoxingRepository boxingRepository,
+            ILockerRepository lockerRepository)
         {
             _customerRepository = customerRepository;
             _membershipRepository = membershipRepository;
             _boxingRepository = boxingRepository;
+            _lockerRepository = lockerRepository;
         }
 
         public async Task<DashboardStats> GetDashboardStatsAsync()
@@ -57,6 +60,23 @@ namespace HighSpiritApp.Services
             var gymTotalDue = customerMemberships
                 .Sum(x => x.LatestMembership!.DueAmount);
 
+            // Locker stats
+            var allLockers = (await _lockerRepository.GetAllAsync()).ToList();
+            var gentsLockers = allLockers.Where(l => l.Gender == "Gents").ToList();
+            var ladiesLockers = allLockers.Where(l => l.Gender == "Ladies").ToList();
+
+            var lockerGentsTotal = gentsLockers.Count;
+            var lockerGentsOccupied = gentsLockers.Count(l => l.Status == "Occupied" && !string.IsNullOrEmpty(l.AssignedTo));
+            var lockerGentsEmpty = gentsLockers.Count(l => l.Status == "Empty" || (l.Status != "Occupied" && l.Status != "Locked" && string.IsNullOrEmpty(l.AssignedTo)));
+            var lockerGentsExpired = gentsLockers.Count(l => l.Status == "Occupied" && l.EndDate < today);
+
+            var lockerLadiesTotal = ladiesLockers.Count;
+            var lockerLadiesOccupied = ladiesLockers.Count(l => l.Status == "Occupied" && !string.IsNullOrEmpty(l.AssignedTo));
+            var lockerLadiesEmpty = ladiesLockers.Count(l => l.Status == "Empty" || (l.Status != "Occupied" && l.Status != "Locked" && string.IsNullOrEmpty(l.AssignedTo)));
+            var lockerLadiesExpired = ladiesLockers.Count(l => l.Status == "Occupied" && l.EndDate < today);
+
+            var lockerTotalDue = allLockers.Sum(l => l.DueAmount);
+
             // Boxing stats
             var boxingMembers = (await _boxingRepository.GetAllAsync()).ToList();
             var boxingTotal = boxingMembers.Count;
@@ -72,6 +92,17 @@ namespace HighSpiritApp.Services
                 GymExpiringSoon = gymExpiringSoon,
                 GymJoinedThisMonth = gymJoinedThisMonth,
                 GymTotalDue = gymTotalDue,
+                
+                LockerGentsTotal = lockerGentsTotal,
+                LockerGentsOccupied = lockerGentsOccupied,
+                LockerGentsEmpty = lockerGentsEmpty,
+                LockerGentsExpired = lockerGentsExpired,
+                LockerLadiesTotal = lockerLadiesTotal,
+                LockerLadiesOccupied = lockerLadiesOccupied,
+                LockerLadiesEmpty = lockerLadiesEmpty,
+                LockerLadiesExpired = lockerLadiesExpired,
+                LockerTotalDue = lockerTotalDue,
+                
                 BoxingTotal = boxingTotal,
                 BoxingPaid = boxingPaid,
                 BoxingWithDue = boxingWithDue,

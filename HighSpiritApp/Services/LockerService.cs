@@ -357,7 +357,11 @@ namespace HighSpiritApp.Services
                         else if (nameLower == "locked")
                             status = "Locked";
                         else if (nameLower == "occupied")
+                        {
+                            // "Occupied" text without a name - mark as occupied with placeholder
                             status = "Occupied";
+                            assignedName = "(Reserved)";
+                        }
                         else if (nameLower == "maintenance")
                             status = "Maintenance";
                         else

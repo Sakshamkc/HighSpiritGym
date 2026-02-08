@@ -49,6 +49,11 @@
         color: white;
     }
     
+    .section-icon.locker {
+        background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%);
+        color: white;
+    }
+    
     .section-icon.boxing {
         background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
         color: white;
@@ -114,6 +119,79 @@
         background: linear-gradient(to right, transparent, #e5e7eb, transparent);
         margin: 40px 0;
     }
+    
+    .locker-stats-row {
+        display: flex;
+        gap: 20px;
+        flex-wrap: wrap;
+    }
+    
+    .locker-gender-card {
+        flex: 1;
+        min-width: 280px;
+        background: white;
+        border-radius: 16px;
+        padding: 20px;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+    }
+    
+    .locker-gender-header {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        margin-bottom: 15px;
+        padding-bottom: 10px;
+        border-bottom: 2px solid #f1f5f9;
+    }
+    
+    .locker-gender-header.gents {
+        border-bottom-color: #3b82f6;
+    }
+    
+    .locker-gender-header.ladies {
+        border-bottom-color: #ec4899;
+    }
+    
+    .locker-gender-header i {
+        font-size: 20px;
+    }
+    
+    .locker-gender-header.gents i {
+        color: #3b82f6;
+    }
+    
+    .locker-gender-header.ladies i {
+        color: #ec4899;
+    }
+    
+    .locker-mini-stats {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 12px;
+    }
+    
+    .locker-mini-stat {
+        background: #f8fafc;
+        border-radius: 10px;
+        padding: 12px;
+        text-align: center;
+    }
+    
+    .locker-mini-stat .value {
+        font-size: 1.5rem;
+        font-weight: 700;
+    }
+    
+    .locker-mini-stat .label {
+        font-size: 0.75rem;
+        color: #64748b;
+        text-transform: uppercase;
+    }
+    
+    .locker-mini-stat.total .value { color: #6366f1; }
+    .locker-mini-stat.occupied .value { color: #3b82f6; }
+    .locker-mini-stat.empty .value { color: #10b981; }
+    .locker-mini-stat.expired .value { color: #ef4444; }
 </style>
 
 <!-- ======================= GYM DASHBOARD ======================= -->
@@ -256,6 +334,155 @@
                             <td colspan="5" class="text-center text-muted py-4">
                                 <i class="fa-solid fa-party-horn fa-2x mb-2 d-block"></i>
                                 No members expiring soon 🎉
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<hr class="divider" />
+
+<!-- ======================= LOCKER DASHBOARD ======================= -->
+<div class="section-header">
+    <div class="section-icon locker">
+        <i class="fa-solid fa-lock"></i>
+    </div>
+    <div>
+        <h5 class="mb-0">Locker Overview</h5>
+        <small class="text-muted">Locker allocation statistics</small>
+    </div>
+    <a href="/Locker" class="btn btn-sm btn-outline-primary ms-auto">
+        <i class="fa-solid fa-arrow-right me-1"></i> View All
+    </a>
+</div>
+
+<div class="locker-stats-row mb-4">
+    <!-- Gents Lockers -->
+    <div class="locker-gender-card">
+        <div class="locker-gender-header gents">
+            <i class="fa-solid fa-mars"></i>
+            <h6 class="mb-0 fw-bold">Gents Lockers</h6>
+        </div>
+        <div class="locker-mini-stats">
+            <div class="locker-mini-stat total">
+                <div class="value">@ViewBag.LockerGentsTotal</div>
+                <div class="label">Total</div>
+            </div>
+            <div class="locker-mini-stat occupied">
+                <div class="value">@ViewBag.LockerGentsOccupied</div>
+                <div class="label">Occupied</div>
+            </div>
+            <div class="locker-mini-stat empty">
+                <div class="value">@ViewBag.LockerGentsEmpty</div>
+                <div class="label">Empty</div>
+            </div>
+            <div class="locker-mini-stat expired">
+                <div class="value">@ViewBag.LockerGentsExpired</div>
+                <div class="label">Expired</div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Ladies Lockers -->
+    <div class="locker-gender-card">
+        <div class="locker-gender-header ladies">
+            <i class="fa-solid fa-venus"></i>
+            <h6 class="mb-0 fw-bold">Ladies Lockers</h6>
+        </div>
+        <div class="locker-mini-stats">
+            <div class="locker-mini-stat total">
+                <div class="value">@ViewBag.LockerLadiesTotal</div>
+                <div class="label">Total</div>
+            </div>
+            <div class="locker-mini-stat occupied">
+                <div class="value">@ViewBag.LockerLadiesOccupied</div>
+                <div class="label">Occupied</div>
+            </div>
+            <div class="locker-mini-stat empty">
+                <div class="value">@ViewBag.LockerLadiesEmpty</div>
+                <div class="label">Empty</div>
+            </div>
+            <div class="locker-mini-stat expired">
+                <div class="value">@ViewBag.LockerLadiesExpired</div>
+                <div class="label">Expired</div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Total Due Card -->
+    <div class="card stat-card shadow text-white" style="background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%); min-width: 200px; flex: 0.5;">
+        <div class="card-body d-flex flex-column justify-content-center">
+            <div class="stat-icon">
+                <i class="fa-solid fa-money-bill-wave"></i>
+            </div>
+            <h2>Rs @ViewBag.LockerTotalDue.ToString("N0")</h2>
+            <p class="mb-0">Total Locker Due</p>
+        </div>
+    </div>
+</div>
+
+<!-- Locker Expired Table -->
+<div class="card shadow data-table mb-4">
+    <div class="card-body">
+        <h5 class="mb-3 table-header-icon">
+            <span class="section-icon locker" style="width:32px;height:32px;font-size:14px;">
+                <i class="fa-solid fa-clock"></i>
+            </span>
+            Expired Lockers
+        </h5>
+
+        <div class="table-responsive">
+            <table class="table table-hover align-middle">
+                <thead class="table-dark">
+                    <tr>
+                        <th>Locker #</th>
+                        <th>Gender</th>
+                        <th>Assigned To</th>
+                        <th>Expired Date</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @if (ViewBag.LockerExpiredList != null && ViewBag.LockerExpiredList.Count > 0)
+                    {
+                        foreach (var l in ViewBag.LockerExpiredList)
+                        {
+                            <tr>
+                                <td class="fw-semibold">
+                                    <i class="fa-solid fa-lock me-1 text-purple"></i>#@l.LockerNumber
+                                </td>
+                                <td>
+                                    <span class="badge @(l.Gender == "Gents" ? "bg-primary" : "bg-danger")">
+                                        <i class="fa-solid fa-@(l.Gender == "Gents" ? "mars" : "venus") me-1"></i>@l.Gender
+                                    </span>
+                                </td>
+                                <td>@l.AssignedTo</td>
+                                <td>
+                                    <span class="text-danger fw-semibold">
+                                        <i class="fa-solid fa-calendar-xmark me-1"></i>
+                                        @(l.EndDate?.ToString("dd MMM yyyy") ?? "-")
+                                    </span>
+                                </td>
+                                <td>
+                                    <a class="btn btn-sm btn-outline-primary" href="/Locker/Edit/@l.LockerID">
+                                        <i class="fa-solid fa-edit"></i> Edit
+                                    </a>
+                                    <a class="btn btn-sm btn-success" href="/Locker/Renew/@l.LockerID">
+                                        <i class="fa-solid fa-rotate"></i> Renew
+                                    </a>
+                                </td>
+                            </tr>
+                        }
+                    }
+                    else
+                    {
+                        <tr>
+                            <td colspan="5" class="text-center text-muted py-4">
+                                <i class="fa-solid fa-thumbs-up fa-2x mb-2 d-block"></i>
+                                No expired lockers 🎉
                             </td>
                         </tr>
                     }

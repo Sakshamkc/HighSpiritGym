@@ -18,6 +18,17 @@ namespace HighSpiritApp.Services.Interfaces
         public int GymJoinedThisMonth { get; set; }
         public int GymTotalDue { get; set; }
 
+        // Locker Stats
+        public int LockerGentsTotal { get; set; }
+        public int LockerGentsOccupied { get; set; }
+        public int LockerGentsEmpty { get; set; }
+        public int LockerGentsExpired { get; set; }
+        public int LockerLadiesTotal { get; set; }
+        public int LockerLadiesOccupied { get; set; }
+        public int LockerLadiesEmpty { get; set; }
+        public int LockerLadiesExpired { get; set; }
+        public decimal LockerTotalDue { get; set; }
+
         // Boxing Stats
         public int BoxingTotal { get; set; }
         public int BoxingPaid { get; set; }

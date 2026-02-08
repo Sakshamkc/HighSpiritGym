@@ -13,15 +13,18 @@ namespace HighSpiritApp.Controllers
         private readonly IDashboardService _dashboardService;
         private readonly IMembershipService _membershipService;
         private readonly IBoxingService _boxingService;
+        private readonly ILockerService _lockerService;
 
         public HomeController(
             IDashboardService dashboardService,
             IMembershipService membershipService,
-            IBoxingService boxingService)
+            IBoxingService boxingService,
+            ILockerService lockerService)
         {
             _dashboardService = dashboardService;
             _membershipService = membershipService;
             _boxingService = boxingService;
+            _lockerService = lockerService;
         }
 
         public async Task<IActionResult> Index()
@@ -37,6 +40,17 @@ namespace HighSpiritApp.Controllers
             ViewBag.JoinedThisMonth = stats.GymJoinedThisMonth;
             ViewBag.GymTotalDue = stats.GymTotalDue;
 
+            // Locker stats
+            ViewBag.LockerGentsTotal = stats.LockerGentsTotal;
+            ViewBag.LockerGentsOccupied = stats.LockerGentsOccupied;
+            ViewBag.LockerGentsEmpty = stats.LockerGentsEmpty;
+            ViewBag.LockerGentsExpired = stats.LockerGentsExpired;
+            ViewBag.LockerLadiesTotal = stats.LockerLadiesTotal;
+            ViewBag.LockerLadiesOccupied = stats.LockerLadiesOccupied;
+            ViewBag.LockerLadiesEmpty = stats.LockerLadiesEmpty;
+            ViewBag.LockerLadiesExpired = stats.LockerLadiesExpired;
+            ViewBag.LockerTotalDue = stats.LockerTotalDue;
+
             // Boxing stats
             ViewBag.BoxingTotal = stats.BoxingTotal;
             ViewBag.BoxingPaid = stats.BoxingPaid;
@@ -46,6 +60,7 @@ namespace HighSpiritApp.Controllers
             // Get lists for tables
             var expiringList = (await _membershipService.GetExpiringSoonAsync(7)).Take(5).ToList();
             ViewBag.BoxingDueList = (await _boxingService.GetMembersWithDueAsync()).Take(5).ToList();
+            ViewBag.LockerExpiredList = (await _lockerService.GetExpiredLockersAsync()).Take(5).ToList();
 
             return View(expiringList);
         }
