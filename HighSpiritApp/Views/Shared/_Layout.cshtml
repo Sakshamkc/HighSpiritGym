@@ -548,8 +548,17 @@
                 margin-right: 12px !important;
             }
 
+            /* Allow submenu container to be visible but respect collapse state */
             .sidebar.show .submenu-container {
                 display: block !important;
+                max-height: 0;
+                overflow: hidden;
+                transition: max-height 0.3s ease;
+            }
+
+            /* When collapse is shown, expand it */
+            .sidebar.show .submenu-container.show {
+                max-height: 500px;
             }
 
             .content {

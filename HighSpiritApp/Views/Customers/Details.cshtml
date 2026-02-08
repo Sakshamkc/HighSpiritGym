@@ -12,6 +12,12 @@
     var isExpiringSoon = latestMembership != null && latestMembership.ExpireDate >= today && latestMembership.ExpireDate <= today.AddDays(7);
     var daysLeft = latestMembership != null ? (latestMembership.ExpireDate - today).Days : 0;
     
+    // Locker info
+    var assignedLocker = ViewBag.AssignedLocker as HighSpiritApp.Models.Locker.Locker;
+    var lockerIsExpired = assignedLocker != null && assignedLocker.EndDate < today;
+    var lockerIsExpiringSoon = assignedLocker != null && assignedLocker.EndDate >= today && assignedLocker.EndDate <= today.AddDays(7);
+    var lockerDaysLeft = assignedLocker != null && assignedLocker.EndDate.HasValue ? (assignedLocker.EndDate.Value - today).Days : 0;
+    
     string FormatDate(DateTime date)
     {
         return date.ToString("dd MMM yyyy");
@@ -139,6 +145,10 @@
         background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%);
         color: white;
     }
+    .info-card-header.locker i {
+        background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%);
+        color: white;
+    }
     .info-card-header h5 {
         margin: 0;
         font-weight: 600;
@@ -151,6 +161,11 @@
     .info-grid {
         display: grid;
         grid-template-columns: repeat(3, 1fr);
+        gap: 20px;
+    }
+    .info-grid-2 {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
         gap: 20px;
     }
     .info-item {
@@ -171,6 +186,9 @@
         font-weight: 600;
         color: #1e293b;
     }
+    .info-item span.text-danger { color: #dc2626 !important; }
+    .info-item span.text-success { color: #16a34a !important; }
+    .info-item span.text-warning { color: #d97706 !important; }
 
     .membership-highlight {
         background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%);
@@ -206,6 +224,38 @@
         color: #dc2626;
     }
     .membership-stat.expiring .value {
+        color: #d97706;
+    }
+
+    /* Locker Card Styles */
+    .locker-highlight {
+        background: linear-gradient(135deg, #f5f3ff 0%, #ede9fe 100%);
+        border: 1px solid #c4b5fd;
+        border-radius: 16px;
+        padding: 25px;
+        margin-bottom: 20px;
+    }
+    .locker-highlight.expired {
+        background: linear-gradient(135deg, #fef2f2 0%, #fee2e2 100%);
+        border-color: #fecaca;
+    }
+    .locker-highlight.expiring {
+        background: linear-gradient(135deg, #fffbeb 0%, #fef3c7 100%);
+        border-color: #fde68a;
+    }
+    .locker-number-display {
+        font-size: 48px;
+        font-weight: 700;
+        color: #7c3aed;
+    }
+    .locker-number-display i {
+        font-size: 32px;
+        margin-right: 8px;
+    }
+    .locker-highlight.expired .locker-number-display {
+        color: #dc2626;
+    }
+    .locker-highlight.expiring .locker-number-display {
         color: #d97706;
     }
 
@@ -266,6 +316,9 @@
     @@media (max-width: 768px) {
         .info-grid {
             grid-template-columns: repeat(2, 1fr);
+        }
+        .info-grid-2 {
+            grid-template-columns: 1fr;
         }
         .profile-header .row {
             text-align: center;
@@ -336,9 +389,6 @@
                     <a href="/Memberships/Renew/@Model.CustomerID" class="action-btn btn btn-success">
                         <i class="fa-solid fa-rotate"></i> Renew
                     </a>
-                    @{
-                        var assignedLocker = ViewBag.AssignedLocker as HighSpiritApp.Models.Locker.Locker;
-                    }
                     @if (assignedLocker != null)
                     {
                         <a href="/Locker/Details/@assignedLocker.LockerID" class="action-btn btn btn-info">
@@ -393,6 +443,68 @@
                         }
                     </div>
                     <div class="label">@(isExpired ? "Overdue" : "Remaining")</div>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+<!-- Locker Details Card (if assigned) -->
+@if (assignedLocker != null)
+{
+    <div class="locker-highlight @(lockerIsExpired ? "expired" : lockerIsExpiringSoon ? "expiring" : "")">
+        <div class="row align-items-center">
+            <div class="col-md-3 text-center mb-3 mb-md-0">
+                <div class="locker-number-display">
+                    <i class="fa-solid fa-lock"></i>#@assignedLocker.LockerNumber
+                </div>
+                <span class="badge @(assignedLocker.Gender == "Gents" ? "bg-primary" : "bg-danger") fs-6">
+                    <i class="fa-solid fa-@(assignedLocker.Gender == "Gents" ? "mars" : "venus") me-1"></i>@assignedLocker.Gender
+                </span>
+            </div>
+            <div class="col-md-9">
+                <div class="row g-3">
+                    <div class="col-6 col-md-3">
+                        <div class="membership-stat">
+                            <div class="value">@(assignedLocker.RentalMonths)M</div>
+                            <div class="label">Duration</div>
+                        </div>
+                    </div>
+                    <div class="col-6 col-md-3">
+                        <div class="membership-stat">
+                            <div class="value">@(assignedLocker.EndDate?.ToString("dd MMM") ?? "-")</div>
+                            <div class="label">Expiry</div>
+                        </div>
+                    </div>
+                    <div class="col-6 col-md-3">
+                        <div class="membership-stat highlight">
+                            <div class="value">Rs. @assignedLocker.PaidAmount.ToString("N0")</div>
+                            <div class="label">Paid</div>
+                        </div>
+                    </div>
+                    <div class="col-6 col-md-3">
+                        <div class="membership-stat @(assignedLocker.DueAmount > 0 ? "expired" : "highlight")">
+                            <div class="value">
+                                @if (assignedLocker.DueAmount > 0)
+                                {
+                                    @($"Rs. {assignedLocker.DueAmount:N0}")
+                                }
+                                else
+                                {
+                                    <i class="fa-solid fa-check-circle"></i>
+                                }
+                            </div>
+                            <div class="label">@(assignedLocker.DueAmount > 0 ? "Due" : "Paid")</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="d-flex gap-2 mt-3 justify-content-center justify-content-md-start">
+                    <a href="/Locker/Details/@assignedLocker.LockerID" class="btn btn-sm btn-outline-primary">
+                        <i class="fa-solid fa-eye me-1"></i> View Locker
+                    </a>
+                    <a href="/Locker/Renew/@assignedLocker.LockerID" class="btn btn-sm btn-outline-success">
+                        <i class="fa-solid fa-rotate me-1"></i> Renew Locker
+                    </a>
                 </div>
             </div>
         </div>
