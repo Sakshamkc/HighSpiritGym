@@ -67,6 +67,18 @@ namespace HighSpiritApp.Services
             return emptyLockers[random.Next(emptyLockers.Count)];
         }
 
+        public async Task<Locker?> GetLockerByMemberNameAsync(string memberName)
+        {
+            if (string.IsNullOrWhiteSpace(memberName))
+                return null;
+
+            var allLockers = await _lockerRepository.GetAllAsync();
+            return allLockers.FirstOrDefault(l => 
+                l.Status == "Occupied" && 
+                !string.IsNullOrEmpty(l.AssignedTo) && 
+                l.AssignedTo.Equals(memberName, StringComparison.OrdinalIgnoreCase));
+        }
+
         public async Task<Locker> CreateAsync(Locker locker)
         {
             if (await _lockerRepository.IsLockerNumberExistsAsync(locker.LockerNumber, locker.Gender))

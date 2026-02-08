@@ -927,6 +927,24 @@
     .btn-outline-purple:focus {
         box-shadow: 0 0 0 0.2rem rgba(139, 92, 246, 0.5);
     }
+
+    /* Filled purple button for assigned locker */
+    .btn-purple {
+        color: #fff;
+        background-color: #8b5cf6;
+        border-color: #8b5cf6;
+    }
+    .btn-purple:hover {
+        color: #fff;
+        background-color: #7c3aed;
+        border-color: #7c3aed;
+    }
+    .btn-purple:focus {
+        box-shadow: 0 0 0 0.2rem rgba(139, 92, 246, 0.5);
+    }
+    .text-purple {
+        color: #8b5cf6 !important;
+    }
 </style>
 
 <div class="card shadow">
@@ -1049,6 +1067,11 @@
                             }
                         </td>
                         <td>
+                            @{
+                                var assignedLockers = ViewBag.AssignedLockers as Dictionary<string, HighSpiritApp.Models.Locker.Locker>;
+                                var hasLocker = assignedLockers != null && assignedLockers.ContainsKey(c.FullName.ToLower());
+                                var existingLocker = hasLocker ? assignedLockers[c.FullName.ToLower()] : null;
+                            }
                             <div class="btn-group btn-group-sm">
                                 <a class="btn btn-outline-primary" href="/Customers/Details/@c.CustomerID" title="View">
                                     <i class="fa-solid fa-eye"></i>
@@ -1062,9 +1085,18 @@
                                         <i class="fa-solid fa-rotate"></i>
                                     </a>
                                 }
-                                <a class="btn btn-outline-purple" href="/Locker/AutoAssign?customerId=@c.CustomerID" title="Assign Locker">
-                                    <i class="fa-solid fa-lock"></i>
-                                </a>
+                                @if (hasLocker && existingLocker != null)
+                                {
+                                    <a class="btn btn-purple text-white" href="/Locker/Details/@existingLocker.LockerID" title="Locker #@existingLocker.LockerNumber (@existingLocker.Gender)">
+                                        <i class="fa-solid fa-lock"></i>
+                                    </a>
+                                }
+                                else
+                                {
+                                    <a class="btn btn-outline-purple" href="/Locker/AutoAssign?customerId=@c.CustomerID" title="Assign Locker">
+                                        <i class="fa-solid fa-lock-open"></i>
+                                    </a>
+                                }
                                 <button class="btn btn-outline-danger" data-bs-toggle="modal"
                                         data-bs-target="#delModal_@c.CustomerID" title="Delete">
                                     <i class="fa-solid fa-trash"></i>

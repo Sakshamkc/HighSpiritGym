@@ -174,11 +174,29 @@
             color: #e2e8f0;
         }
 
+        .sidebar .submenu.active {
+            background: rgba(59, 130, 246, 0.1);
+            color: #60a5fa;
+        }
+
         .sidebar .submenu i {
             width: 18px;
             margin-right: 10px;
             font-size: 11px;
             opacity: 0.7;
+        }
+
+        /* Chevron rotation for collapsible menus */
+        .sidebar .nav-link[data-bs-toggle="collapse"] .fa-chevron-down {
+            transition: transform 0.3s ease;
+        }
+
+        .sidebar .nav-link[data-bs-toggle="collapse"][aria-expanded="true"] .fa-chevron-down {
+            transform: rotate(180deg);
+        }
+
+        .sidebar .nav-link[data-bs-toggle="collapse"]:not(.collapsed) .fa-chevron-down {
+            transform: rotate(180deg);
         }
 
         /* Collapsed state */
@@ -656,60 +674,46 @@
                 </a>
             </div>
 
-            <p class="nav-section-title">Gym Packages</p>
+            <p class="nav-section-title">Gym Members</p>
 
             <div class="nav-item">
-                <a href="/Customers" class="nav-link @(controller == "Customers" && string.IsNullOrEmpty(ViewBag.PlanName as string) ? "active" : "")" onclick="closeSidebarOnMobile()">
-                    <i class="fa-solid fa-users" style="background: rgba(100, 116, 139, 0.15); color: #94a3b8;"></i>
+                <a href="#" class="nav-link gym-link" data-bs-toggle="collapse" data-bs-target="#gymPackagesMenu">
+                    <i class="fa-solid fa-dumbbell"></i>
+                    <span class="nav-text">Gym Packages</span>
+                    <i class="fa-solid fa-chevron-down ms-auto nav-text" style="font-size: 10px; opacity: 0.6;"></i>
+                </a>
+            </div>
+            <div class="collapse submenu-container @(controller == "Customers" ? "show" : "")" id="gymPackagesMenu">
+                <a href="/Customers" class="nav-link submenu @(controller == "Customers" && string.IsNullOrEmpty(ViewBag.PlanName as string) ? "active" : "")" onclick="closeSidebarOnMobile()">
+                    <i class="fa-solid fa-users"></i>
                     <span class="nav-text">All Members</span>
                 </a>
-            </div>
-
-            <div class="nav-item">
-                <a href="/Customers?planName=Gym" class="nav-link @(ViewBag.PlanName as string == "Gym" ? "active" : "")" onclick="closeSidebarOnMobile()">
-                    <i class="fa-solid fa-dumbbell" style="background: rgba(59, 130, 246, 0.15); color: #60a5fa;"></i>
+                <a href="/Customers?planName=Gym" class="nav-link submenu @(ViewBag.PlanName as string == "Gym" ? "active" : "")" onclick="closeSidebarOnMobile()">
+                    <i class="fa-solid fa-dumbbell"></i>
                     <span class="nav-text">Gym Package</span>
                 </a>
-            </div>
-
-            <div class="nav-item">
-                <a href="/Customers?planName=Cardio" class="nav-link @(ViewBag.PlanName as string == "Cardio" ? "active" : "")" onclick="closeSidebarOnMobile()">
-                    <i class="fa-solid fa-heart-pulse" style="background: rgba(239, 68, 68, 0.15); color: #f87171;"></i>
+                <a href="/Customers?planName=Cardio" class="nav-link submenu @(ViewBag.PlanName as string == "Cardio" ? "active" : "")" onclick="closeSidebarOnMobile()">
+                    <i class="fa-solid fa-heart-pulse"></i>
                     <span class="nav-text">Cardio Package</span>
                 </a>
-            </div>
-
-            <div class="nav-item">
-                <a href="/Customers?planName=Premium" class="nav-link @(ViewBag.PlanName as string == "Premium" ? "active" : "")" onclick="closeSidebarOnMobile()">
-                    <i class="fa-solid fa-crown" style="background: rgba(245, 158, 11, 0.15); color: #fbbf24;"></i>
+                <a href="/Customers?planName=Premium" class="nav-link submenu @(ViewBag.PlanName as string == "Premium" ? "active" : "")" onclick="closeSidebarOnMobile()">
+                    <i class="fa-solid fa-crown"></i>
                     <span class="nav-text">Premium Package</span>
                 </a>
-            </div>
-
-            <div class="nav-item">
-                <a href="/Customers?planName=Custom2" class="nav-link @(ViewBag.PlanName as string == "Custom2" ? "active" : "")" onclick="closeSidebarOnMobile()">
-                    <i class="fa-solid fa-layer-group" style="background: rgba(16, 185, 129, 0.15); color: #34d399;"></i>
+                <a href="/Customers?planName=Custom2" class="nav-link submenu @(ViewBag.PlanName as string == "Custom2" ? "active" : "")" onclick="closeSidebarOnMobile()">
+                    <i class="fa-solid fa-layer-group"></i>
                     <span class="nav-text">Custom-2 Package</span>
                 </a>
-            </div>
-
-            <div class="nav-item">
-                <a href="/Customers?planName=Custom3" class="nav-link @(ViewBag.PlanName as string == "Custom3" ? "active" : "")" onclick="closeSidebarOnMobile()">
-                    <i class="fa-solid fa-cubes" style="background: rgba(20, 184, 166, 0.15); color: #2dd4bf;"></i>
+                <a href="/Customers?planName=Custom3" class="nav-link submenu @(ViewBag.PlanName as string == "Custom3" ? "active" : "")" onclick="closeSidebarOnMobile()">
+                    <i class="fa-solid fa-cubes"></i>
                     <span class="nav-text">Custom-3 Package</span>
                 </a>
-            </div>
-
-            <div class="nav-item">
-                <a href="/Customers?planName=Zumba" class="nav-link @(ViewBag.PlanName as string == "Zumba" ? "active" : "")" onclick="closeSidebarOnMobile()">
-                    <i class="fa-solid fa-music" style="background: rgba(236, 72, 153, 0.15); color: #f472b6;"></i>
+                <a href="/Customers?planName=Zumba" class="nav-link submenu @(ViewBag.PlanName as string == "Zumba" ? "active" : "")" onclick="closeSidebarOnMobile()">
+                    <i class="fa-solid fa-music"></i>
                     <span class="nav-text">Zumba Package</span>
                 </a>
-            </div>
-
-            <div class="nav-item">
-                <a href="/Customers?planName=Sauna" class="nav-link @(ViewBag.PlanName as string == "Sauna" ? "active" : "")" onclick="closeSidebarOnMobile()">
-                    <i class="fa-solid fa-hot-tub-person" style="background: rgba(139, 92, 246, 0.15); color: #a78bfa;"></i>
+                <a href="/Customers?planName=Sauna" class="nav-link submenu @(ViewBag.PlanName as string == "Sauna" ? "active" : "")" onclick="closeSidebarOnMobile()">
+                    <i class="fa-solid fa-hot-tub-person"></i>
                     <span class="nav-text">Sauna Package</span>
                 </a>
             </div>

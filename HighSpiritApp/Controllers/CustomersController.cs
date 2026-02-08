@@ -13,13 +13,16 @@ namespace HighSpiritApp.Controllers
     {
         private readonly ICustomerService _customerService;
         private readonly IMembershipService _membershipService;
+        private readonly ILockerService _lockerService;
 
         public CustomersController(
             ICustomerService customerService,
-            IMembershipService membershipService)
+            IMembershipService membershipService,
+            ILockerService lockerService)
         {
             _customerService = customerService;
             _membershipService = membershipService;
+            _lockerService = lockerService;
         }
 
         public async Task<IActionResult> Index(string search, string sort, string filter, int? duration, string planName, string shift, string gender, string paymentStatus, int page = 1)
@@ -36,6 +39,16 @@ namespace HighSpiritApp.Controllers
                 PaymentStatus = paymentStatus,
                 Page = page
             });
+
+            // Get all occupied lockers to check which customers already have lockers
+            // Use GroupBy to handle duplicate names (like "(reserved)") - take first locker for each name
+            var allLockers = await _lockerService.GetAllAsync();
+            var assignedLockers = allLockers
+                .Where(l => l.Status == "Occupied" && !string.IsNullOrEmpty(l.AssignedTo))
+                .GroupBy(l => l.AssignedTo!.ToLower())
+                .ToDictionary(g => g.Key, g => g.First());
+            
+            ViewBag.AssignedLockers = assignedLockers;
 
             ViewBag.Page = result.CurrentPage;
             ViewBag.TotalPages = result.TotalPages;
@@ -61,6 +74,10 @@ namespace HighSpiritApp.Controllers
             var customer = await _customerService.GetByIdWithMembershipsAsync(id);
             if (customer == null)
                 return NotFound();
+
+            // Check if customer has a locker
+            var locker = await _lockerService.GetLockerByMemberNameAsync(customer.FullName);
+            ViewBag.AssignedLocker = locker;
 
             return View(customer);
         }

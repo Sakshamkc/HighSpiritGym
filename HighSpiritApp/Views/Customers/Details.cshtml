@@ -336,6 +336,21 @@
                     <a href="/Memberships/Renew/@Model.CustomerID" class="action-btn btn btn-success">
                         <i class="fa-solid fa-rotate"></i> Renew
                     </a>
+                    @{
+                        var assignedLocker = ViewBag.AssignedLocker as HighSpiritApp.Models.Locker.Locker;
+                    }
+                    @if (assignedLocker != null)
+                    {
+                        <a href="/Locker/Details/@assignedLocker.LockerID" class="action-btn btn btn-info">
+                            <i class="fa-solid fa-lock"></i> Locker #@assignedLocker.LockerNumber
+                        </a>
+                    }
+                    else
+                    {
+                        <a href="/Locker/AutoAssign?customerId=@Model.CustomerID" class="action-btn btn btn-warning">
+                            <i class="fa-solid fa-lock-open"></i> Assign Locker
+                        </a>
+                    }
                 </div>
             </div>
         </div>

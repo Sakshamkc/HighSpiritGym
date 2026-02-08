@@ -318,6 +318,14 @@ namespace HighSpiritApp.Controllers
                 return RedirectToAction("Index", "Customers");
             }
 
+            // Check if customer already has a locker assigned
+            var existingLocker = await _lockerService.GetLockerByMemberNameAsync(customer.FullName);
+            if (existingLocker != null)
+            {
+                TempData["error"] = $"{customer.FullName} already has Locker #{existingLocker.LockerNumber} assigned!";
+                return RedirectToAction("Details", new { id = existingLocker.LockerID });
+            }
+
             // Determine gender for locker (Male -> Gents, Female -> Ladies)
             var lockerGender = customer.Gender?.ToLower() == "female" ? "Ladies" : "Gents";
 
