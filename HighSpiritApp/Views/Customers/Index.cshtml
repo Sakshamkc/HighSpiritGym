@@ -912,6 +912,21 @@
     .btn-group-sm .btn {
         padding: 5px 10px;
     }
+
+    /* Purple outline button for Locker */
+    .btn-outline-purple {
+        color: #8b5cf6;
+        border-color: #8b5cf6;
+        background-color: transparent;
+    }
+    .btn-outline-purple:hover {
+        color: #fff;
+        background-color: #8b5cf6;
+        border-color: #8b5cf6;
+    }
+    .btn-outline-purple:focus {
+        box-shadow: 0 0 0 0.2rem rgba(139, 92, 246, 0.5);
+    }
 </style>
 
 <div class="card shadow">
@@ -1047,6 +1062,9 @@
                                         <i class="fa-solid fa-rotate"></i>
                                     </a>
                                 }
+                                <a class="btn btn-outline-purple" href="/Locker/AutoAssign?customerId=@c.CustomerID" title="Assign Locker">
+                                    <i class="fa-solid fa-lock"></i>
+                                </a>
                                 <button class="btn btn-outline-danger" data-bs-toggle="modal"
                                         data-bs-target="#delModal_@c.CustomerID" title="Delete">
                                     <i class="fa-solid fa-trash"></i>

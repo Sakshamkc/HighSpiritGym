@@ -14,6 +14,7 @@ namespace HighSpiritApp.Services.Interfaces
         Task<IEnumerable<Locker>> GetByStatusAsync(string status);
         Task<IEnumerable<Locker>> GetExpiredLockersAsync();
         Task<IEnumerable<Locker>> GetExpiringSoonLockersAsync(int days = 7);
+        Task<Locker?> GetRandomEmptyLockerAsync(string gender);
         Task<Locker> CreateAsync(Locker locker);
         Task UpdateAsync(Locker locker);
         Task DeleteAsync(int id);

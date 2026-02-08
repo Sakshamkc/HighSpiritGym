@@ -282,5 +282,43 @@ namespace HighSpiritApp.Controllers
 
             return Json(members);
         }
+
+        /// <summary>
+        /// Auto-assign a random empty locker to a member from Customers page
+        /// </summary>
+        public async Task<IActionResult> AutoAssign(int customerId)
+        {
+            // Get the customer details
+            var customer = await _customerService.GetByIdWithMembershipsAsync(customerId);
+            if (customer == null)
+            {
+                TempData["error"] = "Customer not found.";
+                return RedirectToAction("Index", "Customers");
+            }
+
+            // Determine gender for locker (Male -> Gents, Female -> Ladies)
+            var lockerGender = customer.Gender?.ToLower() == "female" ? "Ladies" : "Gents";
+
+            // Find a random empty locker for this gender
+            var emptyLocker = await _lockerService.GetRandomEmptyLockerAsync(lockerGender);
+            
+            if (emptyLocker == null)
+            {
+                TempData["error"] = $"No empty {lockerGender} lockers available!";
+                return RedirectToAction("Index", new { gender = lockerGender });
+            }
+
+            // Get member's current package
+            var membership = customer.Memberships?.OrderByDescending(x => x.StartDate).FirstOrDefault();
+            var package = membership?.PlanName ?? "";
+
+            // Pass data to the Assign view
+            ViewBag.CustomerName = customer.FullName;
+            ViewBag.CustomerPhone = customer.Phone;
+            ViewBag.CustomerPackage = package;
+            ViewBag.CustomerId = customerId;
+
+            return View("Assign", emptyLocker);
+        }
     }
 }

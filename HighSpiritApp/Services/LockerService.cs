@@ -52,6 +52,21 @@ namespace HighSpiritApp.Services
             return await _lockerRepository.GetExpiringSoonLockersAsync(days);
         }
 
+        public async Task<Locker?> GetRandomEmptyLockerAsync(string gender)
+        {
+            var allLockers = await _lockerRepository.GetLockersByGenderAsync(gender);
+            var emptyLockers = allLockers
+                .Where(l => l.Status == "Empty" || (l.Status != "Occupied" && l.Status != "Locked" && string.IsNullOrEmpty(l.AssignedTo)))
+                .ToList();
+
+            if (emptyLockers.Count == 0)
+                return null;
+
+            // Get a random empty locker
+            var random = new Random();
+            return emptyLockers[random.Next(emptyLockers.Count)];
+        }
+
         public async Task<Locker> CreateAsync(Locker locker)
         {
             if (await _lockerRepository.IsLockerNumberExistsAsync(locker.LockerNumber, locker.Gender))
