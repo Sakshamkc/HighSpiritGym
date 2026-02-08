@@ -192,6 +192,38 @@
     .locker-mini-stat.occupied .value { color: #3b82f6; }
     .locker-mini-stat.empty .value { color: #10b981; }
     .locker-mini-stat.expired .value { color: #ef4444; }
+
+    /* Collapse button styles */
+    .collapse-btn {
+        width: 32px;
+        height: 32px;
+        padding: 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 8px;
+        transition: all 0.3s ease;
+    }
+    
+    .collapse-btn:hover {
+        background: #f1f5f9;
+    }
+    
+    .collapse-btn i {
+        transition: transform 0.3s ease;
+    }
+    
+    .collapse-btn[aria-expanded="false"] i {
+        transform: rotate(180deg);
+    }
+    
+    .collapse-btn[aria-expanded="true"] i {
+        transform: rotate(0deg);
+    }
+
+    .text-purple {
+        color: #8b5cf6 !important;
+    }
 </style>
 
 <!-- ======================= GYM DASHBOARD ======================= -->
@@ -284,61 +316,69 @@
 <!-- Gym Expiring Table -->
 <div class="card shadow data-table mb-4">
     <div class="card-body">
-        <h5 class="mb-3 table-header-icon">
-            <span class="section-icon gym" style="width:32px;height:32px;font-size:14px;">
-                <i class="fa-solid fa-hourglass-half"></i>
-            </span>
-            Gym Members Expiring in 7 Days
-        </h5>
+        <div class="d-flex align-items-center justify-content-between mb-3">
+            <h5 class="mb-0 table-header-icon">
+                <span class="section-icon gym" style="width:32px;height:32px;font-size:14px;">
+                    <i class="fa-solid fa-hourglass-half"></i>
+                </span>
+                Gym Members Expiring in 7 Days
+                <span class="badge bg-warning text-dark ms-2">@Model.Count()</span>
+            </h5>
+            <button class="btn btn-sm btn-outline-secondary collapse-btn" type="button" data-bs-toggle="collapse" data-bs-target="#gymExpiringTable" aria-expanded="true">
+                <i class="fa-solid fa-chevron-up"></i>
+            </button>
+        </div>
 
-        <div class="table-responsive">
-            <table class="table table-hover align-middle">
-                <thead class="table-dark">
-                    <tr>
-                        <th>Name</th>
-                        <th>Phone</th>
-                        <th>Plan</th>
-                        <th>Expire Date</th>
-                        <th>Action</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    @if (Model.Any())
-                    {
-                        foreach (var m in Model)
+        <div class="collapse show" id="gymExpiringTable">
+            <div class="table-responsive">
+                <table class="table table-hover align-middle">
+                    <thead class="table-dark">
+                        <tr>
+                            <th>Name</th>
+                            <th>Phone</th>
+                            <th>Plan</th>
+                            <th>Expire Date</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @if (Model.Any())
+                        {
+                            foreach (var m in Model)
+                            {
+                                <tr>
+                                    <td class="fw-semibold">@m.Customer.FullName</td>
+                                    <td>@m.Customer.Phone</td>
+                                    <td><span class="badge bg-secondary">@m.PlanName</span></td>
+                                    <td>
+                                        <span class="text-warning fw-semibold">
+                                            <i class="fa-solid fa-calendar-day me-1"></i>
+                                            @m.ExpireDate.ToString("dd MMM yyyy")
+                                        </span>
+                                    </td>
+                                    <td>
+                                        <a class="btn btn-sm btn-outline-primary" href="/Customers/Details/@m.CustomerID">
+                                            <i class="fa-solid fa-eye"></i> View
+                                        </a>
+                                        <a class="btn btn-sm btn-success" href="/Memberships/Renew/@m.CustomerID">
+                                            <i class="fa-solid fa-rotate"></i> Renew
+                                        </a>
+                                    </td>
+                                </tr>
+                            }
+                        }
+                        else
                         {
                             <tr>
-                                <td class="fw-semibold">@m.Customer.FullName</td>
-                                <td>@m.Customer.Phone</td>
-                                <td><span class="badge bg-secondary">@m.PlanName</span></td>
-                                <td>
-                                    <span class="text-warning fw-semibold">
-                                        <i class="fa-solid fa-calendar-day me-1"></i>
-                                        @m.ExpireDate.ToString("dd MMM yyyy")
-                                    </span>
-                                </td>
-                                <td>
-                                    <a class="btn btn-sm btn-outline-primary" href="/Customers/Details/@m.CustomerID">
-                                        <i class="fa-solid fa-eye"></i> View
-                                    </a>
-                                    <a class="btn btn-sm btn-success" href="/Memberships/Renew/@m.CustomerID">
-                                        <i class="fa-solid fa-rotate"></i> Renew
-                                    </a>
+                                <td colspan="5" class="text-center text-muted py-4">
+                                    <i class="fa-solid fa-party-horn fa-2x mb-2 d-block"></i>
+                                    No members expiring soon 🎉
                                 </td>
                             </tr>
                         }
-                    }
-                    else
-                    {
-                        <tr>
-                            <td colspan="5" class="text-center text-muted py-4">
-                                <i class="fa-solid fa-party-horn fa-2x mb-2 d-block"></i>
-                                No members expiring soon 🎉
-                            </td>
-                        </tr>
-                    }
-                </tbody>
-            </table>
+                    </tbody>
+                </table>
+            </div>
         </div>
     </div>
 </div>
@@ -427,67 +467,78 @@
 <!-- Locker Expired Table -->
 <div class="card shadow data-table mb-4">
     <div class="card-body">
-        <h5 class="mb-3 table-header-icon">
-            <span class="section-icon locker" style="width:32px;height:32px;font-size:14px;">
-                <i class="fa-solid fa-clock"></i>
-            </span>
-            Expired Lockers
-        </h5>
+        <div class="d-flex align-items-center justify-content-between mb-3">
+            <h5 class="mb-0 table-header-icon">
+                <span class="section-icon locker" style="width:32px;height:32px;font-size:14px;">
+                    <i class="fa-solid fa-clock"></i>
+                </span>
+                Expired Lockers
+                @if (ViewBag.LockerExpiredList != null)
+                {
+                    <span class="badge bg-danger ms-2">@ViewBag.LockerExpiredList.Count</span>
+                }
+            </h5>
+            <button class="btn btn-sm btn-outline-secondary collapse-btn" type="button" data-bs-toggle="collapse" data-bs-target="#lockerExpiredTable" aria-expanded="true">
+                <i class="fa-solid fa-chevron-up"></i>
+            </button>
+        </div>
 
-        <div class="table-responsive">
-            <table class="table table-hover align-middle">
-                <thead class="table-dark">
-                    <tr>
-                        <th>Locker #</th>
-                        <th>Gender</th>
-                        <th>Assigned To</th>
-                        <th>Expired Date</th>
-                        <th>Action</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    @if (ViewBag.LockerExpiredList != null && ViewBag.LockerExpiredList.Count > 0)
-                    {
-                        foreach (var l in ViewBag.LockerExpiredList)
+        <div class="collapse show" id="lockerExpiredTable">
+            <div class="table-responsive">
+                <table class="table table-hover align-middle">
+                    <thead class="table-dark">
+                        <tr>
+                            <th>Locker #</th>
+                            <th>Gender</th>
+                            <th>Assigned To</th>
+                            <th>Expired Date</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @if (ViewBag.LockerExpiredList != null && ViewBag.LockerExpiredList.Count > 0)
+                        {
+                            foreach (var l in ViewBag.LockerExpiredList)
+                            {
+                                <tr>
+                                    <td class="fw-semibold">
+                                        <i class="fa-solid fa-lock me-1 text-purple"></i>#@l.LockerNumber
+                                    </td>
+                                    <td>
+                                        <span class="badge @(l.Gender == "Gents" ? "bg-primary" : "bg-danger")">
+                                            <i class="fa-solid fa-@(l.Gender == "Gents" ? "mars" : "venus") me-1"></i>@l.Gender
+                                        </span>
+                                    </td>
+                                    <td>@l.AssignedTo</td>
+                                    <td>
+                                        <span class="text-danger fw-semibold">
+                                            <i class="fa-solid fa-calendar-xmark me-1"></i>
+                                            @(l.EndDate?.ToString("dd MMM yyyy") ?? "-")
+                                        </span>
+                                    </td>
+                                    <td>
+                                        <a class="btn btn-sm btn-outline-primary" href="/Locker/Edit/@l.LockerID">
+                                            <i class="fa-solid fa-edit"></i> Edit
+                                        </a>
+                                        <a class="btn btn-sm btn-success" href="/Locker/Renew/@l.LockerID">
+                                            <i class="fa-solid fa-rotate"></i> Renew
+                                        </a>
+                                    </td>
+                                </tr>
+                            }
+                        }
+                        else
                         {
                             <tr>
-                                <td class="fw-semibold">
-                                    <i class="fa-solid fa-lock me-1 text-purple"></i>#@l.LockerNumber
-                                </td>
-                                <td>
-                                    <span class="badge @(l.Gender == "Gents" ? "bg-primary" : "bg-danger")">
-                                        <i class="fa-solid fa-@(l.Gender == "Gents" ? "mars" : "venus") me-1"></i>@l.Gender
-                                    </span>
-                                </td>
-                                <td>@l.AssignedTo</td>
-                                <td>
-                                    <span class="text-danger fw-semibold">
-                                        <i class="fa-solid fa-calendar-xmark me-1"></i>
-                                        @(l.EndDate?.ToString("dd MMM yyyy") ?? "-")
-                                    </span>
-                                </td>
-                                <td>
-                                    <a class="btn btn-sm btn-outline-primary" href="/Locker/Edit/@l.LockerID">
-                                        <i class="fa-solid fa-edit"></i> Edit
-                                    </a>
-                                    <a class="btn btn-sm btn-success" href="/Locker/Renew/@l.LockerID">
-                                        <i class="fa-solid fa-rotate"></i> Renew
-                                    </a>
+                                <td colspan="5" class="text-center text-muted py-4">
+                                    <i class="fa-solid fa-thumbs-up fa-2x mb-2 d-block"></i>
+                                    No expired lockers 🎉
                                 </td>
                             </tr>
                         }
-                    }
-                    else
-                    {
-                        <tr>
-                            <td colspan="5" class="text-center text-muted py-4">
-                                <i class="fa-solid fa-thumbs-up fa-2x mb-2 d-block"></i>
-                                No expired lockers 🎉
-                            </td>
-                        </tr>
-                    }
-                </tbody>
-            </table>
+                    </tbody>
+                </table>
+            </div>
         </div>
     </div>
 </div>
@@ -558,60 +609,96 @@
 <!-- Boxing Due Table -->
 <div class="card shadow data-table">
     <div class="card-body">
-        <h5 class="mb-3 table-header-icon">
-            <span class="section-icon boxing" style="width:32px;height:32px;font-size:14px;">
-                <i class="fa-solid fa-triangle-exclamation"></i>
-            </span>
-            Boxing Members with Due
-        </h5>
+        <div class="d-flex align-items-center justify-content-between mb-3">
+            <h5 class="mb-0 table-header-icon">
+                <span class="section-icon boxing" style="width:32px;height:32px;font-size:14px;">
+                    <i class="fa-solid fa-triangle-exclamation"></i>
+                </span>
+                Boxing Members with Due
+                @if (ViewBag.BoxingDueList != null)
+                {
+                    <span class="badge bg-danger ms-2">@ViewBag.BoxingDueList.Count</span>
+                }
+            </h5>
+            <button class="btn btn-sm btn-outline-secondary collapse-btn" type="button" data-bs-toggle="collapse" data-bs-target="#boxingDueTable" aria-expanded="true">
+                <i class="fa-solid fa-chevron-up"></i>
+            </button>
+        </div>
 
-        <div class="table-responsive">
-            <table class="table table-hover align-middle">
-                <thead class="table-dark">
-                    <tr>
-                        <th>Name</th>
-                        <th>Guardian</th>
-                        <th>Contact</th>
-                        <th>Due Amount</th>
-                        <th>Action</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    @if (ViewBag.BoxingDueList != null && ViewBag.BoxingDueList.Count > 0)
-                    {
-                        foreach (var b in ViewBag.BoxingDueList)
+        <div class="collapse show" id="boxingDueTable">
+            <div class="table-responsive">
+                <table class="table table-hover align-middle">
+                    <thead class="table-dark">
+                        <tr>
+                            <th>Name</th>
+                            <th>Guardian</th>
+                            <th>Contact</th>
+                            <th>Due Amount</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @if (ViewBag.BoxingDueList != null && ViewBag.BoxingDueList.Count > 0)
+                        {
+                            foreach (var b in ViewBag.BoxingDueList)
+                            {
+                                <tr>
+                                    <td class="fw-semibold">@b.Name</td>
+                                    <td>@b.GuardianName</td>
+                                    <td>
+                                        <i class="fa-solid fa-phone me-1 text-muted"></i>
+                                        @b.GuardianContact
+                                    </td>
+                                    <td>
+                                        <span class="badge bg-danger fs-6">
+                                            <i class="fa-solid fa-indian-rupee-sign me-1"></i>@b.DueAmount
+                                        </span>
+                                    </td>
+                                    <td>
+                                        <a class="btn btn-sm btn-outline-primary" href="/Boxing/Details/@b.BoxingMemberID">
+                                            <i class="fa-solid fa-eye"></i> View
+                                        </a>
+                                    </td>
+                                </tr>
+                            }
+                        }
+                        else
                         {
                             <tr>
-                                <td class="fw-semibold">@b.Name</td>
-                                <td>@b.GuardianName</td>
-                                <td>
-                                    <i class="fa-solid fa-phone me-1 text-muted"></i>
-                                    @b.GuardianContact
-                                </td>
-                                <td>
-                                    <span class="badge bg-danger fs-6">
-                                        <i class="fa-solid fa-indian-rupee-sign me-1"></i>@b.DueAmount
-                                    </span>
-                                </td>
-                                <td>
-                                    <a class="btn btn-sm btn-outline-primary" href="/Boxing/Details/@b.BoxingMemberID">
-                                        <i class="fa-solid fa-eye"></i> View
-                                    </a>
+                                <td colspan="5" class="text-center text-muted py-4">
+                                    <i class="fa-solid fa-thumbs-up fa-2x mb-2 d-block"></i>
+                                    No boxing dues 🎉
                                 </td>
                             </tr>
                         }
-                    }
-                    else
-                    {
-                        <tr>
-                            <td colspan="5" class="text-center text-muted py-4">
-                                <i class="fa-solid fa-thumbs-up fa-2x mb-2 d-block"></i>
-                                No boxing dues 🎉
-                            </td>
-                        </tr>
-                    }
-                </tbody>
-            </table>
+                    </tbody>
+                </table>
+            </div>
         </div>
     </div>
 </div>
+
+@section Scripts {
+    <script>
+        // Handle collapse button aria-expanded state for chevron rotation
+        document.addEventListener('DOMContentLoaded', function() {
+            const collapseButtons = document.querySelectorAll('.collapse-btn');
+            
+            collapseButtons.forEach(function(btn) {
+                const targetId = btn.getAttribute('data-bs-target');
+                const targetEl = document.querySelector(targetId);
+                
+                if (targetEl) {
+                    // Listen for Bootstrap collapse events
+                    targetEl.addEventListener('show.bs.collapse', function() {
+                        btn.setAttribute('aria-expanded', 'true');
+                    });
+                    
+                    targetEl.addEventListener('hide.bs.collapse', function() {
+                        btn.setAttribute('aria-expanded', 'false');
+                    });
+                }
+            });
+        });
+    </script>
+}
