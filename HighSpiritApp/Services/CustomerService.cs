@@ -50,7 +50,7 @@ namespace HighSpiritApp.Services
                     (c.Phone != null && c.Phone.Contains(filter.Search)));
             }
 
-            // Status filter - based on latest membership's ExpireDate, no IsActive check
+            // Status filter - based on latest membership's ExpireDate
             filter.Filter ??= "all";
             query = filter.Filter switch
             {
@@ -66,15 +66,6 @@ namespace HighSpiritApp.Services
                     c.Memberships.OrderByDescending(m => m.StartDate).First().ExpireDate <= today.AddDays(7)),
                 _ => query
             };
-
-            // Plan name filter
-            if (!string.IsNullOrEmpty(filter.PlanName))
-            {
-                query = query.Where(c =>
-                    c.Memberships.Any() &&
-                    c.Memberships.OrderByDescending(m => m.StartDate).First().PlanName != null &&
-                    c.Memberships.OrderByDescending(m => m.StartDate).First().PlanName!.Contains(filter.PlanName));
-            }
 
             // Shift filter
             if (!string.IsNullOrEmpty(filter.Shift))
@@ -103,8 +94,36 @@ namespace HighSpiritApp.Services
                 };
             }
 
-            // Get all for duration counts before applying duration filter
+            // Load all matching customers to memory for plan filtering
             var allCustomers = await query.ToListAsync();
+
+            // Plan name filter - EXACT matching logic (in-memory)
+            if (!string.IsNullOrEmpty(filter.PlanName))
+            {
+                var planFilter = filter.PlanName.ToLower();
+                
+                allCustomers = planFilter switch
+                {
+                    "custom2" or "custom-2" => allCustomers.Where(c => IsCustomPlan(c, 2)).ToList(),
+                    "custom3" or "custom-3" => allCustomers.Where(c => IsCustomPlan(c, 3)).ToList(),
+                    "gym" => allCustomers.Where(c => IsExactPlan(c, "Gym")).ToList(),
+                    "cardio" => allCustomers.Where(c => IsExactPlan(c, "Cardio")).ToList(),
+                    "premium" => allCustomers.Where(c => IsPlanContains(c, "Premium")).ToList(),
+                    "zumba" => allCustomers.Where(c => IsExactPlanMultiple(c, new[] { "Zumba", "Aerobics" })).ToList(),
+                    "sauna" => allCustomers.Where(c => IsExactPlanMultiple(c, new[] { "Sauna", "Steam" })).ToList(),
+                    _ => allCustomers.Where(c => IsPlanContains(c, filter.PlanName)).ToList()
+                };
+            }
+
+            // Duration filter
+            if (filter.Duration.HasValue)
+            {
+                allCustomers = allCustomers.Where(c =>
+                    c.Memberships.OrderByDescending(m => m.StartDate).FirstOrDefault()?.Duration == filter.Duration.Value
+                ).ToList();
+            }
+
+            // Calculate duration counts
             var durationCounts = new DurationCounts
             {
                 Count1M = allCustomers.Count(c =>
@@ -118,33 +137,22 @@ namespace HighSpiritApp.Services
                 CountAll = allCustomers.Count
             };
 
-            // Duration filter
-            if (filter.Duration.HasValue)
-            {
-                query = query.Where(c =>
-                    c.Memberships
-                        .OrderByDescending(m => m.StartDate)
-                        .FirstOrDefault()!.Duration == filter.Duration.Value);
-            }
-
             // Sorting
-            query = filter.Sort switch
+            allCustomers = filter.Sort switch
             {
-                "name_desc" => query.OrderByDescending(c => c.FullName),
-                "expire" => query.OrderBy(c =>
-                    c.Memberships.OrderByDescending(m => m.StartDate)
-                        .Select(m => m.ExpireDate).FirstOrDefault()),
-                "expire_desc" => query.OrderByDescending(c =>
-                    c.Memberships.OrderByDescending(m => m.StartDate)
-                        .Select(m => m.ExpireDate).FirstOrDefault()),
-                _ => query.OrderBy(c => c.FullName)
+                "name_desc" => allCustomers.OrderByDescending(c => c.FullName).ToList(),
+                "expire" => allCustomers.OrderBy(c =>
+                    c.Memberships.OrderByDescending(m => m.StartDate).FirstOrDefault()?.ExpireDate).ToList(),
+                "expire_desc" => allCustomers.OrderByDescending(c =>
+                    c.Memberships.OrderByDescending(m => m.StartDate).FirstOrDefault()?.ExpireDate).ToList(),
+                _ => allCustomers.OrderBy(c => c.FullName).ToList()
             };
 
-            var total = await query.CountAsync();
-            var customers = await query
+            var total = allCustomers.Count;
+            var customers = allCustomers
                 .Skip((filter.Page - 1) * filter.PageSize)
                 .Take(filter.PageSize)
-                .ToListAsync();
+                .ToList();
 
             return new CustomerListResult
             {
@@ -154,6 +162,64 @@ namespace HighSpiritApp.Services
                 CurrentPage = filter.Page,
                 DurationCounts = durationCounts
             };
+        }
+
+        // Helper: Check if plan contains keyword but is NOT a customized package
+        private bool IsExactPlan(Customer c, string planKeyword)
+        {
+            var planName = c.Memberships?.OrderByDescending(m => m.StartDate).FirstOrDefault()?.PlanName;
+            if (string.IsNullOrEmpty(planName)) return false;
+
+            bool containsKeyword = planName.Contains(planKeyword, StringComparison.OrdinalIgnoreCase);
+            bool isCustomized = planName.Contains("Customized", StringComparison.OrdinalIgnoreCase) ||
+                               planName.Contains("Custom", StringComparison.OrdinalIgnoreCase) ||
+                               planName.Contains("Two", StringComparison.OrdinalIgnoreCase) ||
+                               planName.Contains("Three", StringComparison.OrdinalIgnoreCase) ||
+                               planName.Contains("(2)", StringComparison.OrdinalIgnoreCase) ||
+                               planName.Contains("(3)", StringComparison.OrdinalIgnoreCase);
+
+            return containsKeyword && !isCustomized;
+        }
+
+        // Helper: Check if plan contains any of the keywords but is NOT a customized package
+        private bool IsExactPlanMultiple(Customer c, string[] keywords)
+        {
+            var planName = c.Memberships?.OrderByDescending(m => m.StartDate).FirstOrDefault()?.PlanName;
+            if (string.IsNullOrEmpty(planName)) return false;
+
+            bool containsKeyword = keywords.Any(k => planName.Contains(k, StringComparison.OrdinalIgnoreCase));
+            bool isCustomized = planName.Contains("Customized", StringComparison.OrdinalIgnoreCase) ||
+                               planName.Contains("Custom", StringComparison.OrdinalIgnoreCase) ||
+                               planName.Contains("Two", StringComparison.OrdinalIgnoreCase) ||
+                               planName.Contains("Three", StringComparison.OrdinalIgnoreCase) ||
+                               planName.Contains("(2)", StringComparison.OrdinalIgnoreCase) ||
+                               planName.Contains("(3)", StringComparison.OrdinalIgnoreCase);
+
+            return containsKeyword && !isCustomized;
+        }
+
+        // Helper: Check if customer has customized package (2 or 3 facilities)
+        private bool IsCustomPlan(Customer c, int count)
+        {
+            var planName = c.Memberships?.OrderByDescending(m => m.StartDate).FirstOrDefault()?.PlanName;
+            if (string.IsNullOrEmpty(planName)) return false;
+
+            return count switch
+            {
+                2 => planName.Contains("Two", StringComparison.OrdinalIgnoreCase) ||
+                     planName.Contains("(2)", StringComparison.OrdinalIgnoreCase),
+                3 => planName.Contains("Three", StringComparison.OrdinalIgnoreCase) ||
+                     planName.Contains("(3)", StringComparison.OrdinalIgnoreCase),
+                _ => false
+            };
+        }
+
+        // Helper: Simple contains check (for Premium, etc.)
+        private bool IsPlanContains(Customer c, string keyword)
+        {
+            var planName = c.Memberships?.OrderByDescending(m => m.StartDate).FirstOrDefault()?.PlanName;
+            if (string.IsNullOrEmpty(planName)) return false;
+            return planName.Contains(keyword, StringComparison.OrdinalIgnoreCase);
         }
 
         public async Task<Customer> CreateAsync(Customer customer, byte[]? photo)
