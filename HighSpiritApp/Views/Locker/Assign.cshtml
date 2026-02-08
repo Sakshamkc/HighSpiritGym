@@ -90,9 +90,24 @@
                             <input type="text" name="phone" id="phoneInput" class="form-control" />
                         </div>
                         <div class="col-12">
-                            <label class="form-label">Package (from Member)</label>
-                            <input type="text" name="package" id="packageInput" class="form-control" placeholder="e.g., Custom 2 - Gym & Cardio" />
-                            <small class="text-muted">This will be auto-filled when you select a member</small>
+                            <label class="form-label">Package</label>
+                            <select name="package" id="packageInput" class="form-select">
+                                <option value="">-- Select Package --</option>
+                                <optgroup label="Premium">
+                                    <option value="Premium Package">Premium Package (All Facilities)</option>
+                                </optgroup>
+                                <optgroup label="Customized">
+                                    <option value="Customized Package (Any Three)">Customized (Any 3 Facilities)</option>
+                                    <option value="Customized Package (Any Two)">Customized (Any 2 Facilities)</option>
+                                </optgroup>
+                                <optgroup label="Single Facility">
+                                    <option value="Gym Package">Gym Package</option>
+                                    <option value="Zumba & Aerobics Package">Zumba & Aerobics Package</option>
+                                    <option value="Cardio Package">Cardio Package</option>
+                                    <option value="Sauna & Steam Package">Sauna & Steam Package</option>
+                                </optgroup>
+                            </select>
+                            <small class="text-muted">Select the member's gym package or it will be auto-filled when you select a member</small>
                         </div>
                     </div>
                 </div>
@@ -175,6 +190,41 @@
     const packageInput = document.getElementById('packageInput');
     let searchTimeout;
 
+    // Helper function to find best matching option in dropdown
+    function selectBestPackageOption(memberPackage) {
+        if (!memberPackage) return;
+        
+        const options = packageInput.options;
+        let bestMatch = null;
+        
+        // Try to find exact match first
+        for (let i = 0; i < options.length; i++) {
+            if (options[i].value === memberPackage) {
+                packageInput.selectedIndex = i;
+                return;
+            }
+        }
+        
+        // Try partial matching - check if member's package contains option value
+        const pkgLower = memberPackage.toLowerCase();
+        
+        if (pkgLower.includes('premium')) {
+            packageInput.value = 'Premium Package';
+        } else if (pkgLower.includes('any three') || pkgLower.includes('(any 3)') || pkgLower.includes('custom') && pkgLower.includes('three')) {
+            packageInput.value = 'Customized Package (Any Three)';
+        } else if (pkgLower.includes('any two') || pkgLower.includes('(any 2)') || pkgLower.includes('custom') && pkgLower.includes('two')) {
+            packageInput.value = 'Customized Package (Any Two)';
+        } else if (pkgLower.includes('gym') && !pkgLower.includes('custom')) {
+            packageInput.value = 'Gym Package';
+        } else if (pkgLower.includes('zumba') || pkgLower.includes('aerobics')) {
+            packageInput.value = 'Zumba & Aerobics Package';
+        } else if (pkgLower.includes('cardio') && !pkgLower.includes('custom')) {
+            packageInput.value = 'Cardio Package';
+        } else if (pkgLower.includes('sauna') || pkgLower.includes('steam')) {
+            packageInput.value = 'Sauna & Steam Package';
+        }
+    }
+
     memberSearchInput.addEventListener('input', function() {
         clearTimeout(searchTimeout);
         const term = this.value.trim();
@@ -187,7 +237,7 @@
                         memberDropdown.innerHTML = '<div class="p-3 text-center text-muted">No members found</div>';
                     } else {
                         memberDropdown.innerHTML = data.map(m => `
-                            <div class="member-item" data-name="${m.name}" data-phone="${m.phone}" data-package="${m.package}">
+                            <div class="member-item" data-name="${m.name}" data-phone="${m.phone}" data-package="${m.package || ''}">
                                 ${m.photo ? `<img src="data:image/jpeg;base64,${m.photo}" />` : `<div class="member-avatar">${m.name.charAt(0)}</div>`}
                                 <div>
                                     <div class="fw-bold">${m.name}</div>
@@ -198,12 +248,16 @@
                         `).join('');
                         memberDropdown.querySelectorAll('.member-item').forEach(item => {
                             item.addEventListener('click', () => {
+                                const memberPackage = item.dataset.package;
                                 memberNameInput.value = item.dataset.name;
                                 phoneInput.value = item.dataset.phone;
-                                packageInput.value = item.dataset.package; // Full package name
+                                
+                                // Try to match the package to dropdown option
+                                selectBestPackageOption(memberPackage);
+                                
                                 document.getElementById('selectedName').textContent = item.dataset.name;
                                 document.getElementById('selectedPhone').textContent = item.dataset.phone || '-';
-                                document.getElementById('selectedPackage').textContent = item.dataset.package || '-';
+                                document.getElementById('selectedPackage').textContent = memberPackage || '-';
                                 selectedMemberCard.classList.add('show');
                                 memberDropdown.classList.remove('show');
                                 memberSearchInput.value = '';
@@ -218,7 +272,7 @@
     document.getElementById('removeMember').addEventListener('click', function() {
         memberNameInput.value = '';
         phoneInput.value = '';
-        packageInput.value = '';
+        packageInput.selectedIndex = 0;
         selectedMemberCard.classList.remove('show');
     });
 

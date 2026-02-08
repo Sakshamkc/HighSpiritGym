@@ -103,7 +103,22 @@
                         </div>
                         <div class="col-12">
                             <label class="form-label">Package</label>
-                            <input asp-for="Package" class="form-control" placeholder="e.g., Custom 2 - Gym & Cardio" />
+                            <select asp-for="Package" class="form-select" id="packageSelect">
+                                <option value="">-- Select Package --</option>
+                                <optgroup label="Premium">
+                                    <option value="Premium Package">Premium Package (All Facilities)</option>
+                                </optgroup>
+                                <optgroup label="Customized">
+                                    <option value="Customized Package (Any Three)">Customized (Any 3 Facilities)</option>
+                                    <option value="Customized Package (Any Two)">Customized (Any 2 Facilities)</option>
+                                </optgroup>
+                                <optgroup label="Single Facility">
+                                    <option value="Gym Package">Gym Package</option>
+                                    <option value="Zumba & Aerobics Package">Zumba & Aerobics Package</option>
+                                    <option value="Cardio Package">Cardio Package</option>
+                                    <option value="Sauna & Steam Package">Sauna & Steam Package</option>
+                                </optgroup>
+                            </select>
                         </div>
                         <div class="col-md-4">
                             <label class="form-label">Duration (Months)</label>
@@ -243,4 +258,43 @@
 
     totalInput.addEventListener('input', updateDue);
     paidInput.addEventListener('input', updateDue);
+
+    // Auto-select the current package in dropdown
+    document.addEventListener('DOMContentLoaded', function() {
+        const packageSelect = document.getElementById('packageSelect');
+        const currentPackage = '@Model.Package';
+        
+        if (currentPackage) {
+            // Try exact match first
+            let found = false;
+            for (let i = 0; i < packageSelect.options.length; i++) {
+                if (packageSelect.options[i].value === currentPackage) {
+                    packageSelect.selectedIndex = i;
+                    found = true;
+                    break;
+                }
+            }
+            
+            // If no exact match, try partial matching
+            if (!found) {
+                const pkgLower = currentPackage.toLowerCase();
+                
+                if (pkgLower.includes('premium')) {
+                    packageSelect.value = 'Premium Package';
+                } else if (pkgLower.includes('any three') || pkgLower.includes('(any 3)') || (pkgLower.includes('custom') && pkgLower.includes('three'))) {
+                    packageSelect.value = 'Customized Package (Any Three)';
+                } else if (pkgLower.includes('any two') || pkgLower.includes('(any 2)') || (pkgLower.includes('custom') && pkgLower.includes('two'))) {
+                    packageSelect.value = 'Customized Package (Any Two)';
+                } else if (pkgLower.includes('gym') && !pkgLower.includes('custom')) {
+                    packageSelect.value = 'Gym Package';
+                } else if (pkgLower.includes('zumba') || pkgLower.includes('aerobics')) {
+                    packageSelect.value = 'Zumba & Aerobics Package';
+                } else if (pkgLower.includes('cardio') && !pkgLower.includes('custom')) {
+                    packageSelect.value = 'Cardio Package';
+                } else if (pkgLower.includes('sauna') || pkgLower.includes('steam')) {
+                    packageSelect.value = 'Sauna & Steam Package';
+                }
+            }
+        }
+    });
 </script>
