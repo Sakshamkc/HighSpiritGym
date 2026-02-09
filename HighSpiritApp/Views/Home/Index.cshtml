@@ -3,18 +3,44 @@
     Layout = "~/Views/Shared/_Layout.cshtml";
 }
 
-<!-- Dashboard Header -->
-<div class="d-flex align-items-center mb-4">
-    <div class="dashboard-icon me-3">
-        <i class="fa-solid fa-chart-pie"></i>
+<!-- Dashboard Header with Quick Actions -->
+<div class="dashboard-header d-flex flex-wrap align-items-center justify-content-between mb-4">
+    <div class="d-flex align-items-center">
+        <div class="dashboard-icon me-3">
+            <i class="fa-solid fa-chart-pie"></i>
+        </div>
+        <div>
+            <h3 class="mb-0">Dashboard</h3>
+            <small class="text-muted">Welcome back! Here's your gym overview</small>
+        </div>
     </div>
-    <div>
-        <h3 class="mb-0">Dashboard</h3>
-        <small class="text-muted">Welcome back! Here's your gym overview</small>
+    
+    <!-- Quick Action Buttons -->
+    <div class="quick-actions d-flex gap-2 flex-wrap mt-3 mt-md-0">
+        <a href="/Customers/Create" class="btn btn-quick-action btn-gym">
+            <i class="fa-solid fa-user-plus"></i>
+            <span>Add Gym Member</span>
+        </a>
+        <a href="/Boxing/Create" class="btn btn-quick-action btn-boxing">
+            <i class="fa-solid fa-user-plus"></i>
+            <span>Add Boxing Member</span>
+        </a>
+        <a href="/Locker" class="btn btn-quick-action btn-locker">
+            <i class="fa-solid fa-user-plus"></i>
+            <span>Add Locker</span>
+        </a>
     </div>
 </div>
 
 <style>
+    /* Dashboard Header */
+    .dashboard-header {
+        background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+        padding: 20px 24px;
+        border-radius: 16px;
+        border: 1px solid #e2e8f0;
+    }
+
     .dashboard-icon {
         width: 50px;
         height: 50px;
@@ -25,6 +51,51 @@
         justify-content: center;
         color: white;
         font-size: 24px;
+    }
+
+    /* Quick Action Buttons */
+    .btn-quick-action {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        padding: 12px 20px;
+        border-radius: 12px;
+        font-size: 14px;
+        font-weight: 600;
+        text-decoration: none;
+        border: none;
+        transition: all 0.25s ease;
+        color: white;
+    }
+
+    .btn-quick-action:hover {
+        transform: translateY(-3px);
+        color: white;
+    }
+
+    .btn-quick-action i {
+        font-size: 16px;
+    }
+
+    .btn-gym {
+        background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+    }
+    .btn-gym:hover {
+        box-shadow: 0 6px 20px rgba(245, 158, 11, 0.4);
+    }
+
+    .btn-boxing {
+        background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+    }
+    .btn-boxing:hover {
+        box-shadow: 0 6px 20px rgba(239, 68, 68, 0.4);
+    }
+
+    .btn-locker {
+        background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%);
+    }
+    .btn-locker:hover {
+        box-shadow: 0 6px 20px rgba(139, 92, 246, 0.4);
     }
     
     .section-header {
