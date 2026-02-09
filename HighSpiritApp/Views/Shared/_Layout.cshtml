@@ -320,6 +320,93 @@
             position: relative;
         }
 
+        /* Session Timer in Header */
+        .session-timer {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 14px;
+            background: rgba(255,255,255,0.05);
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 20px;
+            color: #94a3b8;
+            font-size: 13px;
+            font-weight: 500;
+            transition: all 0.3s ease;
+        }
+
+        .session-timer i {
+            font-size: 14px;
+        }
+
+        .session-timer.warning {
+            background: rgba(245, 158, 11, 0.15);
+            border-color: rgba(245, 158, 11, 0.3);
+            color: #fbbf24;
+            animation: timerPulse 1s ease-in-out infinite;
+        }
+
+        .session-timer.danger {
+            background: rgba(239, 68, 68, 0.15);
+            border-color: rgba(239, 68, 68, 0.3);
+            color: #f87171;
+            animation: timerPulse 0.5s ease-in-out infinite;
+        }
+
+        @@keyframes timerPulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.7; }
+        }
+
+        /* Idle notification toast */
+        .idle-toast {
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%) translateY(100px);
+            background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+            border: 1px solid #f59e0b;
+            border-radius: 12px;
+            padding: 14px 24px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.15);
+            z-index: 9999;
+            opacity: 0;
+            transition: all 0.3s ease;
+        }
+
+        .idle-toast.show {
+            transform: translateX(-50%) translateY(0);
+            opacity: 1;
+        }
+
+        .idle-toast i {
+            font-size: 20px;
+            color: #d97706;
+        }
+
+        .idle-toast span {
+            color: #92400e;
+            font-weight: 500;
+            font-size: 14px;
+        }
+
+        .idle-toast .close-toast {
+            background: none;
+            border: none;
+            color: #92400e;
+            cursor: pointer;
+            padding: 4px;
+            margin-left: 8px;
+            opacity: 0.7;
+        }
+
+        .idle-toast .close-toast:hover {
+            opacity: 1;
+        }
+
         .profile-btn {
             background: rgba(255,255,255,0.05);
             border: 1px solid rgba(255,255,255,0.1);
@@ -650,6 +737,12 @@
         </div>
 
         <div class="header-right">
+            <!-- Session Timer -->
+            <div class="session-timer" id="sessionTimerDisplay" title="Session time remaining">
+                <i class="fa-solid fa-clock"></i>
+                <span id="sessionTimerText">15:00</span>
+            </div>
+            
             <!-- Profile Dropdown -->
             <div class="profile-dropdown">
                 <button class="profile-btn" onclick="toggleProfileMenu()">
@@ -841,7 +934,220 @@
                 allowInput: true,
                 animate: true
             });
+
+            // Initialize session timeout
+            initSessionTimeout();
         });
+
+        // =====================================================
+        // SESSION TIMEOUT MANAGEMENT WITH VISIBLE TIMER
+        // =====================================================
+        let sessionTimer = null;
+        let warningTimer = null;
+        let countdownInterval = null;
+        let timerDisplayInterval = null;
+        let idleTimer = null;
+        let sessionStartTime = null;
+        let isIdle = false;
+
+        // Configuration: 15 minutes total, warning at 13 minutes (120 seconds before logout)
+        const SESSION_TIMEOUT_MS = 15 * 60 * 1000;  // 15 minutes
+        const WARNING_TIME_MS = 13 * 60 * 1000;     // Warning at 13 minutes
+        const COUNTDOWN_SECONDS = 120;               // 2 minutes countdown
+        const IDLE_THRESHOLD_MS = 5 * 60 * 1000;    // Show idle notification after 5 minutes of no activity
+
+        function initSessionTimeout() {
+            console.log('Session timeout initialized: ' + (SESSION_TIMEOUT_MS / 1000) + ' seconds');
+            resetSessionTimer();
+
+            // Reset timer on user activity (debounced to avoid too many resets)
+            // Note: scroll and mousemove are excluded as they don't indicate real user activity
+            const activityHandler = debounce(function() {
+                if (isIdle) {
+                    hideIdleToast();
+                    isIdle = false;
+                }
+                resetSessionTimer();
+            }, 1000);
+
+            // Only track meaningful user interactions (click, keypress, touch)
+            // Scroll and mousemove are NOT included as they don't indicate active usage
+            ['click', 'keypress', 'touchstart'].forEach(function(event) {
+                document.addEventListener(event, activityHandler, { passive: true });
+            });
+        }
+
+        function resetSessionTimer() {
+            // Clear existing timers
+            if (sessionTimer) clearTimeout(sessionTimer);
+            if (warningTimer) clearTimeout(warningTimer);
+            if (countdownInterval) clearInterval(countdownInterval);
+            if (timerDisplayInterval) clearInterval(timerDisplayInterval);
+            if (idleTimer) clearTimeout(idleTimer);
+
+            // Reset session start time
+            sessionStartTime = Date.now();
+
+            // Hide warning modal if shown
+            const warningModal = document.getElementById('sessionWarningModal');
+            if (warningModal) {
+                const modalInstance = bootstrap.Modal.getInstance(warningModal);
+                if (modalInstance) {
+                    modalInstance.hide();
+                }
+            }
+
+            // Reset timer display style
+            const timerDisplay = document.getElementById('sessionTimerDisplay');
+            if (timerDisplay) {
+                timerDisplay.classList.remove('warning', 'danger');
+            }
+
+            // Start the visible timer display
+            updateTimerDisplay();
+            timerDisplayInterval = setInterval(updateTimerDisplay, 1000);
+
+            // Set idle notification timer (5 minutes)
+            idleTimer = setTimeout(function() {
+                showIdleToast();
+                isIdle = true;
+            }, IDLE_THRESHOLD_MS);
+
+            // Set warning timer
+            warningTimer = setTimeout(function() {
+                showSessionWarning();
+            }, WARNING_TIME_MS);
+
+            // Set logout timer
+            sessionTimer = setTimeout(function() {
+                window.location.href = '/Account/Logout?expired=true';
+            }, SESSION_TIMEOUT_MS);
+        }
+
+        function updateTimerDisplay() {
+            const elapsed = Date.now() - sessionStartTime;
+            const remaining = Math.max(0, SESSION_TIMEOUT_MS - elapsed);
+            const minutes = Math.floor(remaining / 60000);
+            const seconds = Math.floor((remaining % 60000) / 1000);
+
+            const timerText = document.getElementById('sessionTimerText');
+            const timerDisplay = document.getElementById('sessionTimerDisplay');
+
+            if (timerText) {
+                timerText.textContent = minutes + ':' + seconds.toString().padStart(2, '0');
+            }
+
+            if (timerDisplay) {
+                // Update timer style based on remaining time
+                if (remaining <= 60000) { // Less than 1 minute
+                    timerDisplay.classList.remove('warning');
+                    timerDisplay.classList.add('danger');
+                } else if (remaining <= 120000) { // Less than 2 minutes
+                    timerDisplay.classList.remove('danger');
+                    timerDisplay.classList.add('warning');
+                } else {
+                    timerDisplay.classList.remove('warning', 'danger');
+                }
+            }
+
+            if (remaining <= 0) {
+                clearInterval(timerDisplayInterval);
+            }
+        }
+
+        function showIdleToast() {
+            const toast = document.getElementById('idleToast');
+            if (toast) {
+                toast.classList.add('show');
+            }
+        }
+
+        function hideIdleToast() {
+            const toast = document.getElementById('idleToast');
+            if (toast) {
+                toast.classList.remove('show');
+            }
+        }
+
+        function showSessionWarning() {
+            const warningModal = document.getElementById('sessionWarningModal');
+            if (!warningModal) {
+                console.error('Warning modal not found');
+                return;
+            }
+
+            // Hide idle toast if shown
+            hideIdleToast();
+
+            // Clear any existing countdown
+            if (countdownInterval) clearInterval(countdownInterval);
+
+            // Show the modal
+            const modal = new bootstrap.Modal(warningModal, {
+                backdrop: 'static',
+                keyboard: false
+            });
+            modal.show();
+
+            // Start countdown
+            let countdown = COUNTDOWN_SECONDS;
+            const countdownEl = document.getElementById('sessionCountdown');
+
+            // Update display immediately
+            if (countdownEl) {
+                const mins = Math.floor(countdown / 60);
+                const secs = countdown % 60;
+                countdownEl.textContent = mins + ':' + secs.toString().padStart(2, '0');
+            }
+
+            countdownInterval = setInterval(function() {
+                countdown--;
+                if (countdownEl) {
+                    const mins = Math.floor(countdown / 60);
+                    const secs = countdown % 60;
+                    countdownEl.textContent = mins + ':' + secs.toString().padStart(2, '0');
+                }
+                if (countdown <= 0) {
+                    clearInterval(countdownInterval);
+                }
+            }, 1000);
+        }
+
+        function extendSession() {
+            // Clear countdown
+            if (countdownInterval) clearInterval(countdownInterval);
+
+            // Make a request to extend session
+            fetch('/Account/ExtendSession', {
+                method: 'POST',
+                credentials: 'same-origin'
+            })
+            .then(function(response) {
+                if (response.ok) {
+                    resetSessionTimer();
+                    toastr.success('Session extended!');
+                } else {
+                    window.location.href = '/Account/Login';
+                }
+            })
+            .catch(function(error) {
+                console.error('Error extending session:', error);
+                resetSessionTimer();
+            });
+        }
+
+        // Debounce function to limit activity detection calls
+        function debounce(func, wait) {
+            let timeout;
+            return function() {
+                const context = this;
+                const args = arguments;
+                clearTimeout(timeout);
+                timeout = setTimeout(function() {
+                    func.apply(context, args);
+                }, wait);
+            };
+        }
     </script>
 
     @if (TempData["success"] != null)
@@ -852,6 +1158,40 @@
     {
         <script>toastr.error("@TempData["error"]");</script>
     }
+
+    <!-- Idle Notification Toast -->
+    <div class="idle-toast" id="idleToast">
+        <i class="fa-solid fa-moon"></i>
+        <span>You've been idle. Session will expire soon.</span>
+        <button class="close-toast" onclick="hideIdleToast()">
+            <i class="fa-solid fa-times"></i>
+        </button>
+    </div>
+
+    <!-- Session Warning Modal -->
+    <div class="modal fade" id="sessionWarningModal" tabindex="-1" aria-labelledby="sessionWarningModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content" style="border-radius: 20px; border: none; overflow: hidden;">
+                <div class="modal-body text-center" style="padding: 40px;">
+                    <div style="width: 80px; height: 80px; background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 24px;">
+                        <i class="fa-solid fa-clock" style="font-size: 36px; color: #d97706;"></i>
+                    </div>
+                    <h4 id="sessionWarningModalLabel" style="font-weight: 700; color: #1e293b; margin-bottom: 12px;">Session Expiring Soon</h4>
+                    <p style="color: #64748b; margin-bottom: 8px;">Your session will expire in</p>
+                    <div id="sessionCountdown" style="font-size: 48px; font-weight: 800; color: #dc2626; margin-bottom: 24px;">1:00</div>
+                    <p style="color: #64748b; font-size: 14px; margin-bottom: 24px;">Click below to stay logged in</p>
+                    <div class="d-flex gap-3 justify-content-center">
+                        <a href="/Account/Logout" class="btn btn-outline-secondary" style="border-radius: 12px; padding: 12px 24px; font-weight: 600;">
+                            <i class="fa-solid fa-right-from-bracket me-2"></i>Logout
+                        </a>
+                        <button type="button" class="btn btn-primary" onclick="extendSession()" data-bs-dismiss="modal" style="border-radius: 12px; padding: 12px 24px; font-weight: 600; background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%); border: none;">
+                            <i class="fa-solid fa-rotate me-2"></i>Stay Logged In
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
 
     <script>
         function toggleFullScreen() {

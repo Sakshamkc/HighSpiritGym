@@ -98,14 +98,14 @@
 
         .brand-features {
             text-align: left;
-            max-width: 300px;
+            max-width: 320px;
         }
 
         .brand-feature {
             display: flex;
             align-items: center;
             gap: 15px;
-            margin-bottom: 20px;
+            margin-bottom: 18px;
             color: #cbd5e1;
         }
 
@@ -117,9 +117,15 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            color: #60a5fa;
             font-size: 16px;
         }
+
+        .brand-feature.gym i { background: rgba(245, 158, 11, 0.2); color: #fbbf24; }
+        .brand-feature.locker i { background: rgba(139, 92, 246, 0.2); color: #a78bfa; }
+        .brand-feature.boxing i { background: rgba(239, 68, 68, 0.2); color: #f87171; }
+        .brand-feature.report i { background: rgba(16, 185, 129, 0.2); color: #34d399; }
+        .brand-feature.dashboard i { background: rgba(59, 130, 246, 0.2); color: #60a5fa; }
+        .brand-feature.notify i { background: rgba(236, 72, 153, 0.2); color: #f472b6; }
 
         .brand-feature span {
             font-size: 14px;
@@ -255,6 +261,23 @@
             font-size: 18px;
         }
 
+        .alert-warning {
+            background: #fffbeb;
+            border: 1px solid #fde68a;
+            color: #92400e;
+            padding: 14px 16px;
+            border-radius: 12px;
+            font-size: 14px;
+            margin-bottom: 24px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .alert-warning i {
+            font-size: 18px;
+        }
+
         .login-footer {
             text-align: center;
             margin-top: 30px;
@@ -346,19 +369,27 @@
             <p class="brand-subtitle">Strength • Discipline • Excellence</p>
 
             <div class="brand-features">
-                <div class="brand-feature">
+                <div class="brand-feature gym">
                     <i class="fa-solid fa-dumbbell"></i>
-                    <span>Manage gym memberships easily</span>
+                    <span>Manage gym memberships & packages</span>
                 </div>
-                <div class="brand-feature">
+                <div class="brand-feature locker">
+                    <i class="fa-solid fa-lock"></i>
+                    <span>Locker management system</span>
+                </div>
+                <div class="brand-feature boxing">
                     <i class="fa-solid fa-hand-fist"></i>
                     <span>Track boxing members & dues</span>
                 </div>
-                <div class="brand-feature">
+                <div class="brand-feature report">
                     <i class="fa-solid fa-chart-line"></i>
+                    <span>Revenue reports & analytics</span>
+                </div>
+                <div class="brand-feature dashboard">
+                    <i class="fa-solid fa-chart-pie"></i>
                     <span>Real-time dashboard insights</span>
                 </div>
-                <div class="brand-feature">
+                <div class="brand-feature notify">
                     <i class="fa-solid fa-bell"></i>
                     <span>Expiry & due notifications</span>
                 </div>
@@ -386,6 +417,14 @@
                     <div class="alert-error">
                         <i class="fa-solid fa-circle-exclamation"></i>
                         <span>@ViewBag.Error</span>
+                    </div>
+                }
+
+                @if (TempData["SessionExpired"] != null)
+                {
+                    <div class="alert-warning">
+                        <i class="fa-solid fa-clock"></i>
+                        <span>Your session has expired. Please login again.</span>
                     </div>
                 }
 
@@ -421,9 +460,7 @@
             </div>
 
             <div class="login-footer">
-                <i class="fa-regular fa-copyright"></i> @DateTime.Now.Year High Spirit Gym
-                <br />
-                <i class="fa-solid fa-code"></i> Built with strength & code
+                <i class="fa-regular fa-copyright"></i> @DateTime.Now.Year High Spirit Gym. All rights reserved.
             </div>
         </div>
     </div>

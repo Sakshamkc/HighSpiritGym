@@ -17,8 +17,13 @@ namespace HighSpiritApp.Controllers
         }
 
         [AllowAnonymous]
-        public IActionResult Login()
+        public IActionResult Login(bool? expired)
         {
+            // Show session expired message if redirected due to timeout
+            if (expired == true)
+            {
+                TempData["SessionExpired"] = true;
+            }
             return View();
         }
 
@@ -37,10 +42,28 @@ namespace HighSpiritApp.Controllers
             return View();
         }
 
-        public async Task<IActionResult> Logout()
+        public async Task<IActionResult> Logout(bool? expired)
         {
             await _authService.LogoutAsync();
+            
+            if (expired == true)
+            {
+                return RedirectToAction("Login", new { expired = true });
+            }
+            
             return RedirectToAction("Login");
+        }
+
+        /// <summary>
+        /// Extends the user session by refreshing the authentication cookie
+        /// Called via AJAX when user clicks "Stay Logged In"
+        /// </summary>
+        [HttpPost]
+        [Authorize]
+        public IActionResult ExtendSession()
+        {
+            // Simply returning OK will refresh the sliding expiration cookie
+            return Ok(new { success = true, message = "Session extended" });
         }
     }
 }

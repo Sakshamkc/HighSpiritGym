@@ -31,12 +31,24 @@ builder.Services.AddIdentity<IdentityUser, IdentityRole>(options =>
 .AddEntityFrameworkStores<ApplicationDbContext>()
 .AddDefaultTokenProviders();
 
+// =============================================================
+// COOKIE/SESSION TIMEOUT CONFIGURATION
+// =============================================================
 builder.Services.ConfigureApplicationCookie(options =>
 {
     options.LoginPath = "/Account/Login";
     options.AccessDeniedPath = "/Account/Login";
-    options.ExpireTimeSpan = TimeSpan.FromDays(30);
-    options.SlidingExpiration = true;
+    options.LogoutPath = "/Account/Logout";
+
+    // Session timeout settings - Set to 15 minutes for testing (change to 15 for production)
+    options.ExpireTimeSpan = TimeSpan.FromMinutes(15); // Session expires after 15 minutes
+    options.SlidingExpiration = true; // Reset timer on each request (activity extends session)
+    
+    // Cookie settings
+    options.Cookie.Name = "HighSpiritAuth";
+    options.Cookie.HttpOnly = true;
+    options.Cookie.SecurePolicy = CookieSecurePolicy.SameAsRequest;
+    options.Cookie.SameSite = SameSiteMode.Lax;
 });
 
 // =============================================================
