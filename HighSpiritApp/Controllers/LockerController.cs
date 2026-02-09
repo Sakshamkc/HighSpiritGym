@@ -116,6 +116,23 @@ namespace HighSpiritApp.Controllers
         {
             var locker = await _lockerService.GetByIdAsync(id);
             if (locker == null) return NotFound();
+
+            // If locker is occupied, try to find the customer details
+            if (!string.IsNullOrEmpty(locker.AssignedTo))
+            {
+                var filterRequest = new CustomerFilterRequest { Search = locker.AssignedTo, PageSize = 1 };
+                var result = await _customerService.GetFilteredCustomersAsync(filterRequest);
+                var customer = result.Customers.FirstOrDefault(c => 
+                    c.FullName.Equals(locker.AssignedTo, StringComparison.OrdinalIgnoreCase));
+                
+                if (customer != null)
+                {
+                    // Get customer with memberships
+                    var customerWithMemberships = await _customerService.GetByIdWithMembershipsAsync(customer.CustomerID);
+                    ViewBag.AssignedCustomer = customerWithMemberships;
+                }
+            }
+
             return View(locker);
         }
 

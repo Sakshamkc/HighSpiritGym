@@ -68,7 +68,7 @@
     
     .btn-action { padding: 12px 20px; border-radius: 12px; font-size: 14px; font-weight: 600; display: inline-flex; align-items: center; gap: 8px; transition: all 0.2s; text-decoration: none; border: none; }
     .btn-export { background: linear-gradient(135deg, #dcfce7 0%, #bbf7d0 100%); color: #16a34a; }
-    .btn-export:hover { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(22, 163, 74, 0.2); color: #15803d; }
+    .btn-export:hover { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(22,163,74,0.2); color: #15803d; }
     .btn-import { background: #f8fafc; color: #64748b; border: 1px solid #e2e8f0; }
     .btn-import:hover { background: #f1f5f9; color: #475569; }
     .btn-add { background: linear-gradient(135deg, @(isGents ? "#3b82f6 0%, #2563eb" : "#ec4899 0%, #db2777") 100%); color: white; }
@@ -271,6 +271,27 @@
         font-weight: 700;
         padding: 3px 6px;
         border-radius: 6px;
+        z-index: 2;
+    }
+    
+    /* Locker Card Link */
+    .locker-card-link {
+        display: block;
+        text-decoration: none;
+        color: inherit;
+        cursor: pointer;
+    }
+    .locker-card-link:hover {
+        color: inherit;
+    }
+    .locker-card-link .locker-icon,
+    .locker-card-link .locker-number,
+    .locker-card-link .locker-status,
+    .locker-card-link .member-info {
+        transition: transform 0.2s ease;
+    }
+    .locker-card:hover .locker-card-link .locker-icon {
+        transform: scale(1.05);
     }
     
     /* Empty State */
@@ -434,26 +455,29 @@
                                 <span class="due-badge">DUE</span>
                             }
                             
-                            <div class="locker-icon">
-                                <i class="fa-solid @iconClass"></i>
-                            </div>
-                            
-                            <div class="locker-number">@locker.LockerNumber</div>
-                            <span class="locker-status">@statusText</span>
-                            
-                            @if (!string.IsNullOrEmpty(locker.AssignedTo))
-                            {
-                                <div class="member-info">
-                                    <div class="member-name" title="@locker.AssignedTo">@locker.AssignedTo</div>
-                                    @if (locker.EndDate.HasValue)
-                                    {
-                                        <div class="member-expiry">
-                                            <i class="fa-solid fa-calendar-day me-1"></i>
-                                            @locker.EndDate.Value.ToString("dd MMM yy")
-                                        </div>
-                                    }
+                            <!-- Make the main card content clickable to view details -->
+                            <a href="/Locker/Details/@locker.LockerID" class="locker-card-link">
+                                <div class="locker-icon">
+                                    <i class="fa-solid @iconClass"></i>
                                 </div>
-                            }
+                                
+                                <div class="locker-number">@locker.LockerNumber</div>
+                                <span class="locker-status">@statusText</span>
+                                
+                                @if (!string.IsNullOrEmpty(locker.AssignedTo))
+                                {
+                                    <div class="member-info">
+                                        <div class="member-name" title="@locker.AssignedTo">@locker.AssignedTo</div>
+                                        @if (locker.EndDate.HasValue)
+                                        {
+                                            <div class="member-expiry">
+                                                <i class="fa-solid fa-calendar-day me-1"></i>
+                                                @locker.EndDate.Value.ToString("dd MMM yy")
+                                            </div>
+                                        }
+                                    </div>
+                                }
+                            </a>
                             
                             <div class="locker-actions">
                                 @if (stateClass == "empty")
