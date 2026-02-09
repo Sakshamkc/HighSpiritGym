@@ -306,9 +306,9 @@ namespace HighSpiritApp.Controllers
         }
 
         /// <summary>
-        /// Auto-assign a random empty locker to a member from Customers page
+        /// Choose a locker to assign to a member from Customers page
         /// </summary>
-        public async Task<IActionResult> AutoAssign(int customerId)
+        public async Task<IActionResult> ChooseLocker(int customerId)
         {
             // Get the customer details
             var customer = await _customerService.GetByIdWithMembershipsAsync(customerId);
@@ -329,13 +329,51 @@ namespace HighSpiritApp.Controllers
             // Determine gender for locker (Male -> Gents, Female -> Ladies)
             var lockerGender = customer.Gender?.ToLower() == "female" ? "Ladies" : "Gents";
 
-            // Find a random empty locker for this gender
-            var emptyLocker = await _lockerService.GetRandomEmptyLockerAsync(lockerGender);
-            
-            if (emptyLocker == null)
+            // Get all empty lockers for this gender
+            var allLockers = await _lockerService.GetByGenderAsync(lockerGender);
+            var emptyLockers = allLockers
+                .Where(l => l.Status == "Empty" || (l.Status != "Occupied" && l.Status != "Locked" && string.IsNullOrEmpty(l.AssignedTo)))
+                .OrderBy(l => int.TryParse(l.LockerNumber, out int num) ? num : int.MaxValue)
+                .ThenBy(l => l.LockerNumber)
+                .ToList();
+
+            if (!emptyLockers.Any())
             {
                 TempData["error"] = $"No empty {lockerGender} lockers available!";
                 return RedirectToAction("Index", new { gender = lockerGender });
+            }
+
+            // Get member's current package
+            var membership = customer.Memberships?.OrderByDescending(x => x.StartDate).FirstOrDefault();
+            var package = membership?.PlanName ?? "";
+
+            // Pass data to the view
+            ViewBag.Customer = customer;
+            ViewBag.CustomerPackage = package;
+            ViewBag.LockerGender = lockerGender;
+
+            return View(emptyLockers);
+        }
+
+        /// <summary>
+        /// Assign selected locker to customer (from ChooseLocker page)
+        /// </summary>
+        public async Task<IActionResult> AssignToCustomer(int lockerId, int customerId)
+        {
+            var locker = await _lockerService.GetByIdAsync(lockerId);
+            if (locker == null) return NotFound();
+
+            var customer = await _customerService.GetByIdWithMembershipsAsync(customerId);
+            if (customer == null)
+            {
+                TempData["error"] = "Customer not found.";
+                return RedirectToAction("Index", "Customers");
+            }
+
+            if (locker.Status == "Occupied" && !string.IsNullOrEmpty(locker.AssignedTo))
+            {
+                TempData["error"] = "This locker is already assigned.";
+                return RedirectToAction("ChooseLocker", new { customerId });
             }
 
             // Get member's current package
@@ -348,7 +386,7 @@ namespace HighSpiritApp.Controllers
             ViewBag.CustomerPackage = package;
             ViewBag.CustomerId = customerId;
 
-            return View("Assign", emptyLocker);
+            return View("Assign", locker);
         }
     }
 }

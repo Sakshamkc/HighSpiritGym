@@ -1,0 +1,361 @@
+@model List<HighSpiritApp.Models.Locker.Locker>
+@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    var customer = ViewBag.Customer as HighSpiritApp.Models.Customer;
+    var customerPackage = ViewBag.CustomerPackage as string;
+    var lockerGender = ViewBag.LockerGender as string;
+    var isGents = lockerGender == "Gents";
+}
+
+<style>
+    .choose-header {
+        background: linear-gradient(135deg, @(isGents ? "#3b82f6 0%, #2563eb" : "#ec4899 0%, #db2777") 100%);
+        border-radius: 16px;
+        padding: 25px;
+        color: white;
+        margin-bottom: 25px;
+    }
+    .choose-header h4 {
+        margin: 0;
+        font-weight: 600;
+        display: flex;
+        align-items: center;
+        gap: 12px;
+    }
+    
+    /* Customer Info Card */
+    .customer-info-card {
+        background: white;
+        border-radius: 16px;
+        padding: 20px 25px;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+        margin-bottom: 25px;
+        display: flex;
+        align-items: center;
+        gap: 20px;
+        border: 1px solid #e2e8f0;
+    }
+    .customer-avatar {
+        width: 80px;
+        height: 80px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, @(isGents ? "#3b82f6 0%, #2563eb" : "#ec4899 0%, #db2777") 100%);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 32px;
+        color: white;
+        font-weight: 600;
+        flex-shrink: 0;
+    }
+    .customer-avatar img {
+        width: 100%;
+        height: 100%;
+        border-radius: 50%;
+        object-fit: cover;
+    }
+    .customer-details h5 {
+        margin: 0 0 8px 0;
+        font-weight: 700;
+        font-size: 1.25rem;
+        color: #1e293b;
+    }
+    .customer-details p {
+        margin: 0 0 8px 0;
+        color: #64748b;
+    }
+    .customer-details .badge-package {
+        background: linear-gradient(135deg, #f3e8ff 0%, #e9d5ff 100%);
+        color: #7c3aed;
+        padding: 6px 14px;
+        border-radius: 20px;
+        font-size: 13px;
+        font-weight: 600;
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+    }
+    
+    /* Section Title */
+    .section-title {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        margin-bottom: 20px;
+        padding-bottom: 15px;
+        border-bottom: 2px solid #f1f5f9;
+    }
+    .section-title .section-icon {
+        width: 44px;
+        height: 44px;
+        border-radius: 12px;
+        background: linear-gradient(135deg, @(isGents ? "#3b82f6 0%, #2563eb" : "#ec4899 0%, #db2777") 100%);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-size: 18px;
+    }
+    .section-title h5 {
+        margin: 0;
+        font-weight: 600;
+        color: #1e293b;
+    }
+    .section-title .count-badge {
+        background: linear-gradient(135deg, #dcfce7 0%, #bbf7d0 100%);
+        color: #16a34a;
+        padding: 6px 14px;
+        border-radius: 20px;
+        font-size: 13px;
+        font-weight: 700;
+        margin-left: auto;
+    }
+    
+    /* Locker Grid - Card Style */
+    .locker-panel {
+        background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+        border-radius: 20px;
+        padding: 25px;
+        border: 1px solid #e2e8f0;
+    }
+    .locker-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(110px, 1fr));
+        gap: 15px;
+    }
+    
+    /* Locker Card */
+    .locker-card {
+        background: white;
+        border: 2px solid #e2e8f0;
+        border-radius: 14px;
+        padding: 15px 10px;
+        text-align: center;
+        cursor: pointer;
+        transition: all 0.25s ease;
+        text-decoration: none;
+        color: inherit;
+        position: relative;
+        overflow: hidden;
+    }
+    .locker-card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 4px;
+        background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+        opacity: 0;
+        transition: opacity 0.2s ease;
+    }
+    .locker-card:hover {
+        border-color: @(isGents ? "#3b82f6" : "#ec4899");
+        transform: translateY(-5px);
+        box-shadow: 0 12px 30px rgba(0,0,0,0.12);
+    }
+    .locker-card:hover::before {
+        opacity: 1;
+    }
+    .locker-card:active {
+        transform: translateY(-2px);
+    }
+    
+    .locker-card .locker-icon {
+        width: 50px;
+        height: 50px;
+        margin: 0 auto 10px;
+        background: linear-gradient(135deg, #dcfce7 0%, #bbf7d0 100%);
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 22px;
+        color: #16a34a;
+        transition: all 0.2s ease;
+    }
+    .locker-card:hover .locker-icon {
+        background: linear-gradient(135deg, @(isGents ? "#dbeafe 0%, #bfdbfe" : "#fce7f3 0%, #fbcfe8") 100%);
+        color: @(isGents ? "#2563eb" : "#db2777");
+        transform: scale(1.1);
+    }
+    
+    .locker-card .locker-number {
+        font-size: 26px;
+        font-weight: 800;
+        color: #1e293b;
+        line-height: 1;
+        margin-bottom: 5px;
+    }
+    .locker-card .locker-label {
+        font-size: 11px;
+        color: #10b981;
+        text-transform: uppercase;
+        font-weight: 700;
+        letter-spacing: 0.5px;
+    }
+    
+    /* Info Alert */
+    .info-alert {
+        background: linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%);
+        border: 1px solid #93c5fd;
+        border-radius: 12px;
+        padding: 16px 20px;
+        margin-top: 20px;
+        display: flex;
+        align-items: center;
+        gap: 12px;
+    }
+    .info-alert i {
+        font-size: 20px;
+        color: #3b82f6;
+    }
+    .info-alert p {
+        margin: 0;
+        color: #1e40af;
+        font-size: 14px;
+    }
+    
+    /* Empty State */
+    .empty-state {
+        text-align: center;
+        padding: 60px 20px;
+        background: #f8fafc;
+        border-radius: 16px;
+    }
+    .empty-state i {
+        font-size: 64px;
+        color: #cbd5e1;
+        margin-bottom: 20px;
+    }
+    
+    /* Responsive */
+    @@media (max-width: 768px) {
+        .locker-grid {
+            grid-template-columns: repeat(auto-fill, minmax(90px, 1fr));
+            gap: 12px;
+        }
+        .locker-card {
+            padding: 12px 8px;
+        }
+        .locker-card .locker-icon {
+            width: 40px;
+            height: 40px;
+            font-size: 18px;
+        }
+        .locker-card .locker-number {
+            font-size: 22px;
+        }
+        .customer-info-card {
+            flex-direction: column;
+            text-align: center;
+        }
+    }
+    @@media (max-width: 576px) {
+        .locker-grid {
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+        }
+        .locker-card .locker-number {
+            font-size: 20px;
+        }
+        .locker-card .locker-label {
+            font-size: 9px;
+        }
+    }
+</style>
+
+<div class="choose-header">
+    <div class="d-flex align-items-center justify-content-between flex-wrap gap-3">
+        <h4>
+            <i class="fa-solid fa-lock"></i>
+            Choose @lockerGender Locker
+        </h4>
+        <a href="/Customers" class="btn btn-outline-light">
+            <i class="fa-solid fa-arrow-left me-2"></i> Back to Customers
+        </a>
+    </div>
+</div>
+
+<!-- Customer Info Card -->
+@if (customer != null)
+{
+    <div class="customer-info-card">
+        <div class="customer-avatar">
+            @if (customer.Photo != null)
+            {
+                <img src="data:image/jpeg;base64,@Convert.ToBase64String(customer.Photo)" alt="@customer.FullName" />
+            }
+            else
+            {
+                @customer.FullName.Substring(0, 1).ToUpper()
+            }
+        </div>
+        <div class="customer-details">
+            <h5>@customer.FullName</h5>
+            <p>
+                <i class="fa-solid fa-phone me-1"></i> @(customer.Phone ?? "N/A")
+                <span class="ms-3">
+                    <i class="fa-solid fa-@(customer.Gender?.ToLower() == "female" ? "venus" : "mars") me-1"></i>
+                    @(customer.Gender ?? "N/A")
+                </span>
+            </p>
+            @if (!string.IsNullOrEmpty(customerPackage))
+            {
+                <span class="badge-package">
+                    <i class="fa-solid fa-crown"></i> @customerPackage
+                </span>
+            }
+        </div>
+    </div>
+}
+
+<!-- Available Lockers Panel -->
+<div class="section-title">
+    <div class="section-icon">
+        <i class="fa-solid fa-lock-open"></i>
+    </div>
+    <div>
+        <h5>Available @lockerGender Lockers</h5>
+        <small class="text-muted">Click on a locker to assign it</small>
+    </div>
+    <span class="count-badge">
+        <i class="fa-solid fa-check-circle me-1"></i> @Model.Count available
+    </span>
+</div>
+
+@if (Model.Any())
+{
+    <div class="locker-panel">
+        <div class="locker-grid">
+            @foreach (var locker in Model)
+            {
+                <a href="/Locker/AssignToCustomer?lockerId=@locker.LockerID&customerId=@customer?.CustomerID" 
+                   class="locker-card" 
+                   title="Assign Locker #@locker.LockerNumber to @customer?.FullName">
+                    <div class="locker-icon">
+                        <i class="fa-solid fa-lock-open"></i>
+                    </div>
+                    <div class="locker-number">@locker.LockerNumber</div>
+                    <div class="locker-label">Available</div>
+                </a>
+            }
+        </div>
+    </div>
+    
+    <div class="info-alert">
+        <i class="fa-solid fa-info-circle"></i>
+        <p>Click on any locker card above to assign it to <strong>@customer?.FullName</strong>. You'll be able to set the duration and payment details on the next screen.</p>
+    </div>
+}
+else
+{
+    <div class="empty-state">
+        <i class="fa-solid fa-box-open d-block"></i>
+        <h5 class="text-muted">No Empty Lockers</h5>
+        <p class="text-muted">All @lockerGender lockers are currently occupied or locked.</p>
+        <a href="/Locker?gender=@lockerGender" class="btn btn-primary mt-3">
+            <i class="fa-solid fa-eye me-2"></i> View All Lockers
+        </a>
+    </div>
+}
