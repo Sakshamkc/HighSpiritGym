@@ -849,9 +849,20 @@
             <p class="nav-section-title">Lockers</p>
 
             <div class="nav-item">
-                <a href="/Locker" class="nav-link locker-link @(controller == "Locker" ? "active" : "")" onclick="closeSidebarOnMobile()">
+                <a href="#" class="nav-link locker-link" data-bs-toggle="collapse" data-bs-target="#lockerMenu">
                     <i class="fa-solid fa-lock"></i>
                     <span class="nav-text">Locker</span>
+                    <i class="fa-solid fa-chevron-down ms-auto nav-text" style="font-size: 10px; opacity: 0.6;"></i>
+                </a>
+            </div>
+            <div class="collapse submenu-container @(controller == "Locker" ? "show" : "")" id="lockerMenu">
+               <a href="/Locker?gender=Gents" class="nav-link submenu @(controller == "Locker" && ViewBag.Gender as string == "Gents" ? "active" : "")" onclick="closeSidebarOnMobile()">
+                    <i class="fa-solid fa-mars"></i>
+                    <span class="nav-text">Male Locker</span>
+                </a>
+                <a href="/Locker?gender=Ladies" class="nav-link submenu @(controller == "Locker" && ViewBag.Gender as string == "Ladies" ? "active" : "")" onclick="closeSidebarOnMobile()">
+                    <i class="fa-solid fa-venus"></i>
+                    <span class="nav-text">Female Locker</span>
                 </a>
             </div>
 
