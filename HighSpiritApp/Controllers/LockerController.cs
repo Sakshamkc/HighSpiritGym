@@ -43,7 +43,7 @@ namespace HighSpiritApp.Controllers
                 lockersList = status switch
                 {
                     "empty" => lockersList.Where(l => l.Status == "Empty" || (l.Status != "Occupied" && l.Status != "Locked" && string.IsNullOrEmpty(l.AssignedTo))).ToList(),
-                    "occupied" => lockersList.Where(l => l.Status == "Occupied" && !string.IsNullOrEmpty(l.AssignedTo)).ToList(),
+                    "occupied" => lockersList.Where(l => l.Status == "Occupied" && !string.IsNullOrEmpty(l.AssignedTo) && !l.IsExpired).ToList(),
                     "locked" => lockersList.Where(l => l.Status == "Locked").ToList(),
                     "expired" => lockersList.Where(l => l.Status == "Occupied" && l.IsExpired).ToList(),
                     _ => lockersList

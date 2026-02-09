@@ -223,10 +223,10 @@ namespace HighSpiritApp.Services
             return new LockerStats
             {
                 TotalLockers = lockers.Count,
-                OccupiedLockers = lockers.Count(l => l.Status == "Occupied" && !string.IsNullOrEmpty(l.AssignedTo)),
+                OccupiedLockers = lockers.Count(l => l.Status == "Occupied" && !string.IsNullOrEmpty(l.AssignedTo) && (!l.EndDate.HasValue || l.EndDate >= today)),
                 EmptyLockers = lockers.Count(l => l.Status == "Empty" || (l.Status != "Occupied" && l.Status != "Locked" && string.IsNullOrEmpty(l.AssignedTo))),
                 LockedLockers = lockers.Count(l => l.Status == "Locked"),
-                ExpiredLockers = lockers.Count(l => l.Status == "Occupied" && l.EndDate < today),
+                ExpiredLockers = lockers.Count(l => l.Status == "Occupied" && l.EndDate.HasValue && l.EndDate < today),
                 ExpiringSoonLockers = lockers.Count(l => l.Status == "Occupied" && l.EndDate >= today && l.EndDate <= today.AddDays(7)),
                 TotalDueAmount = lockers.Sum(l => l.DueAmount),
                 TotalRevenue = lockers.Sum(l => l.PaidAmount),
