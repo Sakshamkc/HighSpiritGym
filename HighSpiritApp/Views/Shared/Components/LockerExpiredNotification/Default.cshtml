@@ -1,15 +1,25 @@
 @model List<HighSpiritApp.Models.Locker.Locker>
+@{
+    var currentGender = ViewBag.CurrentGender as string;
+    var isGents = currentGender == "Gents";
+    var isLadies = currentGender == "Ladies";
+    var isAll = string.IsNullOrEmpty(currentGender);
+    var iconColor = isLadies ? "#ec4899" : isAll ? "#8b5cf6" : "#3b82f6";
+    var bgColor = isLadies ? "rgba(236, 72, 153, 0.1)" : isAll ? "rgba(139, 92, 246, 0.1)" : "rgba(59, 130, 246, 0.1)";
+    var genderIcon = isLadies ? "venus" : isAll ? "lock" : "mars";
+    var genderLabel = isLadies ? "Ladies" : isAll ? "All" : "Gents";
+}
 
 <div class="nav-item dropdown list-unstyled">
 
     <a href="#"
        class="nav-link position-relative dropdown-toggle"
        data-bs-toggle="dropdown"
-       title="Expired Lockers">
+       title="Expired Lockers (@genderLabel)">
 
-        <!-- Locker Icon: Lock with purple color -->
-        <span class="d-inline-flex align-items-center gap-1 px-2 py-1 rounded" style="background: rgba(139, 92, 246, 0.1);">
-            <i class="fa-solid fa-lock" style="color: #8b5cf6;"></i>
+        <!-- Locker Icon with gender-based styling -->
+        <span class="d-inline-flex align-items-center gap-1 px-2 py-1 rounded" style="background: @bgColor;">
+            <i class="fa-solid fa-@genderIcon" style="color: @iconColor;"></i>
             @if (ViewBag.ExpiredCount > 0)
             {
                 <span class="badge rounded-pill bg-danger">
@@ -24,14 +34,14 @@
     </a>
 
     <ul class="dropdown-menu dropdown-menu-end shadow notification-dropdown">
-        <li class="dropdown-header fw-bold" style="color: #8b5cf6;">
-            <i class="fa-solid fa-lock me-2"></i>Expired Lockers
+        <li class="dropdown-header fw-bold" style="color: @iconColor;">
+            <i class="fa-solid fa-@genderIcon me-2"></i>Expired Lockers (@genderLabel)
         </li>
 
         @if (!Model.Any())
         {
             <li class="px-3 text-muted">
-                No expired lockers ??
+                No expired lockers 👍
             </li>
         }
         else
