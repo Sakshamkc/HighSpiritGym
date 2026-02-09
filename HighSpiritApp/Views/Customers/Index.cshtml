@@ -1099,9 +1099,13 @@
                             }
                         </td>
                         <td>
-                            @if (m != null && m.DueDaysComputed > 0)
+                            @if (m != null && m.ExpireDate < DateTime.Today)
                             {
-                                <span class="badge bg-danger">Due @m.DueDaysComputed d</span>
+                                <span class="badge bg-danger">Expired</span>
+                            }
+                            else if (m != null && m.DueDaysComputed > 0)
+                            {
+                                <span class="badge bg-warning text-dark">Due @m.DueDaysComputed d</span>
                             }
                             else
                             {

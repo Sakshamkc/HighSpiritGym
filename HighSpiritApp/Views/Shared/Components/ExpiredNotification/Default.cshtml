@@ -1,18 +1,35 @@
 ﻿@model List<CustomerMembership>
+@{
+    var currentPlan = ViewBag.CurrentPlan as string;
+    var isAll = string.IsNullOrEmpty(currentPlan);
+    
+    // Define plan-specific styling
+    var planConfig = currentPlan switch
+    {
+        "Gym" => (icon: "fa-dumbbell", color: "#f59e0b", bg: "rgba(245, 158, 11, 0.1)", label: "Gym"),
+        "Cardio" => (icon: "fa-heart-pulse", color: "#ef4444", bg: "rgba(239, 68, 68, 0.1)", label: "Cardio"),
+        "Premium" => (icon: "fa-crown", color: "#eab308", bg: "rgba(234, 179, 8, 0.1)", label: "Premium"),
+        "Custom2" => (icon: "fa-layer-group", color: "#8b5cf6", bg: "rgba(139, 92, 246, 0.1)", label: "Custom-2"),
+        "Custom3" => (icon: "fa-cubes", color: "#06b6d4", bg: "rgba(6, 182, 212, 0.1)", label: "Custom-3"),
+        "Zumba" => (icon: "fa-music", color: "#ec4899", bg: "rgba(236, 72, 153, 0.1)", label: "Zumba"),
+        "Sauna" => (icon: "fa-hot-tub-person", color: "#f97316", bg: "rgba(249, 115, 22, 0.1)", label: "Sauna"),
+        _ => (icon: "fa-dumbbell", color: "#f59e0b", bg: "rgba(245, 158, 11, 0.1)", label: "All")
+    };
+}
 
 <div class="dropdown">
     <a href="#"
        class="nav-link position-relative dropdown-toggle"
        data-bs-toggle="dropdown"
-       title="Gym Expired Members">
+       title="Expired Members (@planConfig.label)">
 
-        <!-- Gym Icon: Dumbbell with orange/warning color -->
-        <span class="d-inline-flex align-items-center gap-1 px-2 py-1 rounded bg-warning bg-opacity-10">
-            <i class="fa-solid fa-dumbbell text-warning"></i>
-            @if (Model.Count > 0)
+        <!-- Icon with plan-specific color -->
+        <span class="d-inline-flex align-items-center gap-1 px-2 py-1 rounded" style="background: @planConfig.bg;">
+            <i class="fa-solid @planConfig.icon" style="color: @planConfig.color;"></i>
+            @if ((int)ViewBag.ExpiredCount > 0)
             {
                 <span class="badge rounded-pill bg-danger">
-                    @Model.Count
+                    @ViewBag.ExpiredCount
                 </span>
             }
             else
@@ -24,11 +41,11 @@
 
     <ul class="dropdown-menu dropdown-menu-end shadow notification-dropdown">
 
-        <li class="dropdown-header fw-bold text-warning">
-            <i class="fa-solid fa-dumbbell me-2"></i>Expired Gym Memberships
+        <li class="dropdown-header fw-bold" style="color: @planConfig.color;">
+            <i class="fa-solid @planConfig.icon me-2"></i>Expired @planConfig.label Members
         </li>
 
-        @if (Model.Count == 0)
+        @if ((int)ViewBag.ExpiredCount == 0)
         {
             <li class="px-3 text-muted">
                 No expired members 🎉

@@ -898,11 +898,13 @@
             </button>
             @if (controller == "Customers" || controller == "Home" || controller == "Memberships")
             {
-                @await Component.InvokeAsync("ExpiredNotification")
+                var planNameForNotification = controller == "Customers" ? ViewBag.PlanName as string : null;
+                @await Component.InvokeAsync("ExpiredNotification", new { planName = planNameForNotification })
             }
             @if (controller == "Locker" || controller == "Home")
             {
-                @await Component.InvokeAsync("LockerExpiredNotification", new { gender = ViewBag.Gender as string })
+                var genderForNotification = controller == "Locker" ? ViewBag.Gender as string : null;
+                @await Component.InvokeAsync("LockerExpiredNotification", new { gender = genderForNotification })
             }
             @if (controller == "Boxing" || controller == "Home")
             {

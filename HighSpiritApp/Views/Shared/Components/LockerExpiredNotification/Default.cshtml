@@ -20,7 +20,7 @@
         <!-- Locker Icon with gender-based styling -->
         <span class="d-inline-flex align-items-center gap-1 px-2 py-1 rounded" style="background: @bgColor;">
             <i class="fa-solid fa-@genderIcon" style="color: @iconColor;"></i>
-            @if (ViewBag.ExpiredCount > 0)
+            @if ((int)ViewBag.ExpiredCount > 0)
             {
                 <span class="badge rounded-pill bg-danger">
                     @ViewBag.ExpiredCount
@@ -38,7 +38,7 @@
             <i class="fa-solid fa-@genderIcon me-2"></i>Expired Lockers (@genderLabel)
         </li>
 
-        @if (!Model.Any())
+        @if ((int)ViewBag.ExpiredCount == 0)
         {
             <li class="px-3 text-muted">
                 No expired lockers 👍
