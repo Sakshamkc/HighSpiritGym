@@ -902,7 +902,7 @@
             }
             @if (controller == "Locker" || controller == "Home")
             {
-                @await Component.InvokeAsync("LockerExpiredNotification")
+                @await Component.InvokeAsync("LockerExpiredNotification", new { gender = ViewBag.Gender as string })
             }
             @if (controller == "Boxing" || controller == "Home")
             {
