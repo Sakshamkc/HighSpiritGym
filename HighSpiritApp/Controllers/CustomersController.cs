@@ -82,8 +82,9 @@ namespace HighSpiritApp.Controllers
             return View(customer);
         }
 
-        public IActionResult Create()
+        public IActionResult Create(string? planName = null)
         {
+            ViewBag.PreselectedPlan = planName;
             return View();
         }
 
@@ -140,8 +141,9 @@ namespace HighSpiritApp.Controllers
             return RedirectToAction("Index");
         }
 
-        public IActionResult Import()
+        public IActionResult Import(string? planName = null)
         {
+            ViewBag.PreselectedPlan = planName;
             return View();
         }
 

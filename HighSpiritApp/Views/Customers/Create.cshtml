@@ -1,6 +1,27 @@
 ﻿@model HighSpiritApp.Models.Customer
 @{
     Layout = "~/Views/Shared/_Layout.cshtml";
+    var preselectedPlan = ViewBag.PreselectedPlan as string;
+    
+    // Map planName filter to actual plan value
+    var planMapping = new Dictionary<string, string> {
+        { "Gym", "Gym Package" },
+        { "Cardio", "Cardio Package" },
+        { "Premium", "Premium Package" },
+        { "Zumba", "Zumba & Aerobics Package" },
+        { "Sauna", "Sauna & Steam Package" },
+        { "Custom2", "Customized Package (Any Two)" },
+        { "Custom3", "Customized Package (Any Three)" },
+        { "Any Two", "Customized Package (Any Two)" },
+        { "Any Three", "Customized Package (Any Three)" }
+    };
+    
+    var actualPlanValue = !string.IsNullOrEmpty(preselectedPlan) && planMapping.ContainsKey(preselectedPlan) 
+        ? planMapping[preselectedPlan] 
+        : preselectedPlan;
+    
+    var pageTitle = !string.IsNullOrEmpty(preselectedPlan) ? $"Add {preselectedPlan} Member" : "Add Member";
+    var backUrl = !string.IsNullOrEmpty(preselectedPlan) ? $"/Customers?planName={preselectedPlan}" : "/Customers";
 }
 
 <!-- SweetAlert2 -->
@@ -8,7 +29,7 @@
 
 <div class="card shadow">
     <div class="card-body">
-        <h4><i class="fa-solid fa-user-plus me-2 text-primary"></i>Add Member</h4>
+        <h4><i class="fa-solid fa-user-plus me-2 text-primary"></i>@pageTitle</h4>
 
         <form method="post" enctype="multipart/form-data" class="row g-3">
             
@@ -287,7 +308,7 @@
                 <button type="submit" class="btn btn-success btn-lg px-5">
                     <i class="fa-solid fa-user-plus me-2"></i> Save Member
                 </button>
-                <a href="/Customers" class="btn btn-outline-secondary btn-lg px-4">Cancel</a>
+                <a href="@backUrl" class="btn btn-outline-secondary btn-lg px-4">Cancel</a>
             </div>
         </form>
     </div>
@@ -499,6 +520,9 @@
         'Cardio Package': { 12: 25000, 6: 15000, 3: 9000, 1: 3500 },
         'Sauna & Steam Package': { 12: 25000, 6: 15000, 3: 9000 }
     };
+
+    // Preselected plan from server
+    const preselectedPlan = '@(actualPlanValue ?? "")';
 
     // Elements
     const planSelect = document.getElementById('planSelect');
@@ -775,5 +799,18 @@
 
     // Initialize
     calculateFinalPrice();
+
+    // Auto-select plan if preselected
+    if (preselectedPlan && preselectedPlan.length > 0) {
+        planSelect.value = preselectedPlan;
+        planSelect.dispatchEvent(new Event('change'));
+        
+        // If it's a specific single-facility plan, lock the plan selection
+        const singleFacilityPlans = ['Gym Package', 'Cardio Package', 'Zumba & Aerobics Package', 'Sauna & Steam Package', 'Premium Package'];
+        if (singleFacilityPlans.includes(preselectedPlan)) {
+            // Optionally disable changing the plan for package-specific pages
+            // planSelect.disabled = true;
+        }
+    }
 </script>
 }
