@@ -41,6 +41,7 @@ namespace HighSpiritApp.Services
         {
             // Calculate price from cash + esewa
             member.Price = member.CashAmount + member.EsewaAmount;
+            member.CreatedAt = DateTime.Now;
 
             await _boxingRepository.AddAsync(member);
             await _boxingRepository.SaveChangesAsync();
@@ -67,6 +68,7 @@ namespace HighSpiritApp.Services
             if (member.Photo != null)
                 existing.Photo = member.Photo;
 
+            existing.UpdatedAt = DateTime.Now;
             _boxingRepository.Update(existing);
             await _boxingRepository.SaveChangesAsync();
         }
@@ -138,6 +140,7 @@ namespace HighSpiritApp.Services
                         };
 
                         member.Price = member.CashAmount + member.EsewaAmount;
+                        member.CreatedAt = DateTime.Now;
 
                         await _boxingRepository.AddAsync(member);
                         result.Imported++;

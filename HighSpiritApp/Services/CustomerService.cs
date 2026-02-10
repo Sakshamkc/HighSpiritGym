@@ -227,6 +227,7 @@ namespace HighSpiritApp.Services
             if (photo != null)
                 customer.Photo = photo;
 
+            customer.CreatedAt = DateTime.Now;
             await _customerRepository.AddAsync(customer);
             await _customerRepository.SaveChangesAsync();
             return customer;
@@ -255,6 +256,7 @@ namespace HighSpiritApp.Services
             if (photo != null)
                 customer.Photo = photo;
 
+            customer.UpdatedAt = DateTime.Now;
             _customerRepository.Update(customer);
 
             // Update membership if provided
@@ -268,6 +270,7 @@ namespace HighSpiritApp.Services
                     membership.DueAmount = vm.DueAmount ?? 0;
                     membership.StartDate = vm.StartDate;
                     membership.ExpireDate = vm.ExpireDate ?? vm.StartDate.AddMonths(vm.Duration > 0 ? vm.Duration : membership.Duration);
+                    membership.UpdatedAt = DateTime.Now;
                     _membershipRepository.Update(membership);
                 }
             }
@@ -359,7 +362,8 @@ namespace HighSpiritApp.Services
                             Height = "N/A",
                             BloodGroup = "N/A",
                             Shift = string.IsNullOrWhiteSpace(shift) ? "General" : shift,
-                            Remarks = remarks
+                            Remarks = remarks,
+                            CreatedAt = DateTime.Now
                         };
 
                         await _customerRepository.AddAsync(customer);
@@ -374,7 +378,8 @@ namespace HighSpiritApp.Services
                             Duration = duration,
                             ExpireDate = expireDate ?? joinDate.AddMonths(duration),
                             PaidPrice = 0,
-                            IsActive = true
+                            IsActive = true,
+                            CreatedAt = DateTime.Now
                         };
 
                         await _membershipRepository.AddAsync(membership);

@@ -19,6 +19,9 @@ namespace HighSpiritApp.Models
 
         public int DueDaysComputed { get; private set; }
 
+        public DateTime CreatedAt { get; set; } = DateTime.Now;
+        public DateTime? UpdatedAt { get; set; }
+
         // Computed property for total price
         [NotMapped]
         public int TotalPrice => PaidPrice + DueAmount;

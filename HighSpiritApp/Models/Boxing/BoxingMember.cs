@@ -33,6 +33,9 @@ namespace HighSpiritApp.Models.Boxing
         public string? Remarks { get; set; }
 
         public byte[]? Photo { get; set; }
+
+        public DateTime CreatedAt { get; set; } = DateTime.Now;
+        public DateTime? UpdatedAt { get; set; }
     }
 
 }

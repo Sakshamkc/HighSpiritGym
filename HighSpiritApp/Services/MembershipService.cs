@@ -54,6 +54,7 @@ namespace HighSpiritApp.Services
             }
 
             membership.IsActive = true;
+            membership.CreatedAt = DateTime.Now;
             await _membershipRepository.AddAsync(membership);
             await _membershipRepository.SaveChangesAsync();
         }
@@ -76,6 +77,7 @@ namespace HighSpiritApp.Services
             await _membershipRepository.DeactivateByCustomerIdAsync(membership.CustomerID);
 
             membership.IsActive = true;
+            membership.CreatedAt = DateTime.Now;
             await _membershipRepository.AddAsync(membership);
             await _membershipRepository.SaveChangesAsync();
         }
@@ -91,6 +93,7 @@ namespace HighSpiritApp.Services
             if (startDate.HasValue) membership.StartDate = startDate.Value;
             if (expireDate.HasValue) membership.ExpireDate = expireDate.Value;
 
+            membership.UpdatedAt = DateTime.Now;
             _membershipRepository.Update(membership);
             await _membershipRepository.SaveChangesAsync();
         }
