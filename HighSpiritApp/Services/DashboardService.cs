@@ -84,8 +84,31 @@ namespace HighSpiritApp.Services
             var boxingWithDue = boxingMembers.Count(b => b.DueAmount > 0);
             var boxingTotalDue = boxingMembers.Sum(b => b.DueAmount);
 
+            // Revenue calculations
+            // Get all memberships for revenue calculation
+            var allMemberships = (await _membershipRepository.GetAllAsync()).ToList();
+            var gymRevenue = allMemberships.Sum(m => m.PaidPrice);
+            var lockerRevenue = allLockers.Sum(l => l.PaidAmount);
+            var boxingRevenue = boxingMembers.Sum(b => b.CashAmount + b.EsewaAmount);
+            var totalRevenue = gymRevenue + lockerRevenue + boxingRevenue;
+            var totalDueAmount = gymTotalDue + lockerTotalDue + boxingTotalDue;
+
+            // Monthly revenue (memberships started this month)
+            var monthlyGymRevenue = allMemberships.Where(m => m.StartDate >= monthStart).Sum(m => m.PaidPrice);
+            var monthlyLockerRevenue = allLockers.Where(l => l.StartDate >= monthStart).Sum(l => l.PaidAmount);
+            var monthlyBoxingRevenue = boxingMembers.Where(b => b.JoinDate >= monthStart).Sum(b => b.CashAmount + b.EsewaAmount);
+            var monthlyRevenue = monthlyGymRevenue + monthlyLockerRevenue + monthlyBoxingRevenue;
+
             return new DashboardStats
             {
+                // Revenue Summary
+                TotalRevenue = totalRevenue,
+                GymRevenue = gymRevenue,
+                LockerRevenue = lockerRevenue,
+                BoxingRevenue = boxingRevenue,
+                TotalDueAmount = totalDueAmount,
+                MonthlyRevenue = monthlyRevenue,
+
                 GymTotal = gymTotal,
                 GymActive = gymActive,
                 GymExpired = gymExpired,

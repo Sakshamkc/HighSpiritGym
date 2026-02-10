@@ -32,6 +32,14 @@ namespace HighSpiritApp.Controllers
             // Get dashboard statistics
             var stats = await _dashboardService.GetDashboardStatsAsync();
 
+            // Revenue stats
+            ViewBag.TotalRevenue = stats.TotalRevenue;
+            ViewBag.GymRevenue = stats.GymRevenue;
+            ViewBag.LockerRevenue = stats.LockerRevenue;
+            ViewBag.BoxingRevenue = stats.BoxingRevenue;
+            ViewBag.TotalDueAmount = stats.TotalDueAmount;
+            ViewBag.MonthlyRevenue = stats.MonthlyRevenue;
+
             // Gym stats
             ViewBag.Total = stats.GymTotal;
             ViewBag.Active = stats.GymActive;

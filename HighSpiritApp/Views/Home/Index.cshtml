@@ -353,7 +353,205 @@
     .text-purple {
         color: #8b5cf6 !important;
     }
+
+    /* Revenue Summary Styles */
+    .revenue-section {
+        background: linear-gradient(135deg, #1e293b 0%, #334155 100%);
+        border-radius: 20px;
+        padding: 24px;
+        margin-bottom: 30px;
+    }
+
+    .revenue-header {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        margin-bottom: 20px;
+    }
+
+    .revenue-icon {
+        width: 45px;
+        height: 45px;
+        background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-size: 20px;
+    }
+
+    .revenue-header h5 {
+        color: white;
+        margin-bottom: 0;
+    }
+
+    .revenue-header small {
+        color: #94a3b8;
+    }
+
+    .revenue-card {
+        background: rgba(255, 255, 255, 0.1);
+        backdrop-filter: blur(10px);
+        border-radius: 16px;
+        padding: 20px;
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        transition: all 0.3s ease;
+    }
+
+    .revenue-card:hover {
+        background: rgba(255, 255, 255, 0.15);
+        transform: translateY(-3px);
+    }
+
+    .revenue-card .revenue-label {
+        color: #94a3b8;
+        font-size: 0.85rem;
+        margin-bottom: 8px;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .revenue-card .revenue-value {
+        color: white;
+        font-size: 1.75rem;
+        font-weight: 700;
+    }
+
+    .revenue-card.total .revenue-value {
+        color: #4ade80;
+    }
+
+    .revenue-card.monthly .revenue-value {
+        color: #60a5fa;
+    }
+
+    .revenue-card.due .revenue-value {
+        color: #fbbf24;
+    }
+
+    .revenue-breakdown {
+        display: flex;
+        gap: 12px;
+        flex-wrap: wrap;
+        margin-top: 16px;
+    }
+
+    .revenue-breakdown-item {
+        background: rgba(255, 255, 255, 0.05);
+        border-radius: 10px;
+        padding: 12px 16px;
+        flex: 1;
+        min-width: 120px;
+    }
+
+    .revenue-breakdown-item .label {
+        color: #94a3b8;
+        font-size: 0.75rem;
+        text-transform: uppercase;
+    }
+
+    .revenue-breakdown-item .value {
+        color: white;
+        font-size: 1.1rem;
+        font-weight: 600;
+    }
+
+    .revenue-breakdown-item.gym .value { color: #f59e0b; }
+    .revenue-breakdown-item.locker .value { color: #8b5cf6; }
+    .revenue-breakdown-item.boxing .value { color: #ef4444; }
+
+    @@media (max-width: 768px) {
+        .revenue-section {
+            padding: 16px;
+        }
+        
+        .revenue-card .revenue-value {
+            font-size: 1.4rem;
+        }
+
+        .revenue-breakdown {
+            gap: 8px;
+        }
+
+        .revenue-breakdown-item {
+            padding: 10px 12px;
+            min-width: 100px;
+        }
+    }
 </style>
+
+<!-- ======================= REVENUE SUMMARY ======================= -->
+<div class="revenue-section">
+    <div class="revenue-header">
+        <div class="revenue-icon">
+            <i class="fa-solid fa-indian-rupee-sign"></i>
+        </div>
+        <div>
+            <h5>Revenue Overview</h5>
+            <small>Financial summary at a glance</small>
+        </div>
+    </div>
+
+    <div class="row g-3">
+        <div class="col-lg-4 col-md-6">
+            <div class="revenue-card total">
+                <div class="revenue-label">
+                    <i class="fa-solid fa-chart-line"></i>
+                    Total Revenue (All Time)
+                </div>
+                <div class="revenue-value">Rs @(((decimal)ViewBag.TotalRevenue).ToString("N0"))</div>
+                <div class="revenue-breakdown">
+                    <div class="revenue-breakdown-item gym">
+                        <div class="label">Gym</div>
+                        <div class="value">Rs @(((decimal)ViewBag.GymRevenue).ToString("N0"))</div>
+                    </div>
+                    <div class="revenue-breakdown-item locker">
+                        <div class="label">Locker</div>
+                        <div class="value">Rs @(((decimal)ViewBag.LockerRevenue).ToString("N0"))</div>
+                    </div>
+                    <div class="revenue-breakdown-item boxing">
+                        <div class="label">Boxing</div>
+                        <div class="value">Rs @(((decimal)ViewBag.BoxingRevenue).ToString("N0"))</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-4 col-md-6">
+            <div class="revenue-card monthly">
+                <div class="revenue-label">
+                    <i class="fa-solid fa-calendar-day"></i>
+                    This Month's Revenue
+                </div>
+                <div class="revenue-value">Rs @(((decimal)ViewBag.MonthlyRevenue).ToString("N0"))</div>
+                <div class="revenue-breakdown">
+                    <div class="revenue-breakdown-item">
+                        <div class="label">Collection</div>
+                        <div class="value" style="color: #60a5fa;">@DateTime.Now.ToString("MMMM yyyy")</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-4 col-md-6">
+            <div class="revenue-card due">
+                <div class="revenue-label">
+                    <i class="fa-solid fa-exclamation-triangle"></i>
+                    Total Outstanding Due
+                </div>
+                <div class="revenue-value">Rs @(((decimal)ViewBag.TotalDueAmount).ToString("N0"))</div>
+                <div class="revenue-breakdown">
+                    <div class="revenue-breakdown-item">
+                        <div class="label">Pending</div>
+                        <div class="value" style="color: #fbbf24;">Requires Collection</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
 
 <!-- ======================= GYM DASHBOARD ======================= -->
 <div class="section-header">

@@ -10,6 +10,14 @@ namespace HighSpiritApp.Services.Interfaces
 
     public class DashboardStats
     {
+        // Revenue Summary
+        public decimal TotalRevenue { get; set; }
+        public decimal GymRevenue { get; set; }
+        public decimal LockerRevenue { get; set; }
+        public decimal BoxingRevenue { get; set; }
+        public decimal TotalDueAmount { get; set; }
+        public decimal MonthlyRevenue { get; set; }
+
         // Gym Stats
         public int GymTotal { get; set; }
         public int GymActive { get; set; }
