@@ -16,6 +16,7 @@ namespace HighSpiritApp.Services.Interfaces
         Task DeleteAsync(int id);
         Task<ImportResult> ImportFromExcelAsync(Stream fileStream);
         Task<byte[]> ExportToExcelAsync(CustomerFilterRequest filter);
+        Task MarkQREmailSentAsync(IEnumerable<int> customerIds);
     }
 
     public class CustomerFilterRequest

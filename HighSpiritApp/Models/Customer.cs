@@ -19,6 +19,8 @@
         public string? Remarks { get; set; }
         public string? Shift { get; set; }
 
+        public DateTime? QREmailSentAt { get; set; }
+
         public DateTime CreatedAt { get; set; } = DateTime.Now;
         public DateTime? UpdatedAt { get; set; }
 

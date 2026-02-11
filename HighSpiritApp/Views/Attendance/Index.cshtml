@@ -1,0 +1,293 @@
+@{
+    ViewData["Title"] = "Attendance Records";
+    var records = ViewBag.Records as IEnumerable<HighSpiritApp.Models.Attendance.AttendanceRecord> ?? new List<HighSpiritApp.Models.Attendance.AttendanceRecord>();
+    var filterMode = ViewBag.FilterMode as string ?? "single";
+}
+
+<!-- Page Header -->
+<div class="d-flex flex-wrap justify-content-between align-items-center mb-4">
+    <div>
+        <h4 class="mb-1" style="font-weight: 700; color: #1e293b;">
+            <i class="fa-solid fa-clipboard-check me-2" style="color: #10b981;"></i>Attendance Records
+        </h4>
+        <p class="text-muted mb-0" style="font-size: 13px;">Track daily gym check-ins and check-outs</p>
+    </div>
+    <div class="d-flex gap-2 flex-wrap">
+        <a href="/Attendance/Scanner" class="btn btn-primary btn-sm rounded-pill px-3 shadow-sm">
+            <i class="fa-solid fa-qrcode me-1"></i> QR Scanner
+        </a>
+        <a href="/Attendance/BulkQR" class="btn btn-outline-primary btn-sm rounded-pill px-3">
+            <i class="fa-solid fa-envelopes-bulk me-1"></i> Bulk QR / Email
+        </a>
+    </div>
+</div>
+
+<!-- Summary Cards -->
+<div class="row g-3 mb-4">
+    <div class="col-md-4">
+        <div class="card border-0 shadow-sm h-100" style="border-radius: 14px; border-left: 4px solid #3b82f6 !important;">
+            <div class="card-body d-flex align-items-center gap-3 py-3 px-4">
+                <div class="rounded-circle d-flex align-items-center justify-content-center" style="width: 48px; height: 48px; min-width: 48px; background: rgba(59, 130, 246, 0.1);">
+                    <i class="fa-solid fa-arrow-right-to-bracket" style="color: #3b82f6; font-size: 20px;"></i>
+                </div>
+                <div>
+                    <div class="text-muted" style="font-size: 11px; text-transform: uppercase; letter-spacing: 0.5px;">Today's Check-ins</div>
+                    <div class="fw-bold" style="font-size: 26px; color: #1e293b; line-height: 1.2;">@ViewBag.TotalCheckIns</div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card border-0 shadow-sm h-100" style="border-radius: 14px; border-left: 4px solid #10b981 !important;">
+            <div class="card-body d-flex align-items-center gap-3 py-3 px-4">
+                <div class="rounded-circle d-flex align-items-center justify-content-center" style="width: 48px; height: 48px; min-width: 48px; background: rgba(16, 185, 129, 0.1);">
+                    <i class="fa-solid fa-person-running" style="color: #10b981; font-size: 20px;"></i>
+                </div>
+                <div>
+                    <div class="text-muted" style="font-size: 11px; text-transform: uppercase; letter-spacing: 0.5px;">Currently in Gym</div>
+                    <div class="fw-bold" style="font-size: 26px; color: #10b981; line-height: 1.2;">@ViewBag.CurrentlyInGym</div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card border-0 shadow-sm h-100" style="border-radius: 14px; border-left: 4px solid #f59e0b !important;">
+            <div class="card-body d-flex align-items-center gap-3 py-3 px-4">
+                <div class="rounded-circle d-flex align-items-center justify-content-center" style="width: 48px; height: 48px; min-width: 48px; background: rgba(245, 158, 11, 0.1);">
+                    <i class="fa-solid fa-right-from-bracket" style="color: #f59e0b; font-size: 20px;"></i>
+                </div>
+                <div>
+                    <div class="text-muted" style="font-size: 11px; text-transform: uppercase; letter-spacing: 0.5px;">Already Left</div>
+                    <div class="fw-bold" style="font-size: 26px; color: #f59e0b; line-height: 1.2;">@ViewBag.AlreadyLeft</div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Filter Section -->
+<div class="card border-0 shadow-sm mb-4" style="border-radius: 14px;">
+    <div class="card-body py-3 px-4">
+        <form method="get" action="/Attendance" class="d-flex align-items-end gap-3 flex-wrap">
+            <div>
+                <label class="form-label mb-1 text-muted" style="font-size: 11px; text-transform: uppercase; letter-spacing: 0.5px;">Date</label>
+                <input type="date" name="date" class="form-control form-control-sm"
+                       value="@(ViewBag.SelectedDate ?? DateTime.Today.ToString("yyyy-MM-dd"))"
+                       style="width: 160px; border-radius: 8px;" />
+            </div>
+            <div class="text-muted" style="font-size: 13px; padding-bottom: 6px;">or</div>
+            <div>
+                <label class="form-label mb-1 text-muted" style="font-size: 11px; text-transform: uppercase; letter-spacing: 0.5px;">From</label>
+                <input type="date" name="fromDate" class="form-control form-control-sm"
+                       value="@ViewBag.FromDate"
+                       style="width: 160px; border-radius: 8px;" />
+            </div>
+            <div>
+                <label class="form-label mb-1 text-muted" style="font-size: 11px; text-transform: uppercase; letter-spacing: 0.5px;">To</label>
+                <input type="date" name="toDate" class="form-control form-control-sm"
+                       value="@ViewBag.ToDate"
+                       style="width: 160px; border-radius: 8px;" />
+            </div>
+            <button type="submit" class="btn btn-sm btn-primary" style="border-radius: 8px; padding: 6px 20px;">
+                <i class="fa-solid fa-filter me-1"></i> Filter
+            </button>
+            <a href="/Attendance" class="btn btn-sm btn-outline-secondary" style="border-radius: 8px; padding: 6px 16px;">
+                <i class="fa-solid fa-rotate-left me-1"></i> Reset
+            </a>
+        </form>
+    </div>
+</div>
+
+<!-- Attendance Table -->
+<div class="card border-0 shadow-sm" style="border-radius: 14px;">
+    <div class="card-body p-0">
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+                <thead>
+                    <tr style="background: #f8fafc; border-bottom: 2px solid #e2e8f0;">
+                        <th style="padding: 14px 20px; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; color: #64748b;">S.N.</th>
+                        <th style="padding: 14px 16px; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; color: #64748b;">Member</th>
+                        <th style="padding: 14px 16px; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; color: #64748b;">Punch In</th>
+                        <th style="padding: 14px 16px; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; color: #64748b;">Punch Out</th>
+                        <th style="padding: 14px 16px; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; color: #64748b;">Duration</th>
+                        <th style="padding: 14px 16px; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; color: #64748b;">Status</th>
+                        <th style="padding: 14px 16px; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; color: #64748b; text-align: center;">Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @if (records.Any())
+                    {
+                        var sn = 1;
+                        @foreach (var record in records)
+                        {
+                            <tr style="border-bottom: 1px solid #f1f5f9;">
+                                <td style="padding: 14px 20px; font-size: 13px; color: #94a3b8; font-weight: 500;">@(sn++)</td>
+                                <td style="padding: 14px 16px;">
+                                    <div class="d-flex align-items-center gap-2">
+                                        <div class="rounded-circle d-flex align-items-center justify-content-center"
+                                             style="width: 34px; height: 34px; min-width: 34px; background: @(record.IsPunchedOut ? "rgba(245, 158, 11, 0.1)" : "rgba(16, 185, 129, 0.1)"); font-size: 13px; font-weight: 700; color: @(record.IsPunchedOut ? "#d97706" : "#059669");">
+                                            @record.CustomerName.Substring(0, 1).ToUpper()
+                                        </div>
+                                        <div>
+                                            <div class="fw-semibold" style="font-size: 14px; color: #1e293b;">@record.CustomerName</div>
+                                            <div style="font-size: 11px; color: #94a3b8;">#@record.CustomerID</div>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td style="padding: 14px 16px;">
+                                    <div class="d-flex align-items-center gap-1">
+                                        <span class="d-inline-flex align-items-center justify-content-center" style="width: 22px; height: 22px; border-radius: 6px; background: rgba(16, 185, 129, 0.1);">
+                                            <i class="fa-solid fa-arrow-right-to-bracket" style="color: #10b981; font-size: 10px;"></i>
+                                        </span>
+                                        <span style="font-size: 14px; color: #1e293b; font-weight: 500;">@record.PunchInTime.ToString("hh:mm tt")</span>
+                                    </div>
+                                </td>
+                                <td style="padding: 14px 16px;">
+                                    @if (record.PunchOutTime.HasValue)
+                                    {
+                                        <div class="d-flex align-items-center gap-1">
+                                            <span class="d-inline-flex align-items-center justify-content-center" style="width: 22px; height: 22px; border-radius: 6px; background: rgba(245, 158, 11, 0.1);">
+                                                <i class="fa-solid fa-right-from-bracket" style="color: #f59e0b; font-size: 10px;"></i>
+                                            </span>
+                                            <span style="font-size: 14px; color: #1e293b; font-weight: 500;">@record.PunchOutTime.Value.ToString("hh:mm tt")</span>
+                                        </div>
+                                    }
+                                    else
+                                    {
+                                        <span class="text-muted" style="font-size: 13px;">—</span>
+                                    }
+                                </td>
+                                <td style="padding: 14px 16px;">
+                                    @if (record.IsPunchedOut)
+                                    {
+                                        <span style="font-size: 13px; color: #475569; font-weight: 500;">
+                                            <i class="fa-regular fa-clock me-1" style="font-size: 11px; color: #94a3b8;"></i>@record.Duration
+                                        </span>
+                                    }
+                                    else
+                                    {
+                                        <span class="badge" style="background: rgba(16, 185, 129, 0.08); color: #059669; font-size: 12px; padding: 4px 10px; border-radius: 6px; animation: pulse 2s infinite;">
+                                            <i class="fa-solid fa-circle me-1" style="font-size: 6px; vertical-align: middle;"></i>Active
+                                        </span>
+                                    }
+                                </td>
+                                <td style="padding: 14px 16px;">
+                                    @if (record.IsPunchedOut)
+                                    {
+                                        <span class="badge" style="background: rgba(100, 116, 139, 0.08); color: #64748b; font-size: 12px; padding: 5px 12px; border-radius: 20px;">
+                                            <i class="fa-solid fa-check me-1" style="font-size: 10px;"></i>Left
+                                        </span>
+                                    }
+                                    else
+                                    {
+                                        <span class="badge" style="background: rgba(16, 185, 129, 0.1); color: #059669; font-size: 12px; padding: 5px 12px; border-radius: 20px;">
+                                            <i class="fa-solid fa-person-running me-1" style="font-size: 10px;"></i>In Gym
+                                        </span>
+                                    }
+                                </td>
+                                <td style="padding: 14px 16px; text-align: center;">
+                                    @if (!record.IsPunchedOut)
+                                    {
+                                        <button class="btn btn-sm btn-punch-out" data-customer-id="@record.CustomerID" data-customer-name="@record.CustomerName"
+                                                style="background: rgba(245, 158, 11, 0.1); color: #d97706; border: 1px solid rgba(245, 158, 11, 0.3); border-radius: 8px; font-size: 12px; padding: 5px 14px; font-weight: 600; transition: all 0.2s;">
+                                            <i class="fa-solid fa-right-from-bracket me-1"></i> Punch Out
+                                        </button>
+                                    }
+                                    else
+                                    {
+                                        <span class="text-muted" style="font-size: 13px;">—</span>
+                                    }
+                                </td>
+                            </tr>
+                        }
+                    }
+                    else
+                    {
+                        <tr>
+                            <td colspan="7" class="text-center py-5">
+                                <div style="opacity: 0.5;">
+                                    <i class="fa-solid fa-clipboard-check d-block mb-3" style="font-size: 48px; color: #cbd5e1;"></i>
+                                    <p class="mb-1 fw-semibold" style="color: #64748b;">No records found</p>
+                                    <p class="mb-0 small text-muted">No attendance records for the selected date.</p>
+                                </div>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<style>
+    @@keyframes pulse {
+        0%, 100% { opacity: 1; }
+        50% { opacity: 0.6; }
+    }
+    .btn-punch-out:hover {
+        background: rgba(245, 158, 11, 0.2) !important;
+        border-color: #f59e0b !important;
+        transform: translateY(-1px);
+        box-shadow: 0 2px 8px rgba(245, 158, 11, 0.2);
+    }
+</style>
+
+@section Scripts {
+<!-- SweetAlert2 -->
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script>
+    window.addEventListener('load', function () {
+        document.querySelectorAll('.btn-punch-out').forEach(function (btn) {
+            btn.addEventListener('click', function () {
+                var customerId = parseInt(this.getAttribute('data-customer-id'));
+                var customerName = this.getAttribute('data-customer-name');
+                var button = this;
+
+                Swal.fire({
+                    title: 'Punch Out?',
+                    html: 'Are you sure you want to punch out <strong>' + customerName + '</strong>?',
+                    icon: 'question',
+                    showCancelButton: true,
+                    confirmButtonColor: '#f59e0b',
+                    cancelButtonColor: '#64748b',
+                    confirmButtonText: '<i class="fa-solid fa-right-from-bracket me-1"></i> Yes, Punch Out',
+                    cancelButtonText: 'Cancel'
+                }).then(function (result) {
+                    if (!result.isConfirmed) return;
+
+                    button.disabled = true;
+                    button.innerHTML = '<i class="fa-solid fa-spinner fa-spin me-1"></i> Processing...';
+
+                    fetch('/Attendance/ProcessPunch', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ customerId: customerId })
+                    })
+                    .then(function (res) { return res.json(); })
+                    .then(function (data) {
+                        if (data.success) {
+                            Swal.fire({
+                                icon: 'success',
+                                title: 'Punched Out!',
+                                html: '<strong>' + customerName + '</strong> punched out at <strong>' + (data.time || 'now') + '</strong>',
+                                timer: 1800,
+                                showConfirmButton: false
+                            });
+                            setTimeout(function () { location.reload(); }, 1900);
+                        } else {
+                            Swal.fire({ icon: 'error', title: 'Error', text: data.message, confirmButtonColor: '#ef4444' });
+                            button.disabled = false;
+                            button.innerHTML = '<i class="fa-solid fa-right-from-bracket me-1"></i> Punch Out';
+                        }
+                    })
+                    .catch(function () {
+                        Swal.fire({ icon: 'error', title: 'Error', text: 'Failed to process punch out.', confirmButtonColor: '#ef4444' });
+                        button.disabled = false;
+                        button.innerHTML = '<i class="fa-solid fa-right-from-bracket me-1"></i> Punch Out';
+                    });
+                });
+            });
+        });
+    });
+</script>
+}

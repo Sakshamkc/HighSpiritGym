@@ -462,5 +462,20 @@ namespace HighSpiritApp.Services
             workbook.SaveAs(stream);
             return stream.ToArray();
         }
+
+        public async Task MarkQREmailSentAsync(IEnumerable<int> customerIds)
+        {
+            var ids = customerIds.ToList();
+            foreach (var id in ids)
+            {
+                var customer = await _customerRepository.GetByIdAsync(id);
+                if (customer != null)
+                {
+                    customer.QREmailSentAt = DateTime.Now;
+                    _customerRepository.Update(customer);
+                }
+            }
+            await _customerRepository.SaveChangesAsync();
+        }
     }
 }

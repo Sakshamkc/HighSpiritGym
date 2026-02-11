@@ -389,6 +389,9 @@
                     <a href="/Memberships/Renew/@Model.CustomerID" class="action-btn btn btn-success">
                         <i class="fa-solid fa-rotate"></i> Renew
                     </a>
+                    <a href="/Attendance/CustomerQR/@Model.CustomerID" class="action-btn btn btn-primary">
+                        <i class="fa-solid fa-qrcode"></i> QR Code
+                    </a>
                     @if (assignedLocker != null)
                     {
                         <a href="/Locker/Details/@assignedLocker.LockerID" class="action-btn btn btn-info">

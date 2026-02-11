@@ -1,4 +1,5 @@
 ﻿using HighSpiritApp.Models;
+using HighSpiritApp.Models.Attendance;
 using HighSpiritApp.Models.Boxing;
 using HighSpiritApp.Models.Locker;
 using Microsoft.EntityFrameworkCore;
@@ -13,6 +14,7 @@ namespace HighSpiritApp.DataContext
         public DbSet<CustomerMembership> CustomerMemberships { get; set; }
         public DbSet<BoxingMember> BoxingMembers { get; set; }
         public DbSet<Locker> Lockers { get; set; }
+        public DbSet<AttendanceRecord> AttendanceRecords { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -51,6 +53,18 @@ namespace HighSpiritApp.DataContext
                 entity.Property(l => l.TotalAmount).HasPrecision(10, 2);
                 entity.Property(l => l.PaidAmount).HasPrecision(10, 2);
                 entity.Property(l => l.DueAmount).HasPrecision(10, 2);
+            });
+
+            // AttendanceRecord configuration
+            modelBuilder.Entity<AttendanceRecord>(entity =>
+            {
+                entity.HasKey(a => a.AttendanceID);
+                entity.HasOne(a => a.Customer)
+                      .WithMany()
+                      .HasForeignKey(a => a.CustomerID)
+                      .OnDelete(DeleteBehavior.Cascade);
+                entity.HasIndex(a => new { a.CustomerID, a.Date });
+                entity.HasIndex(a => a.Date);
             });
         }
     }

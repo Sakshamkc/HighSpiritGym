@@ -152,6 +152,11 @@
                 color: #34d399;
             }
 
+            .sidebar .nav-link.attendance-link i {
+                background: rgba(245, 158, 11, 0.15);
+                color: #fbbf24;
+            }
+
         /* Submenu styling */
         .sidebar .submenu-container {
             margin-left: 12px;
@@ -867,6 +872,30 @@
             </div>
 
 
+
+            <p class="nav-section-title">Attendance</p>
+
+            <div class="nav-item">
+                <a href="#" class="nav-link attendance-link" data-bs-toggle="collapse" data-bs-target="#attendanceMenu">
+                    <i class="fa-solid fa-clipboard-check"></i>
+                    <span class="nav-text">Attendance</span>
+                    <i class="fa-solid fa-chevron-down ms-auto nav-text" style="font-size: 10px; opacity: 0.6;"></i>
+                </a>
+            </div>
+            <div class="collapse submenu-container @(controller == "Attendance" ? "show" : "")" id="attendanceMenu">
+                <a href="/Attendance" class="nav-link submenu @(controller == "Attendance" && action == "Index" ? "active" : "")" onclick="closeSidebarOnMobile()">
+                    <i class="fa-solid fa-list-check"></i>
+                    <span class="nav-text">Records</span>
+                </a>
+                <a href="/Attendance/Scanner" class="nav-link submenu @(controller == "Attendance" && action == "Scanner" ? "active" : "")" onclick="closeSidebarOnMobile()">
+                    <i class="fa-solid fa-camera"></i>
+                    <span class="nav-text">QR Scanner</span>
+                </a>
+                <a href="/Attendance/BulkQR" class="nav-link submenu @(controller == "Attendance" && action == "BulkQR" ? "active" : "")" onclick="closeSidebarOnMobile()">
+                    <i class="fa-solid fa-envelopes-bulk"></i>
+                    <span class="nav-text">Bulk QR / Email</span>
+                </a>
+            </div>
 
             <p class="nav-section-title">Analytics</p>
 
