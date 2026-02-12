@@ -637,7 +637,10 @@
     let requiredFacilities = 0;
     let discountType = 'percent';
     let totalPayable = 0;
-    const originalPlanName = '@Model.PlanName';
+    const originalPlanName = '@Html.Raw((Model.PlanName ?? "").Replace("'", "\\'"))';
+    const originalDuration = @Model.Duration;
+    const originalPaid = @currentPaid;
+    const originalDue = @currentDue;
 
     // Current payment update logic
     if (currentPaidInput) {
@@ -731,6 +734,7 @@
             });
         }
         updatePlanName();
+        activateNewPlanPricing();
     });
 
     durationSelect.addEventListener('change', function() {
@@ -742,6 +746,7 @@
             priceDisplay.textContent = price.toLocaleString();
             hiddenDuration.value = months;
             pricingSection.style.display = 'block';
+            activateNewPlanPricing();
             calculateFinalPrice();
             calculateExpireDate();
         } else {
@@ -758,6 +763,7 @@
             hiddenPlanName.value = this.value;
             hiddenDuration.value = '0';
             pricingSection.style.display = 'block';
+            activateNewPlanPricing();
             calculateFinalPrice();
         } else {
             resetPricing();
@@ -865,5 +871,125 @@
         totalPayable = 0;
         pricingSection.style.display = 'none';
     }
+
+    // Swap name attributes: when new plan is selected, new pricing inputs submit; otherwise old ones do
+    function activateNewPlanPricing() {
+        // Remove name from current payment inputs
+        if (currentPaidInput) currentPaidInput.removeAttribute('name');
+        if (currentDueInput) currentDueInput.removeAttribute('name');
+        // Remove hidden fallback inputs
+        document.querySelectorAll('input[type=hidden][name=PaidPrice], input[type=hidden][name=DueAmount]').forEach(el => {
+            if (el.id !== 'hiddenPlanName' && el.id !== 'hiddenDuration') el.removeAttribute('name');
+        });
+        // Add name to new pricing inputs
+        newPaidNowInput.setAttribute('name', 'PaidPrice');
+        newDueAmountInput.setAttribute('name', 'DueAmount');
+    }
+
+    function restoreCurrentPlanPricing() {
+        // Remove name from new pricing inputs
+        newPaidNowInput.removeAttribute('name');
+        newDueAmountInput.removeAttribute('name');
+        // Restore names on current payment inputs
+        if (currentPaidInput) currentPaidInput.setAttribute('name', 'PaidPrice');
+        if (currentDueInput) currentDueInput.setAttribute('name', 'DueAmount');
+    }
+
+    // Get the base plan name from DB value like "Customized Package (Any Two): Gym, Cardio" or just "Gym"
+    function getBasePlanName(fullName) {
+        if (!fullName) return '';
+        const lower = fullName.toLowerCase();
+        if (lower.includes('per session')) return 'Per Session';
+        const colonIdx = fullName.indexOf(':');
+        const baseName = colonIdx > 0 ? fullName.substring(0, colonIdx).trim() : fullName;
+        if (pricing[baseName]) return baseName;
+        for (const key of Object.keys(pricing)) {
+            if (baseName.startsWith(key)) return key;
+        }
+        for (const key of Object.keys(pricing)) {
+            if (lower.includes(key.toLowerCase())) return key;
+        }
+        const keywordMap = {
+            'premium': 'Premium Package',
+            'zumba': 'Zumba & Aerobics Package',
+            'aerobics': 'Zumba & Aerobics Package',
+            'cardio': 'Cardio Package',
+            'gym': 'Gym Package',
+            'sauna': 'Sauna & Steam Package',
+            'steam': 'Sauna & Steam Package'
+        };
+        for (const [keyword, plan] of Object.entries(keywordMap)) {
+            if (lower.includes(keyword) && !lower.includes('customized') && !lower.includes('any')) return plan;
+        }
+        return baseName;
+    }
+
+    // Auto-select the current plan and duration on page load
+    function initCurrentPlan() {
+        if (!originalPlanName) return;
+
+        const basePlan = getBasePlanName(originalPlanName);
+        if (!basePlan) return;
+
+        // Select plan in dropdown
+        let matched = false;
+        for (let i = 0; i < planSelect.options.length; i++) {
+            if (planSelect.options[i].value === basePlan) {
+                planSelect.value = basePlan;
+                matched = true;
+                break;
+            }
+        }
+        if (!matched) return;
+
+        // Trigger plan change logic manually (show duration, facilities, etc.)
+        planSelect.dispatchEvent(new Event('change'));
+
+        // Pre-select duration
+        if (originalDuration > 0) {
+            durationSelect.value = originalDuration.toString();
+            durationSelect.dispatchEvent(new Event('change'));
+        }
+
+        // Pre-check facilities for customized plans
+        if (requiredFacilities > 0) {
+            const colonIdx = originalPlanName.indexOf(':');
+            if (colonIdx > 0) {
+                const facilities = originalPlanName.substring(colonIdx + 1).split(',').map(f => f.trim());
+                facilityChecks.forEach(chk => {
+                    if (facilities.includes(chk.value)) chk.checked = true;
+                });
+                updatePlanName();
+            }
+        }
+
+        // Now set paid/due to DB values (after calculateFinalPrice set them to standard)
+        newPaidNowInput.value = originalPaid;
+        newDueAmountInput.value = originalDue;
+        totalPayable = originalPaid + originalDue;
+        totalPayableDisplay.textContent = totalPayable.toLocaleString();
+        updateNewPaymentStatus(originalPaid, originalDue);
+
+        // Calculate existing discount
+        const stdPrice = parseInt(basePrice.value) || 0;
+        const actualTotal = originalPaid + originalDue;
+        if (actualTotal > 0 && actualTotal < stdPrice && stdPrice > 0) {
+            const discAmt = stdPrice - actualTotal;
+            discountType = 'amount';
+            btnAmount.classList.add('active');
+            btnPercent.classList.remove('active');
+            discountSuffix.textContent = 'Rs.';
+            discountInput.value = discAmt;
+            discountAmount.textContent = discAmt.toLocaleString();
+        }
+
+        // Activate new plan pricing names so they submit
+        activateNewPlanPricing();
+        hiddenPlanName.value = originalPlanName;
+        hiddenDuration.value = originalDuration.toString();
+    }
+
+    // Initialize on page load
+    initCurrentPlan();
 </script>
 }

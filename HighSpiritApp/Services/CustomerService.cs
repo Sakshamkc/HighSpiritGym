@@ -268,6 +268,7 @@ namespace HighSpiritApp.Services
                     membership.PlanName = vm.PlanName;
                     membership.PaidPrice = vm.PaidPrice ?? 0;
                     membership.DueAmount = vm.DueAmount ?? 0;
+                    membership.Duration = vm.Duration > 0 ? vm.Duration : membership.Duration;
                     membership.StartDate = vm.StartDate;
                     membership.ExpireDate = vm.ExpireDate ?? vm.StartDate.AddMonths(vm.Duration > 0 ? vm.Duration : membership.Duration);
                     membership.UpdatedAt = DateTime.Now;
