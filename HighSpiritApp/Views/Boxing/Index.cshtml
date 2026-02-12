@@ -55,8 +55,19 @@
         <input type="hidden" name="category" value="@category" />
         <input type="hidden" name="paymentStatus" value="@ViewBag.PaymentStatus" />
 
+        @if (!isAll)
+        {
+            <a href="/Boxing/Create?category=@category"
+               class="btn btn-primary ms-auto" style="border-radius:10px; font-weight:500; padding:10px 18px;">
+                <i class="fa-solid fa-user-plus me-1"></i> Add Member
+            </a>
+            <a href="/Boxing/Import?category=@category"
+               class="btn btn-warning" style="border-radius:10px; font-weight:500; padding:10px 18px;">
+                <i class="fa-solid fa-file-import me-1"></i> Import
+            </a>
+        }
         <a href="/Boxing/ExportAll?category=@category"
-           class="btn btn-success export-btn ms-auto">
+           class="btn btn-success export-btn @(isAll ? "ms-auto" : "")">
             <i class="fa-solid fa-file-excel me-1"></i> Export
         </a>
     </div>

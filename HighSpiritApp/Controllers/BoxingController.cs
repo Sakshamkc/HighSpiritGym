@@ -62,7 +62,7 @@ namespace HighSpiritApp.Controllers
             int total = membersList.Count;
 
             var data = membersList
-                .OrderByDescending(x => x.JoinDate)
+                .OrderBy(x => x.Name)
                 .Skip((page - 1) * pageSize)
                 .Take(pageSize)
                 .ToList();
