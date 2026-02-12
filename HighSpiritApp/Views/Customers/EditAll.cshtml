@@ -793,6 +793,22 @@
 
     if (newPaidNowInput) {
         newPaidNowInput.addEventListener('input', function() {
+            // If totalPayable hasn't been set yet, calculate it from base price and discount
+            if (totalPayable === 0) {
+                const price = parseInt(basePrice.value) || 0;
+                if (price > 0) {
+                    const discountValue = parseFloat(discountInput.value) || 0;
+                    let discountAmt = 0;
+                    if (discountType === 'percent') {
+                        discountAmt = Math.round(price * (discountValue / 100));
+                    } else {
+                        discountAmt = Math.round(discountValue);
+                    }
+                    discountAmt = Math.min(discountAmt, price);
+                    totalPayable = Math.max(0, price - discountAmt);
+                    totalPayableDisplay.textContent = totalPayable.toLocaleString();
+                }
+            }
             const paid = parseInt(this.value) || 0;
             const due = Math.max(0, totalPayable - paid);
             newDueAmountInput.value = due;
