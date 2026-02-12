@@ -16,7 +16,11 @@ namespace HighSpiritApp.Services.Interfaces
         Task UpdateAsync(BoxingMember member);
         Task DeleteAsync(int id);
         Task<ImportResult> ImportFromExcelAsync(Stream fileStream);
+        Task<ImportResult> ImportFromExcelAsync(Stream fileStream, string category);
         Task<BoxingStats> GetStatsAsync();
+        Task<IEnumerable<BoxingMember>> GetByCategoryAsync(string category);
+        Task<IEnumerable<BoxingMember>> SearchByCategoryAsync(string? searchTerm, string category);
+        Task<BoxingStats> GetStatsByCategoryAsync(string category);
     }
 
     public class BoxingStats

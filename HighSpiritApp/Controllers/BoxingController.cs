@@ -19,13 +19,27 @@ namespace HighSpiritApp.Controllers
             _boxingService = boxingService;
         }
 
-        public async Task<IActionResult> Index(string search, string filter = "all", string paymentStatus = "", int page = 1)
+        public async Task<IActionResult> Index(string category = "Children", string search = "", string filter = "all", string paymentStatus = "", int page = 1)
         {
+            // Validate category
+            if (category != "Adult" && category != "Children" && category != "All")
+                category = "Children";
+
             int pageSize = 10;
 
-            var allMembers = string.IsNullOrEmpty(search)
-                ? await _boxingService.GetAllAsync()
-                : await _boxingService.SearchAsync(search);
+            IEnumerable<BoxingMember> allMembers;
+            if (category == "All")
+            {
+                allMembers = string.IsNullOrEmpty(search)
+                    ? await _boxingService.GetAllAsync()
+                    : await _boxingService.SearchAsync(search);
+            }
+            else
+            {
+                allMembers = string.IsNullOrEmpty(search)
+                    ? await _boxingService.GetByCategoryAsync(category)
+                    : await _boxingService.SearchByCategoryAsync(search, category);
+            }
 
             var membersList = allMembers.ToList();
             
@@ -58,17 +72,22 @@ namespace HighSpiritApp.Controllers
             ViewBag.Search = search;
             ViewBag.Filter = filter;
             ViewBag.PaymentStatus = paymentStatus;
+            ViewBag.Category = category;
 
             return View(data);
         }
 
-        public IActionResult Create()
+        public IActionResult Create(string category = "Children")
         {
+            if (category != "Adult" && category != "Children")
+                category = "Children";
+
+            ViewBag.Category = category;
             return View();
         }
 
         [HttpPost]
-        public async Task<IActionResult> Create(BoxingMember model, IFormFile photoFile)
+        public async Task<IActionResult> Create(BoxingMember model, IFormFile photoFile, string category = "Children")
         {
             if (photoFile != null && photoFile.Length > 0)
             {
@@ -79,11 +98,12 @@ namespace HighSpiritApp.Controllers
 
             // Auto calculate price
             model.Price = model.CashAmount + model.EsewaAmount;
+            model.Category = category;
 
             await _boxingService.CreateAsync(model);
 
-            TempData["success"] = "Boxing member added successfully!";
-            return RedirectToAction("Index");
+            TempData["success"] = $"{category} boxing member added successfully!";
+            return RedirectToAction("Index", new { category });
         }
 
         public async Task<IActionResult> Edit(int id)
@@ -91,6 +111,7 @@ namespace HighSpiritApp.Controllers
             var member = await _boxingService.GetByIdAsync(id);
             if (member == null) return NotFound();
 
+            ViewBag.Category = member.Category;
             return View(member);
         }
 
@@ -99,6 +120,8 @@ namespace HighSpiritApp.Controllers
         {
             var member = await _boxingService.GetByIdAsync(model.BoxingMemberID);
             if (member == null) return NotFound();
+
+            var category = member.Category; // preserve original category
 
             // Update fields
             member.Name = model.Name;
@@ -122,7 +145,7 @@ namespace HighSpiritApp.Controllers
             await _boxingService.UpdateAsync(member);
 
             TempData["success"] = "Boxing member updated successfully!";
-            return RedirectToAction("Index");
+            return RedirectToAction("Index", new { category });
         }
 
         public async Task<IActionResult> Details(int id)
@@ -130,33 +153,42 @@ namespace HighSpiritApp.Controllers
             var member = await _boxingService.GetByIdAsync(id);
             if (member == null) return NotFound();
 
+            ViewBag.Category = member.Category;
             return View(member);
         }
 
         [HttpPost]
         public async Task<IActionResult> Delete(int id)
         {
+            var member = await _boxingService.GetByIdAsync(id);
+            var category = member?.Category ?? "Children";
+
             await _boxingService.DeleteAsync(id);
             TempData["success"] = "Boxing member deleted successfully.";
-            return RedirectToAction("Index");
+            return RedirectToAction("Index", new { category });
         }
 
-        public IActionResult Import()
+        public IActionResult Import(string category = "Children")
         {
+            if (category != "Adult" && category != "Children")
+                category = "Children";
+
+            ViewBag.Category = category;
             return View();
         }
 
         [HttpPost]
-        public async Task<IActionResult> Import(IFormFile file)
+        public async Task<IActionResult> Import(IFormFile file, string category = "Children")
         {
             if (file == null || file.Length == 0)
             {
                 TempData["error"] = "Please select an Excel file.";
+                ViewBag.Category = category;
                 return View();
             }
 
             using var stream = file.OpenReadStream();
-            var result = await _boxingService.ImportFromExcelAsync(stream);
+            var result = await _boxingService.ImportFromExcelAsync(stream, category);
 
             if (result.Success)
             {
@@ -167,13 +199,18 @@ namespace HighSpiritApp.Controllers
                 TempData["error"] = $"Import failed: {result.ErrorMessage}";
             }
 
-            return RedirectToAction("Index");
+            return RedirectToAction("Index", new { category });
         }
 
         [HttpGet]
-        public async Task<IActionResult> ExportAll()
+        public async Task<IActionResult> ExportAll(string category = "Children")
         {
-            var members = (await _boxingService.GetAllAsync()).ToList();
+            if (category != "Adult" && category != "Children" && category != "All")
+                category = "Children";
+
+            var members = category == "All"
+                ? (await _boxingService.GetAllAsync()).ToList()
+                : (await _boxingService.GetByCategoryAsync(category)).ToList();
 
             using var workbook = new XLWorkbook();
             var ws = workbook.Worksheets.Add("BoxingMembers");
@@ -209,7 +246,7 @@ namespace HighSpiritApp.Controllers
             return File(
                 stream.ToArray(),
                 "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-                "Boxing Members Backup.xlsx"
+                $"{category} Boxing Members Backup.xlsx"
             );
         }
     }

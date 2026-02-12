@@ -42,5 +42,33 @@ namespace HighSpiritApp.Repositories
                            (b.GuardianContact != null && b.GuardianContact.Contains(searchTerm)))
                 .ToListAsync();
         }
+
+        public async Task<IEnumerable<BoxingMember>> GetByCategoryAsync(string category)
+        {
+            return await _context.BoxingMembers
+                .Where(b => b.Category == category)
+                .OrderByDescending(b => b.JoinDate)
+                .ToListAsync();
+        }
+
+        public async Task<IEnumerable<BoxingMember>> SearchByCategoryAsync(string? searchTerm, string category)
+        {
+            if (string.IsNullOrEmpty(searchTerm))
+                return await GetByCategoryAsync(category);
+
+            return await _context.BoxingMembers
+                .Where(b => b.Category == category &&
+                           (b.Name.Contains(searchTerm) ||
+                           (b.GuardianContact != null && b.GuardianContact.Contains(searchTerm))))
+                .ToListAsync();
+        }
+
+        public async Task<IEnumerable<BoxingMember>> GetMembersWithDueByCategoryAsync(string category)
+        {
+            return await _context.BoxingMembers
+                .Where(b => b.Category == category && b.DueAmount > 0)
+                .OrderByDescending(b => b.DueAmount)
+                .ToListAsync();
+        }
     }
 }

@@ -11,5 +11,8 @@ namespace HighSpiritApp.Repositories.Interfaces
         Task<IEnumerable<BoxingMember>> GetFullyPaidMembersAsync();
         Task<decimal> GetTotalDueAmountAsync();
         Task<IEnumerable<BoxingMember>> SearchAsync(string? searchTerm);
+        Task<IEnumerable<BoxingMember>> GetByCategoryAsync(string category);
+        Task<IEnumerable<BoxingMember>> SearchByCategoryAsync(string? searchTerm, string category);
+        Task<IEnumerable<BoxingMember>> GetMembersWithDueByCategoryAsync(string category);
     }
 }

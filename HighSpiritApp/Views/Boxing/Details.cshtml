@@ -3,6 +3,10 @@
     Layout = "~/Views/Shared/_Layout.cshtml";
     var hasDue = Model.DueAmount > 0;
     var totalPaid = Model.CashAmount + Model.EsewaAmount;
+    string category = ViewBag.Category ?? Model.Category ?? "Children";
+    bool isAdult = category == "Adult";
+    string memberLabel = isAdult ? "Member" : "Kid";
+    string categoryLabel = isAdult ? "Adult" : "Children";
     
     string FormatDateLong(DateTime? date)
     {
@@ -284,7 +288,7 @@
                     <a href="/Boxing/Edit/@Model.BoxingMemberID" class="action-btn btn btn-light">
                         <i class="fa-solid fa-edit"></i> Edit
                     </a>
-                    <a href="/Boxing" class="action-btn btn btn-outline-light">
+                    <a href="/Boxing?category=@category" class="action-btn btn btn-outline-light">
                         <i class="fa-solid fa-arrow-left"></i> Back
                     </a>
                 </div>
@@ -328,8 +332,8 @@
     <div class="col-lg-6">
         <div class="info-card">
             <div class="info-card-header kid">
-                <i class="fa-solid fa-child"></i>
-                <h5>Kid Information</h5>
+                <i class="fa-solid @(isAdult ? "fa-person" : "fa-child")"></i>
+                <h5>@memberLabel Information</h5>
             </div>
             <div class="info-card-body">
                 <div class="info-grid">
@@ -424,7 +428,7 @@
 
 <!-- Back Button -->
 <div class="mt-4">
-    <a href="/Boxing" class="btn btn-outline-secondary btn-lg px-4">
-        <i class="fa-solid fa-arrow-left me-2"></i> Back to Boxing Members
+    <a href="/Boxing?category=@category" class="btn btn-outline-secondary btn-lg px-4">
+        <i class="fa-solid fa-arrow-left me-2"></i> Back to @categoryLabel Boxing Members
     </a>
 </div>

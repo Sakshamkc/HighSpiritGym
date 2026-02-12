@@ -2,11 +2,17 @@
 @{
     Layout = "~/Views/Shared/_Layout.cshtml";
     int sn = (ViewBag.Page - 1) * 10 + 1;
+    string category = ViewBag.Category ?? "Children";
+    bool isAdult = category == "Adult";
+    bool isAll = category == "All";
+    string categoryLabel = isAll ? "All" : (isAdult ? "Adult" : "Children");
+    string categoryIcon = isAll ? "fa-hand-fist" : (isAdult ? "fa-person" : "fa-child");
     
     // Build query string for links
     string BuildQuery(string? overridePayment = null, int? overridePage = null)
     {
         var parts = new List<string>();
+        parts.Add($"category={category}");
         if (!string.IsNullOrEmpty(ViewBag.Search as string))
             parts.Add($"search={ViewBag.Search}");
         if (!string.IsNullOrEmpty(overridePayment) || !string.IsNullOrEmpty(ViewBag.PaymentStatus as string))
@@ -22,7 +28,7 @@
 
 <h4 class="mb-3 page-title">
     <i class="fa-solid fa-hand-fist me-2 text-danger"></i>
-    <span>Boxing Members</span>
+    <span>@categoryLabel Boxing Members</span>
 </h4>
 
 <form method="get" class="mb-3" id="searchForm">
@@ -33,7 +39,7 @@
                    id="searchInput"
                    value="@ViewBag.Search"
                    class="form-control search-input"
-                   placeholder="Search by kid or guardian name..."
+                   placeholder="Search by @(isAdult ? "member" : "kid") or guardian name..."
                    autocomplete="off" />
             @if (!string.IsNullOrEmpty(ViewBag.Search as string))
             {
@@ -46,9 +52,10 @@
                 <span>Search</span>
             </button>
         </div>
+        <input type="hidden" name="category" value="@category" />
         <input type="hidden" name="paymentStatus" value="@ViewBag.PaymentStatus" />
 
-        <a href="/Boxing/ExportAll"
+        <a href="/Boxing/ExportAll?category=@category"
            class="btn btn-success export-btn ms-auto">
             <i class="fa-solid fa-file-excel me-1"></i> Export
         </a>
@@ -132,7 +139,7 @@
             @if (hasActiveFilters)
             {
                 <div class="ms-auto">
-                    <a href="?search=@ViewBag.Search" class="btn btn-clear-filters">
+                    <a href="?category=@category&search=@ViewBag.Search" class="btn btn-clear-filters">
                         <i class="fa-solid fa-times me-1"></i>Clear
                     </a>
                 </div>
@@ -144,7 +151,7 @@
         {
             <div class="active-filters-tags mt-3 pt-3 border-top">
                 <span class="text-muted small me-2"><i class="fa-solid fa-tag me-1"></i>Active:</span>
-                @if (!string.IsNullOrEmpty((string)ViewBag.PaymentStatus))
+        @if (!string.IsNullOrEmpty((string)ViewBag.PaymentStatus))
                 {
                     <span class="filter-tag @(ViewBag.PaymentStatus == "due" ? "tag-due" : "tag-paid")">
                         <i class="fa-solid @(ViewBag.PaymentStatus == "due" ? "fa-exclamation-triangle" : "fa-check-circle") me-1"></i>@(ViewBag.PaymentStatus == "due" ? "With Due" : "Fully Paid")
@@ -683,6 +690,9 @@
             const url = new URL(window.location.href);
             url.searchParams.delete('search');
             url.searchParams.set('page', '1');
+            if (!url.searchParams.has('category')) {
+                url.searchParams.set('category', '@category');
+            }
             window.location.href = url.toString();
         });
     }

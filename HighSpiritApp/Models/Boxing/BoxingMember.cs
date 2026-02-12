@@ -34,6 +34,12 @@ namespace HighSpiritApp.Models.Boxing
 
         public byte[]? Photo { get; set; }
 
+        /// <summary>
+        /// Category: "Adult" or "Children"
+        /// </summary>
+        [Required]
+        public string Category { get; set; } = "Children";
+
         public DateTime CreatedAt { get; set; } = DateTime.Now;
         public DateTime? UpdatedAt { get; set; }
     }

@@ -832,15 +832,42 @@
                 </a>
             </div>
             <div class="collapse submenu-container @(controller == "Boxing" ? "show" : "")" id="boxingMenu">
-                <a href="/Boxing" class="nav-link submenu" onclick="closeSidebarOnMobile()">
+                <!-- All Boxing Members -->
+                <a href="/Boxing?category=All" class="nav-link submenu @(controller == "Boxing" && ViewBag.Category as string == "All" && ViewContext.RouteData.Values["action"]?.ToString() == "Index" ? "active" : "")" onclick="closeSidebarOnMobile()">
+                    <i class="fa-solid fa-users"></i>
+                    <span class="nav-text">All Members</span>
+                </a>
+
+                <!-- Children Boxing -->
+                <p class="nav-section-subtitle px-3 pt-2 mb-1" style="font-size:11px; color:#94a3b8; text-transform:uppercase; letter-spacing:0.5px; font-weight:600;">
+                    <i class="fa-solid fa-child me-1"></i> Children Boxing
+                </p>
+                <a href="/Boxing?category=Children" class="nav-link submenu @(controller == "Boxing" && ViewBag.Category as string == "Children" && ViewContext.RouteData.Values["action"]?.ToString() == "Index" ? "active" : "")" onclick="closeSidebarOnMobile()">
                     <i class="fa-solid fa-users"></i>
                     <span class="nav-text">View Members</span>
                 </a>
-                <a href="/Boxing/Create" class="nav-link submenu" onclick="closeSidebarOnMobile()">
+                <a href="/Boxing/Create?category=Children" class="nav-link submenu" onclick="closeSidebarOnMobile()">
                     <i class="fa-solid fa-user-plus"></i>
                     <span class="nav-text">Add Member</span>
                 </a>
-                <a href="/Boxing/Import" class="nav-link submenu" onclick="closeSidebarOnMobile()">
+                <a href="/Boxing/Import?category=Children" class="nav-link submenu" onclick="closeSidebarOnMobile()">
+                    <i class="fa-solid fa-file-import"></i>
+                    <span class="nav-text">Import Excel</span>
+                </a>
+
+                <!-- Adult Boxing -->
+                <p class="nav-section-subtitle px-3 pt-2 mb-1" style="font-size:11px; color:#94a3b8; text-transform:uppercase; letter-spacing:0.5px; font-weight:600;">
+                    <i class="fa-solid fa-person me-1"></i> Adult Boxing
+                </p>
+                <a href="/Boxing?category=Adult" class="nav-link submenu @(controller == "Boxing" && ViewBag.Category as string == "Adult" && ViewContext.RouteData.Values["action"]?.ToString() == "Index" ? "active" : "")" onclick="closeSidebarOnMobile()">
+                    <i class="fa-solid fa-users"></i>
+                    <span class="nav-text">View Members</span>
+                </a>
+                <a href="/Boxing/Create?category=Adult" class="nav-link submenu" onclick="closeSidebarOnMobile()">
+                    <i class="fa-solid fa-user-plus"></i>
+                    <span class="nav-text">Add Member</span>
+                </a>
+                <a href="/Boxing/Import?category=Adult" class="nav-link submenu" onclick="closeSidebarOnMobile()">
                     <i class="fa-solid fa-file-import"></i>
                     <span class="nav-text">Import Excel</span>
                 </a>

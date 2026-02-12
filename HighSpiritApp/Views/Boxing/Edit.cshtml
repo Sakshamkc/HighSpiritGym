@@ -4,6 +4,9 @@
     var joinDateValue = Model.JoinDate.HasValue && Model.JoinDate.Value > DateTime.MinValue
         ? Model.JoinDate.Value.ToString("yyyy-MM-dd")
         : "";
+    string category = ViewBag.Category ?? Model.Category ?? "Children";
+    bool isAdult = category == "Adult";
+    string memberLabel = isAdult ? "Member" : "Kid";
 }
 
 <style>
@@ -201,9 +204,9 @@
 <div class="edit-header">
     <h4>
         <i class="fa-solid fa-user-pen"></i>
-        Edit Boxing Member
+        Edit @(isAdult ? "Adult" : "Children") Boxing Member
     </h4>
-    <a href="/Boxing" class="btn btn-outline-light">
+    <a href="/Boxing?category=@category" class="btn btn-outline-light">
         <i class="fa-solid fa-arrow-left me-2"></i> Back
     </a>
 </div>
@@ -217,14 +220,14 @@
             <!-- Kid Information -->
             <div class="form-card">
                 <div class="form-card-header kid">
-                    <i class="fa-solid fa-child"></i>
-                    <h5>Kid Information</h5>
+                    <i class="fa-solid @(isAdult ? "fa-person" : "fa-child")"></i>
+                    <h5>@memberLabel Information</h5>
                 </div>
                 <div class="form-card-body">
                     <div class="row g-3">
                         <div class="col-md-6">
-                            <label class="form-label">Kid Name <span class="required">*</span></label>
-                            <input asp-for="Name" class="form-control" placeholder="Enter kid's full name" required />
+                            <label class="form-label">@memberLabel Name <span class="required">*</span></label>
+                            <input asp-for="Name" class="form-control" placeholder="Enter @(memberLabel.ToLower())'s full name" required />
                         </div>
                         <div class="col-md-6">
                             <label class="form-label">Join Date</label>
@@ -380,7 +383,7 @@
         <button type="submit" class="btn btn-success btn-save btn-lg">
             <i class="fa-solid fa-check me-2"></i> Save Changes
         </button>
-        <a href="/Boxing" class="btn btn-outline-secondary btn-cancel btn-lg">
+        <a href="/Boxing?category=@category" class="btn btn-outline-secondary btn-cancel btn-lg">
             Cancel
         </a>
     </div>
