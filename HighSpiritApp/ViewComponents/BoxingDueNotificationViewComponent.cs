@@ -15,11 +15,20 @@ namespace HighSpiritApp.ViewComponents
             _boxingService = boxingService;
         }
 
-        public async Task<IViewComponentResult> InvokeAsync()
+        public async Task<IViewComponentResult> InvokeAsync(string? category = null)
         {
             var dueMembers = (await _boxingService.GetMembersWithDueAsync()).ToList();
 
+            // Filter by category if specified
+            if (!string.IsNullOrEmpty(category))
+            {
+                dueMembers = dueMembers
+                    .Where(b => b.Category.Equals(category, StringComparison.OrdinalIgnoreCase))
+                    .ToList();
+            }
+
             ViewBag.DueCount = dueMembers.Count;
+            ViewBag.Category = category;
 
             return View(dueMembers.Take(5).ToList());
         }

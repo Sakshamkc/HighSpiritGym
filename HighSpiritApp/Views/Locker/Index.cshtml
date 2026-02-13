@@ -3,7 +3,7 @@
     Layout = "~/Views/Shared/_Layout.cshtml";
     var currentGender = ViewBag.Gender ?? "Gents";
     var isGents = currentGender == "Gents";
-    
+
     string BuildQuery(string? overrideGender = null, string? overrideStatus = null, int? overridePage = null)
     {
         var parts = new List<string>();
@@ -27,14 +27,21 @@
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 
 <style>
-    .locker-page { font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; }
-    
+    .locker-page {
+        font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    }
+
     /* Header */
-    .page-header { 
-        background: linear-gradient(135deg, @(isGents ? "#3b82f6 0%, #1d4ed8" : "#ec4899 0%, #be185d") 100%);
-        border-radius: 16px; 
-        padding: 25px 30px; 
-        color: white; 
+    .page-header {
+        background: linear-gradient(135deg,
+                @(isGents
+                ?
+                "#3b82f6 0%, #1d4ed8" :
+                "#ec4899 0%, #be185d")
+                100%);
+        border-radius: 16px;
+        padding: 25px 30px;
+        color: white;
         margin-bottom: 24px;
         display: flex;
         align-items: center;
@@ -42,62 +49,264 @@
         flex-wrap: wrap;
         gap: 16px;
     }
-    .page-title { font-weight: 700; font-size: 24px; display: flex; align-items: center; gap: 12px; margin: 0; }
-    .gender-toggle { display: flex; background: rgba(255,255,255,0.15); border-radius: 10px; padding: 4px; }
-    .gender-toggle a { 
-        padding: 8px 20px; 
-        border-radius: 8px; 
-        color: rgba(255,255,255,0.8); 
-        text-decoration: none; 
-        font-weight: 600; 
+
+    .page-title {
+        font-weight: 700;
+        font-size: 24px;
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        margin: 0;
+    }
+
+    .gender-toggle {
+        display: flex;
+        background: rgba(255, 255, 255, 0.15);
+        border-radius: 10px;
+        padding: 4px;
+    }
+
+    .gender-toggle a {
+        padding: 8px 20px;
+        border-radius: 8px;
+        color: rgba(255, 255, 255, 0.8);
+        text-decoration: none;
+        font-weight: 600;
         font-size: 14px;
         transition: all 0.2s;
         display: flex;
         align-items: center;
         gap: 8px;
     }
-    .gender-toggle a:hover { color: white; }
-    .gender-toggle a.active { background: white; color: @(isGents ? "#2563eb" : "#db2777"); }
-    
-    /* Filter Row */
-    .filter-row { display: flex; flex-wrap: wrap; gap: 12px; align-items: center; margin-bottom: 24px; }
-    .search-box { position: relative; flex: 1; min-width: 250px; max-width: 400px; }
-    .search-box input { width: 100%; padding: 12px 16px 12px 44px; border: 2px solid #e2e8f0; border-radius: 12px; font-size: 14px; background: #fff; transition: all 0.2s; }
-    .search-box input:focus { outline: none; border-color: @(isGents ? "#3b82f6" : "#ec4899"); box-shadow: 0 0 0 4px @(isGents ? "rgba(59, 130, 246, 0.1)" : "rgba(236, 72, 153, 0.1)"); }
-    .search-box i { position: absolute; left: 16px; top: 50%; transform: translateY(-50%); color: #94a3b8; }
-    
-    .btn-action { padding: 12px 20px; border-radius: 12px; font-size: 14px; font-weight: 600; display: inline-flex; align-items: center; gap: 8px; transition: all 0.2s; text-decoration: none; border: none; }
-    .btn-export { background: linear-gradient(135deg, #dcfce7 0%, #bbf7d0 100%); color: #16a34a; }
-    .btn-export:hover { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(22,163,74,0.2); color: #15803d; }
-    .btn-import { background: #f8fafc; color: #64748b; border: 1px solid #e2e8f0; }
-    .btn-import:hover { background: #f1f5f9; color: #475569; }
-    .btn-add { background: linear-gradient(135deg, @(isGents ? "#3b82f6 0%, #2563eb" : "#ec4899 0%, #db2777") 100%); color: white; }
-    .btn-add:hover { transform: translateY(-2px); box-shadow: 0 4px 12px @(isGents ? "rgba(59, 130, 246, 0.3)" : "rgba(236, 72, 153, 0.3)"); color: white; }
-    
-    /* Stats Row */
-    .stats-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 16px; margin-bottom: 24px; }
-    .stat-card { background: white; border-radius: 14px; padding: 18px 20px; border: 2px solid #e2e8f0; cursor: pointer; transition: all 0.25s; text-decoration: none; display: block; }
-    .stat-card:hover { transform: translateY(-3px); box-shadow: 0 8px 25px rgba(0,0,0,0.1); }
-    .stat-card.active { border-color: @(isGents ? "#3b82f6" : "#ec4899"); box-shadow: 0 0 0 4px @(isGents ? "rgba(59, 130, 246, 0.1)" : "rgba(236, 72, 153, 0.1)"); }
-    .stat-card .stat-icon { width: 44px; height: 44px; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 18px; margin-bottom: 12px; }
-    .stat-card .stat-value { font-size: 28px; font-weight: 800; color: #1e293b; line-height: 1; }
-    .stat-card .stat-label { font-size: 13px; color: #64748b; margin-top: 6px; font-weight: 600; }
-    .stat-card.total .stat-icon { background: linear-gradient(135deg, #f3e8ff 0%, #e9d5ff 100%); color: #7c3aed; }
-    .stat-card.empty .stat-icon { background: linear-gradient(135deg, #dcfce7 0%, #bbf7d0 100%); color: #16a34a; }
-    .stat-card.occupied .stat-icon { background: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%); color: #2563eb; }
-    .stat-card.locked .stat-icon { background: linear-gradient(135deg, #f1f5f9 0%, #e2e8f0 100%); color: #64748b; }
-    .stat-card.expired .stat-icon { background: linear-gradient(135deg, #fee2e2 0%, #fecaca 100%); color: #dc2626; }
-    .stat-card.due .stat-icon { background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%); color: #d97706; }
-    .stat-card.due .stat-value { color: #dc2626; font-size: 22px; }
-    
-    /* Locker Panel */
-    .locker-panel-container { 
-        background: white; 
-        border-radius: 20px; 
-        border: 1px solid #e2e8f0; 
-        overflow: hidden;
-        box-shadow: 0 4px 20px rgba(0,0,0,0.05);
+
+    .gender-toggle a:hover {
+        color: white;
     }
+
+    .gender-toggle a.active {
+        background: white;
+        color:
+            @(isGents
+            ?
+            "#2563eb" :
+            "#db2777")
+        ;
+    }
+
+    /* Filter Row */
+    .filter-row {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 12px;
+        align-items: center;
+        margin-bottom: 24px;
+    }
+
+    .search-box {
+        position: relative;
+        flex: 1;
+        min-width: 250px;
+        max-width: 400px;
+    }
+
+    .search-box input {
+        width: 100%;
+        padding: 12px 16px 12px 44px;
+        border: 2px solid #e2e8f0;
+        border-radius: 12px;
+        font-size: 14px;
+        background: #fff;
+        transition: all 0.2s;
+    }
+
+    .search-box input:focus {
+        outline: none;
+        border-color:
+            @(isGents
+            ?
+            "#3b82f6" :
+            "#ec4899")
+        ;
+        box-shadow: 0 0 0 4px
+            @(isGents
+            ?
+            "rgba(59, 130, 246, 0.1)" :
+            "rgba(236, 72, 153, 0.1)")
+        ;
+    }
+
+    .search-box i {
+        position: absolute;
+        left: 16px;
+        top: 50%;
+        transform: translateY(-50%);
+        color: #94a3b8;
+    }
+
+    .btn-action {
+        padding: 12px 20px;
+        border-radius: 12px;
+        font-size: 14px;
+        font-weight: 600;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        transition: all 0.2s;
+        text-decoration: none;
+        border: none;
+    }
+
+    .btn-export {
+        background: linear-gradient(135deg, #dcfce7 0%, #bbf7d0 100%);
+        color: #16a34a;
+    }
+
+    .btn-export:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(22, 163, 74, 0.2);
+        color: #15803d;
+    }
+
+    .btn-import {
+        background: #f8fafc;
+        color: #64748b;
+        border: 1px solid #e2e8f0;
+    }
+
+    .btn-import:hover {
+        background: #f1f5f9;
+        color: #475569;
+    }
+
+    .btn-add {
+        background: linear-gradient(135deg,
+                @(isGents
+                ?
+                "#3b82f6 0%, #2563eb" :
+                "#ec4899 0%, #db2777")
+                100%);
+        color: white;
+    }
+
+    .btn-add:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px
+            @(isGents
+            ?
+            "rgba(59, 130, 246, 0.3)" :
+            "rgba(236, 72, 153, 0.3)")
+        ;
+        color: white;
+    }
+
+    /* Stats Row */
+    .stats-row {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+        gap: 16px;
+        margin-bottom: 24px;
+    }
+
+    .stat-card {
+        background: white;
+        border-radius: 14px;
+        padding: 18px 20px;
+        border: 2px solid #e2e8f0;
+        cursor: pointer;
+        transition: all 0.25s;
+        text-decoration: none;
+        display: block;
+    }
+
+    .stat-card:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+    }
+
+    .stat-card.active {
+        border-color:
+            @(isGents
+            ?
+            "#3b82f6" :
+            "#ec4899")
+        ;
+        box-shadow: 0 0 0 4px
+            @(isGents
+            ?
+            "rgba(59, 130, 246, 0.1)" :
+            "rgba(236, 72, 153, 0.1)")
+        ;
+    }
+
+    .stat-card .stat-icon {
+        width: 44px;
+        height: 44px;
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 18px;
+        margin-bottom: 12px;
+    }
+
+    .stat-card .stat-value {
+        font-size: 28px;
+        font-weight: 800;
+        color: #1e293b;
+        line-height: 1;
+    }
+
+    .stat-card .stat-label {
+        font-size: 13px;
+        color: #64748b;
+        margin-top: 6px;
+        font-weight: 600;
+    }
+
+    .stat-card.total .stat-icon {
+        background: linear-gradient(135deg, #f3e8ff 0%, #e9d5ff 100%);
+        color: #7c3aed;
+    }
+
+    .stat-card.empty .stat-icon {
+        background: linear-gradient(135deg, #dcfce7 0%, #bbf7d0 100%);
+        color: #16a34a;
+    }
+
+    .stat-card.occupied .stat-icon {
+        background: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%);
+        color: #2563eb;
+    }
+
+    .stat-card.locked .stat-icon {
+        background: linear-gradient(135deg, #f1f5f9 0%, #e2e8f0 100%);
+        color: #64748b;
+    }
+
+    .stat-card.expired .stat-icon {
+        background: linear-gradient(135deg, #fee2e2 0%, #fecaca 100%);
+        color: #dc2626;
+    }
+
+    .stat-card.due .stat-icon {
+        background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+        color: #d97706;
+    }
+
+    .stat-card.due .stat-value {
+        color: #dc2626;
+        font-size: 22px;
+    }
+
+    /* Locker Panel */
+    .locker-panel-container {
+        background: white;
+        border-radius: 20px;
+        border: 1px solid #e2e8f0;
+        overflow: hidden;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+    }
+
     .locker-panel-header {
         background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
         padding: 20px 25px;
@@ -106,6 +315,7 @@
         align-items: center;
         justify-content: space-between;
     }
+
     .locker-panel-header h5 {
         margin: 0;
         font-weight: 700;
@@ -114,22 +324,24 @@
         align-items: center;
         gap: 10px;
     }
+
     .locker-panel-header .count-info {
         font-size: 14px;
         color: #64748b;
     }
+
     .locker-panel {
         background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
         padding: 25px;
     }
-    
+
     /* Locker Grid */
     .locker-grid {
         display: grid;
         grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
         gap: 16px;
     }
-    
+
     /* Locker Card */
     .locker-card {
         background: white;
@@ -141,6 +353,7 @@
         position: relative;
         overflow: hidden;
     }
+
     .locker-card::before {
         content: '';
         position: absolute;
@@ -151,29 +364,68 @@
         opacity: 0;
         transition: opacity 0.2s ease;
     }
+
     .locker-card:hover {
         transform: translateY(-4px);
-        box-shadow: 0 12px 30px rgba(0,0,0,0.12);
+        box-shadow: 0 12px 30px rgba(0, 0, 0, 0.12);
     }
-    .locker-card:hover::before { opacity: 1; }
-    
+
+    .locker-card:hover::before {
+        opacity: 1;
+    }
+
     /* Locker States */
-    .locker-card.empty { border-color: #bbf7d0; }
-    .locker-card.empty::before { background: linear-gradient(135deg, #10b981 0%, #059669 100%); }
-    .locker-card.empty:hover { border-color: #10b981; }
-    
-    .locker-card.occupied { border-color: #bfdbfe; }
-    .locker-card.occupied::before { background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%); }
-    .locker-card.occupied:hover { border-color: #3b82f6; }
-    
-    .locker-card.expired { border-color: #fecaca; background: #fef2f2; }
-    .locker-card.expired::before { background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%); opacity: 1; }
-    .locker-card.expired:hover { border-color: #ef4444; }
-    
-    .locker-card.locked { border-color: #e2e8f0; background: #f8fafc; }
-    .locker-card.locked::before { background: linear-gradient(135deg, #94a3b8 0%, #64748b 100%); }
-    .locker-card.locked:hover { border-color: #94a3b8; }
-    
+    .locker-card.empty {
+        border-color: #bbf7d0;
+    }
+
+    .locker-card.empty::before {
+        background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+    }
+
+    .locker-card.empty:hover {
+        border-color: #10b981;
+    }
+
+    .locker-card.occupied {
+        border-color: #bfdbfe;
+    }
+
+    .locker-card.occupied::before {
+        background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+    }
+
+    .locker-card.occupied:hover {
+        border-color: #3b82f6;
+    }
+
+    .locker-card.expired {
+        border-color: #fecaca;
+        background: #fef2f2;
+    }
+
+    .locker-card.expired::before {
+        background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+        opacity: 1;
+    }
+
+    .locker-card.expired:hover {
+        border-color: #ef4444;
+    }
+
+    .locker-card.locked {
+        border-color: #e2e8f0;
+        background: #f8fafc;
+    }
+
+    .locker-card.locked::before {
+        background: linear-gradient(135deg, #94a3b8 0%, #64748b 100%);
+    }
+
+    .locker-card.locked:hover {
+        border-color: #94a3b8;
+    }
+
     .locker-card .locker-icon {
         width: 50px;
         height: 50px;
@@ -184,11 +436,27 @@
         justify-content: center;
         font-size: 20px;
     }
-    .locker-card.empty .locker-icon { background: linear-gradient(135deg, #dcfce7 0%, #bbf7d0 100%); color: #16a34a; }
-    .locker-card.occupied .locker-icon { background: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%); color: #2563eb; }
-    .locker-card.expired .locker-icon { background: linear-gradient(135deg, #fee2e2 0%, #fecaca 100%); color: #dc2626; }
-    .locker-card.locked .locker-icon { background: linear-gradient(135deg, #f1f5f9 0%, #e2e8f0 100%); color: #64748b; }
-    
+
+    .locker-card.empty .locker-icon {
+        background: linear-gradient(135deg, #dcfce7 0%, #bbf7d0 100%);
+        color: #16a34a;
+    }
+
+    .locker-card.occupied .locker-icon {
+        background: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%);
+        color: #2563eb;
+    }
+
+    .locker-card.expired .locker-icon {
+        background: linear-gradient(135deg, #fee2e2 0%, #fecaca 100%);
+        color: #dc2626;
+    }
+
+    .locker-card.locked .locker-icon {
+        background: linear-gradient(135deg, #f1f5f9 0%, #e2e8f0 100%);
+        color: #64748b;
+    }
+
     .locker-card .locker-number {
         font-size: 28px;
         font-weight: 800;
@@ -196,7 +464,7 @@
         line-height: 1;
         margin-bottom: 6px;
     }
-    
+
     .locker-card .locker-status {
         font-size: 10px;
         font-weight: 700;
@@ -207,16 +475,33 @@
         display: inline-block;
         margin-bottom: 10px;
     }
-    .locker-card.empty .locker-status { background: #dcfce7; color: #166534; }
-    .locker-card.occupied .locker-status { background: #dbeafe; color: #1e40af; }
-    .locker-card.expired .locker-status { background: #fee2e2; color: #991b1b; }
-    .locker-card.locked .locker-status { background: #f1f5f9; color: #475569; }
-    
+
+    .locker-card.empty .locker-status {
+        background: #dcfce7;
+        color: #166534;
+    }
+
+    .locker-card.occupied .locker-status {
+        background: #dbeafe;
+        color: #1e40af;
+    }
+
+    .locker-card.expired .locker-status {
+        background: #fee2e2;
+        color: #991b1b;
+    }
+
+    .locker-card.locked .locker-status {
+        background: #f1f5f9;
+        color: #475569;
+    }
+
     .locker-card .member-info {
         border-top: 1px solid #f1f5f9;
         padding-top: 10px;
         margin-top: 8px;
     }
+
     .locker-card .member-name {
         font-size: 12px;
         font-weight: 600;
@@ -226,18 +511,24 @@
         text-overflow: ellipsis;
         margin-bottom: 4px;
     }
+
     .locker-card .member-expiry {
         font-size: 11px;
         color: #64748b;
     }
-    .locker-card.expired .member-expiry { color: #dc2626; font-weight: 600; }
-    
+
+    .locker-card.expired .member-expiry {
+        color: #dc2626;
+        font-weight: 600;
+    }
+
     .locker-card .locker-actions {
         display: flex;
         gap: 6px;
         justify-content: center;
         margin-top: 12px;
     }
+
     .locker-card .btn-sm-icon {
         width: 32px;
         height: 32px;
@@ -251,15 +542,47 @@
         transition: all 0.2s;
         text-decoration: none;
     }
-    .locker-card .btn-sm-icon.assign { background: #dcfce7; color: #16a34a; }
-    .locker-card .btn-sm-icon.assign:hover { background: #bbf7d0; transform: scale(1.1); }
-    .locker-card .btn-sm-icon.renew { background: #dbeafe; color: #2563eb; }
-    .locker-card .btn-sm-icon.renew:hover { background: #bfdbfe; transform: scale(1.1); }
-    .locker-card .btn-sm-icon.release { background: #fef3c7; color: #d97706; }
-    .locker-card .btn-sm-icon.release:hover { background: #fde68a; transform: scale(1.1); }
-    .locker-card .btn-sm-icon.edit { background: #f1f5f9; color: #64748b; }
-    .locker-card .btn-sm-icon.edit:hover { background: #e2e8f0; transform: scale(1.1); }
-    
+
+    .locker-card .btn-sm-icon.assign {
+        background: #dcfce7;
+        color: #16a34a;
+    }
+
+    .locker-card .btn-sm-icon.assign:hover {
+        background: #bbf7d0;
+        transform: scale(1.1);
+    }
+
+    .locker-card .btn-sm-icon.renew {
+        background: #dbeafe;
+        color: #2563eb;
+    }
+
+    .locker-card .btn-sm-icon.renew:hover {
+        background: #bfdbfe;
+        transform: scale(1.1);
+    }
+
+    .locker-card .btn-sm-icon.release {
+        background: #fef3c7;
+        color: #d97706;
+    }
+
+    .locker-card .btn-sm-icon.release:hover {
+        background: #fde68a;
+        transform: scale(1.1);
+    }
+
+    .locker-card .btn-sm-icon.edit {
+        background: #f1f5f9;
+        color: #64748b;
+    }
+
+    .locker-card .btn-sm-icon.edit:hover {
+        background: #e2e8f0;
+        transform: scale(1.1);
+    }
+
     /* Due Badge */
     .due-badge {
         position: absolute;
@@ -273,7 +596,7 @@
         border-radius: 6px;
         z-index: 2;
     }
-    
+
     /* Locker Card Link */
     .locker-card-link {
         display: block;
@@ -281,265 +604,552 @@
         color: inherit;
         cursor: pointer;
     }
+
     .locker-card-link:hover {
         color: inherit;
     }
+
     .locker-card-link .locker-icon,
     .locker-card-link .locker-number,
     .locker-card-link .locker-status,
     .locker-card-link .member-info {
         transition: transform 0.2s ease;
     }
+
     .locker-card:hover .locker-card-link .locker-icon {
         transform: scale(1.05);
     }
-    
+
     /* Empty State */
-    .empty-state { text-align: center; padding: 60px 20px; }
-    .empty-state i { font-size: 64px; color: #cbd5e1; margin-bottom: 20px; display: block; }
-    .empty-state h5 { color: #64748b; font-weight: 600; margin-bottom: 8px; }
-    .empty-state p { color: #94a3b8; font-size: 14px; }
-    
-    /* Pagination */
-    .pagination-wrapper { display: flex; justify-content: center; margin-top: 24px; }
-    .pagination { display: flex; gap: 6px; list-style: none; padding: 0; margin: 0; }
-    .pagination .page-link { 
-        padding: 10px 16px; 
-        border: 2px solid #e2e8f0; 
-        border-radius: 10px; 
-        color: #64748b; 
-        font-size: 14px; 
-        font-weight: 600; 
-        text-decoration: none; 
-        transition: all 0.2s; 
+    .empty-state {
+        text-align: center;
+        padding: 60px 20px;
     }
-    .pagination .page-link:hover { background: #f8fafc; color: #1e293b; border-color: #cbd5e1; }
-    .pagination .page-item.active .page-link { background: @(isGents ? "#3b82f6" : "#ec4899"); color: white; border-color: @(isGents ? "#3b82f6" : "#ec4899"); }
-    .pagination .page-item.disabled .page-link { color: #cbd5e1; pointer-events: none; }
-    
+
+    .empty-state i {
+        font-size: 64px;
+        color: #cbd5e1;
+        margin-bottom: 20px;
+        display: block;
+    }
+
+    .empty-state h5 {
+        color: #64748b;
+        font-weight: 600;
+        margin-bottom: 8px;
+    }
+
+    .empty-state p {
+        color: #94a3b8;
+        font-size: 14px;
+    }
+
+    /* Pagination */
+    .pagination-wrapper {
+        display: flex;
+        justify-content: center;
+        margin-top: 24px;
+    }
+
+    .pagination {
+        display: flex;
+        gap: 6px;
+        list-style: none;
+        padding: 0;
+        margin: 0;
+    }
+
+    .pagination .page-link {
+        padding: 10px 16px;
+        border: 2px solid #e2e8f0;
+        border-radius: 10px;
+        color: #64748b;
+        font-size: 14px;
+        font-weight: 600;
+        text-decoration: none;
+        transition: all 0.2s;
+    }
+
+    .pagination .page-link:hover {
+        background: #f8fafc;
+        color: #1e293b;
+        border-color: #cbd5e1;
+    }
+
+    .pagination .page-item.active .page-link {
+        background:
+            @(isGents
+            ?
+            "#3b82f6" :
+            "#ec4899")
+        ;
+        color: white;
+        border-color:
+            @(isGents
+            ?
+            "#3b82f6" :
+            "#ec4899")
+        ;
+    }
+
+    .pagination .page-item.disabled .page-link {
+        color: #cbd5e1;
+        pointer-events: none;
+    }
+
     /* Responsive - Mobile Optimized */
     @@media (max-width: 768px) {
-        .page-header { 
-            flex-direction: column; 
-            align-items: stretch; 
+        .page-header {
+            flex-direction: column;
+            align-items: stretch;
             text-align: center;
             padding: 20px;
             gap: 12px;
         }
+
         .page-title {
             justify-content: center;
             font-size: 20px;
         }
-        .gender-toggle { 
+
+        .gender-toggle {
             justify-content: center;
             width: 100%;
         }
+
         .gender-toggle a {
             flex: 1;
             justify-content: center;
             padding: 10px 12px;
             font-size: 13px;
         }
-        
-        .filter-row { 
+
+        .filter-row {
             flex-direction: column;
             gap: 12px;
         }
-        .search-box { 
+
+        .search-box {
             max-width: 100%;
             width: 100%;
             min-width: unset;
         }
+
         .filter-row .ms-auto {
             margin-left: 0 !important;
             width: 100%;
         }
+
         .filter-row .ms-auto.d-flex {
             justify-content: stretch;
         }
+
         .filter-row .btn-action {
             flex: 1;
             justify-content: center;
             padding: 10px 12px;
             font-size: 13px;
         }
-        
-        .stats-row { 
+
+        .stats-row {
             grid-template-columns: repeat(2, 1fr);
             gap: 10px;
         }
+
         .stat-card {
             padding: 14px;
         }
+
         .stat-card .stat-icon {
             width: 36px;
             height: 36px;
             font-size: 14px;
             margin-bottom: 8px;
         }
+
         .stat-card .stat-value {
             font-size: 22px;
         }
+
         .stat-card .stat-label {
             font-size: 11px;
         }
+
         .stat-card.due .stat-value {
             font-size: 16px;
         }
-        
+
         .locker-panel-header {
             flex-direction: column;
             gap: 8px;
             text-align: center;
             padding: 16px;
         }
+
         .locker-panel {
             padding: 16px;
         }
-        .locker-grid { 
-            grid-template-columns: repeat(auto-fill, minmax(110px, 1fr)); 
-            gap: 10px; 
+
+        .locker-grid {
+            grid-template-columns: repeat(auto-fill, minmax(110px, 1fr));
+            gap: 10px;
         }
-        .locker-card { 
-            padding: 12px; 
+
+        .locker-card {
+            padding: 12px;
         }
-        .locker-card .locker-icon { 
-            width: 40px; 
-            height: 40px; 
+
+        .locker-card .locker-icon {
+            width: 40px;
+            height: 40px;
             font-size: 16px;
             margin-bottom: 8px;
         }
-        .locker-card .locker-number { 
-            font-size: 22px; 
+
+        .locker-card .locker-number {
+            font-size: 22px;
         }
+
         .locker-card .locker-status {
             font-size: 9px;
             padding: 3px 8px;
         }
+
         .locker-card .member-name {
             font-size: 11px;
         }
+
         .locker-card .member-expiry {
             font-size: 10px;
         }
+
         .locker-card .locker-actions {
             margin-top: 10px;
         }
+
         .locker-card .btn-sm-icon {
             width: 28px;
             height: 28px;
             font-size: 11px;
         }
     }
-    
+
     @@media (max-width: 576px) {
         .page-header {
             padding: 16px;
         }
+
         .page-title {
             font-size: 18px;
         }
+
         .gender-toggle a {
             padding: 8px 10px;
             font-size: 12px;
             gap: 6px;
         }
-        
+
         .filter-row .ms-auto.d-flex.flex-wrap {
             flex-direction: column;
             width: 100%;
         }
+
         .filter-row .btn-action {
             width: 100%;
         }
-        
-        .locker-grid { 
+
+        .locker-grid {
             grid-template-columns: repeat(2, 1fr);
             gap: 8px;
         }
-        .stats-row { 
+
+        .stats-row {
             grid-template-columns: repeat(2, 1fr);
             gap: 8px;
         }
+
         .stat-card {
             padding: 12px;
         }
+
         .stat-card .stat-value {
             font-size: 20px;
         }
+
         .stat-card.due .stat-value {
             font-size: 14px;
         }
-        
+
         .locker-card {
             padding: 10px;
         }
+
         .locker-card .locker-icon {
             width: 36px;
             height: 36px;
             font-size: 14px;
         }
+
         .locker-card .locker-number {
             font-size: 20px;
         }
+
         .locker-card .due-badge {
             font-size: 8px;
             padding: 2px 5px;
         }
-        
+
         .empty-state {
             padding: 40px 16px;
         }
+
         .empty-state i {
             font-size: 48px;
         }
+
         .empty-state .d-flex {
             flex-direction: column;
         }
+
         .empty-state .btn-action {
             width: 100%;
             justify-content: center;
         }
     }
-    
+
     @@media (max-width: 400px) {
         .gender-toggle {
             flex-direction: column;
             gap: 4px;
         }
+
         .gender-toggle a {
             width: 100%;
         }
-        
+
         .stats-row {
             grid-template-columns: repeat(2, 1fr);
         }
-        
+
         .locker-grid {
             grid-template-columns: repeat(2, 1fr);
             gap: 6px;
         }
+
         .locker-card {
             padding: 8px;
         }
+
         .locker-card .locker-icon {
             width: 32px;
             height: 32px;
             font-size: 12px;
             margin-bottom: 6px;
         }
+
         .locker-card .locker-number {
             font-size: 18px;
         }
+
         .locker-card .locker-status {
             font-size: 8px;
             padding: 2px 6px;
         }
+
         .locker-card .btn-sm-icon {
             width: 26px;
             height: 26px;
             font-size: 10px;
         }
+    }
+
+    /* Dark Mode Overrides */
+    [data-theme="dark"] .stat-card {
+        background: #1e293b !important;
+        border-color: #334155 !important;
+    }
+
+    [data-theme="dark"] .stat-card .stat-value {
+        color: #e2e8f0 !important;
+    }
+
+    [data-theme="dark"] .stat-card .stat-label {
+        color: #94a3b8 !important;
+    }
+
+    [data-theme="dark"] .stat-card.due .stat-value {
+        color: #fca5a5 !important;
+    }
+
+    [data-theme="dark"] .locker-panel-container {
+        background: #1e293b !important;
+        border-color: #334155 !important;
+    }
+
+    [data-theme="dark"] .locker-panel-header {
+        background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%) !important;
+        border-bottom-color: #334155 !important;
+    }
+
+    [data-theme="dark"] .locker-panel-header h5 {
+        color: #e2e8f0 !important;
+    }
+
+    [data-theme="dark"] .locker-panel-header .count-info {
+        color: #94a3b8 !important;
+    }
+
+    [data-theme="dark"] .locker-panel {
+        background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%) !important;
+    }
+
+    [data-theme="dark"] .locker-card {
+        background: #1e293b !important;
+        border-color: #334155 !important;
+    }
+
+    [data-theme="dark"] .locker-card.empty {
+        border-color: #166534 !important;
+    }
+
+    [data-theme="dark"] .locker-card.occupied {
+        border-color: #1d4ed8 !important;
+    }
+
+    [data-theme="dark"] .locker-card.expired {
+        border-color: #991b1b !important;
+        background: #450a0a !important;
+    }
+
+    [data-theme="dark"] .locker-card.locked {
+        border-color: #475569 !important;
+        background: #0f172a !important;
+    }
+
+    [data-theme="dark"] .locker-card.empty .locker-icon {
+        background: linear-gradient(135deg, #14532d 0%, #166534 100%) !important;
+        color: #86efac !important;
+    }
+
+    [data-theme="dark"] .locker-card.occupied .locker-icon {
+        background: linear-gradient(135deg, #1e3a5f 0%, #1d4ed8 100%) !important;
+        color: #93c5fd !important;
+    }
+
+    [data-theme="dark"] .locker-card.expired .locker-icon {
+        background: linear-gradient(135deg, #7f1d1d 0%, #991b1b 100%) !important;
+        color: #fca5a5 !important;
+    }
+
+    [data-theme="dark"] .locker-card.locked .locker-icon {
+        background: linear-gradient(135deg, #334155 0%, #475569 100%) !important;
+        color: #94a3b8 !important;
+    }
+
+    [data-theme="dark"] .locker-card .locker-number {
+        color: #e2e8f0 !important;
+    }
+
+    [data-theme="dark"] .locker-card .member-name {
+        color: #e2e8f0 !important;
+    }
+
+    [data-theme="dark"] .locker-card .member-expiry {
+        color: #94a3b8 !important;
+    }
+
+    [data-theme="dark"] .locker-card .member-info {
+        border-top-color: #334155 !important;
+    }
+
+    [data-theme="dark"] .locker-card.empty .locker-status {
+        background: #14532d !important;
+        color: #86efac !important;
+    }
+
+    [data-theme="dark"] .locker-card.occupied .locker-status {
+        background: #1e3a5f !important;
+        color: #93c5fd !important;
+    }
+
+    [data-theme="dark"] .locker-card.expired .locker-status {
+        background: #7f1d1d !important;
+        color: #fca5a5 !important;
+    }
+
+    [data-theme="dark"] .locker-card.locked .locker-status {
+        background: #334155 !important;
+        color: #94a3b8 !important;
+    }
+
+    [data-theme="dark"] .locker-card .btn-sm-icon.assign {
+        background: #14532d !important;
+        color: #86efac !important;
+    }
+
+    [data-theme="dark"] .locker-card .btn-sm-icon.renew {
+        background: #1e3a5f !important;
+        color: #93c5fd !important;
+    }
+
+    [data-theme="dark"] .locker-card .btn-sm-icon.release {
+        background: #78350f !important;
+        color: #fde68a !important;
+    }
+
+    [data-theme="dark"] .locker-card .btn-sm-icon.edit {
+        background: #334155 !important;
+        color: #94a3b8 !important;
+    }
+
+    [data-theme="dark"] .search-box input {
+        background: #1e293b !important;
+        border-color: #334155 !important;
+        color: #e2e8f0 !important;
+    }
+
+    [data-theme="dark"] .search-box input:focus {
+        background: #1e293b !important;
+    }
+
+    [data-theme="dark"] .btn-import {
+        background: #334155 !important;
+        border-color: #475569 !important;
+        color: #94a3b8 !important;
+    }
+
+    [data-theme="dark"] .btn-import:hover {
+        background: #475569;
+        color: #e2e8f0;
+    }
+
+    [data-theme="dark"] .btn-export {
+        background: linear-gradient(135deg, #14532d 0%, #166534 100%);
+        color: #86efac;
+    }
+
+    [data-theme="dark"] .pagination .page-link {
+        border-color: #334155;
+        color: #94a3b8;
+        background: #1e293b;
+    }
+
+    [data-theme="dark"] .pagination .page-link:hover {
+        background: #334155;
+        color: #e2e8f0;
+        border-color: #475569;
+    }
+
+    [data-theme="dark"] .empty-state h5 {
+        color: #94a3b8;
+    }
+
+    [data-theme="dark"] .empty-state p {
+        color: #64748b;
+    }
+
+    [data-theme="dark"] .empty-state i {
+        color: #475569;
     }
 </style>
 
@@ -551,10 +1161,12 @@
             Locker Management
         </h4>
         <div class="gender-toggle">
-            <a href="@BuildQuery(overrideGender: "Gents", overrideStatus: ViewBag.Status)" class="@(currentGender == "Gents" ? "active" : "")">
+            <a href="@BuildQuery(overrideGender: "Gents", overrideStatus: ViewBag.Status)"
+                   class="@(currentGender == "Gents" ? "active" : "")">
                 <i class="fa-solid fa-mars"></i> Gents (@ViewBag.GentsTotal)
             </a>
-            <a href="@BuildQuery(overrideGender: "Ladies", overrideStatus: ViewBag.Status)" class="@(currentGender == "Ladies" ? "active" : "")">
+            <a href="@BuildQuery(overrideGender: "Ladies", overrideStatus: ViewBag.Status)"
+                   class="@(currentGender == "Ladies" ? "active" : "")">
                 <i class="fa-solid fa-venus"></i> Ladies (@ViewBag.LadiesTotal)
             </a>
         </div>
@@ -566,13 +1178,13 @@
             <i class="fa-solid fa-search"></i>
             <input type="text" name="search" value="@ViewBag.Search" placeholder="Search locker, name, package..." />
         </div>
-        
+
         <input type="hidden" name="gender" value="@currentGender" />
         <input type="hidden" name="status" value="@ViewBag.Status" />
-        
+
         <div class="ms-auto d-flex gap-2 flex-wrap">
-            <a href="/Locker/Export?gender=@currentGender@(string.IsNullOrEmpty(ViewBag.Status as string) ? "" : $"&status={ViewBag.Status}")" 
-               class="btn-action btn-export" title="Export to Excel">
+            <a href="/Locker/Export?gender=@currentGender@(string.IsNullOrEmpty(ViewBag.Status as string) ? "" : $"&status={ViewBag.Status}")"
+                   class="btn-action btn-export" title="Export to Excel">
                 <i class="fa-solid fa-file-excel"></i> Export
             </a>
             <a href="/Locker/Import?gender=@currentGender" class="btn-action btn-import">
@@ -586,27 +1198,32 @@
 
     <!-- Stats Row -->
     <div class="stats-row">
-        <a href="@BuildQuery(overrideStatus: "")" class="stat-card total @(string.IsNullOrEmpty(ViewBag.Status as string) ? "active" : "")">
+        <a href="@BuildQuery(overrideStatus: "")"
+               class="stat-card total @(string.IsNullOrEmpty(ViewBag.Status as string) ? "active" : "")">
             <div class="stat-icon"><i class="fa-solid fa-lock"></i></div>
             <div class="stat-value">@ViewBag.CountAll</div>
             <div class="stat-label">Total Lockers</div>
         </a>
-        <a href="@BuildQuery(overrideStatus: "empty")" class="stat-card empty @(ViewBag.Status == "empty" ? "active" : "")">
+        <a href="@BuildQuery(overrideStatus: "empty")"
+               class="stat-card empty @(ViewBag.Status == "empty" ? "active" : "")">
             <div class="stat-icon"><i class="fa-solid fa-lock-open"></i></div>
             <div class="stat-value">@ViewBag.CountEmpty</div>
             <div class="stat-label">Empty</div>
         </a>
-        <a href="@BuildQuery(overrideStatus: "occupied")" class="stat-card occupied @(ViewBag.Status == "occupied" ? "active" : "")">
+        <a href="@BuildQuery(overrideStatus: "occupied")"
+               class="stat-card occupied @(ViewBag.Status == "occupied" ? "active" : "")">
             <div class="stat-icon"><i class="fa-solid fa-user-lock"></i></div>
             <div class="stat-value">@ViewBag.CountOccupied</div>
             <div class="stat-label">Occupied</div>
         </a>
-        <a href="@BuildQuery(overrideStatus: "locked")" class="stat-card locked @(ViewBag.Status == "locked" ? "active" : "")">
+        <a href="@BuildQuery(overrideStatus: "locked")"
+               class="stat-card locked @(ViewBag.Status == "locked" ? "active" : "")">
             <div class="stat-icon"><i class="fa-solid fa-ban"></i></div>
             <div class="stat-value">@ViewBag.CountLocked</div>
             <div class="stat-label">Locked</div>
         </a>
-        <a href="@BuildQuery(overrideStatus: "expired")" class="stat-card expired @(ViewBag.Status == "expired" ? "active" : "")">
+        <a href="@BuildQuery(overrideStatus: "expired")"
+               class="stat-card expired @(ViewBag.Status == "expired" ? "active" : "")">
             <div class="stat-icon"><i class="fa-solid fa-clock"></i></div>
             <div class="stat-value">@ViewBag.CountExpired</div>
             <div class="stat-label">Expired</div>
@@ -622,12 +1239,13 @@
     <div class="locker-panel-container">
         <div class="locker-panel-header">
             <h5>
-                <i class="fa-solid fa-@(isGents ? "mars" : "venus")" style="color: @(isGents ? "#3b82f6" : "#ec4899");"></i>
+                <i class="fa-solid fa-@(isGents ? "mars" : "venus")"
+                   style="color: @(isGents ? "#3b82f6" : "#ec4899");"></i>
                 @currentGender Lockers
             </h5>
             <span class="count-info">Showing @Model.Count of @ViewBag.CountAll lockers</span>
         </div>
-        
+
         <div class="locker-panel">
             @if (Model.Any())
             {
@@ -637,7 +1255,7 @@
                         var stateClass = "empty";
                         var statusText = "Empty";
                         var iconClass = "fa-lock-open";
-                        
+
                         if (locker.Status == "Locked")
                         {
                             stateClass = "locked";
@@ -656,22 +1274,22 @@
                             statusText = "Occupied";
                             iconClass = "fa-user-lock";
                         }
-                        
+
                         <div class="locker-card @stateClass">
                             @if (locker.DueAmount > 0)
                             {
                                 <span class="due-badge">DUE</span>
                             }
-                            
+
                             <!-- Make the main card content clickable to view details -->
                             <a href="/Locker/Details/@locker.LockerID" class="locker-card-link">
                                 <div class="locker-icon">
                                     <i class="fa-solid @iconClass"></i>
                                 </div>
-                                
+
                                 <div class="locker-number">@locker.LockerNumber</div>
                                 <span class="locker-status">@statusText</span>
-                                
+
                                 @if (!string.IsNullOrEmpty(locker.AssignedTo))
                                 {
                                     <div class="member-info">
@@ -686,7 +1304,7 @@
                                     </div>
                                 }
                             </a>
-                            
+
                             <div class="locker-actions">
                                 @if (stateClass == "empty")
                                 {
@@ -699,7 +1317,8 @@
                                     <a href="/Locker/Renew/@locker.LockerID" class="btn-sm-icon renew" title="Renew">
                                         <i class="fa-solid fa-rotate"></i>
                                     </a>
-                                    <button type="button" class="btn-sm-icon release" title="Release" data-bs-toggle="modal" data-bs-target="#releaseModal_@locker.LockerID">
+                                    <button type="button" class="btn-sm-icon release" title="Release" data-bs-toggle="modal"
+                                            data-bs-target="#releaseModal_@locker.LockerID">
                                         <i class="fa-solid fa-lock-open"></i>
                                     </button>
                                 }
@@ -707,88 +1326,96 @@
                                     <i class="fa-solid fa-pen"></i>
                                 </a>
                             </div>
-                            
+
                             <!-- Release Modal -->
                             <div class="modal fade" id="releaseModal_@locker.LockerID" tabindex="-1">
                                 <div class="modal-dialog modal-dialog-centered">
                                     <div class="modal-content" style="border-radius: 16px; border: none;">
                                         <div class="modal-header" style="background: #fef3c7; border-radius: 16px 16px 0 0;">
-                                            <h5 class="modal-title" style="font-weight: 600;"><i class="fa-solid fa-lock-open me-2 text-warning"></i>Release Locker</h5>
-                                            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-                                        </div>
-                                        <div class="modal-body" style="padding: 24px;">
-                                            <p style="font-size: 15px;">Release locker <strong>#@locker.LockerNumber</strong>?</p>
-                                            @if (!string.IsNullOrEmpty(locker.AssignedTo))
-                                            {
-                                                <p class="text-muted" style="font-size: 14px;">Assigned to: <strong>@locker.AssignedTo</strong></p>
-                                            }
-                                            @if (locker.DueAmount > 0)
-                                            {
-                                                <div class="alert alert-danger py-2" style="border-radius: 10px;">
-                                                    <i class="fa-solid fa-exclamation-triangle me-2"></i>Outstanding: <strong>Rs. @locker.DueAmount.ToString("N0")</strong>
-                                                </div>
-                                            }
-                                        </div>
-                                        <div class="modal-footer" style="border: none; padding: 16px 24px;">
-                                            <button type="button" class="btn btn-light" data-bs-dismiss="modal" style="border-radius: 8px;">Cancel</button>
-                                            <form method="post" action="/Locker/Release/@locker.LockerID" style="display:inline;">
-                                                <button type="submit" class="btn btn-warning" style="border-radius: 8px; font-weight: 600;">Yes, Release</button>
-                                            </form>
+                                            <h5 class="modal-title" style="font-weight: 600;"><i
+                                                class="fa-solid fa-lock-open me-2 text-warning"></i>Release Locker</h5>
+                                                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                                            </div>
+                                            <div class="modal-body" style="padding: 24px;">
+                                                <p style="font-size: 15px;">Release locker <strong>#@locker.LockerNumber</strong>?
+                                                </p>
+                                                @if (!string.IsNullOrEmpty(locker.AssignedTo))
+                                                {
+                                                    <p class="text-muted" style="font-size: 14px;">Assigned to:
+                                                        <strong>@locker.AssignedTo</strong>
+                                                    </p>
+                                                }
+                                                @if (locker.DueAmount > 0)
+                                                {
+                                                    <div class="alert alert-danger py-2" style="border-radius: 10px;">
+                                                        <i class="fa-solid fa-exclamation-triangle me-2"></i>Outstanding: <strong>Rs.
+                                                        @locker.DueAmount.ToString("N0")</strong>
+                                                    </div>
+                                                }
+                                            </div>
+                                            <div class="modal-footer" style="border: none; padding: 16px 24px;">
+                                                <button type="button" class="btn btn-light" data-bs-dismiss="modal"
+                                                        style="border-radius: 8px;">Cancel</button>
+                                                <form method="post" action="/Locker/Release/@locker.LockerID"
+                                                      style="display:inline;">
+                                                    <button type="submit" class="btn btn-warning"
+                                                            style="border-radius: 8px; font-weight: 600;">Yes, Release</button>
+                                                </form>
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
                             </div>
-                        </div>
-                    }
-                </div>
-            }
-            else
-            {
-                <div class="empty-state">
-                    <i class="fa-solid fa-lock"></i>
-                    <h5>No lockers found</h5>
-                    <p>Get started by importing from Excel or adding a new locker.</p>
-                    <div class="d-flex gap-2 justify-content-center mt-3">
-                        <a href="/Locker/Import?gender=@currentGender" class="btn-action btn-import">
-                            <i class="fa-solid fa-file-import"></i> Import Excel
-                        </a>
-                        <a href="/Locker/Create?gender=@currentGender" class="btn-action btn-add">
-                            <i class="fa-solid fa-plus"></i> Add Locker
-                        </a>
+                        }
                     </div>
-                </div>
-            }
-        </div>
-    </div>
-
-    <!-- Pagination -->
-    @if (Model.Any() && ViewBag.TotalPages > 1)
-    {
-        <div class="pagination-wrapper">
-            <ul class="pagination">
-                @{
-                    int current = ViewBag.Page;
-                    int total = ViewBag.TotalPages;
-                    int start = Math.Max(1, current - 2);
-                    int end = Math.Min(total, current + 2);
                 }
-                <li class="page-item @(current == 1 ? "disabled" : "")">
-                    <a class="page-link" href="@BuildQuery(overridePage: current - 1)">
-                        <i class="fa-solid fa-chevron-left"></i>
-                    </a>
-                </li>
-                @for (int i = start; i <= end; i++)
+            else
                 {
-                    <li class="page-item @(i == current ? "active" : "")">
-                        <a class="page-link" href="@BuildQuery(overridePage: i)">@i</a>
-                    </li>
+                    <div class="empty-state">
+                        <i class="fa-solid fa-lock"></i>
+                        <h5>No lockers found</h5>
+                        <p>Get started by importing from Excel or adding a new locker.</p>
+                        <div class="d-flex gap-2 justify-content-center mt-3">
+                            <a href="/Locker/Import?gender=@currentGender" class="btn-action btn-import">
+                                <i class="fa-solid fa-file-import"></i> Import Excel
+                            </a>
+                            <a href="/Locker/Create?gender=@currentGender" class="btn-action btn-add">
+                                <i class="fa-solid fa-plus"></i> Add Locker
+                            </a>
+                        </div>
+                    </div>
                 }
-                <li class="page-item @(current == total ? "disabled" : "")">
-                    <a class="page-link" href="@BuildQuery(overridePage: current + 1)">
-                        <i class="fa-solid fa-chevron-right"></i>
-                    </a>
-                </li>
-            </ul>
+            </div>
         </div>
-    }
-</div>
+
+        <!-- Pagination -->
+        @if (Model.Any() && ViewBag.TotalPages > 1)
+        {
+            <div class="pagination-wrapper">
+                <ul class="pagination">
+                    @{
+                        int current = ViewBag.Page;
+                        int total = ViewBag.TotalPages;
+                        int start = Math.Max(1, current - 2);
+                        int end = Math.Min(total, current + 2);
+                    }
+                    <li class="page-item @(current == 1 ? "disabled" : "")">
+                        <a class="page-link" href="@BuildQuery(overridePage: current - 1)">
+                            <i class="fa-solid fa-chevron-left"></i>
+                        </a>
+                    </li>
+                    @for (int i = start; i <= end; i++)
+                    {
+                        <li class="page-item @(i == current ? "active" : "")">
+                            <a class="page-link" href="@BuildQuery(overridePage: i)">@i</a>
+                        </li>
+                    }
+                    <li class="page-item @(current == total ? "disabled" : "")">
+                        <a class="page-link" href="@BuildQuery(overridePage: current + 1)">
+                            <i class="fa-solid fa-chevron-right"></i>
+                        </a>
+                    </li>
+                </ul>
+            </div>
+        }
+    </div>

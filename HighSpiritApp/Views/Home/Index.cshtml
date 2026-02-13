@@ -14,7 +14,7 @@
             <small class="text-muted">Welcome back! Here's your gym overview</small>
         </div>
     </div>
-    
+
     <!-- Quick Action Buttons -->
     <div class="quick-actions d-flex gap-2 flex-wrap mt-3 mt-md-0">
         <a href="/Customers/Create" class="btn btn-quick-action btn-gym">
@@ -80,6 +80,7 @@
     .btn-gym {
         background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
     }
+
     .btn-gym:hover {
         box-shadow: 0 6px 20px rgba(245, 158, 11, 0.4);
     }
@@ -87,6 +88,7 @@
     .btn-boxing {
         background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
     }
+
     .btn-boxing:hover {
         box-shadow: 0 6px 20px rgba(239, 68, 68, 0.4);
     }
@@ -94,6 +96,7 @@
     .btn-locker {
         background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%);
     }
+
     .btn-locker:hover {
         box-shadow: 0 6px 20px rgba(139, 92, 246, 0.4);
     }
@@ -106,22 +109,22 @@
             padding: 16px;
             gap: 16px;
         }
-        
-        .dashboard-header > .d-flex:first-child {
+
+        .dashboard-header>.d-flex:first-child {
             flex-direction: column;
             align-items: center;
         }
-        
+
         .dashboard-header .dashboard-icon {
             margin-right: 0 !important;
             margin-bottom: 12px;
         }
-        
+
         .quick-actions {
             width: 100%;
             justify-content: center;
         }
-        
+
         .btn-quick-action {
             flex: 1;
             justify-content: center;
@@ -129,40 +132,40 @@
             font-size: 13px;
         }
     }
-    
+
     @@media (max-width: 576px) {
         .dashboard-header {
             padding: 14px;
         }
-        
+
         .dashboard-header h3 {
             font-size: 1.25rem;
         }
-        
+
         .dashboard-icon {
             width: 44px;
             height: 44px;
             font-size: 20px;
         }
-        
+
         .quick-actions {
             flex-direction: column;
             width: 100%;
         }
-        
+
         .btn-quick-action {
             width: 100%;
             padding: 12px 16px;
         }
     }
-    
+
     .section-header {
         display: flex;
         align-items: center;
         gap: 12px;
         margin-bottom: 20px;
     }
-    
+
     .section-icon {
         width: 40px;
         height: 40px;
@@ -172,38 +175,38 @@
         justify-content: center;
         font-size: 18px;
     }
-    
+
     .section-icon.gym {
         background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
         color: white;
     }
-    
+
     .section-icon.locker {
         background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%);
         color: white;
     }
-    
+
     .section-icon.boxing {
         background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
         color: white;
     }
-    
+
     .stat-card {
         border: none;
         border-radius: 16px;
         overflow: hidden;
         transition: transform 0.2s ease, box-shadow 0.2s ease;
     }
-    
+
     .stat-card:hover {
         transform: translateY(-5px);
-        box-shadow: 0 10px 40px rgba(0,0,0,0.15) !important;
+        box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15) !important;
     }
-    
+
     .stat-card .card-body {
         padding: 20px;
     }
-    
+
     .stat-card .stat-icon {
         width: 50px;
         height: 50px;
@@ -212,58 +215,58 @@
         align-items: center;
         justify-content: center;
         font-size: 22px;
-        background: rgba(255,255,255,0.2);
+        background: rgba(255, 255, 255, 0.2);
         margin-bottom: 15px;
     }
-    
+
     .stat-card h2 {
         font-size: 2rem;
         font-weight: 700;
         margin-bottom: 5px;
     }
-    
+
     .stat-card p {
         font-size: 0.9rem;
         opacity: 0.9;
     }
-    
+
     .data-table {
         border-radius: 12px;
         overflow: hidden;
     }
-    
+
     .data-table .table {
         margin-bottom: 0;
     }
-    
+
     .table-header-icon {
         display: inline-flex;
         align-items: center;
         gap: 8px;
     }
-    
+
     .divider {
         border: none;
         height: 2px;
         background: linear-gradient(to right, transparent, #e5e7eb, transparent);
         margin: 40px 0;
     }
-    
+
     .locker-stats-row {
         display: flex;
         gap: 20px;
         flex-wrap: wrap;
     }
-    
+
     .locker-gender-card {
         flex: 1;
         min-width: 280px;
         background: white;
         border-radius: 16px;
         padding: 20px;
-        box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
     }
-    
+
     .locker-gender-header {
         display: flex;
         align-items: center;
@@ -272,55 +275,66 @@
         padding-bottom: 10px;
         border-bottom: 2px solid #f1f5f9;
     }
-    
+
     .locker-gender-header.gents {
         border-bottom-color: #3b82f6;
     }
-    
+
     .locker-gender-header.ladies {
         border-bottom-color: #ec4899;
     }
-    
+
     .locker-gender-header i {
         font-size: 20px;
     }
-    
+
     .locker-gender-header.gents i {
         color: #3b82f6;
     }
-    
+
     .locker-gender-header.ladies i {
         color: #ec4899;
     }
-    
+
     .locker-mini-stats {
         display: grid;
         grid-template-columns: repeat(2, 1fr);
         gap: 12px;
     }
-    
+
     .locker-mini-stat {
         background: #f8fafc;
         border-radius: 10px;
         padding: 12px;
         text-align: center;
     }
-    
+
     .locker-mini-stat .value {
         font-size: 1.5rem;
         font-weight: 700;
     }
-    
+
     .locker-mini-stat .label {
         font-size: 0.75rem;
         color: #64748b;
         text-transform: uppercase;
     }
-    
-    .locker-mini-stat.total .value { color: #6366f1; }
-    .locker-mini-stat.occupied .value { color: #3b82f6; }
-    .locker-mini-stat.empty .value { color: #10b981; }
-    .locker-mini-stat.expired .value { color: #ef4444; }
+
+    .locker-mini-stat.total .value {
+        color: #6366f1;
+    }
+
+    .locker-mini-stat.occupied .value {
+        color: #3b82f6;
+    }
+
+    .locker-mini-stat.empty .value {
+        color: #10b981;
+    }
+
+    .locker-mini-stat.expired .value {
+        color: #ef4444;
+    }
 
     /* Collapse button styles */
     .collapse-btn {
@@ -333,25 +347,157 @@
         border-radius: 8px;
         transition: all 0.3s ease;
     }
-    
+
     .collapse-btn:hover {
         background: #f1f5f9;
     }
-    
+
     .collapse-btn i {
         transition: transform 0.3s ease;
     }
-    
+
     .collapse-btn[aria-expanded="false"] i {
         transform: rotate(180deg);
     }
-    
+
     .collapse-btn[aria-expanded="true"] i {
         transform: rotate(0deg);
     }
 
     .text-purple {
         color: #8b5cf6 !important;
+    }
+
+    /* ========== DARK MODE OVERRIDES ========== */
+    [data-theme="dark"] .dashboard-header {
+        background: linear-gradient(135deg, #1e293b 0%, #334155 100%);
+        border-color: #475569;
+    }
+
+    [data-theme="dark"] .dashboard-header h3 {
+        color: #e2e8f0;
+    }
+
+    [data-theme="dark"] .section-header h5 {
+        color: #e2e8f0;
+    }
+
+    [data-theme="dark"] .locker-gender-card {
+        background: #1e293b;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.25);
+    }
+
+    [data-theme="dark"] .locker-gender-header h6 {
+        color: #e2e8f0;
+    }
+
+    [data-theme="dark"] .locker-gender-header {
+        border-bottom-color: #475569;
+    }
+
+    [data-theme="dark"] .locker-gender-header.gents {
+        border-bottom-color: #3b82f6;
+    }
+
+    [data-theme="dark"] .locker-gender-header.ladies {
+        border-bottom-color: #ec4899;
+    }
+
+    [data-theme="dark"] .locker-mini-stat {
+        background: #0f172a;
+    }
+
+    [data-theme="dark"] .locker-mini-stat .label {
+        color: #94a3b8;
+    }
+
+    [data-theme="dark"] .data-table {
+        background: #1e293b;
+    }
+
+    [data-theme="dark"] .data-table .card-body {
+        background: #1e293b !important;
+    }
+
+    [data-theme="dark"] .collapse-btn:hover {
+        background: #334155;
+    }
+
+    [data-theme="dark"] .divider {
+        background: linear-gradient(to right, transparent, #475569, transparent);
+    }
+
+    [data-theme="dark"] .btn-outline-primary {
+        color: #60a5fa;
+        border-color: #60a5fa;
+    }
+
+    [data-theme="dark"] .btn-outline-primary:hover {
+        background: rgba(59, 130, 246, 0.15);
+        color: #93bbfd;
+    }
+
+    /* Table text visibility in dark mode */
+    [data-theme="dark"] .table {
+        color: #e2e8f0;
+    }
+
+    [data-theme="dark"] .table td {
+        color: #cbd5e1;
+        border-color: #334155;
+    }
+
+    [data-theme="dark"] .table td.fw-semibold {
+        color: #f1f5f9;
+    }
+
+    [data-theme="dark"] .table th {
+        border-color: #334155;
+    }
+
+    [data-theme="dark"] .table-hover>tbody>tr:hover {
+        --bs-table-hover-bg: rgba(255, 255, 255, 0.05);
+        color: #f1f5f9;
+    }
+
+    /* Card & heading text */
+    [data-theme="dark"] .card {
+        background-color: #1e293b;
+        border-color: #334155;
+    }
+
+    [data-theme="dark"] .table-header-icon {
+        color: #e2e8f0;
+    }
+
+    [data-theme="dark"] .badge.bg-warning.text-dark {
+        color: #1e293b !important;
+    }
+
+    /* Buttons in dark mode */
+    [data-theme="dark"] .btn-outline-secondary {
+        color: #94a3b8;
+        border-color: #475569;
+    }
+
+    [data-theme="dark"] .btn-outline-secondary:hover {
+        background: #334155;
+        color: #e2e8f0;
+        border-color: #64748b;
+    }
+
+    [data-theme="dark"] .btn-sm.btn-outline-primary {
+        color: #60a5fa;
+        border-color: #3b82f6;
+    }
+
+    [data-theme="dark"] .btn-sm.btn-outline-primary:hover {
+        background: rgba(59, 130, 246, 0.2);
+        color: #93c5fd;
+    }
+
+    [data-theme="dark"] .text-muted {
+        color: #64748b !important;
     }
 </style>
 
@@ -368,7 +514,8 @@
 
 <div class="row g-4 mb-4">
     <div class="col-md-3 col-sm-6">
-        <div class="card stat-card shadow text-white" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
+        <div class="card stat-card shadow text-white"
+             style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
             <div class="card-body">
                 <div class="stat-icon">
                     <i class="fa-solid fa-users"></i>
@@ -380,7 +527,8 @@
     </div>
 
     <div class="col-md-3 col-sm-6">
-        <div class="card stat-card shadow text-white" style="background: linear-gradient(135deg, #10b981 0%, #059669 100%);">
+        <div class="card stat-card shadow text-white"
+             style="background: linear-gradient(135deg, #10b981 0%, #059669 100%);">
             <div class="card-body">
                 <div class="stat-icon">
                     <i class="fa-solid fa-circle-check"></i>
@@ -392,7 +540,8 @@
     </div>
 
     <div class="col-md-3 col-sm-6">
-        <div class="card stat-card shadow text-white" style="background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);">
+        <div class="card stat-card shadow text-white"
+             style="background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);">
             <div class="card-body">
                 <div class="stat-icon">
                     <i class="fa-solid fa-circle-xmark"></i>
@@ -404,7 +553,8 @@
     </div>
 
     <div class="col-md-3 col-sm-6">
-        <div class="card stat-card shadow text-white" style="background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);">
+        <div class="card stat-card shadow text-white"
+             style="background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);">
             <div class="card-body">
                 <div class="stat-icon">
                     <i class="fa-solid fa-clock"></i>
@@ -418,7 +568,8 @@
 
 <div class="row mb-4">
     <div class="col-md-4 col-sm-6 mb-3">
-        <div class="card stat-card shadow text-white" style="background: linear-gradient(135deg, #06b6d4 0%, #0891b2 100%);">
+        <div class="card stat-card shadow text-white"
+             style="background: linear-gradient(135deg, #06b6d4 0%, #0891b2 100%);">
             <div class="card-body">
                 <div class="stat-icon">
                     <i class="fa-solid fa-user-plus"></i>
@@ -428,9 +579,10 @@
             </div>
         </div>
     </div>
-    
+
     <div class="col-md-4 col-sm-6 mb-3">
-        <div class="card stat-card shadow text-white" style="background: linear-gradient(135deg, #ec4899 0%, #db2777 100%);">
+        <div class="card stat-card shadow text-white"
+             style="background: linear-gradient(135deg, #ec4899 0%, #db2777 100%);">
             <div class="card-body">
                 <div class="stat-icon">
                     <i class="fa-solid fa-money-bill-wave"></i>
@@ -453,7 +605,8 @@
                 Gym Members Expiring in 7 Days
                 <span class="badge bg-warning text-dark ms-2">@Model.Count()</span>
             </h5>
-            <button class="btn btn-sm btn-outline-secondary collapse-btn" type="button" data-bs-toggle="collapse" data-bs-target="#gymExpiringTable" aria-expanded="true">
+            <button class="btn btn-sm btn-outline-secondary collapse-btn" type="button" data-bs-toggle="collapse"
+                    data-bs-target="#gymExpiringTable" aria-expanded="true">
                 <i class="fa-solid fa-chevron-up"></i>
             </button>
         </div>
@@ -554,7 +707,7 @@
             </div>
         </div>
     </div>
-    
+
     <!-- Ladies Lockers -->
     <div class="locker-gender-card">
         <div class="locker-gender-header ladies">
@@ -580,9 +733,10 @@
             </div>
         </div>
     </div>
-    
+
     <!-- Total Due Card -->
-    <div class="card stat-card shadow text-white" style="background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%); min-width: 200px; flex: 0.5;">
+    <div class="card stat-card shadow text-white"
+         style="background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%); min-width: 200px; flex: 0.5;">
         <div class="card-body d-flex flex-column justify-content-center">
             <div class="stat-icon">
                 <i class="fa-solid fa-money-bill-wave"></i>
@@ -607,7 +761,8 @@
                     <span class="badge bg-danger ms-2">@ViewBag.LockerExpiredList.Count</span>
                 }
             </h5>
-            <button class="btn btn-sm btn-outline-secondary collapse-btn" type="button" data-bs-toggle="collapse" data-bs-target="#lockerExpiredTable" aria-expanded="true">
+            <button class="btn btn-sm btn-outline-secondary collapse-btn" type="button" data-bs-toggle="collapse"
+                    data-bs-target="#lockerExpiredTable" aria-expanded="true">
                 <i class="fa-solid fa-chevron-up"></i>
             </button>
         </div>
@@ -687,7 +842,8 @@
 
 <div class="row g-4 mb-4">
     <div class="col-md-3 col-sm-6">
-        <div class="card stat-card shadow text-white" style="background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);">
+        <div class="card stat-card shadow text-white"
+             style="background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);">
             <div class="card-body">
                 <div class="stat-icon">
                     <i class="fa-solid fa-users"></i>
@@ -699,7 +855,8 @@
     </div>
 
     <div class="col-md-3 col-sm-6">
-        <div class="card stat-card shadow text-white" style="background: linear-gradient(135deg, #10b981 0%, #059669 100%);">
+        <div class="card stat-card shadow text-white"
+             style="background: linear-gradient(135deg, #10b981 0%, #059669 100%);">
             <div class="card-body">
                 <div class="stat-icon">
                     <i class="fa-solid fa-circle-check"></i>
@@ -711,7 +868,8 @@
     </div>
 
     <div class="col-md-3 col-sm-6">
-        <div class="card stat-card shadow text-white" style="background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);">
+        <div class="card stat-card shadow text-white"
+             style="background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);">
             <div class="card-body">
                 <div class="stat-icon">
                     <i class="fa-solid fa-user-clock"></i>
@@ -723,7 +881,8 @@
     </div>
 
     <div class="col-md-3 col-sm-6">
-        <div class="card stat-card shadow text-white" style="background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);">
+        <div class="card stat-card shadow text-white"
+             style="background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);">
             <div class="card-body">
                 <div class="stat-icon">
                     <i class="fa-solid fa-money-bill-wave"></i>
@@ -749,7 +908,8 @@
                     <span class="badge bg-danger ms-2">@ViewBag.BoxingDueList.Count</span>
                 }
             </h5>
-            <button class="btn btn-sm btn-outline-secondary collapse-btn" type="button" data-bs-toggle="collapse" data-bs-target="#boxingDueTable" aria-expanded="true">
+            <button class="btn btn-sm btn-outline-secondary collapse-btn" type="button" data-bs-toggle="collapse"
+                    data-bs-target="#boxingDueTable" aria-expanded="true">
                 <i class="fa-solid fa-chevron-up"></i>
             </button>
         </div>
@@ -809,25 +969,25 @@
 
 @section Scripts {
     <script>
-        // Handle collapse button aria-expanded state for chevron rotation
-        document.addEventListener('DOMContentLoaded', function() {
-            const collapseButtons = document.querySelectorAll('.collapse-btn');
-            
-            collapseButtons.forEach(function(btn) {
-                const targetId = btn.getAttribute('data-bs-target');
-                const targetEl = document.querySelector(targetId);
-                
-                if (targetEl) {
-                    // Listen for Bootstrap collapse events
-                    targetEl.addEventListener('show.bs.collapse', function() {
-                        btn.setAttribute('aria-expanded', 'true');
+                // Handle collapse button aria-expanded state for chevron rotation
+                document.addEventListener('DOMContentLoaded', function () {
+                    const collapseButtons = document.querySelectorAll('.collapse-btn');
+
+                    collapseButtons.forEach(function (btn) {
+                        const targetId = btn.getAttribute('data-bs-target');
+                        const targetEl = document.querySelector(targetId);
+
+                        if (targetEl) {
+                            // Listen for Bootstrap collapse events
+                            targetEl.addEventListener('show.bs.collapse', function () {
+                                btn.setAttribute('aria-expanded', 'true');
+                            });
+
+                            targetEl.addEventListener('hide.bs.collapse', function () {
+                                btn.setAttribute('aria-expanded', 'false');
+                            });
+                        }
                     });
-                    
-                    targetEl.addEventListener('hide.bs.collapse', function() {
-                        btn.setAttribute('aria-expanded', 'false');
-                    });
-                }
-            });
-        });
+                });
     </script>
 }

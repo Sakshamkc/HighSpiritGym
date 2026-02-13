@@ -1,15 +1,23 @@
 ﻿@model List<HighSpiritApp.Models.Boxing.BoxingMember>
+@{
+    var category = ViewBag.Category as string;
+    var isAll = string.IsNullOrEmpty(category);
+
+    var config = category switch
+    {
+        "Children" => (icon: "fa-child", color: "#f59e0b", bg: "rgba(245, 158, 11, 0.1)", label: "Children Boxing"),
+        "Adult" => (icon: "fa-person", color: "#ef4444", bg: "rgba(239, 68, 68, 0.1)", label: "Adult Boxing"),
+        _ => (icon: "fa-hand-fist", color: "#dc2626", bg: "rgba(220, 38, 38, 0.1)", label: "Boxing")
+    };
+}
 
 <div class="nav-item dropdown list-unstyled">
 
-    <a href="#"
-       class="nav-link position-relative dropdown-toggle"
-       data-bs-toggle="dropdown"
-       title="Boxing Due Members">
+    <a href="#" class="nav-link position-relative dropdown-toggle"    data-bs-toggle="dropdown"
+           title="@config.label Due Members">
 
-        <!-- Boxing Icon: Fist with red/danger color -->
-        <span class="d-inline-flex align-items-center gap-1 px-2 py-1 rounded bg-danger bg-opacity-10">
-            <i class="fa-solid fa-hand-fist text-danger"></i>
+        <span class="d-inline-flex align-items-center gap-1 px-2 py-1 rounded" style="background: @config.bg;">
+            <i class="fa-solid @config.icon" style="color: @config.color;"></i>
             @if (ViewBag.DueCount > 0)
             {
                 <span class="badge rounded-pill bg-danger">
@@ -24,8 +32,8 @@
     </a>
 
     <ul class="dropdown-menu dropdown-menu-end shadow notification-dropdown">
-        <li class="dropdown-header fw-bold text-danger">
-            <i class="fa-solid fa-hand-fist me-2"></i>Boxing Due Members
+        <li class="dropdown-header fw-bold" style="color: @config.color;">
+            <i class="fa-solid @config.icon me-2"></i>@config.label Due
         </li>
 
         @if (!Model.Any())
@@ -45,8 +53,7 @@
                         Due: Rs @b.DueAmount
                     </small>
                     <div>
-                        <a href="/Boxing/Details/@b.BoxingMemberID"
-                           class="text-primary small">
+                        <a href="/Boxing/Details/@b.BoxingMemberID"                     class="text-primary small">
                             <i class="fa-solid fa-eye"></i> View
                         </a>
                     </div>

@@ -165,8 +165,9 @@
                 @if (!string.IsNullOrEmpty((string)ViewBag.PaymentStatus))
                 {
                     <span class="filter-tag @(ViewBag.PaymentStatus == "due" ? "tag-due" : "tag-paid")">
-                        <i class="fa-solid @(ViewBag.PaymentStatus == "due" ? "fa-exclamation-triangle" : "fa-check-circle") me-1"></i>@(ViewBag.PaymentStatus
-                                                                == "due" ? "With Due" : "Fully Paid")
+                        <i
+                        class="fa-solid @(ViewBag.PaymentStatus == "due" ? "fa-exclamation-triangle" : "fa-check-circle") me-1"></i>@(ViewBag.PaymentStatus
+                                                                                        == "due" ? "With Due" : "Fully Paid")
                         <a href="@BuildQuery(overridePayment: "")" class="tag-close"><i class="fa-solid fa-times"></i></a>
                     </span>
                 }
@@ -561,6 +562,151 @@
             right: 55px;
         }
     }
+
+    /* Dark Mode Overrides */
+    [data-theme="dark"] .page-title {
+        color: #e2e8f0;
+    }
+
+    [data-theme="dark"] .page-title span {
+        color: #cbd5e1;
+    }
+
+    [data-theme="dark"] .search-input {
+        background: #1e293b;
+        border-color: #334155;
+        color: #e2e8f0;
+    }
+
+    [data-theme="dark"] .search-input:focus {
+        background: #1e293b;
+        border-color: #ef4444;
+    }
+
+    [data-theme="dark"] .search-input::placeholder {
+        color: #64748b;
+    }
+
+    [data-theme="dark"] .search-clear {
+        background: #334155;
+        color: #94a3b8;
+    }
+
+    [data-theme="dark"] .search-clear:hover {
+        background: #7f1d1d;
+        color: #fca5a5;
+    }
+
+    [data-theme="dark"] .stats-card {
+        border-color: #334155;
+    }
+
+    [data-theme="dark"] .stats-card.stats-all {
+        background: linear-gradient(135deg, #1e293b 0%, #334155 100%);
+    }
+
+    [data-theme="dark"] .stats-card.stats-all .fs-2 {
+        color: #a5b4fc;
+    }
+
+    [data-theme="dark"] .stats-card.stats-all.active {
+        border-color: #6366f1;
+        background: linear-gradient(135deg, #312e81 0%, #3730a3 100%);
+    }
+
+    [data-theme="dark"] .stats-card.stats-paid {
+        background: linear-gradient(135deg, #14532d 0%, #166534 100%);
+    }
+
+    [data-theme="dark"] .stats-card.stats-paid .fs-2 {
+        color: #86efac;
+    }
+
+    [data-theme="dark"] .stats-card.stats-paid.active {
+        border-color: #22c55e;
+        background: linear-gradient(135deg, #166534 0%, #15803d 100%);
+    }
+
+    [data-theme="dark"] .stats-card.stats-due {
+        background: linear-gradient(135deg, #450a0a 0%, #7f1d1d 100%);
+    }
+
+    [data-theme="dark"] .stats-card.stats-due .fs-2 {
+        color: #fca5a5;
+    }
+
+    [data-theme="dark"] .stats-card.stats-due.active {
+        border-color: #ef4444;
+        background: linear-gradient(135deg, #7f1d1d 0%, #991b1b 100%);
+    }
+
+    [data-theme="dark"] .stats-card .text-muted {
+        color: #94a3b8 !important;
+    }
+
+    [data-theme="dark"] .filter-bar {
+        background: linear-gradient(135deg, #1e293b 0%, #334155 100%);
+        border-color: #334155;
+    }
+
+    [data-theme="dark"] .status-pill.status-all {
+        background: linear-gradient(135deg, #312e81 0%, #3730a3 100%);
+        color: #a5b4fc;
+    }
+
+    [data-theme="dark"] .status-pill.status-all.active {
+        background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%);
+        color: white;
+    }
+
+    [data-theme="dark"] .status-pill.status-active {
+        background: linear-gradient(135deg, #14532d 0%, #166534 100%);
+        color: #86efac;
+    }
+
+    [data-theme="dark"] .status-pill.status-active.active {
+        background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+        color: white;
+    }
+
+    [data-theme="dark"] .status-pill.status-expired {
+        background: linear-gradient(135deg, #450a0a 0%, #7f1d1d 100%);
+        color: #fca5a5;
+    }
+
+    [data-theme="dark"] .status-pill.status-expired.active {
+        background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+        color: white;
+    }
+
+    [data-theme="dark"] .filter-tag.tag-paid {
+        background: linear-gradient(135deg, #14532d 0%, #166534 100%);
+        color: #86efac;
+    }
+
+    [data-theme="dark"] .filter-tag.tag-paid .tag-close {
+        color: #86efac;
+    }
+
+    [data-theme="dark"] .filter-tag.tag-due {
+        background: linear-gradient(135deg, #450a0a 0%, #7f1d1d 100%);
+        color: #fca5a5;
+    }
+
+    [data-theme="dark"] .filter-tag.tag-due .tag-close {
+        color: #fca5a5;
+    }
+
+    [data-theme="dark"] .btn-clear-filters {
+        background: linear-gradient(135deg, #450a0a 0%, #7f1d1d 100%);
+        border-color: #991b1b;
+        color: #fca5a5;
+    }
+
+    [data-theme="dark"] .btn-clear-filters:hover {
+        background: linear-gradient(135deg, #7f1d1d 0%, #991b1b 100%);
+        color: #fecaca;
+    }
 </style>
 
 <div class="card shadow">
@@ -571,6 +717,10 @@
                     <th>S.No</th>
                     <th>Photo</th>
                     <th>Name</th>
+                    @if (isAll)
+                    {
+                        <th>Category</th>
+                    }
                     <th>Joined</th>
                     <th>Guardian</th>
                     <th>Contact</th>
@@ -600,6 +750,25 @@
                             }
                         </td>
                         <td class="fw-semibold">@b.Name</td>
+                        @if (isAll)
+                        {
+                            <td>
+                                @if (b.Category == "Adult")
+                                {
+                                    <span class="badge rounded-pill"
+                                          style="background: linear-gradient(135deg, #ef4444, #dc2626); font-size: 11px; padding: 5px 10px;">
+                                        <i class="fa-solid fa-person me-1"></i>Adult
+                                    </span>
+                                }
+                                else
+                                {
+                                    <span class="badge rounded-pill"
+                                          style="background: linear-gradient(135deg, #f59e0b, #d97706); font-size: 11px; padding: 5px 10px;">
+                                        <i class="fa-solid fa-child me-1"></i>Children
+                                    </span>
+                                }
+                            </td>
+                        }
                         <td>
                             @if (b.JoinDate != null)
                             {
@@ -654,10 +823,10 @@
                         </td>
                         <td title="@b.Remarks">
                             @(string.IsNullOrWhiteSpace(b.Remarks)
-                                ? "-"
-                                : (b.Remarks.Length > 15
-                                ? b.Remarks.Substring(0, 12) + "..."
-                                : b.Remarks))
+                            ? "-"
+                                    : (b.Remarks.Length > 15
+                            ? b.Remarks.Substring(0, 12) + "..."
+                                    : b.Remarks))
                         </td>
                         <td>
                             <div class="btn-group btn-group-sm">
