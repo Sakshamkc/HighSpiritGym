@@ -300,8 +300,8 @@
             </div>
             <div class="col-md-6">
                 <label>Expire Date</label>
-                <input type="date" name="ExpireDate" id="expireDate" class="form-control" readonly />
-                <small class="text-muted">Auto-calculated from Start Date + Duration</small>
+                <input type="date" name="ExpireDate" id="expireDate" class="form-control" />
+                <small class="text-muted">Auto-calculated from Start Date + Duration (or enter manually)</small>
             </div>
 
             <div class="col-12 mt-4">
@@ -772,7 +772,16 @@
         }
     }
 
+    // Track if user manually changed expire date
+    let expireDateManuallySet = false;
+    expireDate.addEventListener('change', function () {
+        expireDateManuallySet = true;
+    });
+
     function calculateExpireDate() {
+        // Skip auto-calc if user manually entered a date
+        if (expireDateManuallySet) return;
+
         const start = new Date(startDate.value);
         const months = parseInt(hiddenDuration.value) || 0;
         
@@ -785,6 +794,7 @@
     }
 
     function resetPricing() {
+        expireDateManuallySet = false;
         basePrice.value = 0;
         priceDisplay.textContent = '0';
         discountInput.value = 0;

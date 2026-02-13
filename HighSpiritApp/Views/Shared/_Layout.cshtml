@@ -16,6 +16,8 @@
     <!-- Flatpickr Date Picker -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css" />
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/themes/material_blue.css" />
+    <!-- Nepali Date Picker -->
+    <link rel="stylesheet" href="~/css/nepali-datepicker.css" asp-append-version="true" />
     <style>
                 :root {
                     --sidebar-bg: linear-gradient(180deg, #0f172a 0%, #1e293b 100%);
@@ -1942,6 +1944,13 @@
         </div>
 
         <div class="header-right">
+            <!-- Date Mode Toggle (EN/NP) -->
+            <button class="date-toggle-btn" id="dateToggleBtn" onclick="NepaliDatePickerManager.toggle()" title="Switch to Nepali Date">
+                <i class="date-toggle-icon fa-solid fa-calendar-days"></i>
+                <span class="date-toggle-divider"></span>
+                <span class="date-toggle-label">EN</span>
+            </button>
+
             <!-- Dark Mode Toggle -->
             <button class="theme-toggle" id="themeToggle" onclick="toggleTheme()" title="Toggle Dark Mode">
                 <i class="fa-solid fa-moon"></i>
@@ -2161,6 +2170,7 @@
     <script src="~/js/site.js" asp-append-version="true"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+    <script src="~/js/nepali-datepicker.js" asp-append-version="true"></script>
     @await RenderSectionAsync("Scripts", required: false)
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js"></script>
@@ -2174,21 +2184,8 @@
         };
 
         document.addEventListener('DOMContentLoaded', function () {
-        flatpickr('input[type="date"]', {
-        dateFormat: "Y-m-d",
-        altInput: true,
-        altFormat: "j M Y",
-        allowInput: true,
-        animate: true
-        });
-
-        flatpickr('.datepicker', {
-        dateFormat: "Y-m-d",
-        altInput: true,
-        altFormat: "j M Y",
-        allowInput: true,
-        animate: true
-        });
+        // Initialize Date Picker Manager (handles EN/NP mode)
+        NepaliDatePickerManager.init();
 
         // Initialize session timeout
         initSessionTimeout();
