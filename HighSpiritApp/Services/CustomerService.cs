@@ -101,7 +101,7 @@ namespace HighSpiritApp.Services
             if (!string.IsNullOrEmpty(filter.PlanName))
             {
                 var planFilter = filter.PlanName.ToLower();
-                
+
                 allCustomers = planFilter switch
                 {
                     "custom2" or "custom-2" => allCustomers.Where(c => IsCustomPlan(c, 2)).ToList(),
@@ -458,6 +458,107 @@ namespace HighSpiritApp.Services
             }
 
             ws.Columns().AdjustToContents();
+
+            using var stream = new MemoryStream();
+            workbook.SaveAs(stream);
+            return stream.ToArray();
+        }
+
+        public async Task<byte[]> ExportDiaryAsync(CustomerFilterRequest filter)
+        {
+            var customers = (await GetFilteredCustomersAsync(new CustomerFilterRequest
+            {
+                Search = filter.Search,
+                Filter = filter.Filter,
+                Duration = filter.Duration,
+                PlanName = filter.PlanName,
+                Shift = filter.Shift,
+                Gender = filter.Gender,
+                PaymentStatus = filter.PaymentStatus,
+                PageSize = int.MaxValue
+            })).Customers.OrderBy(c => c.FullName);
+
+            using var workbook = new XLWorkbook();
+            var ws = workbook.Worksheets.Add("Contact Diary");
+
+            // Title
+            ws.Cell(1, 1).Value = "HIGH SPIRIT GYM - CONTACT DIARY";
+            ws.Range("A1:D1").Merge();
+            ws.Cell(1, 1).Style.Font.Bold = true;
+            ws.Cell(1, 1).Style.Font.FontSize = 16;
+            ws.Cell(1, 1).Style.Font.FontColor = XLColor.White;
+            ws.Cell(1, 1).Style.Fill.BackgroundColor = XLColor.FromHtml("#1e40af");
+            ws.Cell(1, 1).Style.Alignment.Horizontal = XLAlignmentHorizontalValues.Center;
+            ws.Cell(1, 1).Style.Alignment.Vertical = XLAlignmentVerticalValues.Center;
+            ws.Row(1).Height = 35;
+
+            // Subtitle with date
+            ws.Cell(2, 1).Value = $"Generated on: {DateTime.Now:dd MMM yyyy, hh:mm tt}";
+            ws.Range("A2:D2").Merge();
+            ws.Cell(2, 1).Style.Font.Italic = true;
+            ws.Cell(2, 1).Style.Font.FontSize = 10;
+            ws.Cell(2, 1).Style.Font.FontColor = XLColor.Gray;
+            ws.Cell(2, 1).Style.Alignment.Horizontal = XLAlignmentHorizontalValues.Center;
+            ws.Row(2).Height = 20;
+
+            // Headers
+            var headers = new[] { "SN", "Full Name", "Address", "Phone", "Email" };
+            for (int i = 0; i < headers.Length; i++)
+            {
+                ws.Cell(4, i + 1).Value = headers[i];
+                ws.Cell(4, i + 1).Style.Font.Bold = true;
+                ws.Cell(4, i + 1).Style.Font.FontColor = XLColor.White;
+                ws.Cell(4, i + 1).Style.Fill.BackgroundColor = XLColor.FromHtml("#374151");
+                ws.Cell(4, i + 1).Style.Alignment.Horizontal = XLAlignmentHorizontalValues.Center;
+                ws.Cell(4, i + 1).Style.Border.BottomBorder = XLBorderStyleValues.Thin;
+            }
+            ws.Row(4).Height = 25;
+
+            int row = 5, sn = 1;
+            foreach (var c in customers)
+            {
+                var isEven = sn % 2 == 0;
+                var bgColor = isEven ? XLColor.FromHtml("#f3f4f6") : XLColor.White;
+
+                ws.Cell(row, 1).Value = sn++;
+                ws.Cell(row, 2).Value = c.FullName;
+                ws.Cell(row, 3).Value = c.Address ?? "-";
+                ws.Cell(row, 4).Value = c.Phone ?? "-";
+                ws.Cell(row, 5).Value = c.Email ?? "-";
+
+                for (int col = 1; col <= 5; col++)
+                {
+                    ws.Cell(row, col).Style.Fill.BackgroundColor = bgColor;
+                    ws.Cell(row, col).Style.Border.BottomBorder = XLBorderStyleValues.Hair;
+                    ws.Cell(row, col).Style.Border.BottomBorderColor = XLColor.LightGray;
+                    ws.Cell(row, col).Style.Alignment.Vertical = XLAlignmentVerticalValues.Center;
+                }
+                ws.Cell(row, 1).Style.Alignment.Horizontal = XLAlignmentHorizontalValues.Center;
+                ws.Cell(row, 2).Style.Font.Bold = true;
+                ws.Row(row).Height = 22;
+                row++;
+            }
+
+            // Footer
+            row++;
+            ws.Cell(row, 1).Value = $"Total Members: {sn - 1}";
+            ws.Range(row, 1, row, 5).Merge();
+            ws.Cell(row, 1).Style.Font.Bold = true;
+            ws.Cell(row, 1).Style.Font.FontSize = 11;
+            ws.Cell(row, 1).Style.Alignment.Horizontal = XLAlignmentHorizontalValues.Right;
+
+            // Column widths
+            ws.Column(1).Width = 6;   // SN
+            ws.Column(2).Width = 28;  // Name
+            ws.Column(3).Width = 25;  // Address
+            ws.Column(4).Width = 18;  // Phone
+            ws.Column(5).Width = 28;  // Email
+
+            // Print settings
+            ws.PageSetup.PageOrientation = XLPageOrientation.Landscape;
+            ws.PageSetup.FitToPages(1, 0);
+            ws.PageSetup.Margins.SetLeft(0.5);
+            ws.PageSetup.Margins.SetRight(0.5);
 
             using var stream = new MemoryStream();
             workbook.SaveAs(stream);

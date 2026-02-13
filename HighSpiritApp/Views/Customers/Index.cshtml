@@ -75,7 +75,9 @@
         <span>
             @if (!string.IsNullOrEmpty(ViewBag.PlanName as string))
             {
-                @ViewBag.PlanName<text> Members</text>
+                @ViewBag.PlanName
+            
+                <text> Members</text>
             }
             else
             {
@@ -83,20 +85,24 @@
             }
         </span>
     </h4>
-    
+
     <!-- Action Buttons -->
     <div class="d-flex gap-2 flex-wrap action-buttons">
         <a href="/Customers/ExportAll?search=@ViewBag.Search&filter=@ViewBag.Filter&duration=@ViewBag.Duration&planName=@ViewBag.PlanName&shift=@ViewBag.Shift&gender=@ViewBag.Gender&paymentStatus=@ViewBag.PaymentStatus"
-           class="btn btn-action btn-export" title="Export to Excel">
+               class="btn btn-action btn-export" title="Export to Excel">
             <i class="fa-solid fa-file-excel"></i> <span>Export</span>
         </a>
-        <a href="/Customers/Import@(!string.IsNullOrEmpty(ViewBag.PlanName as string) ? "?planName=" + ViewBag.PlanName : "")" 
-           class="btn btn-action btn-import" title="Import from Excel">
+        <a href="/Customers/ExportDiary?search=@ViewBag.Search&filter=@ViewBag.Filter&duration=@ViewBag.Duration&planName=@ViewBag.PlanName&shift=@ViewBag.Shift&gender=@ViewBag.Gender&paymentStatus=@ViewBag.PaymentStatus"
+               class="btn btn-action btn-contact-book" title="Export Contact Book">
+            <i class="fa-solid fa-address-book"></i> <span>Contact Book</span>
+        </a>
+        <a href="/Customers/Import@(!string.IsNullOrEmpty(ViewBag.PlanName as string) ? "?planName=" + ViewBag.PlanName : "")"
+               class="btn btn-action btn-import" title="Import from Excel">
             <i class="fa-solid fa-file-import"></i> <span>Import</span>
         </a>
-        <a href="/Customers/Create@(!string.IsNullOrEmpty(ViewBag.PlanName as string) ? "?planName=" + ViewBag.PlanName : "")" 
-           class="btn btn-action btn-add" title="Add New Member">
-            <i class="fa-solid fa-user-plus"></i> 
+        <a href="/Customers/Create@(!string.IsNullOrEmpty(ViewBag.PlanName as string) ? "?planName=" + ViewBag.PlanName : "")"
+               class="btn btn-action btn-add" title="Add New Member">
+            <i class="fa-solid fa-user-plus"></i>
             <span>Add @(ViewBag.PlanName ?? "Member")</span>
         </a>
     </div>
@@ -107,7 +113,8 @@
 {
     <div class="alert alert-warning alert-dismissible fade show" role="alert">
         <strong>⚠️ @skippedUsers.Count user(s) were skipped during import.</strong>
-        <button type="button" class="btn btn-sm btn-outline-dark ms-2" data-bs-toggle="modal" data-bs-target="#skippedModal">
+        <button type="button" class="btn btn-sm btn-outline-dark ms-2" data-bs-toggle="modal"
+                data-bs-target="#skippedModal">
             View Details
         </button>
         <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
@@ -148,7 +155,7 @@
 
     <!-- Auto-open modal on page load -->
     <script>
-        document.addEventListener('DOMContentLoaded', function() {
+        document.addEventListener('DOMContentLoaded', function () {
             var skippedModal = new bootstrap.Modal(document.getElementById('skippedModal'));
             skippedModal.show();
         });
@@ -159,12 +166,8 @@
     <div class="d-flex flex-wrap gap-2 align-items-center">
         <div class="search-container">
             <i class="fa-solid fa-search search-icon"></i>
-            <input name="search"
-                   id="searchInput"
-                   value="@ViewBag.Search"
-                   class="form-control search-input"
-                   placeholder="Search by name or phone..."
-                   autocomplete="off" />
+            <input name="search"                   id="searchInput"                   value="@ViewBag.Search"                   class="form-control search-input"
+                   placeholder="Search by name or phone..."                   autocomplete="off" />
             @if (!string.IsNullOrEmpty(ViewBag.Search as string))
             {
                 <button type="button" class="search-clear" id="clearSearch" title="Clear search">
@@ -251,23 +254,23 @@
             <!-- Status Filter Buttons - Colorful Pills -->
             <div class="status-filter-group d-flex gap-2">
                 <a class="status-pill status-all @(ViewBag.Filter == "all" ? "active" : "")"
-                   href="@BuildQuery(overrideFilter: "all")">
+                       href="@BuildQuery(overrideFilter: "all")">
                     <i class="fa-solid fa-users"></i>
                     <span>All</span>
                     <span class="pill-count">@ViewBag.CountAll</span>
                 </a>
                 <a class="status-pill status-active @(ViewBag.Filter == "active" ? "active" : "")"
-                   href="@BuildQuery(overrideFilter: "active")">
+                       href="@BuildQuery(overrideFilter: "active")">
                     <i class="fa-solid fa-circle-check"></i>
                     <span>Active</span>
                 </a>
                 <a class="status-pill status-expired @(ViewBag.Filter == "expired" ? "active" : "")"
-                   href="@BuildQuery(overrideFilter: "expired")">
+                       href="@BuildQuery(overrideFilter: "expired")">
                     <i class="fa-solid fa-circle-xmark"></i>
                     <span>Expired</span>
                 </a>
                 <a class="status-pill status-expiring @(ViewBag.Filter == "soon" ? "active" : "")"
-                   href="@BuildQuery(overrideFilter: "soon")">
+                       href="@BuildQuery(overrideFilter: "soon")">
                     <i class="fa-solid fa-hourglass-half"></i>
                     <span>Expiring</span>
                 </a>
@@ -277,988 +280,1093 @@
 
             <!-- Plan Filter -->
             <div class="dropdown">
-                <button class="btn filter-dropdown filter-plan @(!string.IsNullOrEmpty((string)ViewBag.PlanName) ? "active" : "")"
-                        type="button" data-bs-toggle="dropdown">
+                <button
+                    class="btn filter-dropdown filter-plan @(!string.IsNullOrEmpty((string)ViewBag.PlanName) ? "active" : "")"
+                    type="button" data-bs-toggle="dropdown">
                     <i class="fa-solid fa-crown me-1"></i>
                     @(string.IsNullOrEmpty((string)ViewBag.PlanName) ? "Plan" : ViewBag.PlanName)
                     <i class="fa-solid fa-chevron-down ms-1 small"></i>
                 </button>
                 <ul class="dropdown-menu dropdown-menu-modern">
                     <li class="dropdown-header">Select Plan</li>
-                    <li><a class="dropdown-item @(string.IsNullOrEmpty((string)ViewBag.PlanName) ? "active" : "")" href="@BuildQuery(overridePlan: "")"><i class="fa-solid fa-list me-2 text-muted"></i>All Plans</a></li>
-                    <li><hr class="dropdown-divider"></li>
-                    <li><a class="dropdown-item @(ViewBag.PlanName == "Premium" ? "active" : "")" href="@BuildQuery(overridePlan: "Premium")"><i class="fa-solid fa-crown me-2 text-warning"></i>Premium</a></li>
-                    <li><a class="dropdown-item @(ViewBag.PlanName == "Gym" ? "active" : "")" href="@BuildQuery(overridePlan: "Gym")"><i class="fa-solid fa-dumbbell me-2 text-primary"></i>Gym</a></li>
-                    <li><a class="dropdown-item @(ViewBag.PlanName == "Cardio" ? "active" : "")" href="@BuildQuery(overridePlan: "Cardio")"><i class="fa-solid fa-heart-pulse me-2 text-danger"></i>Cardio</a></li>
-                    <li><hr class="dropdown-divider"></li>
-                    <li class="dropdown-header">Customized Packages</li>
-                    <li><a class="dropdown-item @(ViewBag.PlanName == "Customized" ? "active" : "")" href="@BuildQuery(overridePlan: "Customized")"><i class="fa-solid fa-sliders me-2 text-success"></i>All Customized</a></li>
-                    <li><a class="dropdown-item @(ViewBag.PlanName == "Any Two" ? "active" : "")" href="@BuildQuery(overridePlan: "Any Two")"><i class="fa-solid fa-2 me-2 text-teal"></i>Custom (Any Two)</a></li>
-                    <li><a class="dropdown-item @(ViewBag.PlanName == "Any Three" ? "active" : "")" href="@BuildQuery(overridePlan: "Any Three")"><i class="fa-solid fa-3 me-2 text-purple"></i>Custom (Any Three)</a></li>
-                    <li><hr class="dropdown-divider"></li>
-                    <li><a class="dropdown-item @(ViewBag.PlanName == "Zumba" ? "active" : "")" href="@BuildQuery(overridePlan: "Zumba")"><i class="fa-solid fa-music me-2 text-info"></i>Zumba & Aerobics</a></li>
-                    <li><a class="dropdown-item @(ViewBag.PlanName == "Sauna" ? "active" : "")" href="@BuildQuery(overridePlan: "Sauna")"><i class="fa-solid fa-hot-tub-person me-2 text-secondary"></i>Sauna/Steam</a></li>
-                </ul>
-            </div>
-
-            <!-- Shift Filter -->
-            <div class="dropdown">
-                <button class="btn filter-dropdown filter-shift @(!string.IsNullOrEmpty((string)ViewBag.Shift) ? "active" : "")"
-                        type="button" data-bs-toggle="dropdown">
-                    @if (ViewBag.Shift == "Morning")
-                    {
-                        <i class="fa-solid fa-sun me-1"></i>
-                    }
-                    else if (ViewBag.Shift == "Evening")
-                    {
-                        <i class="fa-solid fa-moon me-1"></i>
-                    }
-                    else
-                    {
-                        <i class="fa-solid fa-clock me-1"></i>
-                    }
-                    @(string.IsNullOrEmpty((string)ViewBag.Shift) ? "Shift" : ViewBag.Shift)
-                    <i class="fa-solid fa-chevron-down ms-1 small"></i>
-                </button>
-                <ul class="dropdown-menu dropdown-menu-modern">
-                    <li class="dropdown-header">Select Shift</li>
-                    <li><a class="dropdown-item @(string.IsNullOrEmpty((string)ViewBag.Shift) ? "active" : "")" href="@BuildQuery(overrideShift: "")"><i class="fa-solid fa-list me-2 text-muted"></i>All Shifts</a></li>
-                    <li><hr class="dropdown-divider"></li>
-                    <li><a class="dropdown-item @(ViewBag.Shift == "Morning" ? "active" : "")" href="@BuildQuery(overrideShift: "Morning")"><i class="fa-solid fa-sun me-2 text-warning"></i>Morning</a></li>
-                    <li><a class="dropdown-item @(ViewBag.Shift == "Evening" ? "active" : "")" href="@BuildQuery(overrideShift: "Evening")"><i class="fa-solid fa-moon me-2 text-info"></i>Evening</a></li>
-                </ul>
-            </div>
-
-            <!-- Gender Filter -->
-            <div class="dropdown">
-                <button class="btn filter-dropdown filter-gender @(!string.IsNullOrEmpty((string)ViewBag.Gender) ? "active" : "")"
-                        type="button" data-bs-toggle="dropdown">
-                    @if (ViewBag.Gender == "Male")
-                    {
-                        <i class="fa-solid fa-mars me-1"></i>
-                    }
-                    else if (ViewBag.Gender == "Female")
-                    {
-                        <i class="fa-solid fa-venus me-1"></i>
-                    }
-                    else
-                    {
-                        <i class="fa-solid fa-venus-mars me-1"></i>
-                    }
-                    @(string.IsNullOrEmpty((string)ViewBag.Gender) ? "Gender" : ViewBag.Gender)
-                    <i class="fa-solid fa-chevron-down ms-1 small"></i>
-                </button>
-                <ul class="dropdown-menu dropdown-menu-modern">
-                    <li class="dropdown-header">Select Gender</li>
-                    <li><a class="dropdown-item @(string.IsNullOrEmpty((string)ViewBag.Gender) ? "active" : "")" href="@BuildQuery(overrideGender: "")"><i class="fa-solid fa-list me-2 text-muted"></i>All</a></li>
-                    <li><hr class="dropdown-divider"></li>
-                    <li><a class="dropdown-item @(ViewBag.Gender == "Male" ? "active" : "")" href="@BuildQuery(overrideGender: "Male")"><i class="fa-solid fa-mars me-2 text-primary"></i>Male</a></li>
-                    <li><a class="dropdown-item @(ViewBag.Gender == "Female" ? "active" : "")" href="@BuildQuery(overrideGender: "Female")"><i class="fa-solid fa-venus me-2 text-danger"></i>Female</a></li>
-                    <li><a class="dropdown-item @(ViewBag.Gender == "Other" ? "active" : "")" href="@BuildQuery(overrideGender: "Other")"><i class="fa-solid fa-genderless me-2 text-secondary"></i>Other</a></li>
-                </ul>
-            </div>
-
-            <!-- Payment Status Filter -->
-            <div class="dropdown">
-                <button class="btn filter-dropdown filter-payment @(!string.IsNullOrEmpty((string)ViewBag.PaymentStatus) ? (ViewBag.PaymentStatus == "due" ? "active-due" : "active-paid") : "")"
-                        type="button" data-bs-toggle="dropdown">
-                    @if (ViewBag.PaymentStatus == "paid")
-                    {
-                        <i class="fa-solid fa-check-circle me-1"></i>
-                    }
-                    else if (ViewBag.PaymentStatus == "due")
-                    {
-                        <i class="fa-solid fa-exclamation-triangle me-1"></i>
-                    }
-                    else
-                    {
-                        <i class="fa-solid fa-wallet me-1"></i>
-                    }
-                    @(string.IsNullOrEmpty((string)ViewBag.PaymentStatus) ? "Payment" : (ViewBag.PaymentStatus == "due" ? "With Due" : "Paid"))
-                    <i class="fa-solid fa-chevron-down ms-1 small"></i>
-                </button>
-                <ul class="dropdown-menu dropdown-menu-modern">
-                    <li class="dropdown-header">Payment Status</li>
-                    <li><a class="dropdown-item @(string.IsNullOrEmpty((string)ViewBag.PaymentStatus) ? "active" : "")" href="@BuildQuery(overridePayment: "")"><i class="fa-solid fa-list me-2 text-muted"></i>All</a></li>
-                    <li><hr class="dropdown-divider"></li>
-                    <li><a class="dropdown-item @(ViewBag.PaymentStatus == "paid" ? "active" : "")" href="@BuildQuery(overridePayment: "paid")"><i class="fa-solid fa-check-circle me-2 text-success"></i>Fully Paid</a></li>
-                    <li><a class="dropdown-item @(ViewBag.PaymentStatus == "due" ? "active" : "")" href="@BuildQuery(overridePayment: "due")"><i class="fa-solid fa-exclamation-circle me-2 text-danger"></i>With Due</a></li>
-                </ul>
-            </div>
-
-            <!-- Clear Filters Button -->
-            @if (hasActiveFilters)
-            {
-                <div class="ms-auto">
-                    <a href="?filter=@ViewBag.Filter&search=@ViewBag.Search" class="btn btn-clear-filters">
-                        <i class="fa-solid fa-times me-1"></i>Clear
-                    </a>
-                </div>
-            }
-        </div>
-
-        <!-- Active Filters Tags -->
-        @if (hasActiveFilters)
-        {
-            <div class="active-filters-tags mt-3 pt-3 border-top">
-                <span class="text-muted small me-2"><i class="fa-solid fa-tag me-1"></i>Active:</span>
-                @if (!string.IsNullOrEmpty((string)ViewBag.PlanName))
-                {
-                    var planLabel = ViewBag.PlanName switch
-                    {
-                        "Any Two" => "Custom (Any 2)",
-                        "Any Three" => "Custom (Any 3)",
-                        _ => (string)ViewBag.PlanName
-                    };
-                    <span class="filter-tag tag-plan">
-                        <i class="fa-solid fa-crown me-1"></i>@planLabel
-                        <a href="@BuildQuery(overridePlan: "")" class="tag-close"><i class="fa-solid fa-times"></i></a>
-                    </span>
-                }
-                @if (!string.IsNullOrEmpty((string)ViewBag.Shift))
-                {
-                    <span class="filter-tag tag-shift">
-                        <i class="fa-solid @(ViewBag.Shift == "Morning" ? "fa-sun" : "fa-moon") me-1"></i>@ViewBag.Shift
-                        <a href="@BuildQuery(overrideShift: "")" class="tag-close"><i class="fa-solid fa-times"></i></a>
-                    </span>
-                }
-                @if (!string.IsNullOrEmpty((string)ViewBag.Gender))
-                {
-                    <span class="filter-tag tag-gender">
-                        <i class="fa-solid @(ViewBag.Gender == "Male" ? "fa-mars" : ViewBag.Gender == "Female" ? "fa-venus" : "fa-genderless") me-1"></i>@ViewBag.Gender
-                        <a href="@BuildQuery(overrideGender: "")" class="tag-close"><i class="fa-solid fa-times"></i></a>
-                    </span>
-                }
-                @if (!string.IsNullOrEmpty((string)ViewBag.PaymentStatus))
-                {
-                    <span class="filter-tag @(ViewBag.PaymentStatus == "due" ? "tag-due" : "tag-paid")">
-                        <i class="fa-solid @(ViewBag.PaymentStatus == "due" ? "fa-exclamation-triangle" : "fa-check-circle") me-1"></i>@(ViewBag.PaymentStatus == "due" ? "With Due" : "Fully Paid")
-                        <a href="@BuildQuery(overridePayment: "")" class="tag-close"><i class="fa-solid fa-times"></i></a>
-                    </span>
-                }
-            </div>
-        }
-    </div>
-</div>
-
-<style>
-    /* Page Header Row */
-    .page-header-row {
-        background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
-        padding: 20px 24px;
-        border-radius: 16px;
-        border: 1px solid #e2e8f0;
-    }
-
-    /* Page Title */
-    .page-title {
-        color: #1e293b;
-        font-weight: 600;
-        display: flex;
-        align-items: center;
-        margin: 0;
-    }
-
-        .page-title span {
-            color: #334155;
-        }
-
-    /* Action Buttons */
-    .btn-action {
-        padding: 10px 18px;
-        border-radius: 12px;
-        font-size: 14px;
-        font-weight: 600;
-        display: inline-flex;
-        align-items: center;
-        gap: 8px;
-        transition: all 0.2s ease;
-        text-decoration: none;
-        border: none;
-    }
-
-    .btn-action:hover {
-        transform: translateY(-2px);
-    }
-
-    .btn-export {
-        background: linear-gradient(135deg, #dcfce7 0%, #bbf7d0 100%);
-        color: #16a34a;
-    }
-
-    .btn-export:hover {
-        box-shadow: 0 4px 12px rgba(22, 163, 74, 0.2);
-        color: #15803d;
-    }
-
-    .btn-import {
-        background: #f8fafc;
-        color: #64748b;
-        border: 1px solid #e2e8f0 !important;
-    }
-
-    .btn-import:hover {
-        background: #f1f5f9;
-        color: #475569;
-    }
-
-    .btn-add {
-        background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
-        color: white;
-    }
-
-    .btn-add:hover {
-        box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
-        color: white;
-    }
-
-    /* Search Container Styles */
-    .search-container {
-        position: relative;
-        display: flex;
-        align-items: center;
-        max-width: 400px;
-        width: 100%;
-    }
-
-    .search-icon {
-        position: absolute;
-        left: 16px;
-        color: #94a3b8;
-        font-size: 14px;
-        z-index: 1;
-        pointer-events: none;
-    }
-
-    .search-input {
-        padding: 12px 130px 12px 44px !important;
-        border: 2px solid #e2e8f0 !important;
-        border-radius: 25px !important;
-        font-size: 14px;
-        transition: all 0.2s ease;
-        background: #f8fafc !important;
-        width: 100%;
-    }
-
-        .search-input:focus {
-            border-color: #3b82f6 !important;
-            background: white !important;
-            box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.1) !important;
-            outline: none;
-        }
-
-        .search-input::placeholder {
-            color: #94a3b8;
-        }
-
-    .search-clear {
-        position: absolute;
-        right: 100px;
-        background: #e2e8f0;
-        border: none;
-        width: 24px;
-        height: 24px;
-        border-radius: 50%;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        cursor: pointer;
-        color: #64748b;
-        font-size: 11px;
-        transition: all 0.15s ease;
-        z-index: 2;
-    }
-
-        .search-clear:hover {
-            background: #fee2e2;
-            color: #dc2626;
-        }
-
-    .search-btn {
-        position: absolute;
-        right: 6px;
-        background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
-        border: none;
-        border-radius: 20px;
-        padding: 8px 18px;
-        color: white;
-        font-size: 13px;
-        font-weight: 500;
-        cursor: pointer;
-        display: flex;
-        align-items: center;
-        gap: 6px;
-        transition: all 0.2s ease;
-        z-index: 2;
-    }
-
-        .search-btn:hover {
-            background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
-            transform: translateY(-1px);
-            box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
-        }
-
-        .search-btn:active {
-            transform: translateY(0);
-        }
-
-    /* Filter Bar */
-    .filter-bar {
-        background: white;
-        border: none;
-        border-radius: 16px;
-    }
-
-    .filter-label {
-        display: flex;
-        align-items: center;
-    }
-
-    /* ============================================
-       STATUS FILTER PILLS - COLORFUL STYLE
-       ============================================ */
-    .status-filter-group {
-        display: flex;
-        flex-wrap: wrap;
-        gap: 8px;
-    }
-
-    .status-pill {
-        display: inline-flex;
-        align-items: center;
-        gap: 6px;
-        padding: 10px 18px;
-        border-radius: 25px;
-        font-size: 14px;
-        font-weight: 600;
-        text-decoration: none;
-        transition: all 0.25s ease;
-        border: 2px solid transparent;
-    }
-
-    .status-pill i {
-        font-size: 14px;
-    }
-
-    .status-pill .pill-count {
-        background: rgba(255,255,255,0.3);
-        padding: 2px 8px;
-        border-radius: 12px;
-        font-size: 12px;
-        font-weight: 700;
-    }
-
-    /* All - Purple/Indigo */
-    .status-pill.status-all {
-        background: linear-gradient(135deg, #818cf8 0%, #6366f1 100%);
-        color: white;
-    }
-    .status-pill.status-all:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 4px 15px rgba(99, 102, 241, 0.4);
-    }
-    .status-pill.status-all.active {
-        box-shadow: 0 4px 20px rgba(99, 102, 241, 0.5);
-        transform: scale(1.05);
-    }
-
-    /* Active - Green */
-    .status-pill.status-active {
-        background: linear-gradient(135deg, #4ade80 0%, #22c55e 100%);
-        color: white;
-    }
-    .status-pill.status-active:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 4px 15px rgba(34, 197, 94, 0.4);
-    }
-    .status-pill.status-active.active {
-        box-shadow: 0 4px 20px rgba(34, 197, 94, 0.5);
-        transform: scale(1.05);
-    }
-
-    /* Expired - Red */
-    .status-pill.status-expired {
-        background: linear-gradient(135deg, #f87171 0%, #ef4444 100%);
-        color: white;
-    }
-    .status-pill.status-expired:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 4px 15px rgba(239, 68, 68, 0.4);
-    }
-    .status-pill.status-expired.active {
-        box-shadow: 0 4px 20px rgba(239, 68, 68, 0.5);
-        transform: scale(1.05);
-    }
-
-    /* Expiring - Orange/Amber */
-    .status-pill.status-expiring {
-        background: linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%);
-        color: white;
-    }
-    .status-pill.status-expiring:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 4px 15px rgba(245, 158, 11, 0.4);
-    }
-    .status-pill.status-expiring.active {
-        box-shadow: 0 4px 20px rgba(245, 158, 11, 0.5);
-        transform: scale(1.05);
-    }
-
-    /* ============================================
-       DROPDOWN FILTER BUTTONS - COLORFUL STYLE
-       ============================================ */
-    .filter-dropdown {
-        border-radius: 25px !important;
-        padding: 10px 18px !important;
-        font-size: 14px !important;
-        font-weight: 600 !important;
-        transition: all 0.25s ease !important;
-        border: none !important;
-    }
-
-    .filter-dropdown:hover {
-        transform: translateY(-2px);
-    }
-
-    /* Plan Filter - Purple */
-    .filter-dropdown.filter-plan {
-        background: linear-gradient(135deg, #a78bfa 0%, #8b5cf6 100%);
-        color: white;
-    }
-    .filter-dropdown.filter-plan:hover,
-    .filter-dropdown.filter-plan.active {
-        box-shadow: 0 4px 15px rgba(139, 92, 246, 0.4);
-    }
-
-    /* Shift Filter - Orange/Amber */
-    .filter-dropdown.filter-shift {
-        background: linear-gradient(135deg, #fcd34d 0%, #f59e0b 100%);
-        color: white;
-    }
-    .filter-dropdown.filter-shift:hover,
-    .filter-dropdown.filter-shift.active {
-        box-shadow: 0 4px 15px rgba(245, 158, 11, 0.4);
-    }
-
-    /* Gender Filter - Cyan/Teal */
-    .filter-dropdown.filter-gender {
-        background: linear-gradient(135deg, #67e8f9 0%, #06b6d4 100%);
-        color: white;
-    }
-    .filter-dropdown.filter-gender:hover,
-    .filter-dropdown.filter-gender.active {
-        box-shadow: 0 4px 15px rgba(6, 182, 212, 0.4);
-    }
-
-    /* Payment Filter - Green */
-    .filter-dropdown.filter-payment {
-        background: linear-gradient(135deg, #6ee7b7 0%, #10b981 100%);
-        color: white;
-    }
-    .filter-dropdown.filter-payment:hover,
-    .filter-dropdown.filter-payment.active-paid {
-        box-shadow: 0 4px 15px rgba(16, 185, 129, 0.4);
-    }
-    .filter-dropdown.filter-payment.active-due {
-        background: linear-gradient(135deg, #fca5a5 0%, #ef4444 100%);
-        box-shadow: 0 4px 15px rgba(239, 68, 68, 0.4);
-    }
-
-    /* Clear Filters Button - Red outline */
-    .btn-clear-filters {
-        background: linear-gradient(135deg, #fee2e2 0%, #fecaca 100%);
-        border: 2px solid #f87171 !important;
-        border-radius: 25px;
-        font-size: 14px;
-        padding: 10px 18px;
-        color: #dc2626;
-        font-weight: 600;
-        transition: all 0.2s ease;
-        text-decoration: none;
-    }
-
-    .btn-clear-filters:hover {
-        background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
-        color: white;
-        transform: translateY(-2px);
-        box-shadow: 0 4px 15px rgba(239, 68, 68, 0.4);
-    }
-
-    /* Dropdown Menu Styles */
-    .dropdown-menu-modern {
-        border: none;
-        border-radius: 12px;
-        box-shadow: 0 10px 40px rgba(0,0,0,0.15);
-        padding: 0.5rem;
-        min-width: 200px;
-    }
-
-    .dropdown-menu-modern .dropdown-header {
-        font-size: 11px;
-        text-transform: uppercase;
-        letter-spacing: 0.5px;
-        color: #94a3b8;
-        padding: 0.5rem 1rem 0.25rem;
-    }
-
-    .dropdown-menu-modern .dropdown-item {
-        border-radius: 8px;
-        padding: 0.6rem 1rem;
-        font-size: 14px;
-        transition: all 0.15s ease;
-    }
-
-    .dropdown-menu-modern .dropdown-item:hover {
-        background: #f1f5f9;
-    }
-
-    .dropdown-menu-modern .dropdown-item.active {
-        background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
-        color: white;
-    }
-
-    .dropdown-menu-modern .dropdown-item.active i {
-        color: white !important;
-    }
-
-    .dropdown-menu-modern .dropdown-divider {
-        margin: 0.25rem 0;
-        border-color: #f1f5f9;
-    }
-
-    /* ============================================
-       ACTIVE FILTER TAGS - COLORFUL STYLE
-       ============================================ */
-    .active-filters-tags {
-        display: flex;
-        flex-wrap: wrap;
-        align-items: center;
-        gap: 8px;
-    }
-
-    .filter-tag {
-        display: inline-flex;
-        align-items: center;
-        padding: 6px 12px;
-        border-radius: 20px;
-        font-size: 13px;
-        font-weight: 600;
-    }
-
-    .filter-tag .tag-close {
-        margin-left: 6px;
-        opacity: 0.8;
-        text-decoration: none;
-        transition: opacity 0.15s;
-    }
-
-    .filter-tag .tag-close:hover {
-        opacity: 1;
-    }
-
-    .tag-plan {
-        background: linear-gradient(135deg, #ede9fe 0%, #ddd6fe 100%);
-        color: #7c3aed;
-    }
-    .tag-plan .tag-close { color: #7c3aed; }
-
-    .tag-shift {
-        background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
-        color: #b45309;
-    }
-    .tag-shift .tag-close { color: #b45309; }
-
-    .tag-gender {
-        background: linear-gradient(135deg, #cffafe 0%, #a5f3fc 100%);
-        color: #0e7490;
-    }
-    .tag-gender .tag-close { color: #0e7490; }
-
-    .tag-paid {
-        background: linear-gradient(135deg, #dcfce7 0%, #bbf7d0 100%);
-        color: #166534;
-    }
-    .tag-paid .tag-close { color: #166534; }
-
-    .tag-due {
-        background: linear-gradient(135deg, #fee2e2 0%, #fecaca 100%);
-        color: #991b1b;
-    }
-    .tag-due .tag-close { color: #991b1b; }
-
-    /* Table styles */
-    .price-cell {
-        font-weight: 600;
-        color: #059669;
-        white-space: nowrap;
-    }
-    .price-cell .currency {
-        font-size: 11px;
-        font-weight: 500;
-        color: #64748b;
-    }
-
-    .due-cell {
-        font-weight: 600;
-        white-space: nowrap;
-    }
-    .due-cell.has-due { color: #dc2626; }
-    .due-cell.no-due { color: #16a34a; }
-    .due-cell .currency {
-        font-size: 11px;
-        font-weight: 500;
-    }
-
-    /* Purple buttons for Locker */
-    .btn-outline-purple {
-        color: #8b5cf6;
-        border-color: #8b5cf6;
-    }
-    .btn-outline-purple:hover {
-        color: #fff;
-        background-color: #8b5cf6;
-        border-color: #8b5cf6;
-    }
-    .btn-purple {
-        color: #fff;
-        background-color: #8b5cf6;
-        border-color: #8b5cf6;
-    }
-    .btn-purple:hover {
-        color: #fff;
-        background-color: #7c3aed;
-        border-color: #7c3aed;
-    }
-
-    /* Responsive */
-    @@media (max-width: 768px) {
-        .page-header-row {
-            flex-direction: column;
-            gap: 16px;
-            text-align: center;
-        }
-        
-        .page-header-row .d-flex {
-            justify-content: center;
-        }
-
-        .search-container {
-            max-width: 100%;
-        }
-        
-        .btn-action {
-            padding: 8px 12px;
-            font-size: 13px;
-        }
-        
-        .btn-action span {
-            display: none;
-        }
-
-        .status-pill {
-            padding: 8px 12px;
-            font-size: 12px;
-        }
-
-        .status-pill span:not(.pill-count) {
-            display: none;
-        }
-
-        .filter-dropdown {
-            padding: 8px 12px !important;
-            font-size: 12px !important;
-        }
-    }
-
-    @@media (max-width: 576px) {
-        .search-btn span {
-            display: none;
-        }
-
-        .search-btn {
-            padding: 8px 12px;
-        }
-
-        .search-input {
-            padding-right: 100px !important;
-        }
-
-        .search-clear {
-            right: 55px;
-        }
-    }
-</style>
-
-<div class="card shadow">
-    <div class="table-responsive">
-        <table class="table table-striped table-hover mb-0">
-            <thead class="table-dark">
-                <tr>
-                    <th>S.No</th>
-                    <th>Photo</th>
-                    <th>Name</th>
-                    <th>Phone</th>
-                    <th>Plan</th>
-                    <th>Paid</th>
-                    <th>Due</th>
-                    <th>Start</th>
-                    <th>Expire</th>
-                    <th>Shift</th>
-                    <th>Status</th>
-                    <th>Actions</th>
-                </tr>
-            </thead>
-
-            <tbody>
-                @foreach (var c in Model)
-                {
-                    // Get current membership - prioritize by ExpireDate (latest = current)
-                    var m = GetCurrentMembership(c);
-
-                    <tr>
-                        <td>@(sn++)</td>
-                        <td>
-                            @if (c.Photo != null)
-                            {
-                                <img src="data:image/jpeg;base64,@Convert.ToBase64String(c.Photo)"
-                                     class="rounded-circle"
-                                     style="width:40px;height:40px;object-fit:cover;" />
-                            }
-                            else
-                            {
-                                <i class="fa-solid fa-user-circle fa-2x text-secondary"></i>
-                            }
-                        </td>
-                        <td class="fw-semibold">@c.FullName</td>
-                        <td>@c.Phone</td>
-                        <td>
-                            <span class="badge bg-secondary" title="@m?.PlanName">
-                                @ShortenPlan(m?.PlanName)
-                            </span>
-                        </td>
-                        <td class="price-cell">
-                            @if (m != null)
-                            {
-                                <span class="currency">Rs.</span> 
-                                @m.PaidPrice.ToString("N0")
-                            }
-                            else
-                            {
-                                <span class="text-muted">-</span>
-                            }
-                        </td>
-                        <td class="due-cell @(m != null && m.DueAmount > 0 ? "has-due" : "no-due")">
-                            @if (m != null)
-                            {
-                                if (m.DueAmount > 0)
-                                {
-                                    <span class="currency">Rs.</span> 
-                                    @m.DueAmount.ToString("N0")
-                                    <i class="fa-solid fa-exclamation-circle ms-1" title="Payment pending"></i>
-                                }
-                                else
-                                {
-                                    <i class="fa-solid fa-check-circle" title="Fully paid"></i>
-                                }
-                            }
-                            else
-                            {
-                                <span class="text-muted">-</span>
-                            }
-                        </td>
-                        <td>
-                            @if (m?.StartDate != null)
-                            {
-                                @m.StartDate.ToString("dd MMM yy")
-                            }
-                            else
-                            {
-                                @("-")
-                            }
-                        </td>
-                        <td>
-                            @if (m?.ExpireDate != null)
-                            {
-                                @m.ExpireDate.ToString("dd MMM yy")
-                            }
-                            else
-                            {
-                                @("-")
-                            }
-                        </td>
-                        <td>
-                            @if (!string.IsNullOrEmpty(c.Shift))
-                            {
-                                <span class="badge @(c.Shift == "Morning" ? "bg-warning text-dark" : "bg-info")">
-                                    @c.Shift
-                                </span>
-                            }
-                            else
-                            {
-                                @("-")
-                            }
-                        </td>
-                        <td>
-                            @if (m != null && m.ExpireDate < DateTime.Today)
-                            {
-                                <span class="badge bg-danger">Expired</span>
-                            }
-                            else if (m != null && m.DueDaysComputed > 0)
-                            {
-                                <span class="badge bg-warning text-dark">Due @m.DueDaysComputed d</span>
-                            }
-                            else
-                            {
-                                <span class="badge bg-success">Active</span>
-                            }
-                        </td>
-                        <td>
-                            @{
-                                var assignedLockers = ViewBag.AssignedLockers as Dictionary<string, HighSpiritApp.Models.Locker.Locker>;
-                                var hasLocker = assignedLockers != null && assignedLockers.ContainsKey(c.FullName.ToLower());
-                                var existingLocker = hasLocker ? assignedLockers[c.FullName.ToLower()] : null;
-                            }
-                            <div class="btn-group btn-group-sm">
-                                <a class="btn btn-outline-primary" href="/Customers/Details/@c.CustomerID" title="View">
-                                    <i class="fa-solid fa-eye"></i>
-                                </a>
-                                <a class="btn btn-outline-secondary" href="/Customers/EditAll/@c.CustomerID" title="Edit">
-                                    <i class="fa-solid fa-edit"></i>
-                                </a>
-                                @if (m != null)
-                                {
-                                    <a class="btn btn-outline-success" href="/Memberships/Renew/@c.CustomerID" title="Renew">
-                                        <i class="fa-solid fa-rotate"></i>
-                                    </a>
-                                }
-                                @if (hasLocker && existingLocker != null)
-                                {
-                                    <a class="btn btn-purple text-white" href="/Locker/Details/@existingLocker.LockerID" title="Locker #@existingLocker.LockerNumber (@existingLocker.Gender)">
-                                        <i class="fa-solid fa-lock"></i>
-                                    </a>
-                                }
-                                else
-                                {
-                                    <a class="btn btn-outline-purple" href="/Locker/ChooseLocker?customerId=@c.CustomerID" title="Assign Locker">
-                                        <i class="fa-solid fa-lock-open"></i>
-                                    </a>
-                                }
-                                <button class="btn btn-outline-danger" data-bs-toggle="modal"
-                                        data-bs-target="#delModal_@c.CustomerID" title="Delete">
-                                    <i class="fa-solid fa-trash"></i>
-                                </button>
-                            </div>
-
-                            <div class="modal fade" id="delModal_@c.CustomerID" tabindex="-1">
-                                <div class="modal-dialog">
-                                    <div class="modal-content">
-                                        <div class="modal-header">
-                                            <h5>Confirm Delete</h5>
-                                        </div>
-                                        <div class="modal-body">
-                                            Are you sure you want to delete <b>@c.FullName</b>?
-                                        </div>
-                                        <div class="modal-footer">
-                                            <button class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                                            <a class="btn btn-danger" href="/Customers/Delete/@c.CustomerID">Yes, Delete</a>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </td>
-                    </tr>
-                }
-            </tbody>
-        </table>
-        <nav class="mt-3">
-            @{
-                int current = ViewBag.Page;
-                int total = ViewBag.TotalPages;
-                int start = Math.Max(1, current - 2);
-                int end = Math.Min(total, current + 2);
-            }
-
-            <ul class="pagination justify-content-center">
-                <li class="page-item @(current == 1 ? "disabled" : "")">
-                    <a class="page-link" href="@BuildQuery(overridePage: current - 1)">Prev</a>
-                </li>
-
-                @if (start > 1)
-                {
-                    <li class="page-item">
-                        <a class="page-link" href="@BuildQuery(overridePage: 1)">1</a>
-                    </li>
-                    <li class="page-item disabled"><span class="page-link">…</span></li>
-                }
-
-                @for (int i = start; i <= end; i++)
-                {
-                    <li class="page-item @(i == current ? "active" : "")">
-                        <a class="page-link" href="@BuildQuery(overridePage: i)">@i</a>
-                    </li>
-                }
-
-                @if (end < total)
-                {
-                    <li class="page-item disabled"><span class="page-link">…</span></li>
-                    <li class="page-item">
-                        <a class="page-link" href="@BuildQuery(overridePage: total)">@total</a>
-                    </li>
-                }
-
-                <li class="page-item @(current == total ? "disabled" : "")">
-                    <a class="page-link" href="@BuildQuery(overridePage: current + 1)">Next</a>
-                </li>
-            </ul>
-        </nav>
-    </div>
-</div>
-
-<script>
-    // Clear search button functionality
-    const clearBtn = document.getElementById('clearSearch');
-    const searchInput = document.getElementById('searchInput');
-    const searchForm = document.getElementById('searchForm');
-
-    if (clearBtn) {
-        clearBtn.addEventListener('click', function() {
-            // Clear the search and redirect
-            const url = new URL(window.location.href);
-            url.searchParams.delete('search');
-            url.searchParams.set('page', '1');
-            window.location.href = url.toString();
-        });
-    }
-
-    // Show/hide clear button based on input
-    if (searchInput) {
-        // Create clear button dynamically if there's text
-        searchInput.addEventListener('input', function() {
-            let existingClear = document.getElementById('clearSearch');
-            if (this.value.trim() !== '' && !existingClear) {
-                const clearButton = document.createElement('button');
-                clearButton.type = 'button';
-                clearButton.className = 'search-clear';
-                clearButton.id = 'clearSearch';
-                clearButton.title = 'Clear search';
-                clearButton.innerHTML = '<i class="fa-solid fa-times"></i>';
-                clearButton.addEventListener('click', function() {
-                    searchInput.value = '';
-                    this.remove();
-                    searchInput.focus();
-                });
-                searchInput.parentNode.insertBefore(clearButton, searchInput.nextSibling.nextSibling);
-            } else if (this.value.trim() === '' && existingClear) {
-                existingClear.remove();
-            }
-        });
-
-        // Allow Enter key to submit
-        searchInput.addEventListener('keypress', function(e) {
-            if (e.key === 'Enter') {
-                searchForm.submit();
-            }
-        });
-    }
-</script>
-
+                    <li><a class="dropdown-item @(string.IsNullOrEmpty((string)ViewBag.PlanName) ? "active" : "")"
+                           href="@BuildQuery(overridePlan: "")"><i class="fa-solid fa-list me-2 text-muted"></i>All
+                        Plans</a></li>
+                        <li>
+                            <hr class="dropdown-divider">
+                        </li>
+                        <li><a class="dropdown-item @(ViewBag.PlanName == "Premium" ? "active" : "")"
+                               href="@BuildQuery(overridePlan: "Premium")"><i
+                            class="fa-solid fa-crown me-2 text-warning"></i>Premium</a></li>
+                            <li><a class="dropdown-item @(ViewBag.PlanName == "Gym" ? "active" : "")"
+                                   href="@BuildQuery(overridePlan: "Gym")"><i
+                                class="fa-solid fa-dumbbell me-2 text-primary"></i>Gym</a></li>
+                                <li><a class="dropdown-item @(ViewBag.PlanName == "Cardio" ? "active" : "")"
+                                       href="@BuildQuery(overridePlan: "Cardio")"><i
+                                    class="fa-solid fa-heart-pulse me-2 text-danger"></i>Cardio</a></li>
+                                    <li>
+                                        <hr class="dropdown-divider">
+                                    </li>
+                                    <li class="dropdown-header">Customized Packages</li>
+                                    <li><a class="dropdown-item @(ViewBag.PlanName == "Customized" ? "active" : "")"
+                                           href="@BuildQuery(overridePlan: "Customized")"><i
+                                        class="fa-solid fa-sliders me-2 text-success"></i>All Customized</a></li>
+                                        <li><a class="dropdown-item @(ViewBag.PlanName == "Any Two" ? "active" : "")"
+                                               href="@BuildQuery(overridePlan: "Any Two")"><i
+                                            class="fa-solid fa-2 me-2 text-teal"></i>Custom (Any Two)</a></li>
+                                            <li><a class="dropdown-item @(ViewBag.PlanName == "Any Three" ? "active" : "")"
+                                                   href="@BuildQuery(overridePlan: "Any Three")"><i
+                                                class="fa-solid fa-3 me-2 text-purple"></i>Custom (Any Three)</a></li>
+                                                <li>
+                                                    <hr class="dropdown-divider">
+                                                </li>
+                                                <li><a class="dropdown-item @(ViewBag.PlanName == "Zumba" ? "active" : "")"
+                                                       href="@BuildQuery(overridePlan: "Zumba")"><i
+                                                    class="fa-solid fa-music me-2 text-info"></i>Zumba & Aerobics</a></li>
+                                                    <li><a class="dropdown-item @(ViewBag.PlanName == "Sauna" ? "active" : "")"
+                                                           href="@BuildQuery(overridePlan: "Sauna")"><i
+                                                        class="fa-solid fa-hot-tub-person me-2 text-secondary"></i>Sauna/Steam</a></li>
+                                                    </ul>
+                                                </div>
+
+                                                <!-- Shift Filter -->
+                                                <div class="dropdown">
+                                                    <button
+                                                        class="btn filter-dropdown filter-shift @(!string.IsNullOrEmpty((string)ViewBag.Shift) ? "active" : "")"
+                                                        type="button" data-bs-toggle="dropdown">
+                                                        @if (ViewBag.Shift == "Morning")
+                                                        {
+                                                            <i class="fa-solid fa-sun me-1"></i>
+                                                        }
+                                                        else if (ViewBag.Shift == "Evening")
+                                                        {
+                                                            <i class="fa-solid fa-moon me-1"></i>
+                                                        }
+                                                        else
+                                                        {
+                                                            <i class="fa-solid fa-clock me-1"></i>
+                                                        }
+                                                        @(string.IsNullOrEmpty((string)ViewBag.Shift) ? "Shift" : ViewBag.Shift)
+                                                        <i class="fa-solid fa-chevron-down ms-1 small"></i>
+                                                    </button>
+                                                    <ul class="dropdown-menu dropdown-menu-modern">
+                                                        <li class="dropdown-header">Select Shift</li>
+                                                        <li><a class="dropdown-item @(string.IsNullOrEmpty((string)ViewBag.Shift) ? "active" : "")"
+                                                               href="@BuildQuery(overrideShift: "")"><i class="fa-solid fa-list me-2 text-muted"></i>All
+                                                            Shifts</a></li>
+                                                            <li>
+                                                                <hr class="dropdown-divider">
+                                                            </li>
+                                                            <li><a class="dropdown-item @(ViewBag.Shift == "Morning" ? "active" : "")"
+                                                                   href="@BuildQuery(overrideShift: "Morning")"><i
+                                                                class="fa-solid fa-sun me-2 text-warning"></i>Morning</a></li>
+                                                                <li><a class="dropdown-item @(ViewBag.Shift == "Evening" ? "active" : "")"
+                                                                       href="@BuildQuery(overrideShift: "Evening")"><i
+                                                                    class="fa-solid fa-moon me-2 text-info"></i>Evening</a></li>
+                                                                </ul>
+                                                            </div>
+
+                                                            <!-- Gender Filter -->
+                                                            <div class="dropdown">
+                                                                <button
+                                                                    class="btn filter-dropdown filter-gender @(!string.IsNullOrEmpty((string)ViewBag.Gender) ? "active" : "")"
+                                                                    type="button" data-bs-toggle="dropdown">
+                                                                    @if (ViewBag.Gender == "Male")
+                                                                    {
+                                                                        <i class="fa-solid fa-mars me-1"></i>
+                                                                    }
+                                                                    else if (ViewBag.Gender == "Female")
+                                                                    {
+                                                                        <i class="fa-solid fa-venus me-1"></i>
+                                                                    }
+                                                                    else
+                                                                    {
+                                                                        <i class="fa-solid fa-venus-mars me-1"></i>
+                                                                    }
+                                                                    @(string.IsNullOrEmpty((string)ViewBag.Gender) ? "Gender" : ViewBag.Gender)
+                                                                    <i class="fa-solid fa-chevron-down ms-1 small"></i>
+                                                                </button>
+                                                                <ul class="dropdown-menu dropdown-menu-modern">
+                                                                    <li class="dropdown-header">Select Gender</li>
+                                                                    <li><a class="dropdown-item @(string.IsNullOrEmpty((string)ViewBag.Gender) ? "active" : "")"
+                                                                           href="@BuildQuery(overrideGender: "")"><i
+                                                                        class="fa-solid fa-list me-2 text-muted"></i>All</a></li>
+                                                                        <li>
+                                                                            <hr class="dropdown-divider">
+                                                                        </li>
+                                                                        <li><a class="dropdown-item @(ViewBag.Gender == "Male" ? "active" : "")"
+                                                                               href="@BuildQuery(overrideGender: "Male")"><i
+                                                                            class="fa-solid fa-mars me-2 text-primary"></i>Male</a></li>
+                                                                            <li><a class="dropdown-item @(ViewBag.Gender == "Female" ? "active" : "")"
+                                                                                   href="@BuildQuery(overrideGender: "Female")"><i
+                                                                                class="fa-solid fa-venus me-2 text-danger"></i>Female</a></li>
+                                                                                <li><a class="dropdown-item @(ViewBag.Gender == "Other" ? "active" : "")"
+                                                                                       href="@BuildQuery(overrideGender: "Other")"><i
+                                                                                    class="fa-solid fa-genderless me-2 text-secondary"></i>Other</a></li>
+                                                                                </ul>
+                                                                            </div>
+
+                                                                            <!-- Payment Status Filter -->
+                                                                            <div class="dropdown">
+                                                                                <button
+                                                                                    class="btn filter-dropdown filter-payment @(!string.IsNullOrEmpty((string)ViewBag.PaymentStatus) ? (ViewBag.PaymentStatus == "due" ? "active-due" : "active-paid") : "")"
+                                                                                    type="button" data-bs-toggle="dropdown">
+                                                                                    @if (ViewBag.PaymentStatus == "paid")
+                                                                                    {
+                                                                                        <i class="fa-solid fa-check-circle me-1"></i>
+                                                                                    }
+                                                                                    else if (ViewBag.PaymentStatus == "due")
+                                                                                    {
+                                                                                        <i class="fa-solid fa-exclamation-triangle me-1"></i>
+                                                                                    }
+                                                                                    else
+                                                                                    {
+                                                                                        <i class="fa-solid fa-wallet me-1"></i>
+                                                                                    }
+                                                                                    @(string.IsNullOrEmpty((string)ViewBag.PaymentStatus) ? "Payment" : (ViewBag.PaymentStatus == "due"             ? "With Due" : "Paid"))
+                                                                                    <i class="fa-solid fa-chevron-down ms-1 small"></i>
+                                                                                </button>
+                                                                                <ul class="dropdown-menu dropdown-menu-modern">
+                                                                                    <li class="dropdown-header">Payment Status</li>
+                                                                                    <li><a class="dropdown-item @(string.IsNullOrEmpty((string)ViewBag.PaymentStatus) ? "active" : "")"
+                                                                                           href="@BuildQuery(overridePayment: "")"><i
+                                                                                        class="fa-solid fa-list me-2 text-muted"></i>All</a></li>
+                                                                                        <li>
+                                                                                            <hr class="dropdown-divider">
+                                                                                        </li>
+                                                                                        <li><a class="dropdown-item @(ViewBag.PaymentStatus == "paid" ? "active" : "")"
+                                                                                               href="@BuildQuery(overridePayment: "paid")"><i
+                                                                                            class="fa-solid fa-check-circle me-2 text-success"></i>Fully Paid</a></li>
+                                                                                            <li><a class="dropdown-item @(ViewBag.PaymentStatus == "due" ? "active" : "")"
+                                                                                                   href="@BuildQuery(overridePayment: "due")"><i
+                                                                                                class="fa-solid fa-exclamation-circle me-2 text-danger"></i>With Due</a></li>
+                                                                                            </ul>
+                                                                                        </div>
+
+                                                                                        <!-- Clear Filters Button -->
+                                                                                        @if (hasActiveFilters)
+                                                                                        {
+                                                                                            <div class="ms-auto">
+                                                                                                <a href="?filter=@ViewBag.Filter&search=@ViewBag.Search" class="btn btn-clear-filters">
+                                                                                                    <i class="fa-solid fa-times me-1"></i>Clear
+                                                                                                </a>
+                                                                                            </div>
+                                                                                        }
+                                                                                    </div>
+
+                                                                                    <!-- Active Filters Tags -->
+                                                                                    @if (hasActiveFilters)
+                                                                                    {
+                                                                                        <div class="active-filters-tags mt-3 pt-3 border-top">
+                                                                                            <span class="text-muted small me-2"><i class="fa-solid fa-tag me-1"></i>Active:</span>
+                                                                                            @if (!string.IsNullOrEmpty((string)ViewBag.PlanName))
+                                                                                            {
+                                                                                                var planLabel = ViewBag.PlanName switch
+                                                                                                {
+                                                                                                    "Any Two" => "Custom (Any 2)",
+                                                                                                    "Any Three" => "Custom (Any 3)",
+                                                                                                    _ => (string)ViewBag.PlanName
+                                                                                                };
+                                                                                                <span class="filter-tag tag-plan">
+                                                                                                    <i class="fa-solid fa-crown me-1"></i>@planLabel
+                                                                                                    <a href="@BuildQuery(overridePlan: "")" class="tag-close"><i class="fa-solid fa-times"></i></a>
+                                                                                                </span>
+                                                                                            }
+                                                                                            @if (!string.IsNullOrEmpty((string)ViewBag.Shift))
+                                                                                            {
+                                                                                                <span class="filter-tag tag-shift">
+                                                                                                    <i class="fa-solid @(ViewBag.Shift == "Morning" ? "fa-sun" : "fa-moon") me-1"></i>@ViewBag.Shift
+                                                                                                    <a href="@BuildQuery(overrideShift: "")" class="tag-close"><i class="fa-solid fa-times"></i></a>
+                                                                                                </span>
+                                                                                            }
+                                                                                            @if (!string.IsNullOrEmpty((string)ViewBag.Gender))
+                                                                                            {
+                                                                                                <span class="filter-tag tag-gender">
+                                                                                                    <i class="fa-solid @(ViewBag.Gender == "Male" ? "fa-mars" : ViewBag.Gender == "Female" ? "fa-venus" : "fa-genderless") me-1"></i>@ViewBag.Gender
+                                                                                                    <a href="@BuildQuery(overrideGender: "")" class="tag-close"><i class="fa-solid fa-times"></i></a>
+                                                                                                </span>
+                                                                                            }
+                                                                                            @if (!string.IsNullOrEmpty((string)ViewBag.PaymentStatus))
+                                                                                            {
+                                                                                                <span class="filter-tag @(ViewBag.PaymentStatus == "due" ? "tag-due" : "tag-paid")">
+                                                                                                    <i            class="fa-solid @(ViewBag.PaymentStatus == "due" ? "fa-exclamation-triangle" : "fa-check-circle") me-1"></i>@(ViewBag.PaymentStatus
+                                                                                                                    == "due" ? "With Due" : "Fully Paid")
+                                                                                                    <a href="@BuildQuery(overridePayment: "")" class="tag-close"><i class="fa-solid fa-times"></i></a>
+                                                                                                </span>
+                                                                                            }
+                                                                                        </div>
+                                                                                    }
+                                                                                </div>
+                                                                            </div>
+
+                                                                            <style>
+                                                                                /* Page Header Row */
+                                                                                .page-header-row {
+                                                                                    background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+                                                                                    padding: 20px 24px;
+                                                                                    border-radius: 16px;
+                                                                                    border: 1px solid #e2e8f0;
+                                                                                }
+
+                                                                                /* Page Title */
+                                                                                .page-title {
+                                                                                    color: #1e293b;
+                                                                                    font-weight: 600;
+                                                                                    display: flex;
+                                                                                    align-items: center;
+                                                                                    margin: 0;
+                                                                                }
+
+                                                                                .page-title span {
+                                                                                    color: #334155;
+                                                                                }
+
+                                                                                /* Action Buttons */
+                                                                                .btn-action {
+                                                                                    padding: 10px 18px;
+                                                                                    border-radius: 12px;
+                                                                                    font-size: 14px;
+                                                                                    font-weight: 600;
+                                                                                    display: inline-flex;
+                                                                                    align-items: center;
+                                                                                    gap: 8px;
+                                                                                    transition: all 0.2s ease;
+                                                                                    text-decoration: none;
+                                                                                    border: none;
+                                                                                }
+
+                                                                                .btn-action:hover {
+                                                                                    transform: translateY(-2px);
+                                                                                }
+
+                                                                                .btn-export {
+                                                                                    background: linear-gradient(135deg, #dcfce7 0%, #bbf7d0 100%);
+                                                                                    color: #16a34a;
+                                                                                }
+
+                                                                                .btn-export:hover {
+                                                                                    box-shadow: 0 4px 12px rgba(22, 163, 74, 0.2);
+                                                                                    color: #15803d;
+                                                                                }
+
+                                                                                .btn-contact-book {
+                                                                                    background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%) !important;
+                                                                                    color: #ffffff !important;
+                                                                                }
+
+                                                                                .btn-contact-book:hover {
+                                                                                    box-shadow: 0 4px 12px rgba(79, 70, 229, 0.35);
+                                                                                    color: #ffffff !important;
+                                                                                }
+
+                                                                                .btn-import {
+                                                                                    background: #f8fafc;
+                                                                                    color: #64748b;
+                                                                                    border: 1px solid #e2e8f0 !important;
+                                                                                }
+
+                                                                                .btn-import:hover {
+                                                                                    background: #f1f5f9;
+                                                                                    color: #475569;
+                                                                                }
+
+                                                                                .btn-add {
+                                                                                    background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+                                                                                    color: white;
+                                                                                }
+
+                                                                                .btn-add:hover {
+                                                                                    box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+                                                                                    color: white;
+                                                                                }
+
+                                                                                /* Search Container Styles */
+                                                                                .search-container {
+                                                                                    position: relative;
+                                                                                    display: flex;
+                                                                                    align-items: center;
+                                                                                    max-width: 400px;
+                                                                                    width: 100%;
+                                                                                }
+
+                                                                                .search-icon {
+                                                                                    position: absolute;
+                                                                                    left: 16px;
+                                                                                    color: #94a3b8;
+                                                                                    font-size: 14px;
+                                                                                    z-index: 1;
+                                                                                    pointer-events: none;
+                                                                                }
+
+                                                                                .search-input {
+                                                                                    padding: 12px 130px 12px 44px !important;
+                                                                                    border: 2px solid #e2e8f0 !important;
+                                                                                    border-radius: 25px !important;
+                                                                                    font-size: 14px;
+                                                                                    transition: all 0.2s ease;
+                                                                                    background: #f8fafc !important;
+                                                                                    width: 100%;
+                                                                                }
+
+                                                                                .search-input:focus {
+                                                                                    border-color: #3b82f6 !important;
+                                                                                    background: white !important;
+                                                                                    box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.1) !important;
+                                                                                    outline: none;
+                                                                                }
+
+                                                                                .search-input::placeholder {
+                                                                                    color: #94a3b8;
+                                                                                }
+
+                                                                                .search-clear {
+                                                                                    position: absolute;
+                                                                                    right: 100px;
+                                                                                    background: #e2e8f0;
+                                                                                    border: none;
+                                                                                    width: 24px;
+                                                                                    height: 24px;
+                                                                                    border-radius: 50%;
+                                                                                    display: flex;
+                                                                                    align-items: center;
+                                                                                    justify-content: center;
+                                                                                    cursor: pointer;
+                                                                                    color: #64748b;
+                                                                                    font-size: 11px;
+                                                                                    transition: all 0.15s ease;
+                                                                                    z-index: 2;
+                                                                                }
+
+                                                                                .search-clear:hover {
+                                                                                    background: #fee2e2;
+                                                                                    color: #dc2626;
+                                                                                }
+
+                                                                                .search-btn {
+                                                                                    position: absolute;
+                                                                                    right: 6px;
+                                                                                    background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+                                                                                    border: none;
+                                                                                    border-radius: 20px;
+                                                                                    padding: 8px 18px;
+                                                                                    color: white;
+                                                                                    font-size: 13px;
+                                                                                    font-weight: 500;
+                                                                                    cursor: pointer;
+                                                                                    display: flex;
+                                                                                    align-items: center;
+                                                                                    gap: 6px;
+                                                                                    transition: all 0.2s ease;
+                                                                                    z-index: 2;
+                                                                                }
+
+                                                                                .search-btn:hover {
+                                                                                    background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
+                                                                                    transform: translateY(-1px);
+                                                                                    box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+                                                                                }
+
+                                                                                .search-btn:active {
+                                                                                    transform: translateY(0);
+                                                                                }
+
+                                                                                /* Filter Bar */
+                                                                                .filter-bar {
+                                                                                    background: white;
+                                                                                    border: none;
+                                                                                    border-radius: 16px;
+                                                                                }
+
+                                                                                .filter-label {
+                                                                                    display: flex;
+                                                                                    align-items: center;
+                                                                                }
+
+                                                                                /* ============================================
+                                                                                   STATUS FILTER PILLS - COLORFUL STYLE
+                                                                                   ============================================ */
+                                                                                .status-filter-group {
+                                                                                    display: flex;
+                                                                                    flex-wrap: wrap;
+                                                                                    gap: 8px;
+                                                                                }
+
+                                                                                .status-pill {
+                                                                                    display: inline-flex;
+                                                                                    align-items: center;
+                                                                                    gap: 6px;
+                                                                                    padding: 10px 18px;
+                                                                                    border-radius: 25px;
+                                                                                    font-size: 14px;
+                                                                                    font-weight: 600;
+                                                                                    text-decoration: none;
+                                                                                    transition: all 0.25s ease;
+                                                                                    border: 2px solid transparent;
+                                                                                }
+
+                                                                                .status-pill i {
+                                                                                    font-size: 14px;
+                                                                                }
+
+                                                                                .status-pill .pill-count {
+                                                                                    background: rgba(255, 255, 255, 0.3);
+                                                                                    padding: 2px 8px;
+                                                                                    border-radius: 12px;
+                                                                                    font-size: 12px;
+                                                                                    font-weight: 700;
+                                                                                }
+
+                                                                                /* All - Purple/Indigo */
+                                                                                .status-pill.status-all {
+                                                                                    background: linear-gradient(135deg, #818cf8 0%, #6366f1 100%);
+                                                                                    color: white;
+                                                                                }
+
+                                                                                .status-pill.status-all:hover {
+                                                                                    transform: translateY(-2px);
+                                                                                    box-shadow: 0 4px 15px rgba(99, 102, 241, 0.4);
+                                                                                }
+
+                                                                                .status-pill.status-all.active {
+                                                                                    box-shadow: 0 4px 20px rgba(99, 102, 241, 0.5);
+                                                                                    transform: scale(1.05);
+                                                                                }
+
+                                                                                /* Active - Green */
+                                                                                .status-pill.status-active {
+                                                                                    background: linear-gradient(135deg, #4ade80 0%, #22c55e 100%);
+                                                                                    color: white;
+                                                                                }
+
+                                                                                .status-pill.status-active:hover {
+                                                                                    transform: translateY(-2px);
+                                                                                    box-shadow: 0 4px 15px rgba(34, 197, 94, 0.4);
+                                                                                }
+
+                                                                                .status-pill.status-active.active {
+                                                                                    box-shadow: 0 4px 20px rgba(34, 197, 94, 0.5);
+                                                                                    transform: scale(1.05);
+                                                                                }
+
+                                                                                /* Expired - Red */
+                                                                                .status-pill.status-expired {
+                                                                                    background: linear-gradient(135deg, #f87171 0%, #ef4444 100%);
+                                                                                    color: white;
+                                                                                }
+
+                                                                                .status-pill.status-expired:hover {
+                                                                                    transform: translateY(-2px);
+                                                                                    box-shadow: 0 4px 15px rgba(239, 68, 68, 0.4);
+                                                                                }
+
+                                                                                .status-pill.status-expired.active {
+                                                                                    box-shadow: 0 4px 20px rgba(239, 68, 68, 0.5);
+                                                                                    transform: scale(1.05);
+                                                                                }
+
+                                                                                /* Expiring - Orange/Amber */
+                                                                                .status-pill.status-expiring {
+                                                                                    background: linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%);
+                                                                                    color: white;
+                                                                                }
+
+                                                                                .status-pill.status-expiring:hover {
+                                                                                    transform: translateY(-2px);
+                                                                                    box-shadow: 0 4px 15px rgba(245, 158, 11, 0.4);
+                                                                                }
+
+                                                                                .status-pill.status-expiring.active {
+                                                                                    box-shadow: 0 4px 20px rgba(245, 158, 11, 0.5);
+                                                                                    transform: scale(1.05);
+                                                                                }
+
+                                                                                /* ============================================
+                                                                                   DROPDOWN FILTER BUTTONS - COLORFUL STYLE
+                                                                                   ============================================ */
+                                                                                .filter-dropdown {
+                                                                                    border-radius: 25px !important;
+                                                                                    padding: 10px 18px !important;
+                                                                                    font-size: 14px !important;
+                                                                                    font-weight: 600 !important;
+                                                                                    transition: all 0.25s ease !important;
+                                                                                    border: none !important;
+                                                                                }
+
+                                                                                .filter-dropdown:hover {
+                                                                                    transform: translateY(-2px);
+                                                                                }
+
+                                                                                /* Plan Filter - Purple */
+                                                                                .filter-dropdown.filter-plan {
+                                                                                    background: linear-gradient(135deg, #a78bfa 0%, #8b5cf6 100%);
+                                                                                    color: white;
+                                                                                }
+
+                                                                                .filter-dropdown.filter-plan:hover,
+                                                                                .filter-dropdown.filter-plan.active {
+                                                                                    box-shadow: 0 4px 15px rgba(139, 92, 246, 0.4);
+                                                                                }
+
+                                                                                /* Shift Filter - Orange/Amber */
+                                                                                .filter-dropdown.filter-shift {
+                                                                                    background: linear-gradient(135deg, #fcd34d 0%, #f59e0b 100%);
+                                                                                    color: white;
+                                                                                }
+
+                                                                                .filter-dropdown.filter-shift:hover,
+                                                                                .filter-dropdown.filter-shift.active {
+                                                                                    box-shadow: 0 4px 15px rgba(245, 158, 11, 0.4);
+                                                                                }
+
+                                                                                /* Gender Filter - Cyan/Teal */
+                                                                                .filter-dropdown.filter-gender {
+                                                                                    background: linear-gradient(135deg, #67e8f9 0%, #06b6d4 100%);
+                                                                                    color: white;
+                                                                                }
+
+                                                                                .filter-dropdown.filter-gender:hover,
+                                                                                .filter-dropdown.filter-gender.active {
+                                                                                    box-shadow: 0 4px 15px rgba(6, 182, 212, 0.4);
+                                                                                }
+
+                                                                                /* Payment Filter - Green */
+                                                                                .filter-dropdown.filter-payment {
+                                                                                    background: linear-gradient(135deg, #6ee7b7 0%, #10b981 100%);
+                                                                                    color: white;
+                                                                                }
+
+                                                                                .filter-dropdown.filter-payment:hover,
+                                                                                .filter-dropdown.filter-payment.active-paid {
+                                                                                    box-shadow: 0 4px 15px rgba(16, 185, 129, 0.4);
+                                                                                }
+
+                                                                                .filter-dropdown.filter-payment.active-due {
+                                                                                    background: linear-gradient(135deg, #fca5a5 0%, #ef4444 100%);
+                                                                                    box-shadow: 0 4px 15px rgba(239, 68, 68, 0.4);
+                                                                                }
+
+                                                                                /* Clear Filters Button - Red outline */
+                                                                                .btn-clear-filters {
+                                                                                    background: linear-gradient(135deg, #fee2e2 0%, #fecaca 100%);
+                                                                                    border: 2px solid #f87171 !important;
+                                                                                    border-radius: 25px;
+                                                                                    font-size: 14px;
+                                                                                    padding: 10px 18px;
+                                                                                    color: #dc2626;
+                                                                                    font-weight: 600;
+                                                                                    transition: all 0.2s ease;
+                                                                                    text-decoration: none;
+                                                                                }
+
+                                                                                .btn-clear-filters:hover {
+                                                                                    background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+                                                                                    color: white;
+                                                                                    transform: translateY(-2px);
+                                                                                    box-shadow: 0 4px 15px rgba(239, 68, 68, 0.4);
+                                                                                }
+
+                                                                                /* Dropdown Menu Styles */
+                                                                                .dropdown-menu-modern {
+                                                                                    border: none;
+                                                                                    border-radius: 12px;
+                                                                                    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15);
+                                                                                    padding: 0.5rem;
+                                                                                    min-width: 200px;
+                                                                                }
+
+                                                                                .dropdown-menu-modern .dropdown-header {
+                                                                                    font-size: 11px;
+                                                                                    text-transform: uppercase;
+                                                                                    letter-spacing: 0.5px;
+                                                                                    color: #94a3b8;
+                                                                                    padding: 0.5rem 1rem 0.25rem;
+                                                                                }
+
+                                                                                .dropdown-menu-modern .dropdown-item {
+                                                                                    border-radius: 8px;
+                                                                                    padding: 0.6rem 1rem;
+                                                                                    font-size: 14px;
+                                                                                    transition: all 0.15s ease;
+                                                                                }
+
+                                                                                .dropdown-menu-modern .dropdown-item:hover {
+                                                                                    background: #f1f5f9;
+                                                                                }
+
+                                                                                .dropdown-menu-modern .dropdown-item.active {
+                                                                                    background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+                                                                                    color: white;
+                                                                                }
+
+                                                                                .dropdown-menu-modern .dropdown-item.active i {
+                                                                                    color: white !important;
+                                                                                }
+
+                                                                                .dropdown-menu-modern .dropdown-divider {
+                                                                                    margin: 0.25rem 0;
+                                                                                    border-color: #f1f5f9;
+                                                                                }
+
+                                                                                /* ============================================
+                                                                                   ACTIVE FILTER TAGS - COLORFUL STYLE
+                                                                                   ============================================ */
+                                                                                .active-filters-tags {
+                                                                                    display: flex;
+                                                                                    flex-wrap: wrap;
+                                                                                    align-items: center;
+                                                                                    gap: 8px;
+                                                                                }
+
+                                                                                .filter-tag {
+                                                                                    display: inline-flex;
+                                                                                    align-items: center;
+                                                                                    padding: 6px 12px;
+                                                                                    border-radius: 20px;
+                                                                                    font-size: 13px;
+                                                                                    font-weight: 600;
+                                                                                }
+
+                                                                                .filter-tag .tag-close {
+                                                                                    margin-left: 6px;
+                                                                                    opacity: 0.8;
+                                                                                    text-decoration: none;
+                                                                                    transition: opacity 0.15s;
+                                                                                }
+
+                                                                                .filter-tag .tag-close:hover {
+                                                                                    opacity: 1;
+                                                                                }
+
+                                                                                .tag-plan {
+                                                                                    background: linear-gradient(135deg, #ede9fe 0%, #ddd6fe 100%);
+                                                                                    color: #7c3aed;
+                                                                                }
+
+                                                                                .tag-plan .tag-close {
+                                                                                    color: #7c3aed;
+                                                                                }
+
+                                                                                .tag-shift {
+                                                                                    background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+                                                                                    color: #b45309;
+                                                                                }
+
+                                                                                .tag-shift .tag-close {
+                                                                                    color: #b45309;
+                                                                                }
+
+                                                                                .tag-gender {
+                                                                                    background: linear-gradient(135deg, #cffafe 0%, #a5f3fc 100%);
+                                                                                    color: #0e7490;
+                                                                                }
+
+                                                                                .tag-gender .tag-close {
+                                                                                    color: #0e7490;
+                                                                                }
+
+                                                                                .tag-paid {
+                                                                                    background: linear-gradient(135deg, #dcfce7 0%, #bbf7d0 100%);
+                                                                                    color: #166534;
+                                                                                }
+
+                                                                                .tag-paid .tag-close {
+                                                                                    color: #166534;
+                                                                                }
+
+                                                                                .tag-due {
+                                                                                    background: linear-gradient(135deg, #fee2e2 0%, #fecaca 100%);
+                                                                                    color: #991b1b;
+                                                                                }
+
+                                                                                .tag-due .tag-close {
+                                                                                    color: #991b1b;
+                                                                                }
+
+                                                                                /* Table styles */
+                                                                                .price-cell {
+                                                                                    font-weight: 600;
+                                                                                    color: #059669;
+                                                                                    white-space: nowrap;
+                                                                                }
+
+                                                                                .price-cell .currency {
+                                                                                    font-size: 11px;
+                                                                                    font-weight: 500;
+                                                                                    color: #64748b;
+                                                                                }
+
+                                                                                .due-cell {
+                                                                                    font-weight: 600;
+                                                                                    white-space: nowrap;
+                                                                                }
+
+                                                                                .due-cell.has-due {
+                                                                                    color: #dc2626;
+                                                                                }
+
+                                                                                .due-cell.no-due {
+                                                                                    color: #16a34a;
+                                                                                }
+
+                                                                                .due-cell .currency {
+                                                                                    font-size: 11px;
+                                                                                    font-weight: 500;
+                                                                                }
+
+                                                                                /* Purple buttons for Locker */
+                                                                                .btn-outline-purple {
+                                                                                    color: #8b5cf6;
+                                                                                    border-color: #8b5cf6;
+                                                                                }
+
+                                                                                .btn-outline-purple:hover {
+                                                                                    color: #fff;
+                                                                                    background-color: #8b5cf6;
+                                                                                    border-color: #8b5cf6;
+                                                                                }
+
+                                                                                .btn-purple {
+                                                                                    color: #fff;
+                                                                                    background-color: #8b5cf6;
+                                                                                    border-color: #8b5cf6;
+                                                                                }
+
+                                                                                .btn-purple:hover {
+                                                                                    color: #fff;
+                                                                                    background-color: #7c3aed;
+                                                                                    border-color: #7c3aed;
+                                                                                }
+
+                                                                                /* Responsive */
+                                                                                @@media (max-width: 768px) {
+                                                                                    .page-header-row {
+                                                                                        flex-direction: column;
+                                                                                        gap: 16px;
+                                                                                        text-align: center;
+                                                                                    }
+
+                                                                                    .page-header-row .d-flex {
+                                                                                        justify-content: center;
+                                                                                    }
+
+                                                                                    .search-container {
+                                                                                        max-width: 100%;
+                                                                                    }
+
+                                                                                    .btn-action {
+                                                                                        padding: 8px 12px;
+                                                                                        font-size: 13px;
+                                                                                    }
+
+                                                                                    .btn-action span {
+                                                                                        display: none;
+                                                                                    }
+
+                                                                                    .status-pill {
+                                                                                        padding: 8px 12px;
+                                                                                        font-size: 12px;
+                                                                                    }
+
+                                                                                    .status-pill span:not(.pill-count) {
+                                                                                        display: none;
+                                                                                    }
+
+                                                                                    .filter-dropdown {
+                                                                                        padding: 8px 12px !important;
+                                                                                        font-size: 12px !important;
+                                                                                    }
+                                                                                }
+
+                                                                                @@media (max-width: 576px) {
+                                                                                    .search-btn span {
+                                                                                        display: none;
+                                                                                    }
+
+                                                                                    .search-btn {
+                                                                                        padding: 8px 12px;
+                                                                                    }
+
+                                                                                    .search-input {
+                                                                                        padding-right: 100px !important;
+                                                                                    }
+
+                                                                                    .search-clear {
+                                                                                        right: 55px;
+                                                                                    }
+                                                                                }
+                                                                            </style>
+
+                                                                            <div class="card shadow">
+                                                                                <div class="table-responsive">
+                                                                                    <table class="table table-striped table-hover mb-0">
+                                                                                        <thead class="table-dark">
+                                                                                            <tr>
+                                                                                                <th>S.No</th>
+                                                                                                <th>Photo</th>
+                                                                                                <th>Name</th>
+                                                                                                <th>Phone</th>
+                                                                                                <th>Plan</th>
+                                                                                                <th>Paid</th>
+                                                                                                <th>Due</th>
+                                                                                                <th>Start</th>
+                                                                                                <th>Expire</th>
+                                                                                                <th>Shift</th>
+                                                                                                <th>Status</th>
+                                                                                                <th>Actions</th>
+                                                                                            </tr>
+                                                                                        </thead>
+
+                                                                                        <tbody>
+                                                                                            @foreach (var c in Model)
+                                                                                            {
+                                                                                                // Get current membership - prioritize by ExpireDate (latest = current)
+                                                                                                var m = GetCurrentMembership(c);
+
+                                                                                                <tr>
+                                                                                                    <td>@(sn++)</td>
+                                                                                                    <td>
+                                                                                                        @if (c.Photo != null)
+                                                                                                        {
+                                                                                                            <img src="data:image/jpeg;base64,@Convert.ToBase64String(c.Photo)"        class="rounded-circle"
+                                                                                                                 style="width:40px;height:40px;object-fit:cover;" />
+                                                                                                        }
+                                                                                                        else
+                                                                                                        {
+                                                                                                            <i class="fa-solid fa-user-circle fa-2x text-secondary"></i>
+                                                                                                        }
+                                                                                                    </td>
+                                                                                                    <td class="fw-semibold">@c.FullName</td>
+                                                                                                    <td>@c.Phone</td>
+                                                                                                    <td>
+                                                                                                        <span class="badge bg-secondary" title="@m?.PlanName">
+                                                                                                            @ShortenPlan(m?.PlanName)
+                                                                                                        </span>
+                                                                                                    </td>
+                                                                                                    <td class="price-cell">
+                                                                                                        @if (m != null)
+                                                                                                        {
+                                                                                                            <span class="currency">Rs.</span>
+                                                                                                            @m.PaidPrice.ToString("N0")
+                                                                                                        }
+                                                                                                        else
+                                                                                                        {
+                                                                                                            <span class="text-muted">-</span>
+                                                                                                        }
+                                                                                                    </td>
+                                                                                                    <td class="due-cell @(m != null && m.DueAmount > 0 ? "has-due" : "no-due")">
+                                                                                                        @if (m != null)
+                                                                                                        {
+                                                                                                            if (m.DueAmount > 0)
+                                                                                                            {
+                                                                                                                <span class="currency">Rs.</span>
+                                                                                                                @m.DueAmount.ToString("N0")
+                                                                                                                <i class="fa-solid fa-exclamation-circle ms-1" title="Payment pending"></i>
+                                                                                                            }
+                                                                                                            else
+                                                                                                            {
+                                                                                                                <i class="fa-solid fa-check-circle" title="Fully paid"></i>
+                                                                                                            }
+                                                                                                        }
+                                                                                                        else
+                                                                                                        {
+                                                                                                            <span class="text-muted">-</span>
+                                                                                                        }
+                                                                                                    </td>
+                                                                                                    <td>
+                                                                                                        @if (m?.StartDate != null)
+                                                                                                        {
+                                                                                                            @m.StartDate.ToString("dd MMM yy")
+                                                                                                        }
+                                                                                                        else
+                                                                                                        {
+                                                                                                            @("-")
+                                                                                                        }
+                                                                                                    </td>
+                                                                                                    <td>
+                                                                                                        @if (m?.ExpireDate != null)
+                                                                                                        {
+                                                                                                            @m.ExpireDate.ToString("dd MMM yy")
+                                                                                                        }
+                                                                                                        else
+                                                                                                        {
+                                                                                                            @("-")
+                                                                                                        }
+                                                                                                    </td>
+                                                                                                    <td>
+                                                                                                        @if (!string.IsNullOrEmpty(c.Shift))
+                                                                                                        {
+                                                                                                            <span class="badge @(c.Shift == "Morning" ? "bg-warning text-dark" : "bg-info")">
+                                                                                                                @c.Shift
+                                                                                                            </span>
+                                                                                                        }
+                                                                                                        else
+                                                                                                        {
+                                                                                                            @("-")
+                                                                                                        }
+                                                                                                    </td>
+                                                                                                    <td>
+                                                                                                        @if (m != null && m.ExpireDate < DateTime.Today)
+                                                                                                        {
+                                                                                                            <span class="badge bg-danger">Expired</span>
+                                                                                                        }
+                                                                                                        else if (m != null && m.DueDaysComputed > 0)
+                                                                                                        {
+                                                                                                            <span class="badge bg-warning text-dark">Due @m.DueDaysComputed d</span>
+                                                                                                        }
+                                                                                                        else
+                                                                                                        {
+                                                                                                            <span class="badge bg-success">Active</span>
+                                                                                                        }
+                                                                                                    </td>
+                                                                                                    <td>
+                                                                                                        @{
+                                                                                                            var assignedLockers = ViewBag.AssignedLockers as Dictionary<string,
+                                                                                                    HighSpiritApp.Models.Locker.Locker>;
+                                                                                                            var hasLocker = assignedLockers != null && assignedLockers.ContainsKey(c.FullName.ToLower());
+                                                                                                            var existingLocker = hasLocker ? assignedLockers[c.FullName.ToLower()] : null;
+                                                                                                        }
+                                                                                                        <div class="btn-group btn-group-sm">
+                                                                                                            <a class="btn btn-outline-primary" href="/Customers/Details/@c.CustomerID" title="View">
+                                                                                                                <i class="fa-solid fa-eye"></i>
+                                                                                                            </a>
+                                                                                                            <a class="btn btn-outline-secondary" href="/Customers/EditAll/@c.CustomerID" title="Edit">
+                                                                                                                <i class="fa-solid fa-edit"></i>
+                                                                                                            </a>
+                                                                                                            @if (m != null)
+                                                                                                            {
+                                                                                                                <a class="btn btn-outline-success" href="/Memberships/Renew/@c.CustomerID" title="Renew">
+                                                                                                                    <i class="fa-solid fa-rotate"></i>
+                                                                                                                </a>
+                                                                                                            }
+                                                                                                            @if (hasLocker && existingLocker != null)
+                                                                                                            {
+                                                                                                                <a class="btn btn-purple text-white" href="/Locker/Details/@existingLocker.LockerID"
+                                                                                                                       title="Locker #@existingLocker.LockerNumber (@existingLocker.Gender)">
+                                                                                                                    <i class="fa-solid fa-lock"></i>
+                                                                                                                </a>
+                                                                                                            }
+                                                                                                            else
+                                                                                                            {
+                                                                                                                <a class="btn btn-outline-purple" href="/Locker/ChooseLocker?customerId=@c.CustomerID"
+                                                                                                                       title="Assign Locker">
+                                                                                                                    <i class="fa-solid fa-lock-open"></i>
+                                                                                                                </a>
+                                                                                                            }
+                                                                                                            <button class="btn btn-outline-danger" data-bs-toggle="modal"
+                                                                                                                    data-bs-target="#delModal_@c.CustomerID" title="Delete">
+                                                                                                                <i class="fa-solid fa-trash"></i>
+                                                                                                            </button>
+                                                                                                        </div>
+
+                                                                                                        <div class="modal fade" id="delModal_@c.CustomerID" tabindex="-1">
+                                                                                                            <div class="modal-dialog">
+                                                                                                                <div class="modal-content">
+                                                                                                                    <div class="modal-header">
+                                                                                                                        <h5>Confirm Delete</h5>
+                                                                                                                    </div>
+                                                                                                                    <div class="modal-body">
+                                                                                                                        Are you sure you want to delete <b>@c.FullName</b>?
+                                                                                                                    </div>
+                                                                                                                    <div class="modal-footer">
+                                                                                                                        <button class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                                                                                                                        <a class="btn btn-danger" href="/Customers/Delete/@c.CustomerID">Yes, Delete</a>
+                                                                                                                    </div>
+                                                                                                                </div>
+                                                                                                            </div>
+                                                                                                        </div>
+                                                                                                    </td>
+                                                                                                </tr>
+                                                                                            }
+                                                                                        </tbody>
+                                                                                    </table>
+                                                                                    <nav class="mt-3">
+                                                                                        @{
+                                                                                            int current = ViewBag.Page;
+                                                                                            int total = ViewBag.TotalPages;
+                                                                                            int start = Math.Max(1, current - 2);
+                                                                                            int end = Math.Min(total, current + 2);
+                                                                                        }
+
+                                                                                        <ul class="pagination justify-content-center">
+                                                                                            <li class="page-item @(current == 1 ? "disabled" : "")">
+                                                                                                <a class="page-link" href="@BuildQuery(overridePage: current - 1)">Prev</a>
+                                                                                            </li>
+
+                                                                                            @if (start > 1)
+                                                                                            {
+                                                                                                <li class="page-item">
+                                                                                                    <a class="page-link" href="@BuildQuery(overridePage: 1)">1</a>
+                                                                                                </li>
+                                                                                                <li class="page-item disabled"><span class="page-link">…</span></li>
+                                                                                            }
+
+                                                                                            @for (int i = start; i <= end; i++)
+                                                                                            {
+                                                                                                <li class="page-item @(i == current ? "active" : "")">
+                                                                                                    <a class="page-link" href="@BuildQuery(overridePage: i)">@i</a>
+                                                                                                </li>
+                                                                                            }
+
+                                                                                            @if (end < total)
+                                                                                            {
+                                                                                                <li class="page-item disabled"><span class="page-link">…</span></li>
+                                                                                                <li class="page-item">
+                                                                                                    <a class="page-link" href="@BuildQuery(overridePage: total)">@total</a>
+                                                                                                </li>
+                                                                                            }
+
+                                                                                            <li class="page-item @(current == total ? "disabled" : "")">
+                                                                                                <a class="page-link" href="@BuildQuery(overridePage: current + 1)">Next</a>
+                                                                                            </li>
+                                                                                        </ul>
+                                                                                    </nav>
+                                                                                </div>
+                                                                            </div>
+
+                                                                            <script>
+                                                                                // Clear search button functionality
+                                                                                const clearBtn = document.getElementById('clearSearch');
+                                                                                const searchInput = document.getElementById('searchInput');
+                                                                                const searchForm = document.getElementById('searchForm');
+
+                                                                                if (clearBtn) {
+                                                                                    clearBtn.addEventListener('click', function () {
+                                                                                        // Clear the search and redirect
+                                                                                        const url = new URL(window.location.href);
+                                                                                        url.searchParams.delete('search');
+                                                                                        url.searchParams.set('page', '1');
+                                                                                        window.location.href = url.toString();
+                                                                                    });
+                                                                                }
+
+                                                                                // Show/hide clear button based on input
+                                                                                if (searchInput) {
+                                                                                    // Create clear button dynamically if there's text
+                                                                                    searchInput.addEventListener('input', function () {
+                                                                                        let existingClear = document.getElementById('clearSearch');
+                                                                                        if (this.value.trim() !== '' && !existingClear) {
+                                                                                            const clearButton = document.createElement('button');
+                                                                                            clearButton.type = 'button';
+                                                                                            clearButton.className = 'search-clear';
+                                                                                            clearButton.id = 'clearSearch';
+                                                                                            clearButton.title = 'Clear search';
+                                                                                            clearButton.innerHTML = '<i class="fa-solid fa-times"></i>';
+                                                                                            clearButton.addEventListener('click', function () {
+                                                                                                searchInput.value = '';
+                                                                                                this.remove();
+                                                                                                searchInput.focus();
+                                                                                            });
+                                                                                            searchInput.parentNode.insertBefore(clearButton, searchInput.nextSibling.nextSibling);
+                                                                                        } else if (this.value.trim() === '' && existingClear) {
+                                                                                            existingClear.remove();
+                                                                                        }
+                                                                                    });
+
+                                                                                    // Allow Enter key to submit
+                                                                                    searchInput.addEventListener('keypress', function (e) {
+                                                                                        if (e.key === 'Enter') {
+                                                                                            searchForm.submit();
+                                                                                        }
+                                                                                    });
+                                                                                }
+                                                                            </script>

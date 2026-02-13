@@ -47,7 +47,7 @@ namespace HighSpiritApp.Controllers
                 .Where(l => l.Status == "Occupied" && !string.IsNullOrEmpty(l.AssignedTo))
                 .GroupBy(l => l.AssignedTo!.ToLower())
                 .ToDictionary(g => g.Key, g => g.First());
-            
+
             ViewBag.AssignedLockers = assignedLockers;
 
             ViewBag.Page = result.CurrentPage;
@@ -251,6 +251,33 @@ namespace HighSpiritApp.Controllers
                 fileName += $" - {planName}";
             if (!string.IsNullOrEmpty(shift))
                 fileName += $" - {shift}";
+
+            return File(
+                fileBytes,
+                "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+                $"{fileName}.xlsx"
+            );
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> ExportDiary(string search, string filter, int? duration, string planName, string shift, string gender, string paymentStatus)
+        {
+            var fileBytes = await _customerService.ExportDiaryAsync(new CustomerFilterRequest
+            {
+                Search = search,
+                Filter = filter ?? "all",
+                Duration = duration,
+                PlanName = planName,
+                Shift = shift,
+                Gender = gender,
+                PaymentStatus = paymentStatus
+            });
+
+            var fileName = "Gym Members Contact Diary";
+            if (duration.HasValue)
+                fileName = $"{duration}M Members Contact Diary";
+            if (!string.IsNullOrEmpty(planName))
+                fileName += $" - {planName}";
 
             return File(
                 fileBytes,

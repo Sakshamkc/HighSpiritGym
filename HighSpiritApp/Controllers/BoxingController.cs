@@ -42,12 +42,12 @@ namespace HighSpiritApp.Controllers
             }
 
             var membersList = allMembers.ToList();
-            
+
             // Store counts before filtering
             ViewBag.CountAll = membersList.Count;
             ViewBag.CountWithDue = membersList.Count(m => m.DueAmount > 0);
             ViewBag.CountPaid = membersList.Count(m => m.DueAmount == 0);
-            
+
             // Apply payment status filter
             if (!string.IsNullOrEmpty(paymentStatus))
             {
@@ -247,6 +247,107 @@ namespace HighSpiritApp.Controllers
                 stream.ToArray(),
                 "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
                 $"{category} Boxing Members Backup.xlsx"
+            );
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> ExportDiary(string category = "Children")
+        {
+            if (category != "Adult" && category != "Children" && category != "All")
+                category = "Children";
+
+            var members = category == "All"
+                ? (await _boxingService.GetAllAsync()).OrderBy(m => m.Name).ToList()
+                : (await _boxingService.GetByCategoryAsync(category)).OrderBy(m => m.Name).ToList();
+
+            using var workbook = new XLWorkbook();
+            var ws = workbook.Worksheets.Add("Contact Diary");
+
+            // Title
+            var title = category == "All" ? "ALL BOXING MEMBERS" : $"{category.ToUpper()} BOXING MEMBERS";
+            ws.Cell(1, 1).Value = $"HIGH SPIRIT GYM - {title} CONTACT DIARY";
+            ws.Range("A1:D1").Merge();
+            ws.Cell(1, 1).Style.Font.Bold = true;
+            ws.Cell(1, 1).Style.Font.FontSize = 16;
+            ws.Cell(1, 1).Style.Font.FontColor = XLColor.White;
+            ws.Cell(1, 1).Style.Fill.BackgroundColor = XLColor.FromHtml("#1e40af");
+            ws.Cell(1, 1).Style.Alignment.Horizontal = XLAlignmentHorizontalValues.Center;
+            ws.Cell(1, 1).Style.Alignment.Vertical = XLAlignmentVerticalValues.Center;
+            ws.Row(1).Height = 35;
+
+            // Subtitle
+            ws.Cell(2, 1).Value = $"Generated on: {DateTime.Now:dd MMM yyyy, hh:mm tt}";
+            ws.Range("A2:D2").Merge();
+            ws.Cell(2, 1).Style.Font.Italic = true;
+            ws.Cell(2, 1).Style.Font.FontSize = 10;
+            ws.Cell(2, 1).Style.Font.FontColor = XLColor.Gray;
+            ws.Cell(2, 1).Style.Alignment.Horizontal = XLAlignmentHorizontalValues.Center;
+            ws.Row(2).Height = 20;
+
+            // Headers
+            var headers = new[] { "SN", "Name", "Guardian Name", "Guardian Contact" };
+            for (int i = 0; i < headers.Length; i++)
+            {
+                ws.Cell(4, i + 1).Value = headers[i];
+                ws.Cell(4, i + 1).Style.Font.Bold = true;
+                ws.Cell(4, i + 1).Style.Font.FontColor = XLColor.White;
+                ws.Cell(4, i + 1).Style.Fill.BackgroundColor = XLColor.FromHtml("#374151");
+                ws.Cell(4, i + 1).Style.Alignment.Horizontal = XLAlignmentHorizontalValues.Center;
+                ws.Cell(4, i + 1).Style.Border.BottomBorder = XLBorderStyleValues.Thin;
+            }
+            ws.Row(4).Height = 25;
+
+            int row = 5, sn = 1;
+            foreach (var b in members)
+            {
+                var isEven = sn % 2 == 0;
+                var bgColor = isEven ? XLColor.FromHtml("#f3f4f6") : XLColor.White;
+
+                ws.Cell(row, 1).Value = sn++;
+                ws.Cell(row, 2).Value = b.Name;
+                ws.Cell(row, 3).Value = b.GuardianName ?? "-";
+                ws.Cell(row, 4).Value = b.GuardianContact ?? "-";
+
+                for (int col = 1; col <= 4; col++)
+                {
+                    ws.Cell(row, col).Style.Fill.BackgroundColor = bgColor;
+                    ws.Cell(row, col).Style.Border.BottomBorder = XLBorderStyleValues.Hair;
+                    ws.Cell(row, col).Style.Border.BottomBorderColor = XLColor.LightGray;
+                    ws.Cell(row, col).Style.Alignment.Vertical = XLAlignmentVerticalValues.Center;
+                }
+                ws.Cell(row, 1).Style.Alignment.Horizontal = XLAlignmentHorizontalValues.Center;
+                ws.Cell(row, 2).Style.Font.Bold = true;
+                ws.Row(row).Height = 22;
+                row++;
+            }
+
+            // Footer
+            row++;
+            ws.Cell(row, 1).Value = $"Total Members: {sn - 1}";
+            ws.Range(row, 1, row, 4).Merge();
+            ws.Cell(row, 1).Style.Font.Bold = true;
+            ws.Cell(row, 1).Style.Font.FontSize = 11;
+            ws.Cell(row, 1).Style.Alignment.Horizontal = XLAlignmentHorizontalValues.Right;
+
+            // Column widths
+            ws.Column(1).Width = 6;
+            ws.Column(2).Width = 28;
+            ws.Column(3).Width = 25;
+            ws.Column(4).Width = 20;
+
+            // Print settings
+            ws.PageSetup.PageOrientation = XLPageOrientation.Landscape;
+            ws.PageSetup.FitToPages(1, 0);
+            ws.PageSetup.Margins.SetLeft(0.5);
+            ws.PageSetup.Margins.SetRight(0.5);
+
+            using var diaryStream = new MemoryStream();
+            workbook.SaveAs(diaryStream);
+
+            return File(
+                diaryStream.ToArray(),
+                "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+                $"{category} Boxing Contact Diary.xlsx"
             );
         }
     }

@@ -7,7 +7,7 @@
     bool isAll = category == "All";
     string categoryLabel = isAll ? "All" : (isAdult ? "Adult" : "Children");
     string categoryIcon = isAll ? "fa-hand-fist" : (isAdult ? "fa-person" : "fa-child");
-    
+
     // Build query string for links
     string BuildQuery(string? overridePayment = null, int? overridePage = null)
     {
@@ -21,7 +21,7 @@
             parts.Add($"page={overridePage}");
         return "?" + string.Join("&", parts);
     }
-    
+
     // Check if any filters are active
     bool hasActiveFilters = !string.IsNullOrEmpty(ViewBag.PaymentStatus as string);
 }
@@ -35,12 +35,8 @@
     <div class="d-flex flex-wrap gap-2 align-items-center">
         <div class="search-container">
             <i class="fa-solid fa-search search-icon"></i>
-            <input name="search"
-                   id="searchInput"
-                   value="@ViewBag.Search"
-                   class="form-control search-input"
-                   placeholder="Search by @(isAdult ? "member" : "kid") or guardian name..."
-                   autocomplete="off" />
+            <input name="search" id="searchInput" value="@ViewBag.Search" class="form-control search-input"
+                   placeholder="Search by @(isAdult ? "member" : "kid") or guardian name..." autocomplete="off" />
             @if (!string.IsNullOrEmpty(ViewBag.Search as string))
             {
                 <button type="button" class="search-clear" id="clearSearch" title="Clear search">
@@ -57,18 +53,21 @@
 
         @if (!isAll)
         {
-            <a href="/Boxing/Create?category=@category"
-               class="btn btn-primary ms-auto" style="border-radius:10px; font-weight:500; padding:10px 18px;">
+            <a href="/Boxing/Create?category=@category" class="btn btn-primary ms-auto"
+                   style="border-radius:10px; font-weight:500; padding:10px 18px;">
                 <i class="fa-solid fa-user-plus me-1"></i> Add Member
             </a>
-            <a href="/Boxing/Import?category=@category"
-               class="btn btn-warning" style="border-radius:10px; font-weight:500; padding:10px 18px;">
+            <a href="/Boxing/Import?category=@category" class="btn btn-warning"
+                   style="border-radius:10px; font-weight:500; padding:10px 18px;">
                 <i class="fa-solid fa-file-import me-1"></i> Import
             </a>
         }
-        <a href="/Boxing/ExportAll?category=@category"
-           class="btn btn-success export-btn @(isAll ? "ms-auto" : "")">
+        <a href="/Boxing/ExportAll?category=@category" class="btn btn-success export-btn @(isAll ? "ms-auto" : "")">
             <i class="fa-solid fa-file-excel me-1"></i> Export
+        </a>
+        <a href="/Boxing/ExportDiary?category=@category" class="btn export-btn"
+               style="background: linear-gradient(135deg, #4f46e5, #7c3aed) !important; color: #fff !important; border: none;">
+            <i class="fa-solid fa-address-book me-1"></i> Contact Book
         </a>
     </div>
 </form>
@@ -77,7 +76,8 @@
 <div class="row g-3 mb-4">
     <div class="col-6 col-md-4">
         <a href="@BuildQuery(overridePayment: "")" class="text-decoration-none">
-            <div class="card shadow-sm stats-card stats-all @(string.IsNullOrEmpty(ViewBag.PaymentStatus as string) ? "active" : "")">
+            <div
+                class="card shadow-sm stats-card stats-all @(string.IsNullOrEmpty(ViewBag.PaymentStatus as string) ? "active" : "")">
                 <div class="card-body text-center py-3">
                     <div class="stats-icon">
                         <i class="fa-solid fa-users"></i>
@@ -125,27 +125,27 @@
                 <i class="fa-solid fa-filter text-danger"></i>
                 <span class="fw-semibold text-muted ms-1">Filters:</span>
             </div>
-            
+
             <!-- Status Filter Buttons -->
             <div class="status-filter-group d-flex gap-2">
                 <a class="status-pill status-all @(string.IsNullOrEmpty(ViewBag.PaymentStatus as string) ? "active" : "")"
-                   href="@BuildQuery(overridePayment: "")">
+                       href="@BuildQuery(overridePayment: "")">
                     <i class="fa-solid fa-users"></i>
                     <span>All</span>
                     <span class="pill-count">@ViewBag.CountAll</span>
                 </a>
                 <a class="status-pill status-active @(ViewBag.PaymentStatus == "paid" ? "active" : "")"
-                   href="@BuildQuery(overridePayment: "paid")">
+                       href="@BuildQuery(overridePayment: "paid")">
                     <i class="fa-solid fa-check-circle"></i>
                     <span>Paid</span>
                 </a>
                 <a class="status-pill status-expired @(ViewBag.PaymentStatus == "due" ? "active" : "")"
-                   href="@BuildQuery(overridePayment: "due")">
+                       href="@BuildQuery(overridePayment: "due")">
                     <i class="fa-solid fa-exclamation-triangle"></i>
                     <span>With Due</span>
                 </a>
             </div>
-            
+
             <!-- Clear Filters Button -->
             @if (hasActiveFilters)
             {
@@ -156,16 +156,17 @@
                 </div>
             }
         </div>
-        
+
         <!-- Active Filters Tags -->
         @if (hasActiveFilters)
         {
             <div class="active-filters-tags mt-3 pt-3 border-top">
                 <span class="text-muted small me-2"><i class="fa-solid fa-tag me-1"></i>Active:</span>
-        @if (!string.IsNullOrEmpty((string)ViewBag.PaymentStatus))
+                @if (!string.IsNullOrEmpty((string)ViewBag.PaymentStatus))
                 {
                     <span class="filter-tag @(ViewBag.PaymentStatus == "due" ? "tag-due" : "tag-paid")">
-                        <i class="fa-solid @(ViewBag.PaymentStatus == "due" ? "fa-exclamation-triangle" : "fa-check-circle") me-1"></i>@(ViewBag.PaymentStatus == "due" ? "With Due" : "Fully Paid")
+                        <i class="fa-solid @(ViewBag.PaymentStatus == "due" ? "fa-exclamation-triangle" : "fa-check-circle") me-1"></i>@(ViewBag.PaymentStatus
+                                                                == "due" ? "With Due" : "Fully Paid")
                         <a href="@BuildQuery(overridePayment: "")" class="tag-close"><i class="fa-solid fa-times"></i></a>
                     </span>
                 }
@@ -182,7 +183,7 @@
         display: flex;
         align-items: center;
     }
-    
+
     .page-title span {
         color: #334155;
     }
@@ -195,7 +196,7 @@
         max-width: 500px;
         width: 100%;
     }
-    
+
     .search-icon {
         position: absolute;
         left: 16px;
@@ -203,7 +204,7 @@
         font-size: 14px;
         z-index: 1;
     }
-    
+
     .search-input {
         padding: 12px 120px 12px 44px;
         border: 2px solid #e2e8f0;
@@ -213,18 +214,18 @@
         background: #f8fafc;
         width: 100%;
     }
-    
+
     .search-input:focus {
         border-color: #ef4444;
         background: white;
         box-shadow: 0 0 0 4px rgba(239, 68, 68, 0.1);
         outline: none;
     }
-    
+
     .search-input::placeholder {
         color: #94a3b8;
     }
-    
+
     .search-clear {
         position: absolute;
         right: 95px;
@@ -241,12 +242,12 @@
         font-size: 11px;
         transition: all 0.15s ease;
     }
-    
+
     .search-clear:hover {
         background: #fee2e2;
         color: #dc2626;
     }
-    
+
     .search-btn {
         position: absolute;
         right: 6px;
@@ -263,24 +264,24 @@
         gap: 6px;
         transition: all 0.2s ease;
     }
-    
+
     .search-btn:hover {
         background: linear-gradient(135deg, #dc2626 0%, #b91c1c 100%);
         transform: translateY(-1px);
         box-shadow: 0 4px 12px rgba(220, 38, 38, 0.3);
     }
-    
+
     .search-btn:active {
         transform: translateY(0);
     }
-    
+
     .export-btn {
         padding: 10px 18px;
         border-radius: 10px;
         font-weight: 500;
         font-size: 14px;
     }
-    
+
     /* Stats Cards */
     .stats-card {
         border: 2px solid transparent;
@@ -288,46 +289,67 @@
         transition: all 0.25s ease;
         overflow: hidden;
     }
-    
+
     .stats-card .stats-icon {
         font-size: 1.5rem;
         margin-bottom: 8px;
         opacity: 0.8;
     }
-    
+
     .stats-card.stats-all {
         background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
     }
-    .stats-card.stats-all .stats-icon { color: #6366f1; }
-    .stats-card.stats-all .fs-2 { color: #4338ca; }
+
+    .stats-card.stats-all .stats-icon {
+        color: #6366f1;
+    }
+
+    .stats-card.stats-all .fs-2 {
+        color: #4338ca;
+    }
+
     .stats-card.stats-all.active {
         border-color: #6366f1;
         background: linear-gradient(135deg, #e0e7ff 0%, #c7d2fe 100%);
     }
-    
+
     .stats-card.stats-paid {
         background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%);
     }
-    .stats-card.stats-paid .stats-icon { color: #22c55e; }
-    .stats-card.stats-paid .fs-2 { color: #16a34a; }
+
+    .stats-card.stats-paid .stats-icon {
+        color: #22c55e;
+    }
+
+    .stats-card.stats-paid .fs-2 {
+        color: #16a34a;
+    }
+
     .stats-card.stats-paid.active {
         border-color: #22c55e;
         background: linear-gradient(135deg, #dcfce7 0%, #bbf7d0 100%);
     }
-    
+
     .stats-card.stats-due {
         background: linear-gradient(135deg, #fef2f2 0%, #fee2e2 100%);
     }
-    .stats-card.stats-due .stats-icon { color: #ef4444; }
-    .stats-card.stats-due .fs-2 { color: #dc2626; }
+
+    .stats-card.stats-due .stats-icon {
+        color: #ef4444;
+    }
+
+    .stats-card.stats-due .fs-2 {
+        color: #dc2626;
+    }
+
     .stats-card.stats-due.active {
         border-color: #ef4444;
         background: linear-gradient(135deg, #fee2e2 0%, #fecaca 100%);
     }
-    
+
     .stats-card:hover {
         transform: translateY(-3px);
-        box-shadow: 0 8px 25px rgba(0,0,0,0.1);
+        box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
     }
 
     /* Filter Bar Styles */
@@ -336,18 +358,18 @@
         border: none;
         border-radius: 16px;
     }
-    
+
     .filter-label {
         display: flex;
         align-items: center;
     }
-    
+
     /* Status Filter Pills */
     .status-filter-group {
         display: flex;
         flex-wrap: wrap;
     }
-    
+
     .status-pill {
         display: inline-flex;
         align-items: center;
@@ -360,70 +382,77 @@
         transition: all 0.25s ease;
         border: 2px solid transparent;
     }
-    
+
     .status-pill i {
         font-size: 0.9rem;
     }
-    
+
     .status-pill .pill-count {
-        background: rgba(255,255,255,0.3);
+        background: rgba(255, 255, 255, 0.3);
         padding: 2px 8px;
         border-radius: 12px;
         font-size: 0.75rem;
         font-weight: 600;
     }
-    
+
     /* All - Blue/Indigo */
     .status-pill.status-all {
         background: linear-gradient(135deg, #e0e7ff 0%, #c7d2fe 100%);
         color: #4338ca;
     }
+
     .status-pill.status-all:hover {
         background: linear-gradient(135deg, #c7d2fe 0%, #a5b4fc 100%);
         transform: translateY(-2px);
         box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3);
     }
+
     .status-pill.status-all.active {
         background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%);
         color: white;
         box-shadow: 0 4px 15px rgba(99, 102, 241, 0.4);
     }
+
     .status-pill.status-all.active .pill-count {
-        background: rgba(255,255,255,0.25);
+        background: rgba(255, 255, 255, 0.25);
     }
-    
+
     /* Paid - Green */
     .status-pill.status-active {
         background: linear-gradient(135deg, #d1fae5 0%, #a7f3d0 100%);
         color: #047857;
     }
+
     .status-pill.status-active:hover {
         background: linear-gradient(135deg, #a7f3d0 0%, #6ee7b7 100%);
         transform: translateY(-2px);
         box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
     }
+
     .status-pill.status-active.active {
         background: linear-gradient(135deg, #10b981 0%, #059669 100%);
         color: white;
         box-shadow: 0 4px 15px rgba(16, 185, 129, 0.4);
     }
-    
+
     /* Due - Red */
     .status-pill.status-expired {
         background: linear-gradient(135deg, #fee2e2 0%, #fecaca 100%);
         color: #b91c1c;
     }
+
     .status-pill.status-expired:hover {
         background: linear-gradient(135deg, #fecaca 0%, #fca5a5 100%);
         transform: translateY(-2px);
         box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3);
     }
+
     .status-pill.status-expired.active {
         background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
         color: white;
         box-shadow: 0 4px 15px rgba(239, 68, 68, 0.4);
     }
-    
+
     /* Clear Button */
     .btn-clear-filters {
         background: linear-gradient(135deg, #fef2f2 0%, #fee2e2 100%);
@@ -435,13 +464,14 @@
         font-weight: 500;
         transition: all 0.2s ease;
     }
+
     .btn-clear-filters:hover {
         background: linear-gradient(135deg, #fee2e2 0%, #fecaca 100%);
         border-color: #f87171;
         color: #b91c1c;
         transform: translateY(-1px);
     }
-    
+
     /* Filter Tags */
     .filter-tag {
         display: inline-flex;
@@ -453,57 +483,80 @@
         margin-right: 0.5rem;
         margin-bottom: 0.25rem;
     }
-    
+
     .filter-tag .tag-close {
         margin-left: 0.4rem;
         opacity: 0.7;
         text-decoration: none;
     }
+
     .filter-tag .tag-close:hover {
         opacity: 1;
     }
-    
+
     .tag-paid {
         background: linear-gradient(135deg, #dcfce7 0%, #bbf7d0 100%);
         color: #166534;
     }
-    .tag-paid .tag-close { color: #166534; }
-    
+
+    .tag-paid .tag-close {
+        color: #166534;
+    }
+
     .tag-due {
         background: linear-gradient(135deg, #fee2e2 0%, #fecaca 100%);
         color: #991b1b;
     }
-    .tag-due .tag-close { color: #991b1b; }
-    
+
+    .tag-due .tag-close {
+        color: #991b1b;
+    }
+
     /* Table Styles */
     .price-cell {
         font-weight: 600;
         white-space: nowrap;
     }
-    .price-cell.cash { color: #2563eb; }
-    .price-cell.esewa { color: #65a30d; }
-    
+
+    .price-cell.cash {
+        color: #2563eb;
+    }
+
+    .price-cell.esewa {
+        color: #65a30d;
+    }
+
     .due-cell {
         font-weight: 600;
         white-space: nowrap;
     }
-    .due-cell.has-due { color: #dc2626; }
-    .due-cell.no-due { color: #16a34a; }
-    
+
+    .due-cell.has-due {
+        color: #dc2626;
+    }
+
+    .due-cell.no-due {
+        color: #16a34a;
+    }
+
     /* Responsive */
     @@media (max-width: 576px) {
         .search-container {
             max-width: 100%;
         }
+
         .search-btn span {
             display: none;
         }
+
         .search-btn {
             padding: 8px 12px;
         }
+
         .search-input {
             padding-right: 100px;
         }
+
         .search-clear {
             right: 55px;
         }
@@ -538,8 +591,7 @@
                         <td>
                             @if (b.Photo != null)
                             {
-                                <img src="data:image/jpeg;base64,@Convert.ToBase64String(b.Photo)"
-                                     class="rounded-circle"
+                                <img src="data:image/jpeg;base64,@Convert.ToBase64String(b.Photo)" class="rounded-circle"
                                      style="width:40px;height:40px;object-fit:cover;" />
                             }
                             else
@@ -615,7 +667,7 @@
                                 <a class="btn btn-outline-secondary" href="/Boxing/Edit/@b.BoxingMemberID" title="Edit">
                                     <i class="fa-solid fa-edit"></i>
                                 </a>
-                                <button class="btn btn-outline-danger" data-bs-toggle="modal" 
+                                <button class="btn btn-outline-danger" data-bs-toggle="modal"
                                         data-bs-target="#delBoxing_@b.BoxingMemberID" title="Delete">
                                     <i class="fa-solid fa-trash"></i>
                                 </button>
@@ -632,7 +684,8 @@
                                         </div>
                                         <div class="modal-footer">
                                             <button class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                                            <form method="post" action="/Boxing/Delete/@b.BoxingMemberID" style="display:inline;">
+                                            <form method="post" action="/Boxing/Delete/@b.BoxingMemberID"
+                                                  style="display:inline;">
                                                 <button class="btn btn-danger">Yes, Delete</button>
                                             </form>
                                         </div>
@@ -695,9 +748,9 @@
     const clearBtn = document.getElementById('clearSearch');
     const searchInput = document.getElementById('searchInput');
     const searchForm = document.getElementById('searchForm');
-    
+
     if (clearBtn) {
-        clearBtn.addEventListener('click', function() {
+        clearBtn.addEventListener('click', function () {
             const url = new URL(window.location.href);
             url.searchParams.delete('search');
             url.searchParams.set('page', '1');
@@ -707,9 +760,9 @@
             window.location.href = url.toString();
         });
     }
-    
+
     if (searchInput) {
-        searchInput.addEventListener('input', function() {
+        searchInput.addEventListener('input', function () {
             let existingClear = document.getElementById('clearSearch');
             if (this.value.trim() !== '' && !existingClear) {
                 const clearButton = document.createElement('button');
@@ -718,7 +771,7 @@
                 clearButton.id = 'clearSearch';
                 clearButton.title = 'Clear search';
                 clearButton.innerHTML = '<i class="fa-solid fa-times"></i>';
-                clearButton.addEventListener('click', function() {
+                clearButton.addEventListener('click', function () {
                     searchInput.value = '';
                     this.remove();
                     searchInput.focus();
@@ -728,12 +781,11 @@
                 existingClear.remove();
             }
         });
-        
-        searchInput.addEventListener('keypress', function(e) {
+
+        searchInput.addEventListener('keypress', function (e) {
             if (e.key === 'Enter') {
                 searchForm.submit();
             }
         });
     }
 </script>
-
