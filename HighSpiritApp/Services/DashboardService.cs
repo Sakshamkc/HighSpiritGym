@@ -55,7 +55,7 @@ namespace HighSpiritApp.Services
                 x.LatestMembership!.ExpireDate >= today &&
                 x.LatestMembership.ExpireDate <= today.AddDays(7));
             var gymJoinedThisMonth = customers.Count(c => c.JoinDate >= monthStart);
-            
+
             // Gym total due amount from latest memberships
             var gymTotalDue = customerMemberships
                 .Sum(x => x.LatestMembership!.DueAmount);
@@ -66,14 +66,14 @@ namespace HighSpiritApp.Services
             var ladiesLockers = allLockers.Where(l => l.Gender == "Ladies").ToList();
 
             var lockerGentsTotal = gentsLockers.Count;
-            var lockerGentsOccupied = gentsLockers.Count(l => l.Status == "Occupied" && !string.IsNullOrEmpty(l.AssignedTo));
+            var lockerGentsOccupied = gentsLockers.Count(l => l.Status == "Occupied" && !string.IsNullOrEmpty(l.AssignedTo) && (!l.EndDate.HasValue || l.EndDate >= today));
             var lockerGentsEmpty = gentsLockers.Count(l => l.Status == "Empty" || (l.Status != "Occupied" && l.Status != "Locked" && string.IsNullOrEmpty(l.AssignedTo)));
-            var lockerGentsExpired = gentsLockers.Count(l => l.Status == "Occupied" && l.EndDate < today);
+            var lockerGentsExpired = gentsLockers.Count(l => l.Status == "Occupied" && l.EndDate.HasValue && l.EndDate < today);
 
             var lockerLadiesTotal = ladiesLockers.Count;
-            var lockerLadiesOccupied = ladiesLockers.Count(l => l.Status == "Occupied" && !string.IsNullOrEmpty(l.AssignedTo));
+            var lockerLadiesOccupied = ladiesLockers.Count(l => l.Status == "Occupied" && !string.IsNullOrEmpty(l.AssignedTo) && (!l.EndDate.HasValue || l.EndDate >= today));
             var lockerLadiesEmpty = ladiesLockers.Count(l => l.Status == "Empty" || (l.Status != "Occupied" && l.Status != "Locked" && string.IsNullOrEmpty(l.AssignedTo)));
-            var lockerLadiesExpired = ladiesLockers.Count(l => l.Status == "Occupied" && l.EndDate < today);
+            var lockerLadiesExpired = ladiesLockers.Count(l => l.Status == "Occupied" && l.EndDate.HasValue && l.EndDate < today);
 
             var lockerTotalDue = allLockers.Sum(l => l.DueAmount);
 
@@ -92,7 +92,7 @@ namespace HighSpiritApp.Services
                 GymExpiringSoon = gymExpiringSoon,
                 GymJoinedThisMonth = gymJoinedThisMonth,
                 GymTotalDue = gymTotalDue,
-                
+
                 LockerGentsTotal = lockerGentsTotal,
                 LockerGentsOccupied = lockerGentsOccupied,
                 LockerGentsEmpty = lockerGentsEmpty,
@@ -102,7 +102,7 @@ namespace HighSpiritApp.Services
                 LockerLadiesEmpty = lockerLadiesEmpty,
                 LockerLadiesExpired = lockerLadiesExpired,
                 LockerTotalDue = lockerTotalDue,
-                
+
                 BoxingTotal = boxingTotal,
                 BoxingPaid = boxingPaid,
                 BoxingWithDue = boxingWithDue,
