@@ -19,6 +19,14 @@
     <!-- Nepali Date Picker -->
     <link rel="stylesheet" href="~/css/nepali-datepicker.css" asp-append-version="true" />
     <style>
+                /* Disable animations globally when setting is off */
+                html.no-animations *,
+                html.no-animations *::before,
+                html.no-animations *::after {
+                    animation-duration: 0s !important;
+                    transition-duration: 0s !important;
+                }
+
                 :root {
                     --sidebar-bg: linear-gradient(180deg, #0f172a 0%, #1e293b 100%);
                     --header-bg: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
@@ -2125,6 +2133,16 @@
                     <span class="nav-text">Revenue Report</span>
                 </a>
             </div>
+
+            <p class="nav-section-title">System</p>
+
+            <div class="nav-item">
+                <a href="/Settings" class="nav-link settings-link @(controller == "Settings" ? "active" : "")"
+                       onclick="closeSidebarOnMobile()">
+                    <i class="fa-solid fa-gear"></i>
+                    <span class="nav-text">Settings</span>
+                </a>
+            </div>
         </div>
     </div>
 
@@ -2186,6 +2204,31 @@
         document.addEventListener('DOMContentLoaded', function () {
         // Initialize Date Picker Manager (handles EN/NP mode)
         NepaliDatePickerManager.init();
+
+        // Apply session timer visibility from settings
+        if (localStorage.getItem('sessionTimerHidden') === 'true') {
+            var stDisplay = document.getElementById('sessionTimerDisplay');
+            if (stDisplay) stDisplay.style.display = 'none';
+        }
+
+        // Apply header quick actions visibility from settings
+        if (localStorage.getItem('headerActionsHidden') === 'true') {
+            var dtBtn = document.getElementById('dateToggleBtn');
+            var tmBtn = document.getElementById('themeToggle');
+            if (dtBtn) dtBtn.style.display = 'none';
+            if (tmBtn) tmBtn.style.display = 'none';
+        }
+
+        // Apply animations setting
+        if (localStorage.getItem('animationsDisabled') === 'true') {
+            document.documentElement.classList.add('no-animations');
+        }
+
+        // Apply toast position from settings
+        var savedToastPos = localStorage.getItem('toastPosition');
+        if (savedToastPos && typeof toastr !== 'undefined') {
+            toastr.options.positionClass = savedToastPos;
+        }
 
         // Initialize session timeout
         initSessionTimeout();

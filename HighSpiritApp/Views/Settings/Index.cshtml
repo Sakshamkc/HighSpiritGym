@@ -1,0 +1,1020 @@
+@{
+    ViewData["Title"] = "Settings";
+}
+
+<style>
+    .settings-container {
+        max-width: 800px;
+        margin: 0 auto;
+        padding: 30px 20px;
+    }
+
+    .settings-header {
+        margin-bottom: 30px;
+    }
+
+    .settings-header h2 {
+        font-size: 26px;
+        font-weight: 700;
+        color: #1e293b;
+        margin: 0;
+    }
+
+    .settings-header p {
+        color: #64748b;
+        font-size: 14px;
+        margin-top: 4px;
+    }
+
+    .settings-section {
+        background: #ffffff;
+        border-radius: 14px;
+        border: 1px solid #e2e8f0;
+        overflow: hidden;
+        margin-bottom: 24px;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+        transition: all 0.3s ease;
+    }
+
+    .settings-section:hover {
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06);
+    }
+
+    .section-header {
+        padding: 16px 20px;
+        border-bottom: 1px solid #f1f5f9;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+
+    .section-header .section-icon {
+        width: 36px;
+        height: 36px;
+        border-radius: 10px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 16px;
+        color: #fff;
+        flex-shrink: 0;
+    }
+
+    .section-header h5 {
+        font-size: 15px;
+        font-weight: 600;
+        color: #1e293b;
+        margin: 0;
+    }
+
+    .section-header p {
+        font-size: 12px;
+        color: #94a3b8;
+        margin: 0;
+    }
+
+    .settings-item {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 16px 20px;
+        border-bottom: 1px solid #f8fafc;
+        transition: background 0.15s ease;
+    }
+
+    .settings-item:last-child {
+        border-bottom: none;
+    }
+
+    .settings-item:hover {
+        background: #f8fafc;
+    }
+
+    .settings-item-info {
+        flex: 1;
+    }
+
+    .settings-item-info .label {
+        font-size: 14px;
+        font-weight: 500;
+        color: #334155;
+    }
+
+    .settings-item-info .description {
+        font-size: 12px;
+        color: #94a3b8;
+        margin-top: 2px;
+    }
+
+    .settings-item-icon {
+        width: 34px;
+        height: 34px;
+        border-radius: 8px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 14px;
+        margin-right: 14px;
+        flex-shrink: 0;
+    }
+
+    /* Toggle Switch */
+    .toggle-switch {
+        position: relative;
+        width: 48px;
+        height: 26px;
+        flex-shrink: 0;
+    }
+
+    .toggle-switch input {
+        opacity: 0;
+        width: 0;
+        height: 0;
+    }
+
+    .toggle-slider {
+        position: absolute;
+        cursor: pointer;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background-color: #cbd5e1;
+        border-radius: 26px;
+        transition: all 0.3s ease;
+    }
+
+    .toggle-slider:before {
+        position: absolute;
+        content: "";
+        height: 20px;
+        width: 20px;
+        left: 3px;
+        bottom: 3px;
+        background-color: #fff;
+        border-radius: 50%;
+        transition: all 0.3s ease;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.15);
+    }
+
+    .toggle-switch input:checked+.toggle-slider {
+        background: linear-gradient(135deg, #4f46e5, #6366f1);
+    }
+
+    .toggle-switch input:checked+.toggle-slider:before {
+        transform: translateX(22px);
+    }
+
+    /* Segmented Control */
+    .segmented-control {
+        display: flex;
+        background: #f1f5f9;
+        border-radius: 8px;
+        padding: 3px;
+        flex-shrink: 0;
+    }
+
+    .segmented-btn {
+        padding: 6px 16px;
+        border: none;
+        background: transparent;
+        border-radius: 6px;
+        font-size: 13px;
+        font-weight: 500;
+        color: #64748b;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        white-space: nowrap;
+    }
+
+    .segmented-btn.active {
+        background: #fff;
+        color: #4f46e5;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+        font-weight: 600;
+    }
+
+    .segmented-btn:hover:not(.active) {
+        color: #334155;
+    }
+
+    .settings-action-btn {
+        padding: 8px 20px;
+        border: 1px solid #e2e8f0;
+        background: #f8fafc;
+        border-radius: 8px;
+        font-size: 13px;
+        font-weight: 500;
+        color: #334155;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        flex-shrink: 0;
+    }
+
+    .settings-action-btn:hover {
+        background: #4f46e5;
+        color: #fff;
+        border-color: #4f46e5;
+        transform: translateY(-1px);
+        box-shadow: 0 4px 12px rgba(79, 70, 229, 0.3);
+    }
+
+    /* Color palette icons */
+    .icon-display {
+        background: linear-gradient(135deg, #6366f1, #4f46e5);
+    }
+
+    .icon-date {
+        background: linear-gradient(135deg, #f59e0b, #d97706);
+    }
+
+    .icon-general {
+        background: linear-gradient(135deg, #10b981, #059669);
+    }
+
+    .icon-notifications {
+        background: linear-gradient(135deg, #f43f5e, #e11d48);
+    }
+
+    .icon-about {
+        background: linear-gradient(135deg, #64748b, #475569);
+    }
+
+    .item-icon-dark {
+        background: #312e81;
+        color: #a5b4fc;
+    }
+
+    .item-icon-sidebar {
+        background: #fef3c7;
+        color: #d97706;
+    }
+
+    .item-icon-session {
+        background: #fce7f3;
+        color: #db2777;
+    }
+
+    .item-icon-date {
+        background: #fff7ed;
+        color: #ea580c;
+    }
+
+    .item-icon-lang {
+        background: #ede9fe;
+        color: #6366f1;
+    }
+
+    .item-icon-anim {
+        background: #ecfdf5;
+        color: #059669;
+    }
+
+    .item-icon-header {
+        background: #dbeafe;
+        color: #2563eb;
+    }
+
+    .item-icon-toast {
+        background: #fef9c3;
+        color: #ca8a04;
+    }
+
+    .item-icon-rows {
+        background: #e0e7ff;
+        color: #4338ca;
+    }
+
+    .item-icon-sound {
+        background: #ffe4e6;
+        color: #e11d48;
+    }
+
+    .item-icon-confirm {
+        background: #f0fdf4;
+        color: #16a34a;
+    }
+    }
+
+    .item-icon-sidebar {
+        background: #fef3c7;
+        color: #d97706;
+    }
+
+    .item-icon-session {
+        background: #fce7f3;
+        color: #db2777;
+    }
+
+    .item-icon-date {
+        background: #fff7ed;
+        color: #ea580c;
+    }
+
+    .item-icon-lang {
+        background: #ede9fe;
+        color: #6366f1;
+    }
+
+    /* About Section */
+    .about-info {
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+    }
+
+    .about-row {
+        display: flex;
+        justify-content: space-between;
+        font-size: 13px;
+    }
+
+    .about-row .about-label {
+        color: #94a3b8;
+        font-weight: 500;
+    }
+
+    .about-row .about-value {
+        color: #334155;
+        font-weight: 600;
+    }
+
+    /* Version badge */
+    .version-badge {
+        background: linear-gradient(135deg, #4f46e5, #6366f1);
+        color: #fff;
+        padding: 3px 10px;
+        border-radius: 20px;
+        font-size: 12px;
+        font-weight: 600;
+    }
+
+    /* Reset button */
+    .reset-btn {
+        background: #fff;
+        border: 1px solid #fecaca;
+        color: #ef4444;
+        padding: 10px 24px;
+        border-radius: 10px;
+        font-size: 14px;
+        font-weight: 500;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        margin-top: 10px;
+    }
+
+    .reset-btn:hover {
+        background: #fef2f2;
+        border-color: #ef4444;
+        transform: translateY(-1px);
+    }
+
+    /* ========== Dark Mode ========== */
+    [data-theme="dark"] .settings-header h2 {
+        color: #f1f5f9;
+    }
+
+    [data-theme="dark"] .settings-header p {
+        color: #94a3b8;
+    }
+
+    [data-theme="dark"] .settings-section {
+        background: #1e293b;
+        border-color: #334155;
+    }
+
+    [data-theme="dark"] .settings-section:hover {
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+    }
+
+    [data-theme="dark"] .section-header {
+        border-bottom-color: #334155;
+    }
+
+    [data-theme="dark"] .section-header h5 {
+        color: #f1f5f9;
+    }
+
+    [data-theme="dark"] .section-header p {
+        color: #64748b;
+    }
+
+    [data-theme="dark"] .settings-item {
+        border-bottom-color: #293548;
+    }
+
+    [data-theme="dark"] .settings-item:hover {
+        background: #293548;
+    }
+
+    [data-theme="dark"] .settings-item-info .label {
+        color: #e2e8f0;
+    }
+
+    [data-theme="dark"] .settings-item-info .description {
+        color: #64748b;
+    }
+
+    [data-theme="dark"] .toggle-slider {
+        background-color: #475569;
+    }
+
+    [data-theme="dark"] .segmented-control {
+        background: #0f172a;
+    }
+
+    [data-theme="dark"] .segmented-btn {
+        color: #94a3b8;
+    }
+
+    [data-theme="dark"] .segmented-btn.active {
+        background: #334155;
+        color: #a5b4fc;
+    }
+
+    [data-theme="dark"] .settings-action-btn {
+        background: #334155;
+        border-color: #475569;
+        color: #e2e8f0;
+    }
+
+    [data-theme="dark"] .about-row .about-label {
+        color: #64748b;
+    }
+
+    [data-theme="dark"] .about-row .about-value {
+        color: #e2e8f0;
+    }
+
+    [data-theme="dark"] .reset-btn {
+        background: #1e293b;
+        border-color: #7f1d1d;
+        color: #f87171;
+    }
+
+    [data-theme="dark"] .reset-btn:hover {
+        background: #2c1a1a;
+    }
+
+    [data-theme="dark"] .item-icon-dark {
+        background: #312e81;
+        color: #a5b4fc;
+    }
+
+    [data-theme="dark"] .item-icon-sidebar {
+        background: #78350f;
+        color: #fbbf24;
+    }
+
+    [data-theme="dark"] .item-icon-session {
+        background: #831843;
+        color: #f9a8d4;
+    }
+
+    [data-theme="dark"] .item-icon-date {
+        background: #7c2d12;
+        color: #fdba74;
+    }
+
+    [data-theme="dark"] .item-icon-lang {
+        background: #312e81;
+        color: #c4b5fd;
+    }
+
+    [data-theme="dark"] .item-icon-anim {
+        background: #064e3b;
+        color: #6ee7b7;
+    }
+
+    [data-theme="dark"] .item-icon-header {
+        background: #1e3a5f;
+        color: #93c5fd;
+    }
+
+    [data-theme="dark"] .item-icon-toast {
+        background: #713f12;
+        color: #fde047;
+    }
+
+    [data-theme="dark"] .item-icon-rows {
+        background: #312e81;
+        color: #a5b4fc;
+    }
+
+    [data-theme="dark"] .item-icon-sound {
+        background: #881337;
+        color: #fda4af;
+    }
+
+    [data-theme="dark"] .item-icon-confirm {
+        background: #14532d;
+        color: #86efac;
+    }
+</style>
+
+<div class="settings-container">
+    <div class="settings-header">
+        <h2><i class="fa-solid fa-gear me-2" style="color: #6366f1;"></i>Settings</h2>
+        <p>Customize your experience and preferences</p>
+    </div>
+
+    <!-- ===== Display & Appearance ===== -->
+    <div class="settings-section">
+        <div class="section-header">
+            <div class="section-icon icon-display">
+                <i class="fa-solid fa-palette"></i>
+            </div>
+            <div>
+                <h5>Display & Appearance</h5>
+                <p>Theme, layout and screen preferences</p>
+            </div>
+        </div>
+
+        <!-- Dark Mode -->
+        <div class="settings-item">
+            <div class="settings-item-icon item-icon-dark">
+                <i class="fa-solid fa-moon"></i>
+            </div>
+            <div class="settings-item-info">
+                <div class="label">Dark Mode</div>
+                <div class="description">Switch between light and dark theme</div>
+            </div>
+            <label class="toggle-switch">
+                <input type="checkbox" id="settingDarkMode" onchange="settingsToggleTheme(this)">
+                <span class="toggle-slider"></span>
+            </label>
+        </div>
+
+        <!-- Sidebar Collapsed -->
+        <div class="settings-item">
+            <div class="settings-item-icon item-icon-sidebar">
+                <i class="fa-solid fa-bars"></i>
+            </div>
+            <div class="settings-item-info">
+                <div class="label">Compact Sidebar</div>
+                <div class="description">Start with sidebar collapsed on desktop</div>
+            </div>
+            <label class="toggle-switch">
+                <input type="checkbox" id="settingSidebarCollapsed" onchange="settingsToggleSidebar(this)">
+                <span class="toggle-slider"></span>
+            </label>
+        </div>
+
+        <!-- Animations -->
+        <div class="settings-item">
+            <div class="settings-item-icon item-icon-anim">
+                <i class="fa-solid fa-wand-magic-sparkles"></i>
+            </div>
+            <div class="settings-item-info">
+                <div class="label">Animations</div>
+                <div class="description">Enable page transitions and hover effects</div>
+            </div>
+            <label class="toggle-switch">
+                <input type="checkbox" id="settingAnimations" onchange="settingsToggleAnimations(this)" checked>
+                <span class="toggle-slider"></span>
+            </label>
+        </div>
+
+        <!-- Header Quick Actions -->
+        <div class="settings-item">
+            <div class="settings-item-icon item-icon-header">
+                <i class="fa-solid fa-sliders"></i>
+            </div>
+            <div class="settings-item-info">
+                <div class="label">Header Quick Actions</div>
+                <div class="description">Show dark mode and date toggle buttons in the header bar</div>
+            </div>
+            <label class="toggle-switch">
+                <input type="checkbox" id="settingHeaderActions" onchange="settingsToggleHeaderActions(this)" checked>
+                <span class="toggle-slider"></span>
+            </label>
+        </div>
+
+        <!-- Session Timer -->
+        <div class="settings-item">
+            <div class="settings-item-icon item-icon-session">
+                <i class="fa-solid fa-clock"></i>
+            </div>
+            <div class="settings-item-info">
+                <div class="label">Show Session Timer</div>
+                <div class="description">Display remaining session time in header</div>
+            </div>
+            <label class="toggle-switch">
+                <input type="checkbox" id="settingSessionTimer" onchange="settingsToggleSessionTimer(this)" checked>
+                <span class="toggle-slider"></span>
+            </label>
+        </div>
+    </div>
+
+    <!-- ===== Date & Language ===== -->
+    <div class="settings-section">
+        <div class="section-header">
+            <div class="section-icon icon-date">
+                <i class="fa-solid fa-calendar-days"></i>
+            </div>
+            <div>
+                <h5>Date & Language</h5>
+                <p>Date format and calendar preferences</p>
+            </div>
+        </div>
+
+        <!-- Date Picker Mode -->
+        <div class="settings-item">
+            <div class="settings-item-icon item-icon-date">
+                <i class="fa-solid fa-calendar-alt"></i>
+            </div>
+            <div class="settings-item-info">
+                <div class="label">Date Picker Mode</div>
+                <div class="description">Choose between English (AD) or Nepali (BS) calendar</div>
+            </div>
+            <div class="segmented-control" id="datePickerSegment">
+                <button class="segmented-btn active" data-mode="english" onclick="settingsSetDateMode('english', this)">
+                    <i class="fa-solid fa-calendar-days me-1"></i> English
+                </button>
+                <button class="segmented-btn" data-mode="nepali" onclick="settingsSetDateMode('nepali', this)">
+                    <i class="fa-solid fa-om me-1"></i> नेपाली
+                </button>
+            </div>
+        </div>
+
+        <!-- Date Format Note -->
+        <div class="settings-item">
+            <div class="settings-item-icon item-icon-lang">
+                <i class="fa-solid fa-info-circle"></i>
+            </div>
+            <div class="settings-item-info">
+                <div class="label">Date Format</div>
+                <div class="description" id="dateFormatDesc">
+                    All dates are submitted in AD (YYYY-MM-DD) format regardless of display.
+                    Nepali mode shows BS dates and converts automatically.
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ===== Notifications & Feedback ===== -->
+    <div class="settings-section">
+        <div class="section-header">
+            <div class="section-icon icon-notifications">
+                <i class="fa-solid fa-bell"></i>
+            </div>
+            <div>
+                <h5>Notifications & Feedback</h5>
+                <p>Alerts, sounds and confirmation preferences</p>
+            </div>
+        </div>
+
+        <!-- Toast Position -->
+        <div class="settings-item">
+            <div class="settings-item-icon item-icon-toast">
+                <i class="fa-solid fa-message"></i>
+            </div>
+            <div class="settings-item-info">
+                <div class="label">Toast Notification Position</div>
+                <div class="description">Where success/error messages appear on screen</div>
+            </div>
+            <div class="segmented-control" id="toastPositionSegment">
+                <button class="segmented-btn active" data-pos="toast-top-right" onclick="settingsSetToastPos(this)">Top
+                    Right</button>
+                    <button class="segmented-btn" data-pos="toast-top-center" onclick="settingsSetToastPos(this)">Top
+                        Center</button>
+                        <button class="segmented-btn" data-pos="toast-bottom-right" onclick="settingsSetToastPos(this)">Bottom
+                            Right</button>
+                        </div>
+                    </div>
+
+                    <!-- Delete Confirmation -->
+                    <div class="settings-item">
+                        <div class="settings-item-icon item-icon-confirm">
+                            <i class="fa-solid fa-triangle-exclamation"></i>
+                        </div>
+                        <div class="settings-item-info">
+                            <div class="label">Delete Confirmations</div>
+                            <div class="description">Show confirmation dialog before deleting a record</div>
+                        </div>
+                        <label class="toggle-switch">
+                            <input type="checkbox" id="settingDeleteConfirm" onchange="settingsToggleDeleteConfirm(this)" checked>
+                            <span class="toggle-slider"></span>
+                        </label>
+                    </div>
+
+                    <!-- Notification Sound -->
+                    <div class="settings-item">
+                        <div class="settings-item-icon item-icon-sound">
+                            <i class="fa-solid fa-volume-high"></i>
+                        </div>
+                        <div class="settings-item-info">
+                            <div class="label">Notification Sound</div>
+                            <div class="description">Play a subtle sound for toast notifications</div>
+                        </div>
+                        <label class="toggle-switch">
+                            <input type="checkbox" id="settingNotifSound" onchange="settingsToggleNotifSound(this)">
+                            <span class="toggle-slider"></span>
+                        </label>
+                    </div>
+                </div>
+
+                <!-- ===== Data Display ===== -->
+                <div class="settings-section">
+                    <div class="section-header">
+                        <div class="section-icon icon-general">
+                            <i class="fa-solid fa-table-list"></i>
+                        </div>
+                        <div>
+                            <h5>Data Display</h5>
+                            <p>Table and list preferences</p>
+                        </div>
+                    </div>
+
+                    <!-- Default Rows Per Page -->
+                    <div class="settings-item">
+                        <div class="settings-item-icon item-icon-rows">
+                            <i class="fa-solid fa-list-ol"></i>
+                        </div>
+                        <div class="settings-item-info">
+                            <div class="label">Default Rows Per Page</div>
+                            <div class="description">Number of records shown in tables by default</div>
+                        </div>
+                        <div class="segmented-control" id="rowsPerPageSegment">
+                            <button class="segmented-btn" data-rows="10" onclick="settingsSetRows(this)">10</button>
+                            <button class="segmented-btn active" data-rows="25" onclick="settingsSetRows(this)">25</button>
+                            <button class="segmented-btn" data-rows="50" onclick="settingsSetRows(this)">50</button>
+                            <button class="segmented-btn" data-rows="100" onclick="settingsSetRows(this)">100</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ===== About ===== -->
+                <div class="settings-section">
+                    <div class="section-header">
+                        <div class="section-icon icon-about">
+                            <i class="fa-solid fa-circle-info"></i>
+                        </div>
+                        <div>
+                            <h5>About</h5>
+                            <p>Application information</p>
+                        </div>
+                    </div>
+
+                    <div class="settings-item" style="display:block; padding: 20px;">
+                        <div class="about-info">
+                            <div class="about-row">
+                                <span class="about-label">Application</span>
+                                <span class="about-value">High Spirit Gym Management</span>
+                            </div>
+                            <div class="about-row">
+                                <span class="about-label">Version</span>
+                                <span class="version-badge">v2.0.0</span>
+                            </div>
+                            <div class="about-row">
+                                <span class="about-label">Framework</span>
+                                <span class="about-value">.NET 8.0</span>
+                            </div>
+                            <div class="about-row">
+                                <span class="about-label">Database</span>
+                                <span class="about-value">MySQL</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ===== Reset ===== -->
+                <div class="text-center">
+                    <button class="reset-btn mx-auto" onclick="settingsResetAll()">
+                        <i class="fa-solid fa-rotate-left"></i>
+                        Reset All Settings to Default
+                    </button>
+                </div>
+            </div>
+
+            @section Scripts {
+                <script>
+                    // ===== Initialize settings page state from localStorage =====
+                    document.addEventListener('DOMContentLoaded', function () {
+                        // Dark Mode
+                        const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+                        document.getElementById('settingDarkMode').checked = isDark;
+
+                        // Sidebar collapsed
+                        const isCollapsed = localStorage.getItem('sidebarCollapsed') === 'true';
+                        document.getElementById('settingSidebarCollapsed').checked = isCollapsed;
+
+                        // Session timer visibility
+                        const timerHidden = localStorage.getItem('sessionTimerHidden') === 'true';
+                        document.getElementById('settingSessionTimer').checked = !timerHidden;
+
+                        // Animations
+                        const animDisabled = localStorage.getItem('animationsDisabled') === 'true';
+                        document.getElementById('settingAnimations').checked = !animDisabled;
+
+                        // Header quick actions
+                        const headerHidden = localStorage.getItem('headerActionsHidden') === 'true';
+                        document.getElementById('settingHeaderActions').checked = !headerHidden;
+
+                        // Date picker mode
+                        const dateMode = localStorage.getItem('datePickerMode') || 'english';
+                        const dateButtons = document.querySelectorAll('#datePickerSegment .segmented-btn');
+                        dateButtons.forEach(btn => {
+                            btn.classList.toggle('active', btn.dataset.mode === dateMode);
+                        });
+
+                        // Toast position
+                        const toastPos = localStorage.getItem('toastPosition') || 'toast-top-right';
+                        document.querySelectorAll('#toastPositionSegment .segmented-btn').forEach(btn => {
+                            btn.classList.toggle('active', btn.dataset.pos === toastPos);
+                        });
+
+                        // Delete confirmation
+                        const noConfirm = localStorage.getItem('deleteConfirmDisabled') === 'true';
+                        document.getElementById('settingDeleteConfirm').checked = !noConfirm;
+
+                        // Notification sound
+                        const soundOn = localStorage.getItem('notifSoundEnabled') === 'true';
+                        document.getElementById('settingNotifSound').checked = soundOn;
+
+                        // Rows per page
+                        const rows = localStorage.getItem('defaultRowsPerPage') || '25';
+                        document.querySelectorAll('#rowsPerPageSegment .segmented-btn').forEach(btn => {
+                            btn.classList.toggle('active', btn.dataset.rows === rows);
+                        });
+                    });
+
+                    // ===== Dark Mode =====
+                    function settingsToggleTheme(checkbox) {
+                        const newTheme = checkbox.checked ? 'dark' : 'light';
+                        document.documentElement.setAttribute('data-theme', newTheme);
+                        localStorage.setItem('theme', newTheme);
+                    }
+
+                    // ===== Sidebar Collapsed =====
+                    function settingsToggleSidebar(checkbox) {
+                        localStorage.setItem('sidebarCollapsed', checkbox.checked ? 'true' : 'false');
+                        const sidebar = document.getElementById('sidebar');
+                        const content = document.getElementById('content');
+                        const hamburger = document.getElementById('hamburgerBtn');
+                        if (window.innerWidth >= 992) {
+                            if (checkbox.checked) {
+                                sidebar.classList.add('collapsed');
+                                content.classList.add('expanded');
+                                hamburger.classList.add('active');
+                            } else {
+                                sidebar.classList.remove('collapsed');
+                                content.classList.remove('expanded');
+                                hamburger.classList.remove('active');
+                            }
+                        }
+                    }
+
+                    // ===== Animations =====
+                    function settingsToggleAnimations(checkbox) {
+                        const disabled = !checkbox.checked;
+                        localStorage.setItem('animationsDisabled', disabled ? 'true' : 'false');
+                        document.documentElement.classList.toggle('no-animations', disabled);
+                        if (typeof toastr !== 'undefined') {
+                            toastr.success(disabled ? 'Animations disabled' : 'Animations enabled');
+                        }
+                    }
+
+                    // ===== Header Quick Actions =====
+                    function settingsToggleHeaderActions(checkbox) {
+                        const hidden = !checkbox.checked;
+                        localStorage.setItem('headerActionsHidden', hidden ? 'true' : 'false');
+                        const dateBtn = document.getElementById('dateToggleBtn');
+                        const themeBtn = document.getElementById('themeToggle');
+                        if (dateBtn) dateBtn.style.display = hidden ? 'none' : '';
+                        if (themeBtn) themeBtn.style.display = hidden ? 'none' : '';
+                    }
+
+                    // ===== Session Timer =====
+                    function settingsToggleSessionTimer(checkbox) {
+                        const timer = document.getElementById('sessionTimerDisplay');
+                        if (timer) {
+                            timer.style.display = checkbox.checked ? '' : 'none';
+                        }
+                        localStorage.setItem('sessionTimerHidden', checkbox.checked ? 'false' : 'true');
+                    }
+
+                    // ===== Date Mode =====
+                    function settingsSetDateMode(mode, btn) {
+                        document.querySelectorAll('#datePickerSegment .segmented-btn').forEach(b => b.classList.remove('active'));
+                        btn.classList.add('active');
+                        if (window.NepaliDatePickerManager) {
+                            if (NepaliDatePickerManager.mode !== mode) {
+                                NepaliDatePickerManager.toggle();
+                            }
+                        } else {
+                            localStorage.setItem('datePickerMode', mode);
+                        }
+                    }
+
+                    // ===== Toast Position =====
+                    function settingsSetToastPos(btn) {
+                        document.querySelectorAll('#toastPositionSegment .segmented-btn').forEach(b => b.classList.remove('active'));
+                        btn.classList.add('active');
+                        const pos = btn.dataset.pos;
+                        localStorage.setItem('toastPosition', pos);
+                        if (typeof toastr !== 'undefined') {
+                            toastr.options.positionClass = pos;
+                            toastr.success('Toast position updated');
+                        }
+                    }
+
+                    // ===== Delete Confirmation =====
+                    function settingsToggleDeleteConfirm(checkbox) {
+                        localStorage.setItem('deleteConfirmDisabled', checkbox.checked ? 'false' : 'true');
+                    }
+
+                    // ===== Notification Sound =====
+                    function settingsToggleNotifSound(checkbox) {
+                        localStorage.setItem('notifSoundEnabled', checkbox.checked ? 'true' : 'false');
+                    }
+
+                    // ===== Rows Per Page =====
+                    function settingsSetRows(btn) {
+                        document.querySelectorAll('#rowsPerPageSegment .segmented-btn').forEach(b => b.classList.remove('active'));
+                        btn.classList.add('active');
+                        localStorage.setItem('defaultRowsPerPage', btn.dataset.rows);
+                        if (typeof toastr !== 'undefined') {
+                            toastr.success('Default rows set to ' + btn.dataset.rows);
+                        }
+                    }
+
+                    // ===== Reset All =====
+                    function settingsResetAll() {
+                        if (!confirm('Are you sure you want to reset all settings to default?')) return;
+
+                        // Reset theme
+                        document.documentElement.setAttribute('data-theme', 'light');
+                        localStorage.setItem('theme', 'light');
+                        document.getElementById('settingDarkMode').checked = false;
+
+                        // Reset sidebar
+                        localStorage.setItem('sidebarCollapsed', 'false');
+                        document.getElementById('settingSidebarCollapsed').checked = false;
+                        const sidebar = document.getElementById('sidebar');
+                        const content = document.getElementById('content');
+                        if (sidebar) sidebar.classList.remove('collapsed');
+                        if (content) content.classList.remove('expanded');
+
+                        // Reset animations
+                        localStorage.setItem('animationsDisabled', 'false');
+                        document.getElementById('settingAnimations').checked = true;
+                        document.documentElement.classList.remove('no-animations');
+
+                        // Reset header actions
+                        localStorage.setItem('headerActionsHidden', 'false');
+                        document.getElementById('settingHeaderActions').checked = true;
+                        const dateBtn = document.getElementById('dateToggleBtn');
+                        const themeBtn = document.getElementById('themeToggle');
+                        if (dateBtn) dateBtn.style.display = '';
+                        if (themeBtn) themeBtn.style.display = '';
+
+                        // Reset session timer
+                        localStorage.setItem('sessionTimerHidden', 'false');
+                        document.getElementById('settingSessionTimer').checked = true;
+                        const timer = document.getElementById('sessionTimerDisplay');
+                        if (timer) timer.style.display = '';
+
+                        // Reset date mode
+                        localStorage.setItem('datePickerMode', 'english');
+                        document.querySelectorAll('#datePickerSegment .segmented-btn').forEach(b => {
+                            b.classList.toggle('active', b.dataset.mode === 'english');
+                        });
+                        if (window.NepaliDatePickerManager && NepaliDatePickerManager.mode === 'nepali') {
+                            NepaliDatePickerManager.toggle();
+                        }
+
+                        // Reset toast position
+                        localStorage.setItem('toastPosition', 'toast-top-right');
+                        document.querySelectorAll('#toastPositionSegment .segmented-btn').forEach(b => {
+                            b.classList.toggle('active', b.dataset.pos === 'toast-top-right');
+                        });
+                        if (typeof toastr !== 'undefined') toastr.options.positionClass = 'toast-top-right';
+
+                        // Reset delete confirmation
+                        localStorage.setItem('deleteConfirmDisabled', 'false');
+                        document.getElementById('settingDeleteConfirm').checked = true;
+
+                        // Reset notification sound
+                        localStorage.setItem('notifSoundEnabled', 'false');
+                        document.getElementById('settingNotifSound').checked = false;
+
+                        // Reset rows per page
+                        localStorage.setItem('defaultRowsPerPage', '25');
+                        document.querySelectorAll('#rowsPerPageSegment .segmented-btn').forEach(b => {
+                            b.classList.toggle('active', b.dataset.rows === '25');
+                        });
+
+                        // Show toast
+                        if (typeof toastr !== 'undefined') {
+                            toastr.success('All settings have been reset to defaults');
+                        }
+                    }
+                </script>
+            }
