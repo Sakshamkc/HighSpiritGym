@@ -590,7 +590,6 @@
                 this.instances = [];
 
                 dateInputs.forEach(input => {
-                    // Keep the input type but hide it
                     input.setAttribute('type', 'text');
                     const picker = new NepaliDatePicker(input);
                     this.instances.push(picker);

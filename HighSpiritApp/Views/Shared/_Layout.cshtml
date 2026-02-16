@@ -82,10 +82,14 @@
                 }
 
                 /* ========== DARK MODE OVERRIDES ========== */
-                [data-theme="dark"] .card,
-                [data-theme="dark"] .card-body {
+                [data-theme="dark"] .card:not(.stat-card) {
                     background-color: var(--card-bg) !important;
                     border-color: var(--card-border) !important;
+                    color: var(--text-primary);
+                }
+
+                [data-theme="dark"] .card:not(.stat-card) > .card-body {
+                    background-color: var(--card-bg) !important;
                     color: var(--text-primary);
                 }
 
@@ -385,13 +389,13 @@
                     background-color: #1a2332 !important;
                 }
 
-                [data-theme="dark"] .card {
+                [data-theme="dark"] .card:not(.stat-card) {
                     background-color: var(--card-bg) !important;
                     border-color: var(--card-border) !important;
                     color: var(--text-primary) !important;
                 }
 
-                [data-theme="dark"] .card-body {
+                [data-theme="dark"] .card:not(.stat-card) > .card-body {
                     color: var(--text-primary) !important;
                 }
 
@@ -1892,12 +1896,41 @@
                     }
 
                     .header-bar {
-                        padding: 0 12px;
-                        height: 60px;
+                        padding: 0 8px;
+                        height: 56px;
+                    }
+
+                    .header-left {
+                        gap: 8px;
+                    }
+
+                    .header-right {
+                        gap: 6px;
                     }
 
                     .header-bar .brand-logo {
-                        height: 36px;
+                        height: 32px;
+                    }
+
+                    .header-bar .hamburger-btn {
+                        width: 34px;
+                        height: 34px;
+                        font-size: 14px;
+                    }
+
+                    .session-timer {
+                        padding: 4px 8px;
+                        font-size: 11px;
+                        gap: 4px;
+                    }
+
+                    .session-timer span {
+                        display: none;
+                    }
+
+                    .theme-toggle {
+                        width: 34px;
+                        height: 34px;
                     }
 
                     .top-bar {
@@ -2149,10 +2182,6 @@
     <div class="content" id="content">
         <!-- Top utility bar -->
         <div class="d-flex justify-content-end align-items-center gap-3 top-bar">
-            <button class="btn btn-sm btn-outline-secondary rounded-pill px-3" onclick="toggleFullScreen()"
-                    title="Toggle Full Screen">
-                <i class="fa-solid fa-expand me-1"></i> Fullscreen
-            </button>
             @if (controller == "Customers" || controller == "Home" || controller == "Memberships")
             {
                 var planNameForNotification = controller == "Customers" ? ViewBag.PlanName as string : null;
@@ -2495,23 +2524,6 @@
         </div>
 
         <script>
-            function toggleFullScreen() {
-            const icon = document.querySelector(".fa-expand, .fa-compress");
-            if (!document.fullscreenElement) {
-            document.documentElement.requestFullscreen();
-            if (icon) {
-            icon.classList.remove("fa-expand");
-            icon.classList.add("fa-compress");
-            }
-            } else {
-            document.exitFullscreen();
-            if (icon) {
-            icon.classList.remove("fa-compress");
-            icon.classList.add("fa-expand");
-            }
-            }
-            }
-
             function toggleProfileMenu() {
             const menu = document.getElementById('profileMenu');
             menu.classList.toggle('show');
