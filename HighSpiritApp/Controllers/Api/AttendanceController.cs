@@ -4,6 +4,7 @@ using HighSpiritApp.Models.Api;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using System.Security.Claims;
 
 namespace HighSpiritApp.Controllers.Api
 {
@@ -20,19 +21,68 @@ namespace HighSpiritApp.Controllers.Api
         }
 
         /// <summary>
+        /// GET api/attendance/my-qr
+        /// Get QR token for the currently authenticated customer
+        /// </summary>
+        [HttpGet("my-qr")]
+        public async Task<IActionResult> GetMyQrToken()
+        {
+            var customerIdClaim = User.FindFirstValue("CustomerId");
+            if (string.IsNullOrEmpty(customerIdClaim))
+                return BadRequest(ApiResponse.Fail("No customer profile linked."));
+
+            var customerId = int.Parse(customerIdClaim);
+            var customer = await _context.Customers.FindAsync(customerId);
+            if (customer == null)
+                return NotFound(ApiResponse.Fail("Customer not found."));
+
+            // Generate QR token if not exists
+            if (string.IsNullOrEmpty(customer.QrToken))
+            {
+                customer.QrToken = Guid.NewGuid().ToString();
+                await _context.SaveChangesAsync();
+            }
+
+            return Ok(ApiResponse<object>.Ok(new
+            {
+                QrToken = customer.QrToken,
+                CustomerName = customer.FullName
+            }));
+        }
+
+        /// <summary>
         /// POST api/attendance/checkin
-        /// QR-based check-in for customer
+        /// QR-based check-in for customer (accepts customerID or qrToken)
         /// </summary>
         [HttpPost("checkin")]
         public async Task<IActionResult> CheckIn([FromBody] QrCheckInRequest request)
         {
-            var customer = await _context.Customers.FindAsync(request.CustomerID);
-            if (customer == null)
-                return NotFound(ApiResponse.Fail("Customer not found."));
+            Customer? customer = null;
+
+            // Try QR token first (more secure)
+            if (!string.IsNullOrEmpty(request.QrToken))
+            {
+                customer = await _context.Customers
+                    .FirstOrDefaultAsync(c => c.QrToken == request.QrToken);
+                    
+                if (customer == null)
+                    return NotFound(ApiResponse.Fail("Invalid QR code."));
+            }
+            // Fall back to customer ID
+            else if (request.CustomerID > 0)
+            {
+                customer = await _context.Customers.FindAsync(request.CustomerID);
+                if (customer == null)
+                    return NotFound(ApiResponse.Fail("Customer not found."));
+            }
+            else
+            {
+                return BadRequest(ApiResponse.Fail("Invalid check-in request."));
+            }
 
             // Check if already checked in today without checkout
             var existingCheckin = await _context.Attendances
-                .Where(a => a.CustomerID == request.CustomerID
+                .Where(a => a.CustomerID == customer.CustomerID
                     && a.CheckInTime.Date == DateTime.Today
                     && a.CheckOutTime == null)
                 .FirstOrDefaultAsync();
@@ -42,7 +92,7 @@ namespace HighSpiritApp.Controllers.Api
 
             var attendance = new Attendance
             {
-                CustomerID = request.CustomerID,
+                CustomerID = customer.CustomerID,
                 CustomerName = customer.FullName,
                 CheckInTime = DateTime.Now
             };

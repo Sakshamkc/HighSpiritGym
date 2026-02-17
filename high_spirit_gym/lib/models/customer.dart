@@ -70,16 +70,36 @@ class Customer {
       currentPlan: json['currentPlan'],
       membershipStart: json['membershipStart'] != null ? DateTime.tryParse(json['membershipStart']) : null,
       membershipExpire: json['membershipExpire'] != null ? DateTime.tryParse(json['membershipExpire']) : null,
-      paidPrice: json['paidPrice'],
-      dueAmount: json['dueAmount'],
+      paidPrice: (json['paidPrice'] as num?)?.toInt(),
+      dueAmount: (json['dueAmount'] as num?)?.toInt(),
       isActive: json['isActive'] ?? false,
       isExpired: json['isExpired'] ?? false,
     );
   }
 
   String get statusText {
+    // Use expiry date as the source of truth (matches backend filter logic)
+    if (membershipExpire != null) {
+      final today = DateTime.now();
+      final expiry = membershipExpire!;
+      if (expiry.isAfter(today) || expiry.year == today.year && expiry.month == today.month && expiry.day == today.day) {
+        // Check if expiring within 7 days
+        if (expiry.difference(today).inDays <= 7) return 'Expiring Soon';
+        return 'Active';
+      }
+      return 'Expired';
+    }
     if (isActive && !isExpired) return 'Active';
     if (isExpired) return 'Expired';
     return 'Inactive';
+  }
+
+  bool get isReallyActive {
+    if (membershipExpire != null) {
+      final today = DateTime.now();
+      return membershipExpire!.isAfter(today) || 
+        (membershipExpire!.year == today.year && membershipExpire!.month == today.month && membershipExpire!.day == today.day);
+    }
+    return isActive && !isExpired;
   }
 }

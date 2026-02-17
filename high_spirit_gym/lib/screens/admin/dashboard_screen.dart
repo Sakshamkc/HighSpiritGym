@@ -18,6 +18,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
   Map<String, dynamic>? _revenue;
   List<dynamic>? _monthlyData;
   bool _isLoading = true;
+  String? _errorMessage;
 
   @override
   void initState() {
@@ -26,6 +27,10 @@ class _DashboardScreenState extends State<DashboardScreen> {
   }
 
   Future<void> _loadDashboard() async {
+    setState(() {
+      _isLoading = true;
+      _errorMessage = null;
+    });
     try {
       final auth = context.read<AuthProvider>();
       final dashResp = await auth.api.get('/dashboard');
@@ -40,7 +45,10 @@ class _DashboardScreenState extends State<DashboardScreen> {
         _isLoading = false;
       });
     } catch (e) {
-      setState(() => _isLoading = false);
+      setState(() {
+        _isLoading = false;
+        _errorMessage = e.toString();
+      });
     }
   }
 
@@ -57,7 +65,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
           children: [
             const Icon(Icons.error_outline, size: 64, color: Colors.grey),
             const SizedBox(height: 16),
-            const Text('Failed to load dashboard'),
+            Text('Failed to load dashboard: ${_errorMessage ?? "Unknown error"}', textAlign: TextAlign.center),
             const SizedBox(height: 16),
             ElevatedButton(onPressed: _loadDashboard, child: const Text('Retry')),
           ],
@@ -110,38 +118,97 @@ class _DashboardScreenState extends State<DashboardScreen> {
     );
   }
 
+  String _fmtAmt(dynamic val) {
+    final n = (val is num) ? val.toDouble() : 0.0;
+    if (n >= 100000) return '${(n / 1000).toStringAsFixed(1)}k';
+    return n.toStringAsFixed(0);
+  }
+
   Widget _buildRevenueCards() {
     final todayRev = _revenue?['todayRevenue'] ?? 0;
     final thisMonth = _revenue?['thisMonthRevenue'] ?? 0;
     final totalDue = _revenue?['totalDue'] ?? 0;
+    final growth = (_revenue?['revenueGrowth'] as num?)?.toDouble() ?? 0;
 
-    return Row(
+    return Column(
       children: [
-        Expanded(
-          child: StatCard(
-            title: 'Today',
-            value: 'Rs.$todayRev',
-            icon: Icons.today,
+        // Main revenue card
+        Container(
+          width: double.infinity,
+          padding: const EdgeInsets.all(20),
+          decoration: BoxDecoration(
             gradient: AppTheme.primaryGradient,
+            borderRadius: BorderRadius.circular(20),
+            boxShadow: [
+              BoxShadow(
+                color: AppTheme.primaryColor.withOpacity(0.3),
+                blurRadius: 12,
+                offset: const Offset(0, 6),
+              ),
+            ],
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text('Total Revenue', style: TextStyle(color: Colors.white.withOpacity(0.8), fontSize: 14)),
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                    decoration: BoxDecoration(
+                      color: Colors.white.withOpacity(0.2),
+                      borderRadius: BorderRadius.circular(20),
+                    ),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Icon(growth >= 0 ? Icons.trending_up : Icons.trending_down, color: Colors.white, size: 14),
+                        const SizedBox(width: 4),
+                        Text('${growth.toStringAsFixed(1)}%', style: const TextStyle(color: Colors.white, fontSize: 12, fontWeight: FontWeight.w600)),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 8),
+              Text(
+                'Rs. ${_fmtAmt(_revenue?['totalRevenue'] ?? 0)}',
+                style: const TextStyle(color: Colors.white, fontSize: 32, fontWeight: FontWeight.bold, letterSpacing: 1),
+              ),
+            ],
           ),
         ),
-        const SizedBox(width: 12),
-        Expanded(
-          child: StatCard(
-            title: 'This Month',
-            value: 'Rs.$thisMonth',
-            icon: Icons.calendar_month,
-            gradient: AppTheme.successGradient,
-          ),
-        ),
-        const SizedBox(width: 12),
-        Expanded(
-          child: StatCard(
-            title: 'Total Due',
-            value: 'Rs.$totalDue',
-            icon: Icons.warning_amber,
-            gradient: AppTheme.dangerGradient,
-          ),
+        const SizedBox(height: 12),
+        Row(
+          children: [
+            Expanded(
+              child: StatCard(
+                title: 'Today',
+                value: 'Rs. ${_fmtAmt(todayRev)}',
+                icon: Icons.today,
+                gradient: AppTheme.primaryGradient,
+              ),
+            ),
+            const SizedBox(width: 10),
+            Expanded(
+              child: StatCard(
+                title: 'This Month',
+                value: 'Rs. ${_fmtAmt(thisMonth)}',
+                icon: Icons.calendar_month,
+                gradient: AppTheme.successGradient,
+              ),
+            ),
+            const SizedBox(width: 10),
+            Expanded(
+              child: StatCard(
+                title: 'Total Due',
+                value: 'Rs. ${_fmtAmt(totalDue)}',
+                icon: Icons.warning_amber,
+                gradient: AppTheme.dangerGradient,
+              ),
+            ),
+          ],
         ),
       ],
     );

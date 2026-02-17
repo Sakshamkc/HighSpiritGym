@@ -3,12 +3,15 @@ class ApiConfig {
   // For Android emulator, use 10.0.2.2 instead of localhost
   // For iOS simulator, use localhost
   // For real device, use your computer's local IP or your server's public IP
-  static const String baseUrl = 'http://10.0.2.2:5053/api';
+  // static const String baseUrl = 'http://10.0.2.2:5053/api';
+  // static const String baseUrl = 'http://10.0.2.2:5053/api';
+  // static const String baseUrl = 'http://localhost:5053/api';
+  static const String baseUrl = 'https://127.0.0.1:7041/api';
 
   // Production URL - uncomment when deploying
   // static const String baseUrl = 'https://your-server.com/api';
 
-  static const Duration timeout = Duration(seconds: 30);
+  static const Duration timeout = Duration(seconds: 60);
 
   // Endpoints
   static const String login = '/auth/login';

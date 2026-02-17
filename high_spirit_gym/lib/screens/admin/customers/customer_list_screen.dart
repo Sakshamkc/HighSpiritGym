@@ -44,16 +44,17 @@ class _CustomerListScreenState extends State<CustomerListScreen> {
         'pageSize': '20',
       };
       if (_search.isNotEmpty) query['search'] = _search;
-      if (_filter != 'All') query['filter'] = _filter;
+      if (_filter != 'All') query['filter'] = _filter.toLowerCase();
 
       final resp = await auth.api.get('/customers', query: query);
-      final items = (resp['items'] as List? ?? [])
+      final data = resp['data'] as List? ?? resp['items'] as List? ?? [];
+      final items = data
           .map((e) => Customer.fromJson(e))
           .toList();
 
       setState(() {
         _customers = items;
-        _totalPages = resp['totalPages'] ?? 1;
+        _totalPages = (resp['totalPages'] as num?)?.toInt() ?? 1;
         _isLoading = false;
       });
     } catch (e) {
@@ -105,8 +106,8 @@ class _CustomerListScreenState extends State<CustomerListScreen> {
                   _currentPage = 1;
                   _loadCustomers();
                 },
-                itemBuilder: (_) => ['All', 'Active', 'Expired', 'ExpiringSoon']
-                    .map((f) => PopupMenuItem(value: f, child: Text(f)))
+                itemBuilder: (_) => ['All', 'Active', 'Expired', 'Soon']
+                    .map((f) => PopupMenuItem(value: f, child: Text(f == 'Soon' ? 'Expiring Soon' : f)))
                     .toList(),
               ),
             ],
@@ -120,7 +121,7 @@ class _CustomerListScreenState extends State<CustomerListScreen> {
             child: Row(
               children: [
                 Chip(
-                  label: Text(_filter),
+                  label: Text(_filter == 'Soon' ? 'Expiring Soon' : _filter),
                   deleteIcon: const Icon(Icons.close, size: 16),
                   onDeleted: () {
                     _filter = 'All';
@@ -216,7 +217,7 @@ class _CustomerListScreenState extends State<CustomerListScreen> {
         trailing: Container(
           padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
           decoration: BoxDecoration(
-            color: c.isActive && !c.isExpired
+            color: c.isReallyActive
                 ? AppTheme.successColor.withOpacity(0.1)
                 : AppTheme.dangerColor.withOpacity(0.1),
             borderRadius: BorderRadius.circular(12),
@@ -227,7 +228,7 @@ class _CustomerListScreenState extends State<CustomerListScreen> {
               fontSize: 11,
               fontWeight: FontWeight.w600,
               color:
-                  c.isActive && !c.isExpired ? AppTheme.successColor : AppTheme.dangerColor,
+                  c.isReallyActive ? AppTheme.successColor : AppTheme.dangerColor,
             ),
           ),
         ),

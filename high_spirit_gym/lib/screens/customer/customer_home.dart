@@ -4,6 +4,7 @@ import 'package:high_spirit_gym/config/app_theme.dart';
 import 'package:high_spirit_gym/providers/auth_provider.dart';
 import 'package:high_spirit_gym/providers/theme_provider.dart';
 import 'package:high_spirit_gym/screens/customer/profile_screen.dart';
+import 'package:high_spirit_gym/screens/customer/my_qr_screen.dart';
 import 'package:high_spirit_gym/screens/customer/membership_detail_screen.dart';
 import 'package:high_spirit_gym/screens/customer/payment_history_screen.dart';
 import 'package:high_spirit_gym/screens/customer/qr_scanner_screen.dart';
@@ -21,7 +22,7 @@ class _CustomerHomeState extends State<CustomerHome> {
 
   final _screens = const [
     CustomerDashboardTab(),
-    QrScannerScreen(),
+    MyQrScreen(),
     ScheduleScreen(),
     ProfileScreen(),
   ];
@@ -35,7 +36,7 @@ class _CustomerHomeState extends State<CustomerHome> {
         onDestinationSelected: (i) => setState(() => _currentIndex = i),
         destinations: const [
           NavigationDestination(icon: Icon(Icons.home_outlined), selectedIcon: Icon(Icons.home), label: 'Home'),
-          NavigationDestination(icon: Icon(Icons.qr_code_scanner_outlined), selectedIcon: Icon(Icons.qr_code_scanner), label: 'Check In'),
+          NavigationDestination(icon: Icon(Icons.qr_code_2_outlined), selectedIcon: Icon(Icons.qr_code_2), label: 'My QR'),
           NavigationDestination(icon: Icon(Icons.calendar_month_outlined), selectedIcon: Icon(Icons.calendar_month), label: 'Schedule'),
           NavigationDestination(icon: Icon(Icons.person_outline), selectedIcon: Icon(Icons.person), label: 'Profile'),
         ],
@@ -54,6 +55,7 @@ class CustomerDashboardTab extends StatefulWidget {
 class _CustomerDashboardTabState extends State<CustomerDashboardTab> {
   Map<String, dynamic>? _customerData;
   List<dynamic>? _attendanceHistory;
+  Map<String, dynamic>? _attendanceStatus;
   bool _isLoading = true;
   String? _error;
 
@@ -76,13 +78,16 @@ class _CustomerDashboardTabState extends State<CustomerDashboardTab> {
     }
 
     try {
-      final customerResp = await auth.api.get('/customers/$customerId');
-      final attendanceResp =
-          await auth.api.get('/attendance/customer/$customerId', query: {'days': '30'});
+      final results = await Future.wait([
+        auth.api.get('/customers/$customerId'),
+        auth.api.get('/attendance/customer/$customerId', query: {'days': '30'}),
+        auth.api.get('/attendance/status/$customerId'),
+      ]);
 
       setState(() {
-        _customerData = customerResp['data'];
-        _attendanceHistory = attendanceResp['data'] as List? ?? [];
+        _customerData = results[0]['data'];
+        _attendanceHistory = results[1]['data'] as List? ?? [];
+        _attendanceStatus = results[2]['data'];
         _isLoading = false;
       });
     } catch (e) {
@@ -145,6 +150,10 @@ class _CustomerDashboardTabState extends State<CustomerDashboardTab> {
                         _buildWelcomeCard(),
                         const SizedBox(height: 16),
 
+                        // Check-in Status
+                        _buildCheckinStatus(),
+                        const SizedBox(height: 16),
+
                         // Membership Status
                         _buildMembershipCard(),
                         const SizedBox(height: 16),
@@ -192,6 +201,75 @@ class _CustomerDashboardTabState extends State<CustomerDashboardTab> {
             'Member since ${_customerData?['joinDate']?.toString().substring(0, 10) ?? 'N/A'}',
             style: TextStyle(color: Colors.white.withOpacity(0.7), fontSize: 12),
           ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildCheckinStatus() {
+    final isCheckedIn = _attendanceStatus?['isCheckedIn'] ?? false;
+    final checkinTime = _attendanceStatus?['checkInTime'];
+
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: isCheckedIn
+            ? AppTheme.successColor.withOpacity(0.08)
+            : Colors.grey.withOpacity(0.06),
+        borderRadius: BorderRadius.circular(14),
+        border: Border.all(
+          color: isCheckedIn
+              ? AppTheme.successColor.withOpacity(0.2)
+              : Colors.grey.withOpacity(0.15),
+        ),
+      ),
+      child: Row(
+        children: [
+          Container(
+            padding: const EdgeInsets.all(10),
+            decoration: BoxDecoration(
+              color: isCheckedIn
+                  ? AppTheme.successColor.withOpacity(0.15)
+                  : Colors.grey.withOpacity(0.1),
+              shape: BoxShape.circle,
+            ),
+            child: Icon(
+              isCheckedIn ? Icons.fitness_center : Icons.home_outlined,
+              color: isCheckedIn ? AppTheme.successColor : Colors.grey,
+              size: 22,
+            ),
+          ),
+          const SizedBox(width: 14),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  isCheckedIn ? 'Currently in Gym' : 'Not checked in',
+                  style: TextStyle(
+                    fontWeight: FontWeight.w600,
+                    fontSize: 15,
+                    color: isCheckedIn ? AppTheme.successColor : Colors.grey[600],
+                  ),
+                ),
+                if (isCheckedIn && checkinTime != null)
+                  Text(
+                    'Since ${_formatTime(checkinTime)}',
+                    style: TextStyle(fontSize: 12, color: Colors.grey[500]),
+                  ),
+              ],
+            ),
+          ),
+          if (isCheckedIn)
+            Container(
+              width: 10,
+              height: 10,
+              decoration: const BoxDecoration(
+                color: AppTheme.successColor,
+                shape: BoxShape.circle,
+              ),
+            ),
         ],
       ),
     );
@@ -273,10 +351,11 @@ class _CustomerDashboardTabState extends State<CustomerDashboardTab> {
           children: [
             Expanded(
               child: _actionCard(
-                Icons.qr_code_scanner,
-                'Check In',
+                Icons.qr_code_2,
+                'My QR Code',
                 AppTheme.primaryGradient,
-                () => setState(() {}), // handled by bottom nav
+                () => Navigator.push(context,
+                    MaterialPageRoute(builder: (_) => const MyQrScreen())),
               ),
             ),
             const SizedBox(width: 12),
@@ -319,8 +398,9 @@ class _CustomerDashboardTabState extends State<CustomerDashboardTab> {
             Icon(icon, color: Colors.white, size: 28),
             const SizedBox(height: 6),
             Text(label,
+                textAlign: TextAlign.center,
                 style:
-                    const TextStyle(color: Colors.white, fontSize: 12, fontWeight: FontWeight.w500)),
+                    const TextStyle(color: Colors.white, fontSize: 11, fontWeight: FontWeight.w500)),
           ],
         ),
       ),

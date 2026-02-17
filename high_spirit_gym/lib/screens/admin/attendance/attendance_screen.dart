@@ -36,12 +36,13 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
       final todayResp = results[0];
       final statsResp = results[1];
 
-      final todayData = todayResp['data'] as List? ?? todayResp as List? ?? [];
+      final todayData = todayResp['data'] as List? ?? [];
+      final statsData = statsResp['data'] ?? statsResp;
       setState(() {
         _todayList = todayData.map((e) => Attendance.fromJson(e)).toList();
-        _todayCount = statsResp['todayCheckIns'] ?? 0;
-        _monthCount = statsResp['monthCheckIns'] ?? 0;
-        _currentlyIn = statsResp['currentlyInGym'] ?? 0;
+        _todayCount = statsData['todayCheckIns'] ?? statsData['TodayCheckIns'] ?? 0;
+        _monthCount = statsData['monthCheckIns'] ?? statsData['MonthCheckIns'] ?? 0;
+        _currentlyIn = statsData['currentlyInGym'] ?? statsData['CurrentlyInGym'] ?? 0;
         _isLoading = false;
       });
     } catch (e) {

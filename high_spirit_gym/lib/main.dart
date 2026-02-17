@@ -7,9 +7,12 @@ import 'package:high_spirit_gym/screens/splash_screen.dart';
 import 'package:high_spirit_gym/screens/login_screen.dart';
 import 'package:high_spirit_gym/screens/admin/admin_home.dart';
 import 'package:high_spirit_gym/screens/customer/customer_home.dart';
+import 'package:high_spirit_gym/classes/http_override.dart';
+import 'dart:io';
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
+  HttpOverrides.global = MyHttpOverrides();
   runApp(const HighSpiritApp());
 }
 

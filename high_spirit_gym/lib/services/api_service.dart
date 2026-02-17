@@ -17,9 +17,16 @@ class ApiService {
   Future<Map<String, dynamic>> get(String endpoint, {Map<String, String>? query}) async {
     final uri = Uri.parse('${ApiConfig.baseUrl}$endpoint')
         .replace(queryParameters: query);
-    final response = await http.get(uri, headers: _headers)
-        .timeout(ApiConfig.timeout);
-    return _handleResponse(response);
+    print('GET: $uri');
+    try {
+      final response = await http.get(uri, headers: _headers)
+          .timeout(ApiConfig.timeout);
+      print('Response: ${response.statusCode} ${response.body}');
+      return _handleResponse(response);
+    } catch (e) {
+      print('GET Error: $e');
+      rethrow;
+    }
   }
 
   // ======================== POST ========================

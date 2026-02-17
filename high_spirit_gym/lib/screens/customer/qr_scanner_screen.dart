@@ -51,16 +51,24 @@ class _QrScannerScreenState extends State<QrScannerScreen> {
 
     final qrData = barcode.rawValue!;
 
-    // Parse customer ID from QR code
-    // Expected QR format: "HIGHSPIRIT-{customerID}" or just the ID
+    // Parse QR token from QR code
+    // Expected QR format: "HIGHSPIRIT-{guid-token}" or legacy "HIGHSPIRIT-{customerID}"
+    String? qrToken;
     int? customerId;
+
     if (qrData.startsWith('HIGHSPIRIT-')) {
-      customerId = int.tryParse(qrData.substring(11));
+      final payload = qrData.substring(11);
+      // Check if it's a GUID (contains dashes and letters) or a numeric ID
+      if (payload.contains('-') || payload.contains(RegExp(r'[a-fA-F]'))) {
+        qrToken = payload;
+      } else {
+        customerId = int.tryParse(payload);
+      }
     } else {
       customerId = int.tryParse(qrData);
     }
 
-    if (customerId == null) {
+    if (qrToken == null && customerId == null) {
       setState(() {
         _statusMessage = 'Invalid QR code format';
         _isSuccess = false;
@@ -71,9 +79,14 @@ class _QrScannerScreenState extends State<QrScannerScreen> {
 
     try {
       final auth = context.read<AuthProvider>();
-      final resp = await auth.api.post('/attendance/checkin', body: {
-        'customerID': customerId,
-      });
+      final body = <String, dynamic>{};
+      if (qrToken != null) {
+        body['qrToken'] = qrToken;
+      } else {
+        body['customerID'] = customerId;
+      }
+
+      final resp = await auth.api.post('/attendance/checkin', body: body);
 
       setState(() {
         _statusMessage = resp['message'] ?? 'Check-in successful!';

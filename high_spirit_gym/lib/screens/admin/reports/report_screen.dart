@@ -4,7 +4,6 @@ import 'package:fl_chart/fl_chart.dart';
 import 'package:high_spirit_gym/config/app_theme.dart';
 import 'package:high_spirit_gym/models/report.dart';
 import 'package:high_spirit_gym/providers/auth_provider.dart';
-import 'package:high_spirit_gym/widgets/stat_card.dart';
 
 class ReportScreen extends StatefulWidget {
   const ReportScreen({super.key});
@@ -15,6 +14,7 @@ class ReportScreen extends StatefulWidget {
 
 class _ReportScreenState extends State<ReportScreen> {
   RevenueReport? _report;
+  List<dynamic>? _monthlyData;
   bool _isLoading = true;
   String _error = '';
 
@@ -32,8 +32,11 @@ class _ReportScreenState extends State<ReportScreen> {
     try {
       final auth = context.read<AuthProvider>();
       final resp = await auth.api.get('/report/revenue');
+      final monthlyResp = await auth.api.get('/report/monthly',
+          query: {'year': DateTime.now().year.toString()});
       setState(() {
-        _report = RevenueReport.fromJson(resp);
+        _report = RevenueReport.fromJson(resp['data'] ?? resp);
+        _monthlyData = monthlyResp['data']?['months'] as List? ?? [];
         _isLoading = false;
       });
     } catch (e) {
@@ -44,22 +47,40 @@ class _ReportScreenState extends State<ReportScreen> {
     }
   }
 
+  String _formatAmount(dynamic amount) {
+    final val = (amount is num) ? amount.toDouble() : 0.0;
+    if (val >= 100000) {
+      return '${(val / 1000).toStringAsFixed(1)}k';
+    }
+    return val.toStringAsFixed(0);
+  }
+
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
     return Scaffold(
-      appBar: AppBar(title: const Text('Reports')),
       body: _isLoading
           ? const Center(child: CircularProgressIndicator())
           : _error.isNotEmpty
               ? Center(
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Text(_error),
-                      const SizedBox(height: 12),
-                      ElevatedButton(
-                          onPressed: _loadReport, child: const Text('Retry')),
-                    ],
+                  child: Padding(
+                    padding: const EdgeInsets.all(24),
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Icon(Icons.error_outline, size: 64,
+                            color: Colors.grey[400]),
+                        const SizedBox(height: 16),
+                        Text(_error, textAlign: TextAlign.center),
+                        const SizedBox(height: 16),
+                        ElevatedButton.icon(
+                          onPressed: _loadReport,
+                          icon: const Icon(Icons.refresh),
+                          label: const Text('Retry'),
+                        ),
+                      ],
+                    ),
                   ),
                 )
               : RefreshIndicator(
@@ -70,13 +91,52 @@ class _ReportScreenState extends State<ReportScreen> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        _buildRevenueCards(),
+                        // Header
+                        Row(
+                          children: [
+                            Container(
+                              padding: const EdgeInsets.all(10),
+                              decoration: BoxDecoration(
+                                gradient: AppTheme.primaryGradient,
+                                borderRadius: BorderRadius.circular(12),
+                              ),
+                              child: const Icon(Icons.analytics,
+                                  color: Colors.white, size: 24),
+                            ),
+                            const SizedBox(width: 12),
+                            const Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text('Revenue Report',
+                                      style: TextStyle(
+                                          fontSize: 20,
+                                          fontWeight: FontWeight.bold)),
+                                  Text('Financial overview & analytics',
+                                      style: TextStyle(
+                                          color: Colors.grey, fontSize: 13)),
+                                ],
+                              ),
+                            ),
+                          ],
+                        ),
                         const SizedBox(height: 20),
-                        _buildMonthlyChart(),
+
+                        // Revenue summary cards
+                        _buildRevenueSummary(isDark),
                         const SizedBox(height: 20),
-                        _buildCategoryBreakdown(),
+
+                        // Monthly chart
+                        _buildMonthlyChart(isDark),
                         const SizedBox(height: 20),
-                        _buildRecentTransactions(),
+
+                        // Category breakdown
+                        _buildCategoryBreakdown(isDark),
+                        const SizedBox(height: 20),
+
+                        // Quick stats
+                        _buildQuickStats(isDark),
+                        const SizedBox(height: 20),
                       ],
                     ),
                   ),
@@ -84,75 +144,116 @@ class _ReportScreenState extends State<ReportScreen> {
     );
   }
 
-  Widget _buildRevenueCards() {
+  Widget _buildRevenueSummary(bool isDark) {
     final r = _report!;
     return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Text('Revenue Overview',
-            style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+        // Main revenue card
+        Container(
+          width: double.infinity,
+          padding: const EdgeInsets.all(20),
+          decoration: BoxDecoration(
+            gradient: AppTheme.primaryGradient,
+            borderRadius: BorderRadius.circular(20),
+            boxShadow: [
+              BoxShadow(
+                color: AppTheme.primaryColor.withOpacity(0.3),
+                blurRadius: 12,
+                offset: const Offset(0, 6),
+              ),
+            ],
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text('Total Revenue',
+                      style: TextStyle(
+                          color: Colors.white.withOpacity(0.8), fontSize: 14)),
+                  Container(
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                    decoration: BoxDecoration(
+                      color: Colors.white.withOpacity(0.2),
+                      borderRadius: BorderRadius.circular(20),
+                    ),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Icon(
+                          r.revenueGrowth >= 0
+                              ? Icons.trending_up
+                              : Icons.trending_down,
+                          color: Colors.white,
+                          size: 14,
+                        ),
+                        const SizedBox(width: 4),
+                        Text(
+                          '${r.revenueGrowth.toStringAsFixed(1)}%',
+                          style: const TextStyle(
+                              color: Colors.white,
+                              fontSize: 12,
+                              fontWeight: FontWeight.w600),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 8),
+              Text(
+                'Rs. ${r.totalRevenue.toStringAsFixed(0)}',
+                style: const TextStyle(
+                  color: Colors.white,
+                  fontSize: 32,
+                  fontWeight: FontWeight.bold,
+                  letterSpacing: 1,
+                ),
+              ),
+              const SizedBox(height: 16),
+              Row(
+                children: [
+                  _miniInfo('Collected', 'Rs. ${_formatAmount(r.totalCollected)}',
+                      Icons.check_circle_outline),
+                  const SizedBox(width: 24),
+                  _miniInfo('Due', 'Rs. ${_formatAmount(r.totalDue)}',
+                      Icons.pending_outlined),
+                ],
+              ),
+            ],
+          ),
+        ),
         const SizedBox(height: 12),
+
+        // Stat row
         Row(
           children: [
             Expanded(
-              child: StatCard(
-                title: 'Total Revenue',
-                value: 'Rs. ${r.totalRevenue}',
-                icon: Icons.account_balance_wallet,
-                gradient: AppTheme.primaryGradient,
+              child: _statTile(
+                'Today',
+                'Rs. ${_formatAmount(r.todayRevenue)}',
+                Icons.today,
+                AppTheme.successGradient,
               ),
             ),
             const SizedBox(width: 10),
             Expanded(
-              child: StatCard(
-                title: 'This Month',
-                value: 'Rs. ${r.monthlyRevenue}',
-                icon: Icons.calendar_month,
-                gradient: AppTheme.successGradient,
-              ),
-            ),
-          ],
-        ),
-        const SizedBox(height: 10),
-        Row(
-          children: [
-            Expanded(
-              child: StatCard(
-                title: 'Total Due',
-                value: 'Rs. ${r.totalDue}',
-                icon: Icons.warning_amber,
-                gradient: AppTheme.dangerGradient,
+              child: _statTile(
+                'This Month',
+                'Rs. ${_formatAmount(r.thisMonthRevenue)}',
+                Icons.calendar_month,
+                AppTheme.infoGradient,
               ),
             ),
             const SizedBox(width: 10),
             Expanded(
-              child: StatCard(
-                title: 'Cash',
-                value: 'Rs. ${r.totalCash}',
-                icon: Icons.payments,
-                gradient: AppTheme.infoGradient,
-              ),
-            ),
-          ],
-        ),
-        const SizedBox(height: 10),
-        Row(
-          children: [
-            Expanded(
-              child: StatCard(
-                title: 'eSewa',
-                value: 'Rs. ${r.totalEsewa}',
-                icon: Icons.phone_android,
-                gradient: AppTheme.successGradient,
-              ),
-            ),
-            const SizedBox(width: 10),
-            Expanded(
-              child: StatCard(
-                title: 'Today',
-                value: 'Rs. ${r.todayRevenue}',
-                icon: Icons.today,
-                gradient: AppTheme.warningGradient,
+              child: _statTile(
+                'Last Month',
+                'Rs. ${_formatAmount(r.lastMonthRevenue)}',
+                Icons.history,
+                AppTheme.warningGradient,
               ),
             ),
           ],
@@ -161,162 +262,215 @@ class _ReportScreenState extends State<ReportScreen> {
     );
   }
 
-  Widget _buildMonthlyChart() {
-    final months = _report!.monthlyBreakdown;
-    if (months.isEmpty) return const SizedBox.shrink();
-
-    return Card(
-      child: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Column(
+  Widget _miniInfo(String label, String value, IconData icon) {
+    return Row(
+      children: [
+        Icon(icon, color: Colors.white70, size: 16),
+        const SizedBox(width: 6),
+        Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Text('Monthly Revenue',
-                style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
-            const SizedBox(height: 16),
-            SizedBox(
-              height: 220,
-              child: BarChart(
-                BarChartData(
-                  alignment: BarChartAlignment.spaceAround,
-                  maxY: months
-                          .map((m) => m.totalRevenue)
-                          .reduce((a, b) => a > b ? a : b) *
-                      1.2,
-                  barTouchData: BarTouchData(
-                    enabled: true,
-                    touchTooltipData: BarTouchTooltipData(
-                      getTooltipItem: (group, gIdx, rod, rIdx) {
-                        final m = months[group.x.toInt()];
-                        return BarTooltipItem(
-                          '${m.monthName}\nRs. ${m.totalRevenue.toStringAsFixed(0)}',
-                          const TextStyle(
-                              color: Colors.white,
-                              fontWeight: FontWeight.bold,
-                              fontSize: 12),
-                        );
-                      },
-                    ),
-                  ),
-                  titlesData: FlTitlesData(
-                    show: true,
-                    bottomTitles: AxisTitles(
-                      sideTitles: SideTitles(
-                        showTitles: true,
-                        reservedSize: 28,
-                        getTitlesWidget: (value, meta) {
-                          final idx = value.toInt();
-                          if (idx < 0 || idx >= months.length) {
-                            return const SizedBox();
-                          }
-                          final name = months[idx].monthName;
-                          return SideTitleWidget(
-                            meta: meta,
-                            child: Text(
-                              name.length > 3 ? name.substring(0, 3) : name,
-                              style: const TextStyle(fontSize: 10),
-                            ),
-                          );
-                        },
-                      ),
-                    ),
-                    leftTitles: AxisTitles(
-                      sideTitles: SideTitles(
-                        showTitles: true,
-                        reservedSize: 42,
-                        getTitlesWidget: (value, meta) {
-                          if (value == 0) return const SizedBox();
-                          return Text(
-                            '${(value / 1000).toStringAsFixed(0)}k',
-                            style: const TextStyle(fontSize: 10),
-                          );
-                        },
-                      ),
-                    ),
-                    topTitles: const AxisTitles(
-                        sideTitles: SideTitles(showTitles: false)),
-                    rightTitles: const AxisTitles(
-                        sideTitles: SideTitles(showTitles: false)),
-                  ),
-                  borderData: FlBorderData(show: false),
-                  barGroups: months.asMap().entries.map((entry) {
-                    return BarChartGroupData(
-                      x: entry.key,
-                      barRods: [
-                        BarChartRodData(
-                          toY: entry.value.totalRevenue,
-                          gradient: AppTheme.primaryGradient,
-                          width: 16,
-                          borderRadius:
-                              const BorderRadius.vertical(top: Radius.circular(6)),
-                        ),
-                      ],
-                    );
-                  }).toList(),
-                  gridData: const FlGridData(show: false),
-                ),
-              ),
-            ),
+            Text(label,
+                style: TextStyle(
+                    color: Colors.white.withOpacity(0.7), fontSize: 11)),
+            Text(value,
+                style: const TextStyle(
+                    color: Colors.white,
+                    fontSize: 14,
+                    fontWeight: FontWeight.w600)),
           ],
         ),
-      ),
+      ],
     );
   }
 
-  Widget _buildCategoryBreakdown() {
-    final r = _report!;
-    return Card(
-      child: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            const Text('Category Breakdown',
-                style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
-            const SizedBox(height: 12),
-            _categoryRow('Gym Membership', r.gymRevenue, AppTheme.primaryColor),
-            _categoryRow('Locker', r.lockerRevenue, AppTheme.infoColor),
-            _categoryRow('Boxing', r.boxingRevenue, AppTheme.warningColor),
-          ],
-        ),
+  Widget _statTile(
+      String title, String value, IconData icon, Gradient gradient) {
+    return Container(
+      padding: const EdgeInsets.all(14),
+      decoration: BoxDecoration(
+        gradient: gradient,
+        borderRadius: BorderRadius.circular(14),
+        boxShadow: [
+          BoxShadow(
+            color: (gradient as LinearGradient).colors.first.withOpacity(0.25),
+            blurRadius: 8,
+            offset: const Offset(0, 3),
+          ),
+        ],
       ),
-    );
-  }
-
-  Widget _categoryRow(String label, double amount, Color color) {
-    final total = _report!.totalRevenue;
-    final pct = total > 0 ? (amount / total) : 0.0;
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 6),
       child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Icon(icon, color: Colors.white, size: 18),
+          const SizedBox(height: 8),
+          Text(value,
+              style: const TextStyle(
+                  color: Colors.white,
+                  fontSize: 15,
+                  fontWeight: FontWeight.bold)),
+          const SizedBox(height: 2),
+          Text(title,
+              style: TextStyle(
+                  color: Colors.white.withOpacity(0.8), fontSize: 11)),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildMonthlyChart(bool isDark) {
+    if (_monthlyData == null || _monthlyData!.isEmpty) {
+      return const SizedBox.shrink();
+    }
+
+    double maxVal = 0;
+    for (var d in _monthlyData!) {
+      final total = (d['total'] as num?)?.toDouble() ?? 0;
+      if (total > maxVal) maxVal = total;
+    }
+    if (maxVal == 0) maxVal = 100000;
+
+    return Container(
+      padding: const EdgeInsets.all(20),
+      decoration: BoxDecoration(
+        color: isDark ? Colors.grey[900] : Colors.white,
+        borderRadius: BorderRadius.circular(20),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(isDark ? 0.3 : 0.06),
+            blurRadius: 12,
+            offset: const Offset(0, 4),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Row(
-                children: [
-                  Container(
-                    width: 12,
-                    height: 12,
-                    decoration: BoxDecoration(
-                        color: color, borderRadius: BorderRadius.circular(3)),
+              const Text('Monthly Revenue',
+                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+              Container(
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                decoration: BoxDecoration(
+                  color:
+                      AppTheme.primaryColor.withOpacity(isDark ? 0.2 : 0.08),
+                  borderRadius: BorderRadius.circular(20),
+                ),
+                child: Text(
+                  '${DateTime.now().year}',
+                  style: TextStyle(
+                    color: AppTheme.primaryColor,
+                    fontSize: 12,
+                    fontWeight: FontWeight.w600,
                   ),
-                  const SizedBox(width: 8),
-                  Text(label),
-                ],
+                ),
               ),
-              Text('Rs. ${amount.toStringAsFixed(0)}',
-                  style: const TextStyle(fontWeight: FontWeight.w600)),
             ],
           ),
-          const SizedBox(height: 4),
-          ClipRRect(
-            borderRadius: BorderRadius.circular(4),
-            child: LinearProgressIndicator(
-              value: pct,
-              backgroundColor: color.withOpacity(0.1),
-              valueColor: AlwaysStoppedAnimation(color),
-              minHeight: 6,
+          const SizedBox(height: 20),
+          SizedBox(
+            height: 220,
+            child: BarChart(
+              BarChartData(
+                alignment: BarChartAlignment.spaceAround,
+                maxY: maxVal * 1.2,
+                barTouchData: BarTouchData(
+                  enabled: true,
+                  touchTooltipData: BarTouchTooltipData(
+                    getTooltipItem: (group, gIdx, rod, rIdx) {
+                      final idx = group.x.toInt();
+                      if (idx < 0 || idx >= _monthlyData!.length) return null;
+                      final d = _monthlyData![idx];
+                      return BarTooltipItem(
+                        '${d['monthName']}\nRs. ${(d['total'] as num?)?.toStringAsFixed(0) ?? '0'}',
+                        const TextStyle(
+                            color: Colors.white,
+                            fontWeight: FontWeight.bold,
+                            fontSize: 12),
+                      );
+                    },
+                  ),
+                ),
+                titlesData: FlTitlesData(
+                  bottomTitles: AxisTitles(
+                    sideTitles: SideTitles(
+                      showTitles: true,
+                      reservedSize: 28,
+                      getTitlesWidget: (value, meta) {
+                        final idx = value.toInt();
+                        if (idx < 0 || idx >= _monthlyData!.length) {
+                          return const SizedBox();
+                        }
+                        final name = _monthlyData![idx]['monthName'] ?? '';
+                        return SideTitleWidget(
+                          axisSide: meta.axisSide,
+                          child: Text(
+                            name.toString().length > 3
+                                ? name.toString().substring(0, 3)
+                                : name.toString(),
+                            style: TextStyle(
+                                fontSize: 10,
+                                color: isDark ? Colors.grey[400] : Colors.grey[600]),
+                          ),
+                        );
+                      },
+                    ),
+                  ),
+                  leftTitles: AxisTitles(
+                    sideTitles: SideTitles(
+                      showTitles: true,
+                      reservedSize: 50,
+                      getTitlesWidget: (value, meta) {
+                        if (value == 0) return const SizedBox();
+                        return Text(
+                          '${(value / 1000).toStringAsFixed(0)}k',
+                          style: TextStyle(
+                              fontSize: 10,
+                              color: isDark ? Colors.grey[500] : Colors.grey[400]),
+                        );
+                      },
+                    ),
+                  ),
+                  topTitles:
+                      const AxisTitles(sideTitles: SideTitles(showTitles: false)),
+                  rightTitles:
+                      const AxisTitles(sideTitles: SideTitles(showTitles: false)),
+                ),
+                borderData: FlBorderData(show: false),
+                gridData: FlGridData(
+                  show: true,
+                  drawVerticalLine: false,
+                  horizontalInterval: maxVal > 0 ? maxVal * 1.2 / 4 : 25000,
+                  getDrawingHorizontalLine: (value) => FlLine(
+                    color: isDark
+                        ? Colors.grey[800]!
+                        : Colors.grey[200]!,
+                    strokeWidth: 1,
+                  ),
+                ),
+                barGroups: _monthlyData!.asMap().entries.map((e) {
+                  final d = e.value;
+                  final total = (d['total'] as num?)?.toDouble() ?? 0;
+                  return BarChartGroupData(
+                    x: e.key,
+                    barRods: [
+                      BarChartRodData(
+                        toY: total,
+                        gradient: total > 0
+                            ? AppTheme.primaryGradient
+                            : const LinearGradient(
+                                colors: [Colors.grey, Colors.grey]),
+                        width: 14,
+                        borderRadius: const BorderRadius.vertical(
+                            top: Radius.circular(6)),
+                      ),
+                    ],
+                  );
+                }).toList(),
+              ),
             ),
           ),
         ],
@@ -324,54 +478,207 @@ class _ReportScreenState extends State<ReportScreen> {
     );
   }
 
-  Widget _buildRecentTransactions() {
-    final transactions = _report!.recentTransactions;
-    if (transactions.isEmpty) return const SizedBox.shrink();
+  Widget _buildCategoryBreakdown(bool isDark) {
+    final r = _report!;
+    return Container(
+      padding: const EdgeInsets.all(20),
+      decoration: BoxDecoration(
+        color: isDark ? Colors.grey[900] : Colors.white,
+        borderRadius: BorderRadius.circular(20),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(isDark ? 0.3 : 0.06),
+            blurRadius: 12,
+            offset: const Offset(0, 4),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const Text('Revenue by Category',
+              style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+          const SizedBox(height: 16),
+          _categoryItem('Gym Membership', r.gymRevenue, r.gymDue,
+              AppTheme.primaryColor, Icons.fitness_center, r.totalRevenue),
+          const SizedBox(height: 12),
+          _categoryItem('Locker Rental', r.lockerRevenue, r.lockerDue,
+              AppTheme.infoColor, Icons.lock_outline, r.totalRevenue),
+          const SizedBox(height: 12),
+          _categoryItem('Boxing', r.boxingRevenue, r.boxingDue,
+              AppTheme.warningColor, Icons.sports_mma, r.totalRevenue),
+        ],
+      ),
+    );
+  }
 
-    return Card(
-      child: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            const Text('Recent Transactions',
-                style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
-            const SizedBox(height: 12),
-            ...transactions.map((t) => ListTile(
-                  contentPadding: EdgeInsets.zero,
-                  leading: CircleAvatar(
-                    backgroundColor: t.type == 'Gym'
-                        ? AppTheme.primaryColor.withOpacity(0.1)
-                        : t.type == 'Locker'
-                            ? AppTheme.infoColor.withOpacity(0.1)
-                            : AppTheme.warningColor.withOpacity(0.1),
-                    child: Icon(
-                      t.type == 'Gym'
-                          ? Icons.fitness_center
-                          : t.type == 'Locker'
-                              ? Icons.lock
-                              : Icons.sports_mma,
-                      color: t.type == 'Gym'
-                          ? AppTheme.primaryColor
-                          : t.type == 'Locker'
-                              ? AppTheme.infoColor
-                              : AppTheme.warningColor,
-                      size: 20,
-                    ),
-                  ),
-                  title: Text(t.customerName,
-                      style: const TextStyle(
-                          fontWeight: FontWeight.w500, fontSize: 14)),
-                  subtitle: Text(
-                    '${t.type} • ${t.date?.toString().substring(0, 10) ?? ''}',
-                    style: TextStyle(fontSize: 12, color: Colors.grey[600]),
-                  ),
-                  trailing: Text('Rs. ${t.amount.toStringAsFixed(0)}',
-                      style: const TextStyle(
-                          fontWeight: FontWeight.bold, fontSize: 14)),
-                )),
-          ],
+  Widget _categoryItem(String label, double revenue, double due, Color color,
+      IconData icon, double totalRevenue) {
+    final pct = totalRevenue > 0 ? (revenue / totalRevenue) : 0.0;
+    return Row(
+      children: [
+        Container(
+          width: 42,
+          height: 42,
+          decoration: BoxDecoration(
+            color: color.withOpacity(0.1),
+            borderRadius: BorderRadius.circular(12),
+          ),
+          child: Icon(icon, color: color, size: 20),
         ),
+        const SizedBox(width: 12),
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(label,
+                      style: const TextStyle(
+                          fontWeight: FontWeight.w600, fontSize: 14)),
+                  Text('Rs. ${revenue.toStringAsFixed(0)}',
+                      style: TextStyle(
+                          fontWeight: FontWeight.w700,
+                          fontSize: 14,
+                          color: color)),
+                ],
+              ),
+              const SizedBox(height: 6),
+              ClipRRect(
+                borderRadius: BorderRadius.circular(4),
+                child: LinearProgressIndicator(
+                  value: pct,
+                  backgroundColor: color.withOpacity(0.08),
+                  valueColor: AlwaysStoppedAnimation(color),
+                  minHeight: 6,
+                ),
+              ),
+              const SizedBox(height: 4),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text('${(pct * 100).toStringAsFixed(1)}%',
+                      style: TextStyle(fontSize: 11, color: Colors.grey[500])),
+                  if (due > 0)
+                    Text('Due: Rs. ${due.toStringAsFixed(0)}',
+                        style: const TextStyle(
+                            fontSize: 11, color: AppTheme.dangerColor)),
+                ],
+              ),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildQuickStats(bool isDark) {
+    final r = _report!;
+    return Container(
+      padding: const EdgeInsets.all(20),
+      decoration: BoxDecoration(
+        color: isDark ? Colors.grey[900] : Colors.white,
+        borderRadius: BorderRadius.circular(20),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(isDark ? 0.3 : 0.06),
+            blurRadius: 12,
+            offset: const Offset(0, 4),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const Text('Quick Stats',
+              style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+          const SizedBox(height: 16),
+          Row(
+            children: [
+              Expanded(
+                child: _quickStatItem('Total Members',
+                    '${r.totalGymMembers}', Icons.people, AppTheme.primaryColor),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: _quickStatItem('Boxing Members',
+                    '${r.totalBoxingMembers}', Icons.sports_mma, AppTheme.warningColor),
+              ),
+            ],
+          ),
+          const SizedBox(height: 12),
+          Row(
+            children: [
+              Expanded(
+                child: _quickStatItem('Total Lockers',
+                    '${r.totalLockers}', Icons.lock, AppTheme.infoColor),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: _quickStatItem('Active Lockers',
+                    '${r.activeLockers}', Icons.lock_open, AppTheme.successColor),
+              ),
+            ],
+          ),
+          const SizedBox(height: 12),
+          Row(
+            children: [
+              Expanded(
+                child: _quickStatItem("Today's Txns",
+                    '${r.todayTransactions}', Icons.receipt_long, AppTheme.secondaryColor),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: _quickStatItem('Growth',
+                    '${r.revenueGrowth.toStringAsFixed(1)}%', 
+                    r.revenueGrowth >= 0 ? Icons.trending_up : Icons.trending_down, 
+                    r.revenueGrowth >= 0 ? AppTheme.successColor : AppTheme.dangerColor),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _quickStatItem(
+      String label, String value, IconData icon, Color color) {
+    return Container(
+      padding: const EdgeInsets.all(14),
+      decoration: BoxDecoration(
+        color: color.withOpacity(0.06),
+        borderRadius: BorderRadius.circular(14),
+        border: Border.all(color: color.withOpacity(0.12)),
+      ),
+      child: Row(
+        children: [
+          Container(
+            padding: const EdgeInsets.all(8),
+            decoration: BoxDecoration(
+              color: color.withOpacity(0.12),
+              borderRadius: BorderRadius.circular(10),
+            ),
+            child: Icon(icon, color: color, size: 18),
+          ),
+          const SizedBox(width: 10),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(value,
+                    style: TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                        color: color)),
+                Text(label,
+                    style: TextStyle(
+                        fontSize: 11, color: Colors.grey[500]),
+                    overflow: TextOverflow.ellipsis),
+              ],
+            ),
+          ),
+        ],
       ),
     );
   }

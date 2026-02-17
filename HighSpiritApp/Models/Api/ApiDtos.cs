@@ -251,6 +251,7 @@ namespace HighSpiritApp.Models.Api
     public class QrCheckInRequest
     {
         public int CustomerID { get; set; }
+        public string? QrToken { get; set; }
     }
 
     // ===================== SCHEDULE =====================

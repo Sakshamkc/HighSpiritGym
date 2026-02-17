@@ -15,6 +15,10 @@ class RevenueReport {
   final int todayTransactions;
   final double totalCash;
   final double totalEsewa;
+  final int totalGymMembers;
+  final int totalBoxingMembers;
+  final int totalLockers;
+  final int activeLockers;
   final List<MonthlyRevenue> monthlyBreakdown;
   final List<RecentTransaction> recentTransactions;
 
@@ -35,6 +39,10 @@ class RevenueReport {
     required this.todayTransactions,
     required this.totalCash,
     required this.totalEsewa,
+    required this.totalGymMembers,
+    required this.totalBoxingMembers,
+    required this.totalLockers,
+    required this.activeLockers,
     required this.monthlyBreakdown,
     required this.recentTransactions,
   });
@@ -57,9 +65,13 @@ class RevenueReport {
       lastMonthRevenue: (json['lastMonthRevenue'] as num?)?.toDouble() ?? 0,
       revenueGrowth: (json['revenueGrowth'] as num?)?.toDouble() ?? 0,
       todayRevenue: (json['todayRevenue'] as num?)?.toDouble() ?? 0,
-      todayTransactions: json['todayTransactions'] ?? 0,
+      todayTransactions: (json['todayTransactions'] as num?)?.toInt() ?? 0,
       totalCash: (json['totalCash'] as num?)?.toDouble() ?? 0,
       totalEsewa: (json['totalEsewa'] as num?)?.toDouble() ?? 0,
+      totalGymMembers: (json['totalGymMembers'] as num?)?.toInt() ?? 0,
+      totalBoxingMembers: (json['totalBoxingMembers'] as num?)?.toInt() ?? 0,
+      totalLockers: (json['totalLockers'] as num?)?.toInt() ?? 0,
+      activeLockers: (json['activeLockers'] as num?)?.toInt() ?? 0,
       monthlyBreakdown: (json['monthlyBreakdown'] as List?)
               ?.map((e) => MonthlyRevenue.fromJson(e))
               .toList() ??

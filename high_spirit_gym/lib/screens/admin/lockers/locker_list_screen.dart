@@ -24,7 +24,7 @@ class _LockerListScreenState extends State<LockerListScreen>
     _tabController = TabController(length: 3, vsync: this);
     _tabController.addListener(() {
       if (!_tabController.indexIsChanging) {
-        final genders = ['', 'male', 'female'];
+        final genders = ['', 'Gents', 'Ladies'];
         _gender = genders[_tabController.index];
         _loadLockers();
       }
@@ -252,7 +252,7 @@ class _LockerCard extends StatelessWidget {
               ),
               const SizedBox(height: 8),
               Text(
-                locker.customerName ?? 'Empty',
+                locker.assignedTo ?? 'Empty',
                 style: const TextStyle(
                     fontWeight: FontWeight.w600, fontSize: 13),
                 textAlign: TextAlign.center,

@@ -255,14 +255,18 @@ namespace HighSpiritApp.Controllers.Api
         // ===== Helper: Map Customer entity to DTO =====
         private static CustomerDto MapToDto(Customer customer)
         {
+            // Get the latest membership that is either flagged active OR not yet expired
             var activeMembership = customer.Memberships?
-                .Where(m => m.IsActive)
+                .Where(m => m.IsActive || m.ExpireDate >= DateTime.Today)
                 .OrderByDescending(m => m.StartDate)
                 .FirstOrDefault();
 
             var latestMembership = activeMembership ?? customer.Memberships?
                 .OrderByDescending(m => m.StartDate)
                 .FirstOrDefault();
+
+            var membershipToShow = activeMembership ?? latestMembership;
+            var isExpired = membershipToShow != null && membershipToShow.ExpireDate < DateTime.Today;
 
             return new CustomerDto
             {
@@ -282,13 +286,13 @@ namespace HighSpiritApp.Controllers.Api
                 Remarks = customer.Remarks,
                 Shift = customer.Shift,
                 CreatedAt = customer.CreatedAt,
-                CurrentPlan = latestMembership?.PlanName,
-                MembershipStart = latestMembership?.StartDate,
-                MembershipExpire = latestMembership?.ExpireDate,
-                PaidPrice = latestMembership?.PaidPrice,
-                DueAmount = latestMembership?.DueAmount,
-                IsActive = activeMembership != null,
-                IsExpired = latestMembership != null && latestMembership.ExpireDate < DateTime.Today
+                CurrentPlan = membershipToShow?.PlanName,
+                MembershipStart = membershipToShow?.StartDate,
+                MembershipExpire = membershipToShow?.ExpireDate,
+                PaidPrice = membershipToShow?.PaidPrice,
+                DueAmount = membershipToShow?.DueAmount,
+                IsActive = membershipToShow != null && !isExpired,
+                IsExpired = isExpired
             };
         }
     }
