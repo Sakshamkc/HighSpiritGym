@@ -56,7 +56,7 @@
             foreach (var m in Model)
             {
                 <li class="dropdown-item-text border-bottom">
-                    <div class="fw-semibold">@m.Customer.FullName</div>
+                    <div class="fw-semibold">@(m.Customer?.FullName ?? "Unknown")</div>
                     <small class="text-danger">
                         <i class="fa-solid fa-calendar-xmark me-1"></i>
                         Expired: @m.ExpireDate.ToString("dd MMM yyyy")

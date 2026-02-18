@@ -26,7 +26,7 @@ namespace HighSpiritApp.Models
         [NotMapped]
         public int TotalPrice => PaidPrice + DueAmount;
 
-        public Customer Customer { get; set; }
+        public Customer? Customer { get; set; }
     }
 
 }
