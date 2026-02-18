@@ -14,6 +14,13 @@ namespace HighSpiritApp.Models.Api
         public string Role { get; set; } = "Customer";
         public int? CustomerId { get; set; }
         public DateTime ExpiresAt { get; set; }
+        public bool MustChangePassword { get; set; }
+    }
+
+    public class ChangePasswordRequest
+    {
+        public string CurrentPassword { get; set; } = null!;
+        public string NewPassword { get; set; } = null!;
     }
 
     // ===================== CUSTOMER =====================
@@ -259,6 +266,7 @@ namespace HighSpiritApp.Models.Api
     {
         public int ScheduleID { get; set; }
         public string DayOfWeek { get; set; } = string.Empty;
+        public string Gender { get; set; } = "Male";
         public string ClassName { get; set; } = string.Empty;
         public string StartTime { get; set; } = string.Empty;
         public string EndTime { get; set; } = string.Empty;
@@ -272,6 +280,7 @@ namespace HighSpiritApp.Models.Api
     public class ScheduleCreateRequest
     {
         public string DayOfWeek { get; set; } = string.Empty;
+        public string Gender { get; set; } = "Male";
         public string ClassName { get; set; } = string.Empty;
         public string StartTime { get; set; } = string.Empty;
         public string EndTime { get; set; } = string.Empty;

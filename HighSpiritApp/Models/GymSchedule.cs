@@ -7,7 +7,9 @@ namespace HighSpiritApp.Models
         [Key]
         public int ScheduleID { get; set; }
 
-        public string DayOfWeek { get; set; } = string.Empty; // "Monday", "Tuesday", etc.
+        public string DayOfWeek { get; set; } = string.Empty; // "Day 1", "Day 2", "Day 3" (Male) or "Push Day", "Pull Day", "Leg Day" (Female)
+
+        public string Gender { get; set; } = "Male"; // "Male" or "Female"
 
         public string ClassName { get; set; } = string.Empty; // "Morning Cardio", "Weight Training", etc.
 

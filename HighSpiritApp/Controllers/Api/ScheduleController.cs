@@ -21,10 +21,10 @@ namespace HighSpiritApp.Controllers.Api
 
         /// <summary>
         /// GET api/schedule
-        /// Get all active schedules grouped by day
+        /// Get all active schedules, optionally filtered by day and/or gender
         /// </summary>
         [HttpGet]
-        public async Task<IActionResult> GetAll([FromQuery] string? day = null, [FromQuery] string? category = null)
+        public async Task<IActionResult> GetAll([FromQuery] string? day = null, [FromQuery] string? category = null, [FromQuery] string? gender = null)
         {
             var query = _context.GymSchedules.AsQueryable();
 
@@ -33,6 +33,9 @@ namespace HighSpiritApp.Controllers.Api
 
             if (!string.IsNullOrEmpty(category))
                 query = query.Where(s => s.Category == category);
+
+            if (!string.IsNullOrEmpty(gender))
+                query = query.Where(s => s.Gender.ToLower() == gender.ToLower());
 
             query = query.Where(s => s.IsActive).OrderBy(s => s.SortOrder);
 
@@ -65,6 +68,7 @@ namespace HighSpiritApp.Controllers.Api
             var schedule = new GymSchedule
             {
                 DayOfWeek = request.DayOfWeek,
+                Gender = request.Gender,
                 ClassName = request.ClassName,
                 StartTime = request.StartTime,
                 EndTime = request.EndTime,
@@ -95,6 +99,7 @@ namespace HighSpiritApp.Controllers.Api
                 return NotFound(ApiResponse.Fail("Schedule not found."));
 
             schedule.DayOfWeek = request.DayOfWeek;
+            schedule.Gender = request.Gender;
             schedule.ClassName = request.ClassName;
             schedule.StartTime = request.StartTime;
             schedule.EndTime = request.EndTime;
@@ -126,15 +131,19 @@ namespace HighSpiritApp.Controllers.Api
         }
 
         /// <summary>
-        /// GET api/schedule/today
-        /// Get today's schedule
+        /// GET api/schedule/today?gender=Male
+        /// Get today's schedule entries for the given gender
         /// </summary>
         [HttpGet("today")]
-        public async Task<IActionResult> GetToday()
+        public async Task<IActionResult> GetToday([FromQuery] string? gender = null)
         {
-            var today = DateTime.Now.DayOfWeek.ToString(); // "Monday", "Tuesday", etc.
-            var schedules = await _context.GymSchedules
-                .Where(s => s.DayOfWeek == today && s.IsActive)
+            var query = _context.GymSchedules
+                .Where(s => s.IsActive);
+
+            if (!string.IsNullOrEmpty(gender))
+                query = query.Where(s => s.Gender.ToLower() == gender.ToLower());
+
+            var schedules = await query
                 .OrderBy(s => s.SortOrder)
                 .ThenBy(s => s.StartTime)
                 .ToListAsync();
@@ -146,6 +155,7 @@ namespace HighSpiritApp.Controllers.Api
         {
             ScheduleID = s.ScheduleID,
             DayOfWeek = s.DayOfWeek,
+            Gender = s.Gender,
             ClassName = s.ClassName,
             StartTime = s.StartTime,
             EndTime = s.EndTime,

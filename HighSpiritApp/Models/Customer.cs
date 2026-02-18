@@ -19,6 +19,7 @@
         public string? Remarks { get; set; }
         public string? Shift { get; set; }
         public string? QrToken { get; set; }
+        public bool MustChangePassword { get; set; } = true;
 
         public DateTime CreatedAt { get; set; } = DateTime.Now;
         public DateTime? UpdatedAt { get; set; }

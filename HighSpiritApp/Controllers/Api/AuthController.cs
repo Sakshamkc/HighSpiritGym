@@ -64,6 +64,15 @@ namespace HighSpiritApp.Controllers.Api
                 customerId = customer?.CustomerID;
             }
 
+            // Check if customer must change password
+            bool mustChangePassword = false;
+            if (role == "Customer" && customerId.HasValue)
+            {
+                var customer = await _gymContext.Customers.FindAsync(customerId.Value);
+                if (customer != null)
+                    mustChangePassword = customer.MustChangePassword;
+            }
+
             var token = GenerateJwtToken(user, role, customerId);
             var expiresAt = DateTime.UtcNow.AddDays(
                 _configuration.GetValue<int>("Jwt:ExpireDays", 30));
@@ -74,7 +83,8 @@ namespace HighSpiritApp.Controllers.Api
                 Username = user.UserName!,
                 Role = role,
                 CustomerId = customerId,
-                ExpiresAt = expiresAt
+                ExpiresAt = expiresAt,
+                MustChangePassword = mustChangePassword
             }, "Login successful."));
         }
 
@@ -115,7 +125,49 @@ namespace HighSpiritApp.Controllers.Api
 
             await _userManager.AddToRoleAsync(user, "Customer");
 
+            // Mark customer as needing password change on first login
+            customer.MustChangePassword = true;
+            await _gymContext.SaveChangesAsync();
+
             return Ok(ApiResponse.Ok("Registration successful. You can now login."));
+        }
+
+        /// <summary>
+        /// POST api/auth/change-password
+        /// Change password (used after first login)
+        /// </summary>
+        [HttpPost("change-password")]
+        [Microsoft.AspNetCore.Authorization.Authorize(AuthenticationSchemes = "Bearer")]
+        public async Task<IActionResult> ChangePassword([FromBody] ChangePasswordRequest request)
+        {
+            if (string.IsNullOrWhiteSpace(request.CurrentPassword) || string.IsNullOrWhiteSpace(request.NewPassword))
+                return BadRequest(ApiResponse.Fail("Current password and new password are required."));
+
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (userId == null)
+                return Unauthorized(ApiResponse.Fail("Not authenticated."));
+
+            var user = await _userManager.FindByIdAsync(userId);
+            if (user == null)
+                return NotFound(ApiResponse.Fail("User not found."));
+
+            var result = await _userManager.ChangePasswordAsync(user, request.CurrentPassword, request.NewPassword);
+            if (!result.Succeeded)
+                return BadRequest(ApiResponse.Fail(string.Join(", ", result.Errors.Select(e => e.Description))));
+
+            // Clear mustChangePassword flag on the linked customer
+            var customerIdClaim = User.FindFirstValue("CustomerId");
+            if (!string.IsNullOrEmpty(customerIdClaim) && int.TryParse(customerIdClaim, out var custId))
+            {
+                var customer = await _gymContext.Customers.FindAsync(custId);
+                if (customer != null)
+                {
+                    customer.MustChangePassword = false;
+                    await _gymContext.SaveChangesAsync();
+                }
+            }
+
+            return Ok(ApiResponse.Ok("Password changed successfully."));
         }
 
         /// <summary>
