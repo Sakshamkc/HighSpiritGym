@@ -1,0 +1,19 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "HighSpiritApp (http)",
+      "type": "dotnet",
+      "request": "launch",
+      "projectPath": "${workspaceFolder}/HighSpiritApp.csproj",
+      "launchSettingsProfile": "http"
+    },
+    {
+      "name": "HighSpiritApp (https)",
+      "type": "dotnet",
+      "request": "launch",
+      "projectPath": "${workspaceFolder}/HighSpiritApp.csproj",
+      "launchSettingsProfile": "https"
+    }
+  ]
+}
