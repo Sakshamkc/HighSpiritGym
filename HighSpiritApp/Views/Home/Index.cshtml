@@ -979,25 +979,25 @@
 
 @section Scripts {
     <script>
-                        // Handle collapse button aria-expanded state for chevron rotation
-                        document.addEventListener('DOMContentLoaded', function () {
-                            const collapseButtons = document.querySelectorAll('.collapse-btn');
+                                        // Handle collapse button aria-expanded state for chevron rotation
+                                        document.addEventListener('DOMContentLoaded', function () {
+                                            const collapseButtons = document.querySelectorAll('.collapse-btn');
 
-                            collapseButtons.forEach(function (btn) {
-                                const targetId = btn.getAttribute('data-bs-target');
-                                const targetEl = document.querySelector(targetId);
+                                            collapseButtons.forEach(function (btn) {
+                                                const targetId = btn.getAttribute('data-bs-target');
+                                                const targetEl = document.querySelector(targetId);
 
-                                if (targetEl) {
-                                    // Listen for Bootstrap collapse events
-                                    targetEl.addEventListener('show.bs.collapse', function () {
-                                        btn.setAttribute('aria-expanded', 'true');
-                                    });
+                                                if (targetEl) {
+                                                    // Listen for Bootstrap collapse events
+                                                    targetEl.addEventListener('show.bs.collapse', function () {
+                                                        btn.setAttribute('aria-expanded', 'true');
+                                                    });
 
-                                    targetEl.addEventListener('hide.bs.collapse', function () {
-                                        btn.setAttribute('aria-expanded', 'false');
-                                    });
-                                }
-                            });
-                        });
+                                                    targetEl.addEventListener('hide.bs.collapse', function () {
+                                                        btn.setAttribute('aria-expanded', 'false');
+                                                    });
+                                                }
+                                            });
+                                        });
     </script>
 }

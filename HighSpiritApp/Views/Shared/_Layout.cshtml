@@ -2,6 +2,13 @@
 <html lang="en">
 
 <head>
+    <script>
+        // Apply theme BEFORE any CSS/HTML renders to prevent flash
+        (function() {
+            var t = localStorage.getItem('theme');
+            if (t) document.documentElement.setAttribute('data-theme', t);
+        })();
+    </script>
 
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -2208,6 +2215,9 @@
                     @await Component.InvokeAsync("BoxingDueNotification", new { category = "Adult" })
                 }
             }
+            <button class="btn btn-sm btn-outline-secondary rounded-circle" id="fullscreenToggle" onclick="toggleFullScreen()" title="Toggle Fullscreen" style="width:36px;height:36px;display:flex;align-items:center;justify-content:center;border:1px solid #e2e8f0;background:transparent;">
+                <i class="fa-solid fa-expand" id="navFullscreenIcon"></i>
+            </button>
         </div>
 
         @RenderBody()
@@ -2568,6 +2578,29 @@
             hamburger.classList.remove('active');
             }
             }
+
+            // =====================================================
+            // FULLSCREEN TOGGLE
+            // =====================================================
+            function toggleFullScreen() {
+                if (!document.fullscreenElement) {
+                    document.documentElement.requestFullscreen();
+                } else {
+                    document.exitFullscreen();
+                }
+            }
+            function updateFullscreenIcons(isFs) {
+                var icons = document.querySelectorAll('#dashboardFullscreenIcon, #navFullscreenIcon');
+                icons.forEach(function(icon) {
+                    if (isFs) { icon.classList.remove('fa-expand'); icon.classList.add('fa-compress'); }
+                    else { icon.classList.remove('fa-compress'); icon.classList.add('fa-expand'); }
+                });
+                var cb = document.getElementById('settingFullscreen');
+                if (cb) cb.checked = isFs;
+            }
+            document.addEventListener('fullscreenchange', function() {
+                updateFullscreenIcons(!!document.fullscreenElement);
+            });
 
             // =====================================================
             // DARK MODE TOGGLE
