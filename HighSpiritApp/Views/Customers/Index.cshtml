@@ -88,6 +88,11 @@
                 <text>New Arrivals</text>
                 <small class="text-muted" style="font-size: 0.55em; font-weight: 400;">Last 30 days</small>
             }
+            else if ((ViewBag.Filter as string) == "updated")
+            {
+                <text>Recently Updated</text>
+                <small class="text-muted" style="font-size: 0.55em; font-weight: 400;">Last 30 days</small>
+            }
             else
             {
                 <text>All Members</text>
