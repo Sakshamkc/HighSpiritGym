@@ -1,4 +1,4 @@
-﻿@model List<HighSpiritApp.Models.Customer>
+@model List<HighSpiritApp.Models.Customer>
 @{
     Layout = "~/Views/Shared/_Layout.cshtml";
     int sn = 1;
@@ -112,7 +112,7 @@
 @if (skippedUsers.Any())
 {
     <div class="alert alert-warning alert-dismissible fade show" role="alert">
-        <strong>⚠️ @skippedUsers.Count user(s) were skipped during import.</strong>
+        <strong>?? @skippedUsers.Count user(s) were skipped during import.</strong>
         <button type="button" class="btn btn-sm btn-outline-dark ms-2" data-bs-toggle="modal"
                 data-bs-target="#skippedModal">
             View Details
@@ -124,7 +124,7 @@
         <div class="modal-dialog modal-lg">
             <div class="modal-content">
                 <div class="modal-header bg-warning">
-                    <h5 class="modal-title">⚠️ Skipped Users During Import</h5>
+                    <h5 class="modal-title">?? Skipped Users During Import</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                 </div>
                 <div class="modal-body">
@@ -1275,8 +1275,8 @@
                                                                                                         @{
                                                                                                             var assignedLockers = ViewBag.AssignedLockers as Dictionary<string,
                                                                                                     HighSpiritApp.Models.Locker.Locker>;
-                                                                                                            var hasLocker = assignedLockers != null && assignedLockers.ContainsKey(c.FullName.ToLower());
-                                                                                                            var existingLocker = hasLocker ? assignedLockers[c.FullName.ToLower()] : null;
+                                                                                                            var hasLocker = assignedLockers != null && !string.IsNullOrEmpty(c.FullName) && assignedLockers.ContainsKey(c.FullName.ToLower());
+                                                                                                            var existingLocker = (hasLocker && !string.IsNullOrEmpty(c.FullName)) ? assignedLockers[c.FullName.ToLower()] : null;
                                                                                                         }
                                                                                                         <div class="btn-group btn-group-sm">
                                                                                                             <a class="btn btn-outline-primary" href="/Customers/Details/@c.CustomerID" title="View">
@@ -1350,7 +1350,7 @@
                                                                                                 <li class="page-item">
                                                                                                     <a class="page-link" href="@BuildQuery(overridePage: 1)">1</a>
                                                                                                 </li>
-                                                                                                <li class="page-item disabled"><span class="page-link">…</span></li>
+                                                                                                <li class="page-item disabled"><span class="page-link">�</span></li>
                                                                                             }
 
                                                                                             @for (int i = start; i <= end; i++)
@@ -1362,7 +1362,7 @@
 
                                                                                             @if (end < total)
                                                                                             {
-                                                                                                <li class="page-item disabled"><span class="page-link">…</span></li>
+                                                                                                <li class="page-item disabled"><span class="page-link">�</span></li>
                                                                                                 <li class="page-item">
                                                                                                     <a class="page-link" href="@BuildQuery(overridePage: total)">@total</a>
                                                                                                 </li>

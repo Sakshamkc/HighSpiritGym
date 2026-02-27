@@ -639,8 +639,8 @@
                             foreach (var m in Model)
                             {
                                 <tr>
-                                    <td class="fw-semibold">@m.Customer.FullName</td>
-                                    <td>@m.Customer.Phone</td>
+                                    <td class="fw-semibold">@(m.Customer?.FullName ?? "Unknown")</td>
+                                    <td>@(m.Customer?.Phone ?? "-")</td>
                                     <td><span class="badge bg-secondary">@m.PlanName</span></td>
                                     <td>
                                         <span class="text-warning fw-semibold">

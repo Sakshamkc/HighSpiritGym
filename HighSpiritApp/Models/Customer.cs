@@ -3,7 +3,7 @@
     public class Customer
     {
         public int CustomerID { get; set; }
-        public string FullName { get; set; }
+        public string FullName { get; set; } = string.Empty;
         public string? Phone { get; set; }
         public string? Email { get; set; }
         public string? Address { get; set; }
@@ -18,10 +18,12 @@
 
         public string? Remarks { get; set; }
         public string? Shift { get; set; }
+        public string? QrToken { get; set; }
+        public bool MustChangePassword { get; set; } = true;
 
         public DateTime CreatedAt { get; set; } = DateTime.Now;
         public DateTime? UpdatedAt { get; set; }
 
-        public ICollection<CustomerMembership> Memberships { get; set; }
+        public ICollection<CustomerMembership> Memberships { get; set; } = new List<CustomerMembership>();
     }
 }
