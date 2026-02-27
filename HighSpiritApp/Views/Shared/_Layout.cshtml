@@ -1347,7 +1347,9 @@
                     transition: max-height 0.3s ease;
                 }
 
-                .sidebar .submenu {
+                .sidebar .nav-link.submenu {
+                    display: flex;
+                    align-items: center;
                     padding: 9px 14px 9px 50px;
                     color: #64748b;
                     font-size: 13px;
@@ -1356,21 +1358,32 @@
                     transition: all 0.2s ease;
                 }
 
-                .sidebar .submenu:hover {
+                .sidebar .nav-link.submenu:hover {
                     background: rgba(255, 255, 255, 0.03);
                     color: #e2e8f0;
                 }
 
-                .sidebar .submenu.active {
+                .sidebar .nav-link.submenu.active {
                     background: rgba(59, 130, 246, 0.1);
                     color: #60a5fa;
                 }
 
-                .sidebar .submenu i {
-                    width: 18px;
+                .sidebar .nav-link.submenu i {
+                    display: inline-flex;
+                    align-items: center;
+                    justify-content: center;
+                    width: 26px;
+                    height: 26px;
+                    min-width: 26px;
+                    max-width: 26px;
+                    text-align: center;
                     margin-right: 10px;
                     font-size: 11px;
                     opacity: 0.7;
+                    background: rgba(255, 255, 255, 0.05);
+                    border-radius: 5px;
+                    vertical-align: middle;
+                    flex-shrink: 0;
                 }
 
                 /* Chevron rotation for collapsible menus */
