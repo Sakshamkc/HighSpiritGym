@@ -2060,10 +2060,16 @@
             </div>
             <div class="collapse submenu-container @(controller == "Customers" ? "show" : "")" id="gymPackagesMenu">
                 <a href="/Customers"
-                       class="nav-link submenu @(controller == "Customers" && string.IsNullOrEmpty(ViewBag.PlanName as string) ? "active" : "")"
+                       class="nav-link submenu @(controller == "Customers" && string.IsNullOrEmpty(ViewBag.PlanName as string) && (ViewBag.Filter as string) != "active" ? "active" : "")"
                        onclick="closeSidebarOnMobile()">
                     <i class="fa-solid fa-users"></i>
                     <span class="nav-text">All Members</span>
+                </a>
+                <a href="/Customers?filter=active"
+                       class="nav-link submenu @(controller == "Customers" && (ViewBag.Filter as string) == "active" && string.IsNullOrEmpty(ViewBag.PlanName as string) ? "active" : "")"
+                       onclick="closeSidebarOnMobile()">
+                    <i class="fa-solid fa-user-check"></i>
+                    <span class="nav-text">Active Members</span>
                 </a>
                 <a href="/Customers?planName=Gym"
                        class="nav-link submenu @(ViewBag.PlanName as string == "Gym" ? "active" : "")"

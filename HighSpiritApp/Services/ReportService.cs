@@ -47,8 +47,14 @@ namespace HighSpiritApp.Services
 
             // Gym Revenue
             report.GymRevenue = memberships.Sum(m => m.PaidPrice);
-            report.GymDue = memberships.Sum(m => m.DueAmount);
-            report.TotalGymMembers = (await _customerRepository.GetAllAsync()).Count();
+
+            // Gym Due - only from latest membership per customer (matches Dashboard logic)
+            var customers = (await _customerRepository.GetAllWithMembershipsAsync()).ToList();
+            report.GymDue = customers
+                .Select(c => c.Memberships?.OrderByDescending(m => m.StartDate).FirstOrDefault())
+                .Where(m => m != null)
+                .Sum(m => m!.DueAmount);
+            report.TotalGymMembers = customers.Count;
 
             // Boxing Revenue
             report.BoxingRevenue = boxingMembers.Sum(b => b.CashAmount + b.EsewaAmount);
