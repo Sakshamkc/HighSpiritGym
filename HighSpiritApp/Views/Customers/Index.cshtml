@@ -79,6 +79,15 @@
             
                 <text> Members</text>
             }
+            else if ((ViewBag.Filter as string) == "active")
+            {
+                <text>Active Members</text>
+            }
+            else if ((ViewBag.Filter as string) == "new")
+            {
+                <text>New Arrivals</text>
+                <small class="text-muted" style="font-size: 0.55em; font-weight: 400;">Last 30 days</small>
+            }
             else
             {
                 <text>All Members</text>
@@ -1350,7 +1359,7 @@
                                                                                                 <li class="page-item">
                                                                                                     <a class="page-link" href="@BuildQuery(overridePage: 1)">1</a>
                                                                                                 </li>
-                                                                                                <li class="page-item disabled"><span class="page-link">…</span></li>
+                                                                                                <li class="page-item disabled"><span class="page-link">&hellip;</span></li>
                                                                                             }
 
                                                                                             @for (int i = start; i <= end; i++)
@@ -1362,7 +1371,7 @@
 
                                                                                             @if (end < total)
                                                                                             {
-                                                                                                <li class="page-item disabled"><span class="page-link">…</span></li>
+                                                                                                <li class="page-item disabled"><span class="page-link">&hellip;</span></li>
                                                                                                 <li class="page-item">
                                                                                                     <a class="page-link" href="@BuildQuery(overridePage: total)">@total</a>
                                                                                                 </li>

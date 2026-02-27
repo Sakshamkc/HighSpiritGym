@@ -2,6 +2,14 @@
   "version": "0.2.0",
   "configurations": [
     {
+      "name": "Watch (Hot Reload + Debug)",
+      "type": "dotnet",
+      "request": "launch",
+      "projectPath": "${workspaceFolder}/HighSpiritApp.csproj",
+      "launchSettingsProfile": "http",
+      "hotReloadEnabled": true
+    },
+    {
       "name": "HighSpiritApp (http)",
       "type": "dotnet",
       "request": "launch",

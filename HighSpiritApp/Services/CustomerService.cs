@@ -52,6 +52,7 @@ namespace HighSpiritApp.Services
 
             // Status filter - based on latest membership's ExpireDate
             filter.Filter ??= "all";
+            var thirtyDaysAgo = today.AddDays(-30);
             query = filter.Filter switch
             {
                 "active" => query.Where(c =>
@@ -64,6 +65,7 @@ namespace HighSpiritApp.Services
                     c.Memberships.Any() &&
                     c.Memberships.OrderByDescending(m => m.StartDate).First().ExpireDate >= today &&
                     c.Memberships.OrderByDescending(m => m.StartDate).First().ExpireDate <= today.AddDays(7)),
+                "new" => query.Where(c => c.JoinDate >= thirtyDaysAgo),
                 _ => query
             };
 
@@ -145,7 +147,11 @@ namespace HighSpiritApp.Services
                     c.Memberships.OrderByDescending(m => m.StartDate).FirstOrDefault()?.ExpireDate).ToList(),
                 "expire_desc" => allCustomers.OrderByDescending(c =>
                     c.Memberships.OrderByDescending(m => m.StartDate).FirstOrDefault()?.ExpireDate).ToList(),
-                _ => allCustomers.OrderBy(c => c.FullName).ToList()
+                "join" => allCustomers.OrderBy(c => c.JoinDate).ToList(),
+                "join_desc" => allCustomers.OrderByDescending(c => c.JoinDate).ToList(),
+                _ => filter.Filter == "new"
+                    ? allCustomers.OrderByDescending(c => c.JoinDate).ToList()
+                    : allCustomers.OrderBy(c => c.FullName).ToList()
             };
 
             var total = allCustomers.Count;
