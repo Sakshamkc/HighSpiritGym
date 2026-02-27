@@ -18,4 +18,10 @@
     <PackageReference Include="Pomelo.EntityFrameworkCore.MySql" Version="8.0.0" />
   </ItemGroup>
 
+  <!-- Exclude the maintenance template from build/publish output -->
+  <ItemGroup>
+    <Content Remove="app_offline.htm.template" />
+    <None Include="app_offline.htm.template" />
+  </ItemGroup>
+
 </Project>
