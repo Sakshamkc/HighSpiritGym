@@ -98,6 +98,16 @@ namespace HighSpiritApp.Services
             await _membershipRepository.SaveChangesAsync();
         }
 
+        public async Task DeleteAsync(int membershipId)
+        {
+            var membership = await _membershipRepository.GetByIdAsync(membershipId);
+            if (membership == null)
+                throw new KeyNotFoundException($"Membership with ID {membershipId} not found.");
+
+            _membershipRepository.Remove(membership);
+            await _membershipRepository.SaveChangesAsync();
+        }
+
         public DateTime CalculateSuggestedStartDate(int customerId)
         {
             // This is sync for simplicity, but you could make it async

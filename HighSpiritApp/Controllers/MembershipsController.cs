@@ -71,5 +71,20 @@ namespace HighSpiritApp.Controllers
                 return View(membership);
             }
         }
+
+        [HttpPost]
+        public async Task<IActionResult> Delete(int id, int customerId)
+        {
+            try
+            {
+                await _membershipService.DeleteAsync(id);
+                TempData["success"] = "Membership record deleted successfully.";
+            }
+            catch (KeyNotFoundException)
+            {
+                TempData["error"] = "Membership record not found.";
+            }
+            return RedirectToAction("Details", "Customers", new { id = customerId });
+        }
     }
 }

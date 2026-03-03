@@ -2,7 +2,7 @@
 @{
     var currentPlan = ViewBag.CurrentPlan as string;
     var isAll = string.IsNullOrEmpty(currentPlan);
-    
+
     // Define plan-specific styling
     var planConfig = currentPlan switch
     {
@@ -18,10 +18,8 @@
 }
 
 <div class="dropdown">
-    <a href="#"
-       class="nav-link position-relative dropdown-toggle"
-       data-bs-toggle="dropdown"
-       title="Expired Members (@planConfig.label)">
+    <a href="#" class="nav-link position-relative dropdown-toggle" data-bs-toggle="dropdown"
+           title="Expired Members (@planConfig.label)">
 
         <!-- Icon with plan-specific color -->
         <span class="d-inline-flex align-items-center gap-1 px-2 py-1 rounded" style="background: @planConfig.bg;">
@@ -55,20 +53,19 @@
         {
             foreach (var m in Model)
             {
+                var overdueDays = (DateTime.Today - m.ExpireDate.Date).Days;
                 <li class="dropdown-item-text border-bottom">
                     <div class="fw-semibold">@(m.Customer?.FullName ?? "Unknown")</div>
                     <small class="text-danger">
                         <i class="fa-solid fa-calendar-xmark me-1"></i>
                         Expired: @m.ExpireDate.ToString("dd MMM yyyy")
-                        <span class="text-muted">(Due @m.DueDaysComputed days)</span>
+                        <span class="text-muted">(@overdueDays @(overdueDays == 1 ? "day" : "days") overdue)</span>
                     </small>
                     <div>
-                        <a href="/Customers/Details/@m.CustomerID"
-                           class="text-primary small">
+                        <a href="/Customers/Details/@m.CustomerID"                 class="text-primary small">
                             <i class="fa-solid fa-eye"></i> View
                         </a>
-                        <a href="/Memberships/Renew/@m.CustomerID"
-                           class="text-success small ms-2">
+                        <a href="/Memberships/Renew/@m.CustomerID"     class="text-success small ms-2">
                             <i class="fa-solid fa-rotate"></i> Renew
                         </a>
                     </div>
