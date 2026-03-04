@@ -1,0 +1,28 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "Watch (Hot Reload)",
+      "type": "dotnet",
+      "request": "launch",
+      "projectPath": "${workspaceFolder}/HighSpiritApp/HighSpiritApp.csproj",
+      "launchSettingsProfile": "http",
+      "hotReloadEnabled": true
+    },
+    {
+      "name": "Run (http)",
+      "type": "dotnet",
+      "request": "launch",
+      "projectPath": "${workspaceFolder}/HighSpiritApp/HighSpiritApp.csproj",
+      "launchSettingsProfile": "http"
+    },
+    {
+      "name": "Run (https)",
+      "type": "dotnet",
+      "request": "launch",
+      "projectPath": "${workspaceFolder}/HighSpiritApp/HighSpiritApp.csproj",
+      "launchSettingsProfile": "https"
+    }
+  ],
+  "compounds": []
+}
