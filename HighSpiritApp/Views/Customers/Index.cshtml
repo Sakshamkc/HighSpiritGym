@@ -88,6 +88,11 @@
                 <text>New Arrivals</text>
                 <small class="text-muted" style="font-size: 0.55em; font-weight: 400;">Last 30 days</small>
             }
+            else if ((ViewBag.Filter as string) == "thismonth")
+            {
+                <text>Joined This Month</text>
+                <small class="text-muted" style="font-size: 0.55em; font-weight: 400;">@DateTime.Now.ToString("MMMM yyyy")</small>
+            }
             else if ((ViewBag.Filter as string) == "updated")
             {
                 <text>Recently Updated</text>

@@ -198,6 +198,17 @@
         transition: transform 0.2s ease, box-shadow 0.2s ease;
     }
 
+    a.stat-card-link {
+        text-decoration: none;
+        color: inherit;
+        display: block;
+    }
+
+    a.stat-card-link:hover {
+        text-decoration: none;
+        color: inherit;
+    }
+
     .stat-card:hover {
         transform: translateY(-5px);
         box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15) !important;
@@ -524,83 +535,95 @@
 
 <div class="row g-4 mb-4">
     <div class="col-md-3 col-sm-6">
-        <div class="card stat-card shadow text-white"
-             style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;">
-            <div class="card-body">
-                <div class="stat-icon">
-                    <i class="fa-solid fa-users"></i>
+        <a href="/Customers" class="stat-card-link">
+            <div class="card stat-card shadow text-white"
+                 style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;">
+                <div class="card-body">
+                    <div class="stat-icon">
+                        <i class="fa-solid fa-users"></i>
+                    </div>
+                    <h2>@ViewBag.Total</h2>
+                    <p class="mb-0">Total Members</p>
                 </div>
-                <h2>@ViewBag.Total</h2>
-                <p class="mb-0">Total Members</p>
             </div>
-        </div>
+        </a>
     </div>
 
     <div class="col-md-3 col-sm-6">
-        <div class="card stat-card shadow text-white"
-             style="background: linear-gradient(135deg, #10b981 0%, #059669 100%) !important;">
-            <div class="card-body">
-                <div class="stat-icon">
-                    <i class="fa-solid fa-circle-check"></i>
+        <a href="/Customers?filter=active" class="stat-card-link">
+            <div class="card stat-card shadow text-white"
+                 style="background: linear-gradient(135deg, #10b981 0%, #059669 100%) !important;">
+                <div class="card-body">
+                    <div class="stat-icon">
+                        <i class="fa-solid fa-circle-check"></i>
+                    </div>
+                    <h2>@ViewBag.Active</h2>
+                    <p class="mb-0">Active Members</p>
                 </div>
-                <h2>@ViewBag.Active</h2>
-                <p class="mb-0">Active Members</p>
             </div>
-        </div>
+        </a>
     </div>
 
     <div class="col-md-3 col-sm-6">
-        <div class="card stat-card shadow text-white"
-             style="background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%) !important;">
-            <div class="card-body">
-                <div class="stat-icon">
-                    <i class="fa-solid fa-circle-xmark"></i>
+        <a href="/Customers?filter=expired" class="stat-card-link">
+            <div class="card stat-card shadow text-white"
+                 style="background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%) !important;">
+                <div class="card-body">
+                    <div class="stat-icon">
+                        <i class="fa-solid fa-circle-xmark"></i>
+                    </div>
+                    <h2>@ViewBag.Expired</h2>
+                    <p class="mb-0">Expired</p>
                 </div>
-                <h2>@ViewBag.Expired</h2>
-                <p class="mb-0">Expired</p>
             </div>
-        </div>
+        </a>
     </div>
 
     <div class="col-md-3 col-sm-6">
-        <div class="card stat-card shadow text-white"
-             style="background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%) !important;">
-            <div class="card-body">
-                <div class="stat-icon">
-                    <i class="fa-solid fa-clock"></i>
+        <a href="/Customers?filter=soon" class="stat-card-link">
+            <div class="card stat-card shadow text-white"
+                 style="background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%) !important;">
+                <div class="card-body">
+                    <div class="stat-icon">
+                        <i class="fa-solid fa-clock"></i>
+                    </div>
+                    <h2>@ViewBag.ExpiringSoon</h2>
+                    <p class="mb-0">Expiring Soon</p>
                 </div>
-                <h2>@ViewBag.ExpiringSoon</h2>
-                <p class="mb-0">Expiring Soon</p>
             </div>
-        </div>
+        </a>
     </div>
 </div>
 
 <div class="row mb-4">
     <div class="col-md-4 col-sm-6 mb-3">
-        <div class="card stat-card shadow text-white"
-             style="background: linear-gradient(135deg, #06b6d4 0%, #0891b2 100%) !important;">
-            <div class="card-body">
-                <div class="stat-icon">
-                    <i class="fa-solid fa-user-plus"></i>
+        <a href="/Customers?filter=thismonth" class="stat-card-link">
+            <div class="card stat-card shadow text-white"
+                 style="background: linear-gradient(135deg, #06b6d4 0%, #0891b2 100%) !important;">
+                <div class="card-body">
+                    <div class="stat-icon">
+                        <i class="fa-solid fa-user-plus"></i>
+                    </div>
+                    <h2>@ViewBag.JoinedThisMonth</h2>
+                    <p class="mb-0">Joined This Month</p>
                 </div>
-                <h2>@ViewBag.JoinedThisMonth</h2>
-                <p class="mb-0">Joined This Month</p>
             </div>
-        </div>
+        </a>
     </div>
 
     <div class="col-md-4 col-sm-6 mb-3">
-        <div class="card stat-card shadow text-white"
-             style="background: linear-gradient(135deg, #ec4899 0%, #db2777 100%) !important;">
-            <div class="card-body">
-                <div class="stat-icon">
-                    <i class="fa-solid fa-money-bill-wave"></i>
+        <a href="/Customers?paymentStatus=due" class="stat-card-link">
+            <div class="card stat-card shadow text-white"
+                 style="background: linear-gradient(135deg, #ec4899 0%, #db2777 100%) !important;">
+                <div class="card-body">
+                    <div class="stat-icon">
+                        <i class="fa-solid fa-money-bill-wave"></i>
+                    </div>
+                    <h2>Rs @ViewBag.GymTotalDue.ToString("N0")</h2>
+                    <p class="mb-0">Total Due Amount</p>
                 </div>
-                <h2>Rs @ViewBag.GymTotalDue.ToString("N0")</h2>
-                <p class="mb-0">Total Due Amount</p>
             </div>
-        </div>
+        </a>
     </div>
 </div>
 
@@ -745,16 +768,18 @@
     </div>
 
     <!-- Total Due Card -->
-    <div class="card stat-card shadow text-white"
-         style="background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%) !important; min-width: 200px; flex: 0.5;">
-        <div class="card-body d-flex flex-column justify-content-center">
-            <div class="stat-icon">
-                <i class="fa-solid fa-money-bill-wave"></i>
+    <a href="/Locker" class="stat-card-link" style="min-width: 200px; flex: 0.5;">
+        <div class="card stat-card shadow text-white"
+             style="background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%) !important;">
+            <div class="card-body d-flex flex-column justify-content-center">
+                <div class="stat-icon">
+                    <i class="fa-solid fa-money-bill-wave"></i>
+                </div>
+                <h2>Rs @ViewBag.LockerTotalDue.ToString("N0")</h2>
+                <p class="mb-0">Total Locker Due</p>
             </div>
-            <h2>Rs @ViewBag.LockerTotalDue.ToString("N0")</h2>
-            <p class="mb-0">Total Locker Due</p>
         </div>
-    </div>
+    </a>
 </div>
 
 <!-- Locker Expired Table -->
@@ -852,55 +877,63 @@
 
 <div class="row g-4 mb-4">
     <div class="col-md-3 col-sm-6">
-        <div class="card stat-card shadow text-white"
-             style="background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%) !important;">
-            <div class="card-body">
-                <div class="stat-icon">
-                    <i class="fa-solid fa-users"></i>
+        <a href="/Boxing?category=All" class="stat-card-link">
+            <div class="card stat-card shadow text-white"
+                 style="background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%) !important;">
+                <div class="card-body">
+                    <div class="stat-icon">
+                        <i class="fa-solid fa-users"></i>
+                    </div>
+                    <h2>@ViewBag.BoxingTotal</h2>
+                    <p class="mb-0">Total Members</p>
                 </div>
-                <h2>@ViewBag.BoxingTotal</h2>
-                <p class="mb-0">Total Members</p>
             </div>
-        </div>
+        </a>
     </div>
 
     <div class="col-md-3 col-sm-6">
-        <div class="card stat-card shadow text-white"
-             style="background: linear-gradient(135deg, #10b981 0%, #059669 100%) !important;">
-            <div class="card-body">
-                <div class="stat-icon">
-                    <i class="fa-solid fa-circle-check"></i>
+        <a href="/Boxing?category=All" class="stat-card-link">
+            <div class="card stat-card shadow text-white"
+                 style="background: linear-gradient(135deg, #10b981 0%, #059669 100%) !important;">
+                <div class="card-body">
+                    <div class="stat-icon">
+                        <i class="fa-solid fa-circle-check"></i>
+                    </div>
+                    <h2>@ViewBag.BoxingPaid</h2>
+                    <p class="mb-0">Fully Paid</p>
                 </div>
-                <h2>@ViewBag.BoxingPaid</h2>
-                <p class="mb-0">Fully Paid</p>
             </div>
-        </div>
+        </a>
     </div>
 
     <div class="col-md-3 col-sm-6">
-        <div class="card stat-card shadow text-white"
-             style="background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%) !important;">
-            <div class="card-body">
-                <div class="stat-icon">
-                    <i class="fa-solid fa-user-clock"></i>
+        <a href="/Boxing?category=All" class="stat-card-link">
+            <div class="card stat-card shadow text-white"
+                 style="background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%) !important;">
+                <div class="card-body">
+                    <div class="stat-icon">
+                        <i class="fa-solid fa-user-clock"></i>
+                    </div>
+                    <h2>@ViewBag.BoxingWithDue</h2>
+                    <p class="mb-0">With Due</p>
                 </div>
-                <h2>@ViewBag.BoxingWithDue</h2>
-                <p class="mb-0">With Due</p>
             </div>
-        </div>
+        </a>
     </div>
 
     <div class="col-md-3 col-sm-6">
-        <div class="card stat-card shadow text-white"
-             style="background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%) !important;">
-            <div class="card-body">
-                <div class="stat-icon">
-                    <i class="fa-solid fa-money-bill-wave"></i>
+        <a href="/Boxing?category=All" class="stat-card-link">
+            <div class="card stat-card shadow text-white"
+                 style="background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%) !important;">
+                <div class="card-body">
+                    <div class="stat-icon">
+                        <i class="fa-solid fa-money-bill-wave"></i>
+                    </div>
+                    <h2>Rs @ViewBag.BoxingDue</h2>
+                    <p class="mb-0">Total Due Amount</p>
                 </div>
-                <h2>Rs @ViewBag.BoxingDue</h2>
-                <p class="mb-0">Total Due Amount</p>
             </div>
-        </div>
+        </a>
     </div>
 </div>
 
@@ -979,25 +1012,25 @@
 
 @section Scripts {
     <script>
-                                        // Handle collapse button aria-expanded state for chevron rotation
-                                        document.addEventListener('DOMContentLoaded', function () {
-                                            const collapseButtons = document.querySelectorAll('.collapse-btn');
+                                                // Handle collapse button aria-expanded state for chevron rotation
+                                                document.addEventListener('DOMContentLoaded', function () {
+                                                    const collapseButtons = document.querySelectorAll('.collapse-btn');
 
-                                            collapseButtons.forEach(function (btn) {
-                                                const targetId = btn.getAttribute('data-bs-target');
-                                                const targetEl = document.querySelector(targetId);
+                                                    collapseButtons.forEach(function (btn) {
+                                                        const targetId = btn.getAttribute('data-bs-target');
+                                                        const targetEl = document.querySelector(targetId);
 
-                                                if (targetEl) {
-                                                    // Listen for Bootstrap collapse events
-                                                    targetEl.addEventListener('show.bs.collapse', function () {
-                                                        btn.setAttribute('aria-expanded', 'true');
+                                                        if (targetEl) {
+                                                            // Listen for Bootstrap collapse events
+                                                            targetEl.addEventListener('show.bs.collapse', function () {
+                                                                btn.setAttribute('aria-expanded', 'true');
+                                                            });
+
+                                                            targetEl.addEventListener('hide.bs.collapse', function () {
+                                                                btn.setAttribute('aria-expanded', 'false');
+                                                            });
+                                                        }
                                                     });
-
-                                                    targetEl.addEventListener('hide.bs.collapse', function () {
-                                                        btn.setAttribute('aria-expanded', 'false');
-                                                    });
-                                                }
-                                            });
-                                        });
+                                                });
     </script>
 }

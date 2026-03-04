@@ -66,6 +66,7 @@ namespace HighSpiritApp.Services
                     c.Memberships.OrderByDescending(m => m.StartDate).First().ExpireDate >= today &&
                     c.Memberships.OrderByDescending(m => m.StartDate).First().ExpireDate <= today.AddDays(7)),
                 "new" => query.Where(c => c.JoinDate >= thirtyDaysAgo),
+                "thismonth" => query.Where(c => c.JoinDate.Month == today.Month && c.JoinDate.Year == today.Year),
                 "updated" => query.Where(c => c.UpdatedAt != null && c.UpdatedAt >= thirtyDaysAgo),
                 _ => query
             };
@@ -154,9 +155,11 @@ namespace HighSpiritApp.Services
                 "update_desc" => allCustomers.OrderByDescending(c => c.UpdatedAt).ToList(),
                 _ => filter.Filter == "new"
                     ? allCustomers.OrderByDescending(c => c.JoinDate).ToList()
-                    : filter.Filter == "updated"
-                        ? allCustomers.OrderByDescending(c => c.UpdatedAt).ToList()
-                        : allCustomers.OrderBy(c => c.FullName).ToList()
+                    : filter.Filter == "thismonth"
+                        ? allCustomers.OrderByDescending(c => c.JoinDate).ToList()
+                        : filter.Filter == "updated"
+                            ? allCustomers.OrderByDescending(c => c.UpdatedAt).ToList()
+                            : allCustomers.OrderBy(c => c.FullName).ToList()
             };
 
             var total = allCustomers.Count;
