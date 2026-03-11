@@ -66,6 +66,9 @@
                             !string.IsNullOrEmpty(ViewBag.Shift as string) ||
                             !string.IsNullOrEmpty(ViewBag.Gender as string) ||
                             !string.IsNullOrEmpty(ViewBag.PaymentStatus as string);
+
+    // Capture current URL for back navigation
+    var returnUrl = Uri.EscapeDataString(Context.Request.Path + Context.Request.QueryString);
 }
 
 <!-- Page Header with Title and Action Buttons -->
@@ -1298,15 +1301,15 @@
                                                                                                             var existingLocker = (hasLocker && !string.IsNullOrEmpty(c.FullName)) ? assignedLockers[c.FullName.ToLower()] : null;
                                                                                                         }
                                                                                                         <div class="btn-group btn-group-sm">
-                                                                                                            <a class="btn btn-outline-primary" href="/Customers/Details/@c.CustomerID" title="View">
+                                                                                                            <a class="btn btn-outline-primary" href="/Customers/Details/@c.CustomerID?returnUrl=@returnUrl" title="View">
                                                                                                                 <i class="fa-solid fa-eye"></i>
                                                                                                             </a>
-                                                                                                            <a class="btn btn-outline-secondary" href="/Customers/EditAll/@c.CustomerID" title="Edit">
+                                                                                                            <a class="btn btn-outline-secondary" href="/Customers/EditAll/@c.CustomerID?returnUrl=@returnUrl" title="Edit">
                                                                                                                 <i class="fa-solid fa-edit"></i>
                                                                                                             </a>
                                                                                                             @if (m != null)
                                                                                                             {
-                                                                                                                <a class="btn btn-outline-success" href="/Memberships/Renew/@c.CustomerID" title="Renew">
+                                                                                                                <a class="btn btn-outline-success" href="/Memberships/Renew/@c.CustomerID?returnUrl=@returnUrl" title="Renew">
                                                                                                                     <i class="fa-solid fa-rotate"></i>
                                                                                                                 </a>
                                                                                                             }

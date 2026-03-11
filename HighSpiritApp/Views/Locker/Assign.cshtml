@@ -6,6 +6,9 @@
     var customerPackage = ViewBag.CustomerPackage as string;
     var customerId = ViewBag.CustomerId;
     var isAutoAssign = !string.IsNullOrEmpty(customerName);
+
+    var returnUrlRaw = Context.Request.Query["returnUrl"].FirstOrDefault();
+    var backUrl = !string.IsNullOrEmpty(returnUrlRaw) ? Uri.UnescapeDataString(returnUrlRaw) : $"/Locker?gender={Model.Gender}";
 }
 
 <style>
@@ -54,7 +57,7 @@
             <span class="auto-assign-badge"><i class="fa-solid fa-bolt me-1"></i>Auto-Assign</span>
         }
     </h4>
-    <a href="/Locker?gender=@Model.Gender" class="btn btn-outline-light"><i class="fa-solid fa-arrow-left me-2"></i> Back</a>
+    <a href="@backUrl" class="btn btn-outline-light"><i class="fa-solid fa-arrow-left me-2"></i> Back</a>
 </div>
 
 <form method="post" action="/Locker/Assign" id="assignForm">
@@ -189,7 +192,7 @@
 
     <div class="d-flex gap-3">
         <button type="submit" class="btn btn-success btn-assign btn-lg"><i class="fa-solid fa-check me-2"></i> Assign Locker</button>
-        <a href="/Locker?gender=@Model.Gender" class="btn btn-outline-secondary btn-lg">Cancel</a>
+        <a href="@backUrl" class="btn btn-outline-secondary btn-lg">Cancel</a>
     </div>
 </form>
 

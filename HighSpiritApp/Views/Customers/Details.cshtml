@@ -21,6 +21,10 @@ today.AddDays(7);
     var lockerDaysLeft = assignedLocker != null && assignedLocker.EndDate.HasValue ? (assignedLocker.EndDate.Value -
 today).Days : 0;
 
+    var returnUrl = Context.Request.Query["returnUrl"].FirstOrDefault();
+    var backUrl = !string.IsNullOrEmpty(returnUrl) ? Uri.UnescapeDataString(returnUrl) : "/Customers";
+    var encodedReturnUrl = !string.IsNullOrEmpty(returnUrl) ? returnUrl : "";
+
     string FormatDate(DateTime date)
     {
         return date.ToString("dd MMM yyyy");
@@ -444,10 +448,10 @@ today).Days : 0;
                     }
                 </div>
                 <div class="d-flex gap-2 flex-wrap justify-content-center">
-                    <a href="/Customers/EditAll/@Model.CustomerID" class="action-btn btn btn-light">
+                    <a href="/Customers/EditAll/@Model.CustomerID@(encodedReturnUrl != "" ? "?returnUrl=" + encodedReturnUrl : "")" class="action-btn btn btn-light">
                         <i class="fa-solid fa-edit"></i> Edit
                     </a>
-                    <a href="/Memberships/Renew/@Model.CustomerID" class="action-btn btn btn-success">
+                    <a href="/Memberships/Renew/@Model.CustomerID@(encodedReturnUrl != "" ? "?returnUrl=" + encodedReturnUrl : "")" class="action-btn btn btn-success">
                         <i class="fa-solid fa-rotate"></i> Renew
                     </a>
                     @if (assignedLocker != null)
@@ -714,7 +718,7 @@ today).Days : 0;
 
 <!-- Back Button -->
 <div class="mt-4">
-    <a href="/Customers" class="btn btn-outline-secondary btn-lg px-4">
+    <a href="@backUrl" class="btn btn-outline-secondary btn-lg px-4">
         <i class="fa-solid fa-arrow-left me-2"></i> Back to Members
     </a>
 </div>

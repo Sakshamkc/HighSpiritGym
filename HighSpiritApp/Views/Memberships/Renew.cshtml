@@ -230,7 +230,11 @@
                 <button type="submit" class="btn btn-success btn-lg px-5">
                     <i class="fa-solid fa-rotate me-2"></i> Renew Membership
                 </button>
-                <a href="/Customers" class="btn btn-outline-secondary btn-lg px-4">Cancel</a>
+                @{
+                    var returnUrl = Context.Request.Query["returnUrl"].FirstOrDefault();
+                    var backUrl = !string.IsNullOrEmpty(returnUrl) ? Uri.UnescapeDataString(returnUrl) : "/Customers";
+                }
+                <a href="@backUrl" class="btn btn-outline-secondary btn-lg px-4">Cancel</a>
             </div>
         </form>
     </div>

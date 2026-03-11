@@ -2,6 +2,9 @@
     Layout = "~/Views/Shared/_Layout.cshtml";
     string category = ViewBag.Category ?? "Children";
     bool isAdult = category == "Adult";
+
+    var returnUrlRaw = Context.Request.Query["returnUrl"].FirstOrDefault();
+    var backUrl = !string.IsNullOrEmpty(returnUrlRaw) ? Uri.UnescapeDataString(returnUrlRaw) : $"/Boxing?category={category}";
 }
 
 <h4 class="mb-3"><i class="fa-solid fa-file-import me-2 text-danger"></i> Import @(isAdult ? "Adult" : "Children") Boxing Members (Excel)</h4>
@@ -24,7 +27,7 @@
     <button class="btn btn-success">
         <i class="fa-solid fa-file-import me-1"></i> Import
     </button>
-    <a href="/Boxing?category=@category" class="btn btn-secondary">Cancel</a>
+    <a href="@backUrl" class="btn btn-secondary">Cancel</a>
 
 </form>
 

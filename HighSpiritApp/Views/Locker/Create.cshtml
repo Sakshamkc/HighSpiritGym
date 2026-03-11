@@ -1,6 +1,9 @@
 @model HighSpiritApp.Models.Locker.Locker
 @{
     Layout = "~/Views/Shared/_Layout.cshtml";
+
+    var returnUrlRaw = Context.Request.Query["returnUrl"].FirstOrDefault();
+    var backUrl = !string.IsNullOrEmpty(returnUrlRaw) ? Uri.UnescapeDataString(returnUrlRaw) : $"/Locker?gender={Model.Gender}";
 }
 
 <style>
@@ -19,7 +22,7 @@
 
 <div class="create-header">
     <h4><i class="fa-solid fa-plus"></i> Add New @Model.Gender Locker</h4>
-    <a href="/Locker?gender=@Model.Gender" class="btn btn-outline-light"><i class="fa-solid fa-arrow-left me-2"></i> Back</a>
+    <a href="@backUrl" class="btn btn-outline-light"><i class="fa-solid fa-arrow-left me-2"></i> Back</a>
 </div>
 
 <form method="post">
@@ -74,6 +77,6 @@
 
     <div class="d-flex gap-3">
         <button type="submit" class="btn btn-success btn-save btn-lg"><i class="fa-solid fa-check me-2"></i> Create Locker</button>
-        <a href="/Locker?gender=@Model.Gender" class="btn btn-outline-secondary btn-lg">Cancel</a>
+        <a href="@backUrl" class="btn btn-outline-secondary btn-lg">Cancel</a>
     </div>
 </form>

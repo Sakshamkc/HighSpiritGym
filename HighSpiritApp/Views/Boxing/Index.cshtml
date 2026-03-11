@@ -24,6 +24,9 @@
 
     // Check if any filters are active
     bool hasActiveFilters = !string.IsNullOrEmpty(ViewBag.PaymentStatus as string);
+
+    // Capture current URL for back navigation
+    var returnUrl = Uri.EscapeDataString(Context.Request.Path + Context.Request.QueryString);
 }
 
 <h4 class="mb-3 page-title">
@@ -830,10 +833,10 @@
                         </td>
                         <td>
                             <div class="btn-group btn-group-sm">
-                                <a class="btn btn-outline-primary" href="/Boxing/Details/@b.BoxingMemberID" title="View">
+                                <a class="btn btn-outline-primary" href="/Boxing/Details/@b.BoxingMemberID?returnUrl=@returnUrl" title="View">
                                     <i class="fa-solid fa-eye"></i>
                                 </a>
-                                <a class="btn btn-outline-secondary" href="/Boxing/Edit/@b.BoxingMemberID" title="Edit">
+                                <a class="btn btn-outline-secondary" href="/Boxing/Edit/@b.BoxingMemberID?returnUrl=@returnUrl" title="Edit">
                                     <i class="fa-solid fa-edit"></i>
                                 </a>
                                 <button class="btn btn-outline-danger" data-bs-toggle="modal"

@@ -13,6 +13,10 @@
     var membershipIsExpired = latestMembership != null && latestMembership.ExpireDate < today;
     var membershipIsExpiringSoon = latestMembership != null && latestMembership.ExpireDate >= today && latestMembership.ExpireDate <= today.AddDays(7);
     var membershipDaysLeft = latestMembership != null ? (latestMembership.ExpireDate - today).Days : 0;
+
+    var returnUrlRaw = Context.Request.Query["returnUrl"].FirstOrDefault();
+    var backUrl = !string.IsNullOrEmpty(returnUrlRaw) ? Uri.UnescapeDataString(returnUrlRaw) : $"/Locker?gender={Model.Gender}";
+    var encodedReturnUrl = !string.IsNullOrEmpty(returnUrlRaw) ? returnUrlRaw : "";
 }
 
 <style>
@@ -167,14 +171,14 @@
         </div>
         <div class="col-md-4 text-md-end mt-3 mt-md-0">
             <div class="d-flex gap-2 justify-content-md-end flex-wrap">
-                <a href="/Locker/Edit/@Model.LockerID" class="action-btn btn btn-light"><i class="fa-solid fa-edit"></i> Edit</a>
+                <a href="/Locker/Edit/@Model.LockerID@(encodedReturnUrl != "" ? "?returnUrl=" + encodedReturnUrl : "")" class="action-btn btn btn-light"><i class="fa-solid fa-edit"></i> Edit</a>
                 @if (Model.Status != "Occupied" || string.IsNullOrEmpty(Model.AssignedTo))
                 {
-                    <a href="/Locker/Assign/@Model.LockerID" class="action-btn btn btn-success"><i class="fa-solid fa-user-plus"></i> Assign</a>
+                    <a href="/Locker/Assign/@Model.LockerID@(encodedReturnUrl != "" ? "?returnUrl=" + encodedReturnUrl : "")" class="action-btn btn btn-success"><i class="fa-solid fa-user-plus"></i> Assign</a>
                 }
                 else
                 {
-                    <a href="/Locker/Renew/@Model.LockerID" class="action-btn btn btn-warning"><i class="fa-solid fa-rotate"></i> Renew</a>
+                    <a href="/Locker/Renew/@Model.LockerID@(encodedReturnUrl != "" ? "?returnUrl=" + encodedReturnUrl : "")" class="action-btn btn btn-warning"><i class="fa-solid fa-rotate"></i> Renew</a>
                 }
             </div>
         </div>
@@ -463,7 +467,7 @@
                     <i class="fa-solid fa-lock-open fa-4x text-success mb-3"></i>
                     <h5>Locker Available</h5>
                     <p class="text-muted">This locker is currently available for assignment.</p>
-                    <a href="/Locker/Assign/@Model.LockerID" class="btn btn-success mt-2"><i class="fa-solid fa-user-plus me-2"></i> Assign Now</a>
+                    <a href="/Locker/Assign/@Model.LockerID@(encodedReturnUrl != "" ? "?returnUrl=" + encodedReturnUrl : "")" class="btn btn-success mt-2"><i class="fa-solid fa-user-plus me-2"></i> Assign Now</a>
                 </div>
             </div>
         }
@@ -472,7 +476,7 @@
 
 <!-- Back Button -->
 <div class="mt-4">
-    <a href="/Locker?gender=@Model.Gender" class="btn btn-outline-secondary btn-lg px-4">
+    <a href="@backUrl" class="btn btn-outline-secondary btn-lg px-4">
         <i class="fa-solid fa-arrow-left me-2"></i> Back to @Model.Gender Lockers
     </a>
 </div>

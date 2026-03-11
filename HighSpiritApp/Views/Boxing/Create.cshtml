@@ -3,6 +3,9 @@
     Layout = "~/Views/Shared/_Layout.cshtml";
     string category = ViewBag.Category ?? "Children";
     bool isAdult = category == "Adult";
+
+    var returnUrlRaw = Context.Request.Query["returnUrl"].FirstOrDefault();
+    var backUrl = !string.IsNullOrEmpty(returnUrlRaw) ? Uri.UnescapeDataString(returnUrlRaw) : $"/Boxing?category={category}";
     string memberLabel = isAdult ? "Member" : "Kid";
 }
 
@@ -212,7 +215,7 @@
         <i class="fa-solid fa-user-plus"></i>
         Add New @(isAdult ? "Adult" : "Children") Boxing Member
     </h4>
-    <a href="/Boxing?category=@category" class="btn btn-outline-light">
+    <a href="@backUrl" class="btn btn-outline-light">
         <i class="fa-solid fa-arrow-left me-2"></i> Back
     </a>
 </div>
@@ -380,7 +383,7 @@
         <button type="submit" class="btn btn-success btn-save btn-lg">
             <i class="fa-solid fa-check me-2"></i> Add Member
         </button>
-        <a href="/Boxing?category=@category" class="btn btn-outline-secondary btn-cancel btn-lg">
+        <a href="@backUrl" class="btn btn-outline-secondary btn-cancel btn-lg">
             Cancel
         </a>
     </div>

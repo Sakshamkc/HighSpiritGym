@@ -7,6 +7,10 @@
     bool isAdult = category == "Adult";
     string memberLabel = isAdult ? "Member" : "Kid";
     string categoryLabel = isAdult ? "Adult" : "Children";
+
+    var returnUrlRaw = Context.Request.Query["returnUrl"].FirstOrDefault();
+    var backUrl = !string.IsNullOrEmpty(returnUrlRaw) ? Uri.UnescapeDataString(returnUrlRaw) : $"/Boxing?category={category}";
+    var encodedReturnUrl = !string.IsNullOrEmpty(returnUrlRaw) ? returnUrlRaw : "";
     
     string FormatDateLong(DateTime? date)
     {
@@ -285,10 +289,10 @@
                     }
                 </div>
                 <div class="d-flex gap-2 flex-wrap justify-content-center">
-                    <a href="/Boxing/Edit/@Model.BoxingMemberID" class="action-btn btn btn-light">
+                    <a href="/Boxing/Edit/@Model.BoxingMemberID@(encodedReturnUrl != "" ? "?returnUrl=" + encodedReturnUrl : "")" class="action-btn btn btn-light">
                         <i class="fa-solid fa-edit"></i> Edit
                     </a>
-                    <a href="/Boxing?category=@category" class="action-btn btn btn-outline-light">
+                    <a href="@backUrl" class="action-btn btn btn-outline-light">
                         <i class="fa-solid fa-arrow-left"></i> Back
                     </a>
                 </div>
@@ -428,7 +432,7 @@
 
 <!-- Back Button -->
 <div class="mt-4">
-    <a href="/Boxing?category=@category" class="btn btn-outline-secondary btn-lg px-4">
+    <a href="@backUrl" class="btn btn-outline-secondary btn-lg px-4">
         <i class="fa-solid fa-arrow-left me-2"></i> Back to @categoryLabel Boxing Members
     </a>
 </div>
