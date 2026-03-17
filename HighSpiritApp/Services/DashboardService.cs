@@ -48,11 +48,12 @@ namespace HighSpiritApp.Services
             // Gym stats - based on latest membership's ExpireDate, no IsActive check
             var gymTotal = customers.Count;
             var gymActive = customerMemberships.Count(x =>
-                x.LatestMembership!.ExpireDate >= today);
+                x.LatestMembership!.ExpireDate >= today || x.LatestMembership.IsOnHold);
             var gymExpired = customerMemberships.Count(x =>
-                x.LatestMembership!.ExpireDate < today);
+                x.LatestMembership!.ExpireDate < today && !x.LatestMembership.IsOnHold);
             var gymExpiringSoon = customerMemberships.Count(x =>
-                x.LatestMembership!.ExpireDate >= today &&
+                !x.LatestMembership!.IsOnHold &&
+                x.LatestMembership.ExpireDate >= today &&
                 x.LatestMembership.ExpireDate <= today.AddDays(7));
             var gymJoinedThisMonth = customers.Count(c => c.JoinDate >= monthStart);
 

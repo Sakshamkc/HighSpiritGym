@@ -57,10 +57,12 @@ namespace HighSpiritApp.Services
             {
                 "active" => query.Where(c =>
                     c.Memberships.Any() &&
-                    c.Memberships.OrderByDescending(m => m.StartDate).First().ExpireDate >= today),
+                    (c.Memberships.OrderByDescending(m => m.StartDate).First().ExpireDate >= today ||
+                     c.Memberships.OrderByDescending(m => m.StartDate).First().IsOnHold)),
                 "expired" => query.Where(c =>
                     c.Memberships.Any() &&
-                    c.Memberships.OrderByDescending(m => m.StartDate).First().ExpireDate < today),
+                    c.Memberships.OrderByDescending(m => m.StartDate).First().ExpireDate < today &&
+                    !c.Memberships.OrderByDescending(m => m.StartDate).First().IsOnHold),
                 "soon" => query.Where(c =>
                     c.Memberships.Any() &&
                     c.Memberships.OrderByDescending(m => m.StartDate).First().ExpireDate >= today &&

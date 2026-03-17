@@ -16,6 +16,8 @@ namespace HighSpiritApp.Services.Interfaces
         Task RenewAsync(CustomerMembership membership);
         Task UpdateAsync(int membershipId, string? planName, int? paidPrice, DateTime? startDate, DateTime? expireDate);
         Task DeleteAsync(int membershipId);
+        Task HoldAsync(int membershipId);
+        Task ResumeAsync(int membershipId);
         DateTime CalculateSuggestedStartDate(int customerId);
         Task<RenewalInfo> GetRenewalInfoAsync(int customerId);
     }

@@ -86,5 +86,47 @@ namespace HighSpiritApp.Controllers
             }
             return RedirectToAction("Details", "Customers", new { id = customerId });
         }
+
+        [HttpPost]
+        public async Task<IActionResult> Hold(int id, int customerId, string? returnUrl = null)
+        {
+            try
+            {
+                await _membershipService.HoldAsync(id);
+                TempData["success"] = "Membership has been put on hold.";
+            }
+            catch (KeyNotFoundException)
+            {
+                TempData["error"] = "Membership not found.";
+            }
+            catch (InvalidOperationException ex)
+            {
+                TempData["error"] = ex.Message;
+            }
+            if (!string.IsNullOrEmpty(returnUrl) && Url.IsLocalUrl(returnUrl))
+                return Redirect(returnUrl);
+            return RedirectToAction("Details", "Customers", new { id = customerId });
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> Resume(int id, int customerId, string? returnUrl = null)
+        {
+            try
+            {
+                await _membershipService.ResumeAsync(id);
+                TempData["success"] = "Membership has been resumed. Expire date extended by hold duration.";
+            }
+            catch (KeyNotFoundException)
+            {
+                TempData["error"] = "Membership not found.";
+            }
+            catch (InvalidOperationException ex)
+            {
+                TempData["error"] = ex.Message;
+            }
+            if (!string.IsNullOrEmpty(returnUrl) && Url.IsLocalUrl(returnUrl))
+                return Redirect(returnUrl);
+            return RedirectToAction("Details", "Customers", new { id = customerId });
+        }
     }
 }

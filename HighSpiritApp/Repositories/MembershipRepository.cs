@@ -42,7 +42,7 @@ namespace HighSpiritApp.Repositories
             return memberships
                 .GroupBy(m => m.CustomerID)
                 .Select(g => g.OrderByDescending(x => x.StartDate).First())
-                .Where(m => m.ExpireDate < today)
+                .Where(m => m.ExpireDate < today && !m.IsOnHold)
                 .OrderByDescending(m => m.ExpireDate)
                 .ToList();
         }
@@ -61,7 +61,7 @@ namespace HighSpiritApp.Repositories
             return memberships
                 .GroupBy(m => m.CustomerID)
                 .Select(g => g.OrderByDescending(x => x.StartDate).First())
-                .Where(m => m.ExpireDate >= today && m.ExpireDate <= endDate)
+                .Where(m => m.ExpireDate >= today && m.ExpireDate <= endDate && !m.IsOnHold)
                 .OrderBy(m => m.ExpireDate)
                 .ToList();
         }

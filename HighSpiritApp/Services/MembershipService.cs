@@ -108,6 +108,50 @@ namespace HighSpiritApp.Services
             await _membershipRepository.SaveChangesAsync();
         }
 
+        public async Task HoldAsync(int membershipId)
+        {
+            var membership = await _membershipRepository.GetByIdAsync(membershipId);
+            if (membership == null)
+                throw new KeyNotFoundException($"Membership with ID {membershipId} not found.");
+
+            if (membership.IsOnHold)
+                throw new InvalidOperationException("Membership is already on hold.");
+
+            if (membership.ExpireDate < DateTime.Today)
+                throw new InvalidOperationException("Cannot hold an expired membership.");
+
+            membership.IsOnHold = true;
+            membership.HoldStartDate = DateTime.Today;
+            membership.UpdatedAt = DateTime.Now;
+
+            _membershipRepository.Update(membership);
+            await _membershipRepository.SaveChangesAsync();
+        }
+
+        public async Task ResumeAsync(int membershipId)
+        {
+            var membership = await _membershipRepository.GetByIdAsync(membershipId);
+            if (membership == null)
+                throw new KeyNotFoundException($"Membership with ID {membershipId} not found.");
+
+            if (!membership.IsOnHold)
+                throw new InvalidOperationException("Membership is not on hold.");
+
+            // Calculate how many days it was on hold
+            var holdDays = (DateTime.Today - membership.HoldStartDate!.Value).Days;
+            if (holdDays < 0) holdDays = 0;
+
+            // Extend expire date by the hold days
+            membership.ExpireDate = membership.ExpireDate.AddDays(holdDays);
+            membership.TotalHoldDays += holdDays;
+            membership.IsOnHold = false;
+            membership.HoldStartDate = null;
+            membership.UpdatedAt = DateTime.Now;
+
+            _membershipRepository.Update(membership);
+            await _membershipRepository.SaveChangesAsync();
+        }
+
         public DateTime CalculateSuggestedStartDate(int customerId)
         {
             // This is sync for simplicity, but you could make it async
