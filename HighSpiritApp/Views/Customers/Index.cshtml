@@ -69,6 +69,7 @@
 
     // Capture current URL for back navigation
     var returnUrl = Uri.EscapeDataString(Context.Request.Path + Context.Request.QueryString);
+    var currentPageUrl = Context.Request.Path + Context.Request.QueryString;
 }
 
 <!-- Page Header with Title and Action Buttons -->
@@ -1280,7 +1281,11 @@
                                                                                                         }
                                                                                                     </td>
                                                                                                     <td>
-                                                                                                        @if (m != null && m.ExpireDate < DateTime.Today)
+                                                                                                        @if (m != null && m.IsOnHold)
+                                                                                                        {
+                                                                                                            <span class="badge bg-warning text-dark"><i class="fa-solid fa-pause"></i> Hold</span>
+                                                                                                        }
+                                                                                                        else if (m != null && m.ExpireDate < DateTime.Today)
                                                                                                         {
                                                                                                             <span class="badge bg-danger">Expired</span>
                                                                                                         }
@@ -1312,6 +1317,20 @@
                                                                                                                 <a class="btn btn-outline-success" href="/Memberships/Renew/@c.CustomerID?returnUrl=@returnUrl" title="Renew">
                                                                                                                     <i class="fa-solid fa-rotate"></i>
                                                                                                                 </a>
+                                                                                                                @if (m.IsOnHold)
+                                                                                                                {
+                                                                                                                    <button class="btn btn-info text-white" title="Resume Membership"
+                                                                                                                            onclick="document.getElementById('resumeForm_@c.CustomerID').submit();">
+                                                                                                                        <i class="fa-solid fa-play"></i>
+                                                                                                                    </button>
+                                                                                                                }
+                                                                                                                else if (m.ExpireDate >= DateTime.Today)
+                                                                                                                {
+                                                                                                                    <button class="btn btn-outline-warning" title="Hold Membership"
+                                                                                                                            onclick="document.getElementById('holdForm_@c.CustomerID').submit();">
+                                                                                                                        <i class="fa-solid fa-pause"></i>
+                                                                                                                    </button>
+                                                                                                                }
                                                                                                             }
                                                                                                             @if (hasLocker && existingLocker != null)
                                                                                                             {
@@ -1347,6 +1366,15 @@
                                                                                                                         <a class="btn btn-danger" href="/Customers/Delete/@c.CustomerID">Yes, Delete</a>
                                                                                                                     </div>
                                                                                                                 </div>
+
+                                                                                                        @if (m != null && !m.IsOnHold && m.ExpireDate >= DateTime.Today)
+                                                                                                        {
+                                                                                                            <form id="holdForm_@c.CustomerID" method="post" action="/Memberships/Hold?id=@m.MembershipID&customerId=@c.CustomerID&returnUrl=@Uri.EscapeDataString(currentPageUrl)" style="display:none;"></form>
+                                                                                                        }
+                                                                                                        @if (m != null && m.IsOnHold)
+                                                                                                        {
+                                                                                                            <form id="resumeForm_@c.CustomerID" method="post" action="/Memberships/Resume?id=@m.MembershipID&customerId=@c.CustomerID&returnUrl=@Uri.EscapeDataString(currentPageUrl)" style="display:none;"></form>
+                                                                                                        }
                                                                                                             </div>
                                                                                                         </div>
                                                                                                     </td>

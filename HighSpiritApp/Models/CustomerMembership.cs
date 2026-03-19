@@ -22,6 +22,11 @@ namespace HighSpiritApp.Models
         public DateTime CreatedAt { get; set; } = DateTime.Now;
         public DateTime? UpdatedAt { get; set; }
 
+        // Hold/Freeze fields
+        public bool IsOnHold { get; set; }
+        public DateTime? HoldStartDate { get; set; }
+        public int TotalHoldDays { get; set; } // accumulated hold days across multiple holds
+
         // Computed property for total price
         [NotMapped]
         public int TotalPrice => PaidPrice + DueAmount;
