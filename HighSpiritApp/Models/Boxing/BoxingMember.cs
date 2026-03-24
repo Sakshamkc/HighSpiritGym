@@ -1,4 +1,4 @@
-﻿using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations;
 
 namespace HighSpiritApp.Models.Boxing
 {
@@ -31,6 +31,8 @@ namespace HighSpiritApp.Models.Boxing
         public int Price { get; set; }   // total monthly fee (optional but useful)
 
         public string? Remarks { get; set; }
+
+        public DateTime? ExpireDate { get; set; }
 
         public byte[]? Photo { get; set; }
 

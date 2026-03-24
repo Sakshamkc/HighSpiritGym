@@ -1,4 +1,4 @@
-﻿using ClosedXML.Excel;
+using ClosedXML.Excel;
 using HighSpiritApp.Models.Boxing;
 using HighSpiritApp.Services.Interfaces;
 using Microsoft.AspNetCore.Authorization;
@@ -134,6 +134,7 @@ namespace HighSpiritApp.Controllers
             member.Price = model.CashAmount + model.EsewaAmount;
             member.DueAmount = model.DueAmount;
             member.Remarks = model.Remarks;
+            member.ExpireDate = model.ExpireDate;
 
             if (photoFile != null && photoFile.Length > 0)
             {
@@ -217,7 +218,7 @@ namespace HighSpiritApp.Controllers
 
             // Headers
             var headers = new[] { "SN", "Name", "Join Date", "Guardian Name", "Guardian Contact",
-                "Per Month Class", "Cash Amount", "eSewa Amount", "Due Amount", "Remarks" };
+                "Per Month Class", "Cash Amount", "eSewa Amount", "Due Amount", "Expire Date", "Remarks" };
 
             for (int i = 0; i < headers.Length; i++)
                 ws.Cell(1, i + 1).Value = headers[i];
@@ -234,7 +235,8 @@ namespace HighSpiritApp.Controllers
                 ws.Cell(row, 7).Value = b.CashAmount;
                 ws.Cell(row, 8).Value = b.EsewaAmount;
                 ws.Cell(row, 9).Value = b.DueAmount;
-                ws.Cell(row, 10).Value = b.Remarks;
+                ws.Cell(row, 10).Value = b.ExpireDate?.ToString("dd MMM yyyy");
+                ws.Cell(row, 11).Value = b.Remarks;
                 row++;
             }
 

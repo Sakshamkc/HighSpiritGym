@@ -64,6 +64,7 @@ namespace HighSpiritApp.Services
             existing.Price = member.CashAmount + member.EsewaAmount;
             existing.DueAmount = member.DueAmount;
             existing.Remarks = member.Remarks;
+            existing.ExpireDate = member.ExpireDate;
 
             if (member.Photo != null)
                 existing.Photo = member.Photo;

@@ -1,4 +1,4 @@
-﻿@model HighSpiritApp.Models.Boxing.BoxingMember
+@model HighSpiritApp.Models.Boxing.BoxingMember
 @{
     Layout = "~/Views/Shared/_Layout.cshtml";
     string category = ViewBag.Category ?? "Children";
@@ -233,13 +233,17 @@
                 </div>
                 <div class="form-card-body">
                     <div class="row g-3">
-                        <div class="col-md-6">
+                        <div class="col-md-4">
                             <label class="form-label">@memberLabel Name <span class="required">*</span></label>
                             <input asp-for="Name" class="form-control" placeholder="Enter @(memberLabel.ToLower())'s full name" required />
                         </div>
-                        <div class="col-md-6">
+                        <div class="col-md-4">
                             <label class="form-label">Join Date</label>
                             <input asp-for="JoinDate" type="date" class="form-control" value="@DateTime.Today.ToString("yyyy-MM-dd")" />
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label"><i class="fa-solid fa-calendar-xmark me-1 text-danger"></i>Expire Date</label>
+                            <input asp-for="ExpireDate" type="date" class="form-control" />
                         </div>
                     </div>
                 </div>

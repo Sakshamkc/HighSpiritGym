@@ -1,4 +1,4 @@
-﻿@model List<HighSpiritApp.Models.Boxing.BoxingMember>
+@model List<HighSpiritApp.Models.Boxing.BoxingMember>
 @{
     Layout = "~/Views/Shared/_Layout.cshtml";
     int sn = (ViewBag.Page - 1) * 10 + 1;
@@ -731,7 +731,7 @@
                     <th>Cash</th>
                     <th>eSewa</th>
                     <th>Due</th>
-                    <th>Remarks</th>
+                    <th>Expire Date</th>
                     <th>Actions</th>
                 </tr>
             </thead>
@@ -824,12 +824,21 @@
                                 <i class="fa-solid fa-check-circle" title="Fully paid"></i>
                             }
                         </td>
-                        <td title="@b.Remarks">
-                            @(string.IsNullOrWhiteSpace(b.Remarks)
-                            ? "-"
-                                    : (b.Remarks.Length > 15
-                            ? b.Remarks.Substring(0, 12) + "..."
-                                    : b.Remarks))
+                        <td>
+                            @if (b.ExpireDate.HasValue)
+                            {
+                                var isExpired = b.ExpireDate.Value.Date < DateTime.Today;
+                                var isExpiringSoon = !isExpired && b.ExpireDate.Value.Date <= DateTime.Today.AddDays(7);
+                                <span class="badge rounded-pill @(isExpired ? "bg-danger" : isExpiringSoon ? "bg-warning text-dark" : "bg-success")"
+                                      style="font-size: 11px; padding: 5px 10px;">
+                                    <i class="fa-solid @(isExpired ? "fa-calendar-xmark" : "fa-calendar-check") me-1"></i>
+                                    @b.ExpireDate.Value.ToString("dd MMM yy")
+                                </span>
+                            }
+                            else
+                            {
+                                <span class="text-muted">-</span>
+                            }
                         </td>
                         <td>
                             <div class="btn-group btn-group-sm">

@@ -152,6 +152,7 @@ namespace HighSpiritApp.Models.Api
         public int DueAmount { get; set; }
         public int Price { get; set; }
         public string? Remarks { get; set; }
+        public DateTime? ExpireDate { get; set; }
         public string? PhotoBase64 { get; set; }
         public string Category { get; set; } = "Children";
         public DateTime CreatedAt { get; set; }
@@ -169,6 +170,7 @@ namespace HighSpiritApp.Models.Api
         public int DueAmount { get; set; }
         public int Price { get; set; }
         public string? Remarks { get; set; }
+        public DateTime? ExpireDate { get; set; }
         public string? PhotoBase64 { get; set; }
         public string Category { get; set; } = "Children";
     }
@@ -185,6 +187,7 @@ namespace HighSpiritApp.Models.Api
         public int DueAmount { get; set; }
         public int Price { get; set; }
         public string? Remarks { get; set; }
+        public DateTime? ExpireDate { get; set; }
         public string? PhotoBase64 { get; set; }
         public string Category { get; set; } = "Children";
     }

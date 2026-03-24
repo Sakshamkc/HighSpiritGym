@@ -74,6 +74,7 @@ namespace HighSpiritApp.Controllers.Api
                 DueAmount = request.DueAmount,
                 Price = request.Price,
                 Remarks = request.Remarks,
+                ExpireDate = request.ExpireDate,
                 Category = request.Category
             };
 
@@ -109,6 +110,7 @@ namespace HighSpiritApp.Controllers.Api
             existing.DueAmount = request.DueAmount;
             existing.Price = request.Price;
             existing.Remarks = request.Remarks;
+            existing.ExpireDate = request.ExpireDate;
             existing.Category = request.Category;
 
             if (!string.IsNullOrEmpty(request.PhotoBase64))
@@ -208,6 +210,7 @@ namespace HighSpiritApp.Controllers.Api
             DueAmount = m.DueAmount,
             Price = m.Price,
             Remarks = m.Remarks,
+            ExpireDate = m.ExpireDate,
             PhotoBase64 = m.Photo != null ? Convert.ToBase64String(m.Photo) : null,
             Category = m.Category,
             CreatedAt = m.CreatedAt

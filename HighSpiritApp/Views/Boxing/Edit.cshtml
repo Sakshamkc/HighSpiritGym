@@ -1,4 +1,4 @@
-﻿@model HighSpiritApp.Models.Boxing.BoxingMember
+@model HighSpiritApp.Models.Boxing.BoxingMember
 @{
     Layout = "~/Views/Shared/_Layout.cshtml";
     var joinDateValue = Model.JoinDate.HasValue && Model.JoinDate.Value > DateTime.MinValue
@@ -228,13 +228,18 @@
                 </div>
                 <div class="form-card-body">
                     <div class="row g-3">
-                        <div class="col-md-6">
+                        <div class="col-md-4">
                             <label class="form-label">@memberLabel Name <span class="required">*</span></label>
                             <input asp-for="Name" class="form-control" placeholder="Enter @(memberLabel.ToLower())'s full name" required />
                         </div>
-                        <div class="col-md-6">
+                        <div class="col-md-4">
                             <label class="form-label">Join Date</label>
                             <input name="JoinDate" type="date" class="form-control" value="@joinDateValue" />
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label"><i class="fa-solid fa-calendar-xmark me-1 text-danger"></i>Expire Date</label>
+                            <input name="ExpireDate" type="date" class="form-control"
+                                   value="@(Model.ExpireDate.HasValue && Model.ExpireDate.Value > DateTime.MinValue ? Model.ExpireDate.Value.ToString("yyyy-MM-dd") : "")" />
                         </div>
                     </div>
                 </div>
@@ -268,7 +273,7 @@
                 </div>
                 <div class="form-card-body">
                     <div class="row g-3">
-                        <div class="col-md-6">
+                        <div class="col-md-4">
                             <label class="form-label">Per Month Class</label>
                             <input asp-for="PerMonthClass" class="form-control" placeholder="e.g. 1+1+1+1" />
                             <div class="class-input-hint">
@@ -276,7 +281,12 @@
                                 <small>Format: Classes per week (e.g., <strong>1+1+1+1</strong> = 1 class each week)</small>
                             </div>
                         </div>
-                        <div class="col-md-6">
+                        <div class="col-md-4">
+                            <label class="form-label"><i class="fa-solid fa-calendar-xmark me-1 text-danger"></i>Expire Date</label>
+                            <input name="ExpireDate" type="date" class="form-control"
+                                   value="@(Model.ExpireDate.HasValue && Model.ExpireDate.Value > DateTime.MinValue ? Model.ExpireDate.Value.ToString("yyyy-MM-dd") : "")" />
+                        </div>
+                        <div class="col-md-4">
                             <label class="form-label">Remarks</label>
                             <textarea asp-for="Remarks" class="form-control" rows="3" placeholder="Any additional notes..."></textarea>
                         </div>

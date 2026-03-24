@@ -1,4 +1,4 @@
-﻿@model HighSpiritApp.Models.Boxing.BoxingMember
+@model HighSpiritApp.Models.Boxing.BoxingMember
 @{
     Layout = "~/Views/Shared/_Layout.cshtml";
     var hasDue = Model.DueAmount > 0;
@@ -348,6 +348,21 @@
                     <div class="info-item">
                         <label>Join Date</label>
                         <span>@FormatDateLong(Model.JoinDate)</span>
+                    </div>
+                    <div class="info-item">
+                        <label>Expire Date</label>
+                        @if (Model.ExpireDate.HasValue)
+                        {
+                            var isExpired = Model.ExpireDate.Value.Date < DateTime.Today;
+                            <span class="@(isExpired ? "text-danger fw-bold" : "text-success fw-bold")">
+                                <i class="fa-solid @(isExpired ? "fa-calendar-xmark" : "fa-calendar-check") me-1"></i>
+                                @FormatDateLong(Model.ExpireDate)
+                            </span>
+                        }
+                        else
+                        {
+                            <span class="text-muted">Not set</span>
+                        }
                     </div>
                 </div>
             </div>
