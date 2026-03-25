@@ -292,7 +292,8 @@ namespace HighSpiritApp.Controllers.Api
                 PaidPrice = membershipToShow?.PaidPrice,
                 DueAmount = membershipToShow?.DueAmount,
                 IsActive = membershipToShow != null && !isExpired,
-                IsExpired = isExpired
+                IsExpired = isExpired,
+                IsOnHold = membershipToShow != null && membershipToShow.IsOnHold
             };
         }
     }

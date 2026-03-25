@@ -51,6 +51,7 @@ namespace HighSpiritApp.Models.Api
         public int? DueAmount { get; set; }
         public bool IsActive { get; set; }
         public bool IsExpired { get; set; }
+        public bool IsOnHold { get; set; }
     }
 
     public class CustomerCreateRequest

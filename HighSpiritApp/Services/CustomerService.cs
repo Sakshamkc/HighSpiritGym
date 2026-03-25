@@ -67,6 +67,9 @@ namespace HighSpiritApp.Services
                     c.Memberships.Any() &&
                     c.Memberships.OrderByDescending(m => m.StartDate).First().ExpireDate >= today &&
                     c.Memberships.OrderByDescending(m => m.StartDate).First().ExpireDate <= today.AddDays(7)),
+                "hold" => query.Where(c =>
+                    c.Memberships.Any() &&
+                    c.Memberships.OrderByDescending(m => m.StartDate).First().IsOnHold),
                 "new" => query.Where(c => c.JoinDate >= thirtyDaysAgo),
                 "thismonth" => query.Where(c => c.JoinDate.Month == today.Month && c.JoinDate.Year == today.Year),
                 "updated" => query.Where(c => c.UpdatedAt != null && c.UpdatedAt >= thirtyDaysAgo),
