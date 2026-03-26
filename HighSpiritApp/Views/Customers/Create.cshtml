@@ -16,8 +16,8 @@
         { "Any Three", "Customized Package (Any Three)" }
     };
     
-    var actualPlanValue = !string.IsNullOrEmpty(preselectedPlan) && planMapping.ContainsKey(preselectedPlan) 
-        ? planMapping[preselectedPlan] 
+    var actualPlanValue = !string.IsNullOrEmpty(preselectedPlan) && planMapping.ContainsKey(preselectedPlan)
+        ? planMapping[preselectedPlan]
         : preselectedPlan;
     
     var pageTitle = !string.IsNullOrEmpty(preselectedPlan) ? $"Add {preselectedPlan} Member" : "Add Member";
@@ -70,7 +70,8 @@
             </div>
             <div class="col-md-4">
                 <label>Join Date <span class="text-danger">*</span></label>
-                <input type="date" name="JoinDate" class="form-control" value="@DateTime.Today.ToString("yyyy-MM-dd")" required />
+                <input type="date" name="JoinDate" class="form-control" value="@DateTime.Today.ToString("yyyy-MM-dd")"
+                       required />
             </div>
             <div class="col-md-3">
                 <label>Height</label>
@@ -135,10 +136,10 @@
                         <option value="Customized Package (Any Two)">Customized (Any 2 Facilities)</option>
                     </optgroup>
                     <optgroup label="Single Facility">
+                        <option value="Sauna & Steam Package">Sauna & Steam Package</option>
                         <option value="Gym Package">Gym Package</option>
                         <option value="Zumba & Aerobics Package">Zumba & Aerobics Package</option>
                         <option value="Cardio Package">Cardio Package</option>
-                        <option value="Sauna & Steam Package">Sauna & Steam Package</option>
                     </optgroup>
                     <optgroup label="Per Session">
                         <option value="Per Session">Per Session</option>
@@ -235,7 +236,7 @@
                         <div class="col-md-2 col-6 mb-2">
                             <label class="text-muted small">Discount</label>
                             <div class="input-group">
-                                <input type="number" id="discountInput" class="form-control form-control-lg text-center" 
+                                <input type="number" id="discountInput" class="form-control form-control-lg text-center"
                                        value="0" min="0" step="0.01" />
                                 <span class="input-group-text" id="discountSuffix">%</span>
                             </div>
@@ -266,9 +267,8 @@
                             </label>
                             <div class="input-group">
                                 <span class="input-group-text">Rs.</span>
-                                <input type="number" id="paidNowInput" name="PaidPrice" 
-                                       class="form-control form-control-lg text-center paid-input" 
-                                       value="0" min="0" />
+                                <input type="number" id="paidNowInput" name="PaidPrice"
+                                       class="form-control form-control-lg text-center paid-input" value="0" min="0" />
                             </div>
                         </div>
                         <div class="col-md-4 col-6 mb-2">
@@ -277,9 +277,9 @@
                             </label>
                             <div class="input-group">
                                 <span class="input-group-text">Rs.</span>
-                                <input type="number" id="dueAmountInput" name="DueAmount" 
-                                       class="form-control form-control-lg text-center due-input" 
-                                       value="0" min="0" readonly />
+                                <input type="number" id="dueAmountInput" name="DueAmount"
+                                       class="form-control form-control-lg text-center due-input" value="0" min="0"
+                                       readonly />
                             </div>
                         </div>
                         <div class="col-md-4 col-12 mb-2">
@@ -295,7 +295,7 @@
             <!-- Date Section -->
             <div class="col-md-6">
                 <label>Start Date <span class="text-danger">*</span></label>
-                <input type="date" name="StartDate" id="startDate" class="form-control" 
+                <input type="date" name="StartDate" id="startDate" class="form-control"
                        value="@DateTime.Today.ToString("yyyy-MM-dd")" required />
             </div>
             <div class="col-md-6">
@@ -316,202 +316,227 @@
 
 <style>
     .section-divider {
-        position: relative;
-        text-align: center;
-        margin: 10px 0 20px;
+    position: relative;
+    text-align: center;
+    margin: 10px 0 20px;
     }
+
     .section-divider::before {
-        content: '';
-        position: absolute;
-        top: 50%;
-        left: 0;
-        right: 0;
-        border-top: 2px solid #e2e8f0;
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 0;
+    right: 0;
+    border-top: 2px solid #e2e8f0;
     }
+
     .section-divider span {
-        background: white;
-        padding: 0 20px;
-        position: relative;
-        color: #64748b;
-        font-weight: 600;
-        font-size: 14px;
-        text-transform: uppercase;
-        letter-spacing: 1px;
+    background: white;
+    padding: 0 20px;
+    position: relative;
+    color: #64748b;
+    font-weight: 600;
+    font-size: 14px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
     }
 
     .facility-grid {
-        display: grid;
-        grid-template-columns: repeat(4, 1fr);
-        gap: 15px;
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 15px;
     }
+
     .facility-card {
-        position: relative;
+    position: relative;
     }
+
     .facility-card input {
-        position: absolute;
-        opacity: 0;
+    position: absolute;
+    opacity: 0;
     }
+
     .facility-card label {
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        justify-content: center;
-        padding: 20px 15px;
-        border: 2px solid #e2e8f0;
-        border-radius: 12px;
-        cursor: pointer;
-        transition: all 0.2s ease;
-        background: #f8fafc;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 20px 15px;
+    border: 2px solid #e2e8f0;
+    border-radius: 12px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    background: #f8fafc;
     }
+
     .facility-card label i {
-        font-size: 28px;
-        color: #64748b;
-        margin-bottom: 8px;
-        transition: all 0.2s ease;
+    font-size: 28px;
+    color: #64748b;
+    margin-bottom: 8px;
+    transition: all 0.2s ease;
     }
+
     .facility-card label span {
-        font-size: 13px;
-        font-weight: 500;
-        color: #475569;
+    font-size: 13px;
+    font-weight: 500;
+    color: #475569;
     }
-    .facility-card input:checked + label {
-        border-color: #3b82f6;
-        background: #eff6ff;
-        box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+
+    .facility-card input:checked+label {
+    border-color: #3b82f6;
+    background: #eff6ff;
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
     }
-    .facility-card input:checked + label i {
-        color: #3b82f6;
-        transform: scale(1.1);
+
+    .facility-card input:checked+label i {
+    color: #3b82f6;
+    transform: scale(1.1);
     }
-    .facility-card input:checked + label span {
-        color: #1e40af;
-        font-weight: 600;
+
+    .facility-card input:checked+label span {
+    color: #1e40af;
+    font-weight: 600;
     }
+
     .facility-card:hover label {
-        border-color: #94a3b8;
+    border-color: #94a3b8;
     }
 
     .pricing-card {
-        background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%);
-        border: 1px solid #bae6fd;
-        border-radius: 16px;
-        padding: 25px;
+    background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%);
+    border: 1px solid #bae6fd;
+    border-radius: 16px;
+    padding: 25px;
     }
+
     .price-display {
-        font-size: 24px;
-        font-weight: 700;
-        color: #475569;
+    font-size: 24px;
+    font-weight: 700;
+    color: #475569;
     }
+
     .price-display .currency {
-        font-size: 14px;
-        font-weight: 500;
-        color: #64748b;
+    font-size: 14px;
+    font-weight: 500;
+    color: #64748b;
     }
+
     .discount-amount {
-        font-size: 18px;
-        font-weight: 600;
+    font-size: 18px;
+    font-weight: 600;
     }
+
     .total-payable {
-        font-size: 28px;
-        font-weight: 700;
-        color: #1e40af;
+    font-size: 28px;
+    font-weight: 700;
+    color: #1e40af;
     }
+
     .total-payable .currency {
-        font-size: 14px;
-        font-weight: 500;
+    font-size: 14px;
+    font-weight: 500;
     }
 
     /* Discount Toggle Styles */
     .discount-toggle {
-        display: flex;
-        background: #e2e8f0;
-        border-radius: 8px;
-        padding: 4px;
-        gap: 4px;
+    display: flex;
+    background: #e2e8f0;
+    border-radius: 8px;
+    padding: 4px;
+    gap: 4px;
     }
+
     .toggle-btn {
-        flex: 1;
-        padding: 8px 12px;
-        border: none;
-        background: transparent;
-        border-radius: 6px;
-        font-size: 13px;
-        font-weight: 600;
-        color: #64748b;
-        cursor: pointer;
-        transition: all 0.2s ease;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        gap: 4px;
+    flex: 1;
+    padding: 8px 12px;
+    border: none;
+    background: transparent;
+    border-radius: 6px;
+    font-size: 13px;
+    font-weight: 600;
+    color: #64748b;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
     }
+
     .toggle-btn:hover {
-        color: #475569;
+    color: #475569;
     }
+
     .toggle-btn.active {
-        background: white;
-        color: #3b82f6;
-        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    background: white;
+    color: #3b82f6;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
     }
+
     .toggle-btn i {
-        font-size: 11px;
+    font-size: 11px;
     }
 
     /* Payment Input Styles */
     .paid-input {
-        background-color: #f0fdf4 !important;
-        border-color: #86efac !important;
-        font-weight: 600;
-        color: #166534 !important;
+    background-color: #f0fdf4 !important;
+    border-color: #86efac !important;
+    font-weight: 600;
+    color: #166534 !important;
     }
+
     .due-input {
-        background-color: #fefce8 !important;
-        border-color: #fde047 !important;
-        font-weight: 600;
-        color: #854d0e !important;
+    background-color: #fefce8 !important;
+    border-color: #fde047 !important;
+    font-weight: 600;
+    color: #854d0e !important;
     }
+
     .due-input.has-due {
-        background-color: #fef2f2 !important;
-        border-color: #fca5a5 !important;
-        color: #991b1b !important;
+    background-color: #fef2f2 !important;
+    border-color: #fca5a5 !important;
+    color: #991b1b !important;
     }
 
     /* Payment Status */
     .payment-status {
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        gap: 8px;
-        padding: 12px 20px;
-        border-radius: 10px;
-        font-weight: 600;
-        font-size: 14px;
-        background: #dcfce7;
-        color: #166534;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 12px 20px;
+    border-radius: 10px;
+    font-weight: 600;
+    font-size: 14px;
+    background: #dcfce7;
+    color: #166534;
     }
+
     .payment-status i {
-        font-size: 18px;
+    font-size: 18px;
     }
+
     .payment-status.partial {
-        background: #fef3c7;
-        color: #92400e;
+    background: #fef3c7;
+    color: #92400e;
     }
+
     .payment-status.unpaid {
-        background: #fee2e2;
-        color: #991b1b;
+    background: #fee2e2;
+    color: #991b1b;
     }
 
     @@media (max-width: 768px) {
-        .facility-grid {
-            grid-template-columns: repeat(2, 1fr);
-        }
+    .facility-grid {
+    grid-template-columns: repeat(2, 1fr);
+    }
     }
 </style>
 
 @section Scripts {
-<script>
-    // Pricing Data
-    const pricing = {
+    <script>
+        // Pricing Data
+        const pricing = {
         'Premium Package': { 12: 50000, 6: 30000, 3: 18000, 1: 7000 },
         'Customized Package (Any Three)': { 12: 45000, 6: 25000, 3: 15000, 1: 6000 },
         'Customized Package (Any Two)': { 12: 30000, 6: 18000, 3: 12000, 1: 5000 },
@@ -519,61 +544,61 @@
         'Zumba & Aerobics Package': { 12: 25000, 6: 15000, 3: 9000, 1: 3500 },
         'Cardio Package': { 12: 25000, 6: 15000, 3: 9000, 1: 3500 },
         'Sauna & Steam Package': { 12: 25000, 6: 15000, 3: 9000, 1: 3500 }
-    };
+        };
 
-    // Preselected plan from server
-    const preselectedPlan = '@(actualPlanValue ?? "")';
+        // Preselected plan from server
+        const preselectedPlan = '@(actualPlanValue ?? "")';
 
-    // Elements
-    const planSelect = document.getElementById('planSelect');
-    const durationSelect = document.getElementById('durationSelect');
-    const durationSection = document.getElementById('durationSection');
-    const facilitySection = document.getElementById('facilitySection');
-    const sessionSection = document.getElementById('sessionSection');
-    const sessionType = document.getElementById('sessionType');
-    const pricingSection = document.getElementById('pricingSection');
-    const basePrice = document.getElementById('basePrice');
-    const priceDisplay = document.getElementById('priceDisplay');
-    const discountInput = document.getElementById('discountInput');
-    const discountSuffix = document.getElementById('discountSuffix');
-    const discountAmount = document.getElementById('discountAmount');
-    const totalPayableDisplay = document.getElementById('totalPayableDisplay');
-    const paidNowInput = document.getElementById('paidNowInput');
-    const dueAmountInput = document.getElementById('dueAmountInput');
-    const paymentStatus = document.getElementById('paymentStatus');
-    const startDate = document.getElementById('startDate');
-    const expireDate = document.getElementById('expireDate');
-    const hiddenPlanName = document.getElementById('hiddenPlanName');
-    const hiddenDuration = document.getElementById('hiddenDuration');
-    const facilityChecks = document.querySelectorAll('.facility-check');
-    const facilityCount = document.getElementById('facilityCount');
-    const btnPercent = document.getElementById('btnPercent');
-    const btnAmount = document.getElementById('btnAmount');
+        // Elements
+        const planSelect = document.getElementById('planSelect');
+        const durationSelect = document.getElementById('durationSelect');
+        const durationSection = document.getElementById('durationSection');
+        const facilitySection = document.getElementById('facilitySection');
+        const sessionSection = document.getElementById('sessionSection');
+        const sessionType = document.getElementById('sessionType');
+        const pricingSection = document.getElementById('pricingSection');
+        const basePrice = document.getElementById('basePrice');
+        const priceDisplay = document.getElementById('priceDisplay');
+        const discountInput = document.getElementById('discountInput');
+        const discountSuffix = document.getElementById('discountSuffix');
+        const discountAmount = document.getElementById('discountAmount');
+        const totalPayableDisplay = document.getElementById('totalPayableDisplay');
+        const paidNowInput = document.getElementById('paidNowInput');
+        const dueAmountInput = document.getElementById('dueAmountInput');
+        const paymentStatus = document.getElementById('paymentStatus');
+        const startDate = document.getElementById('startDate');
+        const expireDate = document.getElementById('expireDate');
+        const hiddenPlanName = document.getElementById('hiddenPlanName');
+        const hiddenDuration = document.getElementById('hiddenDuration');
+        const facilityChecks = document.querySelectorAll('.facility-check');
+        const facilityCount = document.getElementById('facilityCount');
+        const btnPercent = document.getElementById('btnPercent');
+        const btnAmount = document.getElementById('btnAmount');
 
-    let requiredFacilities = 0;
-    let discountType = 'percent';
-    let totalPayable = 0;
+        let requiredFacilities = 0;
+        let discountType = 'percent';
+        let totalPayable = 0;
 
-    // Show toast notification
-    function showToast(icon, title, text) {
+        // Show toast notification
+        function showToast(icon, title, text) {
         Swal.fire({
-            icon: icon,
-            title: title,
-            text: text,
-            toast: true,
-            position: 'top-end',
-            showConfirmButton: false,
-            timer: 3000,
-            timerProgressBar: true,
-            didOpen: (toast) => {
-                toast.addEventListener('mouseenter', Swal.stopTimer);
-                toast.addEventListener('mouseleave', Swal.resumeTimer);
-            }
+        icon: icon,
+        title: title,
+        text: text,
+        toast: true,
+        position: 'top-end',
+        showConfirmButton: false,
+        timer: 3000,
+        timerProgressBar: true,
+        didOpen: (toast) => {
+        toast.addEventListener('mouseenter', Swal.stopTimer);
+        toast.addEventListener('mouseleave', Swal.resumeTimer);
+        }
         });
-    }
+        }
 
-    // Discount Type Toggle
-    btnPercent.addEventListener('click', function() {
+        // Discount Type Toggle
+        btnPercent.addEventListener('click', function () {
         discountType = 'percent';
         btnPercent.classList.add('active');
         btnAmount.classList.remove('active');
@@ -581,9 +606,9 @@
         discountInput.max = 100;
         discountInput.value = 0;
         calculateFinalPrice();
-    });
+        });
 
-    btnAmount.addEventListener('click', function() {
+        btnAmount.addEventListener('click', function () {
         discountType = 'amount';
         btnAmount.classList.add('active');
         btnPercent.classList.remove('active');
@@ -591,10 +616,10 @@
         discountInput.removeAttribute('max');
         discountInput.value = 0;
         calculateFinalPrice();
-    });
+        });
 
-    // Plan Selection
-    planSelect.addEventListener('change', function() {
+        // Plan Selection
+        planSelect.addEventListener('change', function () {
         const plan = this.value;
         
         durationSection.style.display = 'none';
@@ -608,139 +633,139 @@
         if (!plan) return;
 
         if (plan === 'Per Session') {
-            sessionSection.style.display = 'block';
-            hiddenPlanName.value = '';
-            hiddenDuration.value = '0';
-            return;
+        sessionSection.style.display = 'block';
+        hiddenPlanName.value = '';
+        hiddenDuration.value = '0';
+        return;
         }
 
         if (plan.includes('Any Three')) {
-            facilitySection.style.display = 'block';
-            requiredFacilities = 3;
-            facilityCount.textContent = '3';
+        facilitySection.style.display = 'block';
+        requiredFacilities = 3;
+        facilityCount.textContent = '3';
         } else if (plan.includes('Any Two')) {
-            facilitySection.style.display = 'block';
-            requiredFacilities = 2;
-            facilityCount.textContent = '2';
+        facilitySection.style.display = 'block';
+        requiredFacilities = 2;
+        facilityCount.textContent = '2';
         } else {
-            requiredFacilities = 0;
+        requiredFacilities = 0;
         }
 
         durationSection.style.display = 'block';
         const durations = pricing[plan];
         
         if (durations) {
-            Object.keys(durations).sort((a, b) => b - a).forEach(months => {
-                const option = document.createElement('option');
-                option.value = months;
-                option.textContent = months == 1 ? '1 Month - Rs. ' + durations[months].toLocaleString() 
-                                                : `${months} Months - Rs. ${durations[months].toLocaleString()}`;
-                option.dataset.price = durations[months];
-                durationSelect.appendChild(option);
-            });
+        Object.keys(durations).sort((a, b) => b - a).forEach(months => {
+        const option = document.createElement('option');
+        option.value = months;
+        option.textContent = months == 1 ? '1 Month - Rs. ' + durations[months].toLocaleString()
+        : `${months} Months - Rs. ${durations[months].toLocaleString()}`;
+        option.dataset.price = durations[months];
+        durationSelect.appendChild(option);
+        });
         }
 
         updatePlanName();
-    });
+        });
 
-    // Duration Selection
-    durationSelect.addEventListener('change', function() {
+        // Duration Selection
+        durationSelect.addEventListener('change', function () {
         const selected = this.options[this.selectedIndex];
         const price = parseInt(selected.dataset.price) || 0;
         const months = this.value;
 
         if (price > 0) {
-            basePrice.value = price;
-            priceDisplay.textContent = price.toLocaleString();
-            hiddenDuration.value = months;
-            pricingSection.style.display = 'block';
-            calculateFinalPrice();
-            calculateExpireDate();
+        basePrice.value = price;
+        priceDisplay.textContent = price.toLocaleString();
+        hiddenDuration.value = months;
+        pricingSection.style.display = 'block';
+        calculateFinalPrice();
+        calculateExpireDate();
         } else {
-            resetPricing();
+        resetPricing();
         }
-    });
+        });
 
-    // Session Type Selection
-    sessionType.addEventListener('change', function() {
+        // Session Type Selection
+        sessionType.addEventListener('change', function () {
         const selected = this.options[this.selectedIndex];
         const price = parseInt(selected.dataset.price) || 0;
         
         if (price > 0) {
-            basePrice.value = price;
-            priceDisplay.textContent = price.toLocaleString();
-            hiddenPlanName.value = this.value;
-            hiddenDuration.value = '0';
-            pricingSection.style.display = 'block';
-            calculateFinalPrice();
+        basePrice.value = price;
+        priceDisplay.textContent = price.toLocaleString();
+        hiddenPlanName.value = this.value;
+        hiddenDuration.value = '0';
+        pricingSection.style.display = 'block';
+        calculateFinalPrice();
         } else {
-            resetPricing();
+        resetPricing();
         }
-    });
-
-    // Facility Selection with SweetAlert
-    facilityChecks.forEach(check => {
-        check.addEventListener('change', function() {
-            const checked = document.querySelectorAll('.facility-check:checked');
-            
-            if (checked.length > requiredFacilities) {
-                this.checked = false;
-                Swal.fire({
-                    icon: 'warning',
-                    title: 'Selection Limit Reached',
-                    html: `You can only select <strong>${requiredFacilities}</strong> facilities for this package.`,
-                    confirmButtonText: 'Got it!',
-                    confirmButtonColor: '#3b82f6'
-                });
-                return;
-            }
-
-            if (checked.length === requiredFacilities) {
-                showToast('success', 'Perfect!', `You've selected ${requiredFacilities} facilities`);
-            }
-
-            updatePlanName();
         });
-    });
 
-    // Discount Change
-    discountInput.addEventListener('input', calculateFinalPrice);
+        // Facility Selection with SweetAlert
+        facilityChecks.forEach(check => {
+        check.addEventListener('change', function () {
+        const checked = document.querySelectorAll('.facility-check:checked');
+            
+        if (checked.length > requiredFacilities) {
+        this.checked = false;
+        Swal.fire({
+        icon: 'warning',
+        title: 'Selection Limit Reached',
+        html: `You can only select <strong>${requiredFacilities}</strong> facilities for this package.`,
+        confirmButtonText: 'Got it!',
+        confirmButtonColor: '#3b82f6'
+        });
+        return;
+        }
 
-    // Paid Now Change - Calculate Due Amount
-    paidNowInput.addEventListener('input', function() {
+        if (checked.length === requiredFacilities) {
+        showToast('success', 'Perfect!', `You've selected ${requiredFacilities} facilities`);
+        }
+
+        updatePlanName();
+        });
+        });
+
+        // Discount Change
+        discountInput.addEventListener('input', calculateFinalPrice);
+
+        // Paid Now Change - Calculate Due Amount
+        paidNowInput.addEventListener('input', function () {
         const paid = parseInt(this.value) || 0;
         const due = Math.max(0, totalPayable - paid);
         dueAmountInput.value = due;
         updatePaymentStatus(paid, due);
-    });
+        });
 
-    // Start Date Change
-    startDate.addEventListener('change', calculateExpireDate);
+        // Start Date Change
+        startDate.addEventListener('change', calculateExpireDate);
 
-    function updatePlanName() {
+        function updatePlanName() {
         const plan = planSelect.value;
         let planName = plan;
 
         if (requiredFacilities > 0) {
-            const selected = Array.from(document.querySelectorAll('.facility-check:checked')).map(c => c.value);
-            if (selected.length > 0) {
-                planName = `${plan}: ${selected.join(', ')}`;
-            }
+        const selected = Array.from(document.querySelectorAll('.facility-check:checked')).map(c => c.value);
+        if (selected.length > 0) {
+        planName = `${plan}: ${selected.join(', ')}`;
+        }
         }
 
         hiddenPlanName.value = planName;
-    }
+        }
 
-    function calculateFinalPrice() {
+        function calculateFinalPrice() {
         const price = parseInt(basePrice.value) || 0;
         const discountValue = parseFloat(discountInput.value) || 0;
         
         let discountAmt = 0;
         
         if (discountType === 'percent') {
-            discountAmt = Math.round(price * (discountValue / 100));
+        discountAmt = Math.round(price * (discountValue / 100));
         } else {
-            discountAmt = Math.round(discountValue);
+        discountAmt = Math.round(discountValue);
         }
         
         discountAmt = Math.min(discountAmt, price);
@@ -754,31 +779,31 @@
         paidNowInput.value = totalPayable;
         dueAmountInput.value = 0;
         updatePaymentStatus(totalPayable, 0);
-    }
-
-    function updatePaymentStatus(paid, due) {
-        if (due === 0) {
-            paymentStatus.className = 'payment-status';
-            paymentStatus.innerHTML = '<i class="fa-solid fa-check-circle"></i><span>Full Payment</span>';
-            dueAmountInput.classList.remove('has-due');
-        } else if (paid === 0) {
-            paymentStatus.className = 'payment-status unpaid';
-            paymentStatus.innerHTML = '<i class="fa-solid fa-times-circle"></i><span>Unpaid</span>';
-            dueAmountInput.classList.add('has-due');
-        } else {
-            paymentStatus.className = 'payment-status partial';
-            paymentStatus.innerHTML = '<i class="fa-solid fa-clock"></i><span>Partial Payment</span>';
-            dueAmountInput.classList.add('has-due');
         }
-    }
 
-    // Track if user manually changed expire date
-    let expireDateManuallySet = false;
-    expireDate.addEventListener('change', function () {
+        function updatePaymentStatus(paid, due) {
+        if (due === 0) {
+        paymentStatus.className = 'payment-status';
+        paymentStatus.innerHTML = '<i class="fa-solid fa-check-circle"></i><span>Full Payment</span>';
+        dueAmountInput.classList.remove('has-due');
+        } else if (paid === 0) {
+        paymentStatus.className = 'payment-status unpaid';
+        paymentStatus.innerHTML = '<i class="fa-solid fa-times-circle"></i><span>Unpaid</span>';
+        dueAmountInput.classList.add('has-due');
+        } else {
+        paymentStatus.className = 'payment-status partial';
+        paymentStatus.innerHTML = '<i class="fa-solid fa-clock"></i><span>Partial Payment</span>';
+        dueAmountInput.classList.add('has-due');
+        }
+        }
+
+        // Track if user manually changed expire date
+        let expireDateManuallySet = false;
+        expireDate.addEventListener('change', function () {
         expireDateManuallySet = true;
-    });
+        });
 
-    function calculateExpireDate() {
+        function calculateExpireDate() {
         // Skip auto-calc if user manually entered a date
         if (expireDateManuallySet) return;
 
@@ -786,14 +811,14 @@
         const months = parseInt(hiddenDuration.value) || 0;
         
         if (months > 0 && !isNaN(start.getTime())) {
-            start.setMonth(start.getMonth() + months);
-            expireDate.value = start.toISOString().split('T')[0];
+        start.setMonth(start.getMonth() + months);
+        expireDate.value = start.toISOString().split('T')[0];
         } else {
-            expireDate.value = '';
+        expireDate.value = '';
         }
-    }
+        }
 
-    function resetPricing() {
+        function resetPricing() {
         expireDateManuallySet = false;
         basePrice.value = 0;
         priceDisplay.textContent = '0';
@@ -805,22 +830,22 @@
         totalPayable = 0;
         pricingSection.style.display = 'none';
         updatePaymentStatus(0, 0);
-    }
+        }
 
-    // Initialize
-    calculateFinalPrice();
+        // Initialize
+        calculateFinalPrice();
 
-    // Auto-select plan if preselected
-    if (preselectedPlan && preselectedPlan.length > 0) {
+        // Auto-select plan if preselected
+        if (preselectedPlan && preselectedPlan.length > 0) {
         planSelect.value = preselectedPlan;
         planSelect.dispatchEvent(new Event('change'));
         
         // If it's a specific single-facility plan, lock the plan selection
         const singleFacilityPlans = ['Gym Package', 'Cardio Package', 'Zumba & Aerobics Package', 'Sauna & Steam Package', 'Premium Package'];
         if (singleFacilityPlans.includes(preselectedPlan)) {
-            // Optionally disable changing the plan for package-specific pages
-            // planSelect.disabled = true;
+        // Optionally disable changing the plan for package-specific pages
+        // planSelect.disabled = true;
         }
-    }
-</script>
+        }
+    </script>
 }

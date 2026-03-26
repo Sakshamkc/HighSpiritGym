@@ -9,22 +9,27 @@ set VPS_USER=root
 set REMOTE_PATH=/var/www/highspirit/publish
 set SERVICE_NAME=highspirit
 set PROJECT_DIR=HighSpiritApp
+set MAINTENANCE_FLAG=/var/www/maintenance_on
 
 echo.
-echo [1/7] Uploading maintenance page...
-scp %PROJECT_DIR%\wwwroot\maintenance.html %VPS_USER%@%VPS_IP%:%REMOTE_PATH%/wwwroot/maintenance_on.html
-ssh %VPS_USER%@%VPS_IP% "cp %REMOTE_PATH%/wwwroot/maintenance.html %REMOTE_PATH%/wwwroot/maintenance_backup.html 2>/dev/null; cp %REMOTE_PATH%/wwwroot/maintenance_on.html %REMOTE_PATH%/wwwroot/maintenance.html 2>/dev/null"
-echo    Maintenance page is now live.
+echo [1/8] Uploading maintenance page to server...
+scp %PROJECT_DIR%\wwwroot\maintenance.html %VPS_USER%@%VPS_IP%:/var/www/maintenance.html
+echo    Maintenance page uploaded.
 
 echo.
-echo [2/7] Stopping remote service %SERVICE_NAME% on %VPS_IP%...
+echo [2/8] Enabling maintenance mode...
+ssh %VPS_USER%@%VPS_IP% "touch %MAINTENANCE_FLAG% && systemctl reload nginx"
+echo    Maintenance mode is ON. All visitors see the maintenance page.
+
+echo.
+echo [3/8] Stopping remote service %SERVICE_NAME% on %VPS_IP%...
 ssh %VPS_USER%@%VPS_IP% "systemctl stop %SERVICE_NAME%; mkdir -p %REMOTE_PATH%"
 if %ERRORLEVEL% NEQ 0 (
     echo WARNING: Could not stop remote service. Continuing anyway...
 )
 
 echo.
-echo [3/7] Publishing .NET 8.0 app (Release)...
+echo [4/8] Publishing .NET 8.0 app (Release)...
 cd %PROJECT_DIR%
 dotnet publish -c Release
 if %ERRORLEVEL% NEQ 0 (
@@ -36,7 +41,7 @@ if %ERRORLEVEL% NEQ 0 (
 cd ..
 
 echo.
-echo [4/7] Uploading published files to %VPS_IP%:%REMOTE_PATH% ...
+echo [5/8] Uploading published files to %VPS_IP%:%REMOTE_PATH% ...
 scp -r %PROJECT_DIR%\bin\Release\net8.0\publish\* %VPS_USER%@%VPS_IP%:%REMOTE_PATH%/
 if %ERRORLEVEL% NEQ 0 (
     echo ERROR: File upload failed!
@@ -45,16 +50,18 @@ if %ERRORLEVEL% NEQ 0 (
 )
 
 echo.
-echo [5/7] Starting remote service %SERVICE_NAME%...
+echo [6/8] Starting remote service %SERVICE_NAME%...
 ssh %VPS_USER%@%VPS_IP% "systemctl start %SERVICE_NAME%"
 
 echo.
-echo [6/7] Removing maintenance page...
-ssh %VPS_USER%@%VPS_IP% "rm -f %REMOTE_PATH%/wwwroot/maintenance_on.html %REMOTE_PATH%/wwwroot/maintenance_backup.html 2>/dev/null"
-echo    Maintenance page removed. App is live!
+echo [7/8] Waiting for app to start...
+timeout /t 5 /nobreak >nul
+echo    Disabling maintenance mode...
+ssh %VPS_USER%@%VPS_IP% "rm -f %MAINTENANCE_FLAG% && systemctl reload nginx"
+echo    Maintenance mode is OFF. App is live!
 
 echo.
-echo [7/7] Checking service status...
+echo [8/8] Checking service status...
 ssh %VPS_USER%@%VPS_IP% "systemctl status %SERVICE_NAME% --no-pager -l"
 
 echo.
