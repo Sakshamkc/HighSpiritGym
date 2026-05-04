@@ -59,6 +59,16 @@ namespace HighSpiritApp.Controllers
                 };
             }
 
+            // Apply 'updated' filter (recently updated in last 30 days)
+            if (filter == "updated")
+            {
+                var thirtyDaysAgo = DateTime.Today.AddDays(-30);
+                membersList = membersList
+                    .Where(m => m.UpdatedAt.HasValue && m.UpdatedAt.Value >= thirtyDaysAgo)
+                    .OrderByDescending(m => m.UpdatedAt)
+                    .ToList();
+            }
+
             int total = membersList.Count;
 
             var data = membersList

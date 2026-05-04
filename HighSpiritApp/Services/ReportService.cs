@@ -72,16 +72,20 @@ namespace HighSpiritApp.Services
             report.TotalDue = report.GymDue + report.BoxingDue + report.LockerDue;
             report.TotalCollected = report.TotalRevenue;
 
-            // This Month Stats
+            // This Month Stats - include Gym + Boxing + Locker
             var thisMonthStart = new DateTime(DateTime.Today.Year, DateTime.Today.Month, 1);
             var lastMonthStart = thisMonthStart.AddMonths(-1);
             var lastMonthEnd = thisMonthStart.AddDays(-1);
 
-            var thisMonthMemberships = memberships.Where(m => m.StartDate >= thisMonthStart).ToList();
-            report.ThisMonthRevenue = thisMonthMemberships.Sum(m => m.PaidPrice);
+            var thisMonthGym = memberships.Where(m => m.StartDate >= thisMonthStart).Sum(m => m.PaidPrice);
+            var thisMonthBoxing = boxingMembers.Where(b => b.JoinDate.HasValue && b.JoinDate.Value >= thisMonthStart).Sum(b => b.CashAmount + b.EsewaAmount);
+            var thisMonthLocker = lockers.Where(l => l.StartDate.HasValue && l.StartDate.Value >= thisMonthStart).Sum(l => l.PaidAmount);
+            report.ThisMonthRevenue = thisMonthGym + thisMonthBoxing + thisMonthLocker;
 
-            var lastMonthMemberships = memberships.Where(m => m.StartDate >= lastMonthStart && m.StartDate <= lastMonthEnd).ToList();
-            report.LastMonthRevenue = lastMonthMemberships.Sum(m => m.PaidPrice);
+            var lastMonthGym = memberships.Where(m => m.StartDate >= lastMonthStart && m.StartDate <= lastMonthEnd).Sum(m => m.PaidPrice);
+            var lastMonthBoxing = boxingMembers.Where(b => b.JoinDate.HasValue && b.JoinDate.Value >= lastMonthStart && b.JoinDate.Value <= lastMonthEnd).Sum(b => b.CashAmount + b.EsewaAmount);
+            var lastMonthLocker = lockers.Where(l => l.StartDate.HasValue && l.StartDate.Value >= lastMonthStart && l.StartDate.Value <= lastMonthEnd).Sum(l => l.PaidAmount);
+            report.LastMonthRevenue = lastMonthGym + lastMonthBoxing + lastMonthLocker;
 
             // Calculate growth percentage
             if (report.LastMonthRevenue > 0)
@@ -93,11 +97,16 @@ namespace HighSpiritApp.Services
                 report.RevenueGrowth = 100;
             }
 
-            // Today's Stats
+            // Today's Stats - include Gym + Boxing + Locker
             var today = DateTime.Today;
-            var todayMemberships = memberships.Where(m => m.StartDate.Date == today).ToList();
-            report.TodayRevenue = todayMemberships.Sum(m => m.PaidPrice);
-            report.TodayTransactions = todayMemberships.Count;
+            var todayGymList = memberships.Where(m => m.StartDate.Date == today).ToList();
+            var todayBoxingList = boxingMembers.Where(b => b.JoinDate.HasValue && b.JoinDate.Value.Date == today).ToList();
+            var todayLockerList = lockers.Where(l => l.StartDate.HasValue && l.StartDate.Value.Date == today).ToList();
+
+            report.TodayRevenue = todayGymList.Sum(m => m.PaidPrice)
+                                + todayBoxingList.Sum(b => b.CashAmount + b.EsewaAmount)
+                                + todayLockerList.Sum(l => l.PaidAmount);
+            report.TodayTransactions = todayGymList.Count + todayBoxingList.Count + todayLockerList.Count;
 
             return report;
         }

@@ -20,7 +20,7 @@ namespace HighSpiritApp.Controllers
             _customerService = customerService;
         }
 
-        public async Task<IActionResult> Index(string search, string gender = "Gents", string status = "", int page = 1)
+        public async Task<IActionResult> Index(string search, string gender = "Gents", string status = "", string filter = "", int page = 1)
         {
             int pageSize = 25;
             if (string.IsNullOrEmpty(gender)) gender = "Gents";
@@ -50,6 +50,16 @@ namespace HighSpiritApp.Controllers
                 };
             }
 
+            // Apply 'updated' filter (recently updated in last 30 days)
+            if (filter == "updated")
+            {
+                var thirtyDaysAgo = DateTime.Today.AddDays(-30);
+                lockersList = lockersList
+                    .Where(l => l.UpdatedAt.HasValue && l.UpdatedAt.Value >= thirtyDaysAgo)
+                    .OrderByDescending(l => l.UpdatedAt)
+                    .ToList();
+            }
+
             lockersList = lockersList
                 .OrderBy(l => int.TryParse(l.LockerNumber, out int num) ? num : int.MaxValue)
                 .ThenBy(l => l.LockerNumber)
@@ -63,6 +73,7 @@ namespace HighSpiritApp.Controllers
             ViewBag.Search = search;
             ViewBag.Gender = gender;
             ViewBag.Status = status;
+            ViewBag.Filter = filter;
 
             return View(data);
         }
@@ -122,9 +133,9 @@ namespace HighSpiritApp.Controllers
             {
                 var filterRequest = new CustomerFilterRequest { Search = locker.AssignedTo, PageSize = 1 };
                 var result = await _customerService.GetFilteredCustomersAsync(filterRequest);
-                var customer = result.Customers.FirstOrDefault(c => 
+                var customer = result.Customers.FirstOrDefault(c =>
                     c.FullName.Equals(locker.AssignedTo, StringComparison.OrdinalIgnoreCase));
-                
+
                 if (customer != null)
                 {
                     // Get customer with memberships
@@ -305,8 +316,8 @@ namespace HighSpiritApp.Controllers
 
             var filterRequest = new CustomerFilterRequest { Search = term, PageSize = 20 };
             var result = await _customerService.GetFilteredCustomersAsync(filterRequest);
-            
-            var members = result.Customers.Select(m => 
+
+            var members = result.Customers.Select(m =>
             {
                 var membership = m.Memberships?.OrderByDescending(x => x.StartDate).FirstOrDefault();
                 return new

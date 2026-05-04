@@ -2192,6 +2192,12 @@
                     <i class="fa-solid fa-person"></i>
                     <span class="nav-text">Adult Boxing</span>
                 </a>
+                <a href="/Boxing?category=All&filter=updated"
+                       class="nav-link submenu @(controller == "Boxing" && (ViewBag.Filter as string) == "updated" ? "active" : "")"
+                       onclick="closeSidebarOnMobile()">
+                    <i class="fa-solid fa-user-pen"></i>
+                    <span class="nav-text">Recently Updated</span>
+                </a>
             </div>
 
             <p class="nav-section-title">Lockers</p>
@@ -2215,6 +2221,12 @@
                        onclick="closeSidebarOnMobile()">
                     <i class="fa-solid fa-venus"></i>
                     <span class="nav-text">Female Locker</span>
+                </a>
+                <a href="/Locker?filter=updated"
+                       class="nav-link submenu @(controller == "Locker" && (ViewBag.Filter as string) == "updated" ? "active" : "")"
+                       onclick="closeSidebarOnMobile()">
+                    <i class="fa-solid fa-user-pen"></i>
+                    <span class="nav-text">Recently Updated</span>
                 </a>
             </div>
 
