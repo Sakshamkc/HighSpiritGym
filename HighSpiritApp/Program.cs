@@ -100,6 +100,27 @@ builder.Services.AddCors(options =>
 // =============================================================
 builder.Services.AddControllersWithViews();
 
+// =============================================================
+// RESPONSE COMPRESSION (gzip/brotli) - speeds up page loads
+// =============================================================
+builder.Services.AddResponseCompression(options =>
+{
+    options.EnableForHttps = true;
+    options.Providers.Add<Microsoft.AspNetCore.ResponseCompression.BrotliCompressionProvider>();
+    options.Providers.Add<Microsoft.AspNetCore.ResponseCompression.GzipCompressionProvider>();
+    options.MimeTypes = Microsoft.AspNetCore.ResponseCompression.ResponseCompressionDefaults.MimeTypes.Concat(new[]
+    {
+        "application/javascript",
+        "application/json",
+        "text/css",
+        "text/html",
+        "text/plain",
+        "image/svg+xml"
+    });
+});
+builder.Services.Configure<Microsoft.AspNetCore.ResponseCompression.GzipCompressionProviderOptions>(o => o.Level = System.IO.Compression.CompressionLevel.Fastest);
+builder.Services.Configure<Microsoft.AspNetCore.ResponseCompression.BrotliCompressionProviderOptions>(o => o.Level = System.IO.Compression.CompressionLevel.Fastest);
+
 var app = builder.Build();
 
 // =============================================================
@@ -112,7 +133,15 @@ if (!app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
-app.UseStaticFiles();
+app.UseResponseCompression();
+app.UseStaticFiles(new StaticFileOptions
+{
+    OnPrepareResponse = ctx =>
+    {
+        // Cache static files for 30 days
+        ctx.Context.Response.Headers["Cache-Control"] = "public, max-age=2592000";
+    }
+});
 app.UseRouting();
 
 app.UseCors("MobileApp");
