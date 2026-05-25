@@ -1,4 +1,5 @@
 using ClosedXML.Excel;
+using HighSpiritApp.DataContext;
 using HighSpiritApp.Models;
 using HighSpiritApp.Repositories.Interfaces;
 using HighSpiritApp.Services.Interfaces;
@@ -13,13 +14,16 @@ namespace HighSpiritApp.Services
     {
         private readonly ICustomerRepository _customerRepository;
         private readonly IMembershipRepository _membershipRepository;
+        private readonly GymDbContext _db;
 
         public CustomerService(
             ICustomerRepository customerRepository,
-            IMembershipRepository membershipRepository)
+            IMembershipRepository membershipRepository,
+            GymDbContext db)
         {
             _customerRepository = customerRepository;
             _membershipRepository = membershipRepository;
+            _db = db;
         }
 
         public async Task<Customer?> GetByIdAsync(int id)
@@ -40,135 +44,191 @@ namespace HighSpiritApp.Services
         public async Task<CustomerListResult> GetFilteredCustomersAsync(CustomerFilterRequest filter)
         {
             var today = DateTime.Today;
-            var query = _customerRepository.GetQueryable();
+            var thirtyDaysAgo = today.AddDays(-30);
+            filter.Filter ??= "all";
 
-            // Search filter
+            // Build base SQL-translatable filters (avoid loading entities until needed)
+            var query = _db.Customers.AsNoTracking().AsQueryable();
+
             if (!string.IsNullOrEmpty(filter.Search))
             {
                 query = query.Where(c =>
                     c.FullName.Contains(filter.Search) ||
                     (c.Phone != null && c.Phone.Contains(filter.Search)));
             }
+            if (!string.IsNullOrEmpty(filter.Shift))
+                query = query.Where(c => c.Shift == filter.Shift);
+            if (!string.IsNullOrEmpty(filter.Gender))
+                query = query.Where(c => c.Gender == filter.Gender);
 
-            // Status filter - based on latest membership's ExpireDate
-            filter.Filter ??= "all";
-            var thirtyDaysAgo = today.AddDays(-30);
-            query = filter.Filter switch
+            // JoinDate filters can be applied in SQL
+            if (filter.Filter == "new")
+                query = query.Where(c => c.JoinDate >= thirtyDaysAgo);
+            else if (filter.Filter == "thismonth")
+                query = query.Where(c => c.JoinDate.Month == today.Month && c.JoinDate.Year == today.Year);
+            else if (filter.Filter == "updated")
+                query = query.Where(c => c.UpdatedAt != null && c.UpdatedAt >= thirtyDaysAgo);
+
+            // Project WITHOUT the heavy Photo blob; include lightweight membership projection.
+            // (Active/expired/soon/hold/paid/due all depend on "latest membership per customer"
+            //  which MySQL provider translates badly as a subquery — filter those in memory.)
+            var rows = await query
+                .Select(c => new Customer
+                {
+                    CustomerID = c.CustomerID,
+                    FullName = c.FullName,
+                    Phone = c.Phone,
+                    Email = c.Email,
+                    Address = c.Address,
+                    Gender = c.Gender,
+                    BloodGroup = c.BloodGroup,
+                    WeightKG = c.WeightKG,
+                    Height = c.Height,
+                    Occupation = c.Occupation,
+                    JoinDate = c.JoinDate,
+                    DateOfBirth = c.DateOfBirth,
+                    Remarks = c.Remarks,
+                    Shift = c.Shift,
+                    QrToken = c.QrToken,
+                    MustChangePassword = c.MustChangePassword,
+                    CreatedAt = c.CreatedAt,
+                    UpdatedAt = c.UpdatedAt,
+                    // Photo intentionally NOT loaded (blob).
+                    Memberships = c.Memberships
+                        .OrderByDescending(m => m.StartDate)
+                        .Select(m => new CustomerMembership
+                        {
+                            MembershipID = m.MembershipID,
+                            CustomerID = m.CustomerID,
+                            PlanName = m.PlanName,
+                            StartDate = m.StartDate,
+                            ExpireDate = m.ExpireDate,
+                            Duration = m.Duration,
+                            PaidPrice = m.PaidPrice,
+                            DueAmount = m.DueAmount,
+                            IsActive = m.IsActive,
+                            IsOnHold = m.IsOnHold,
+                            HoldStartDate = m.HoldStartDate,
+                            TotalHoldDays = m.TotalHoldDays,
+                            CreatedAt = m.CreatedAt,
+                            UpdatedAt = m.UpdatedAt
+                        })
+                        .ToList()
+                })
+                .ToListAsync();
+
+            // Single lightweight query for "has photo" flags (id only). Set sentinel so the
+            // view's `c.Photo != null` check still works without loading actual bytes.
+            var idsWithPhotos = await _db.Customers.AsNoTracking()
+                .Where(c => c.Photo != null)
+                .Select(c => c.CustomerID)
+                .ToListAsync();
+            var photoSet = new HashSet<int>(idsWithPhotos);
+            var sentinelPhoto = new byte[] { 1 };
+            foreach (var c in rows)
             {
-                "active" => query.Where(c =>
-                    c.Memberships.Any() &&
-                    (c.Memberships.OrderByDescending(m => m.StartDate).First().ExpireDate >= today ||
-                     c.Memberships.OrderByDescending(m => m.StartDate).First().IsOnHold)),
-                "expired" => query.Where(c =>
-                    c.Memberships.Any() &&
-                    c.Memberships.OrderByDescending(m => m.StartDate).First().ExpireDate < today &&
-                    !c.Memberships.OrderByDescending(m => m.StartDate).First().IsOnHold),
-                "soon" => query.Where(c =>
-                    c.Memberships.Any() &&
-                    c.Memberships.OrderByDescending(m => m.StartDate).First().ExpireDate >= today &&
-                    c.Memberships.OrderByDescending(m => m.StartDate).First().ExpireDate <= today.AddDays(7)),
-                "hold" => query.Where(c =>
-                    c.Memberships.Any() &&
-                    c.Memberships.OrderByDescending(m => m.StartDate).First().IsOnHold),
-                "new" => query.Where(c => c.JoinDate >= thirtyDaysAgo),
-                "thismonth" => query.Where(c => c.JoinDate.Month == today.Month && c.JoinDate.Year == today.Year),
-                "updated" => query.Where(c => c.UpdatedAt != null && c.UpdatedAt >= thirtyDaysAgo),
-                _ => query
+                if (photoSet.Contains(c.CustomerID))
+                    c.Photo = sentinelPhoto;
+            }
+
+            IEnumerable<Customer> allCustomers = rows;
+
+            // In-memory filters that depend on "latest membership per customer"
+            CustomerMembership? Latest(Customer c) => c.Memberships?.FirstOrDefault();
+
+            allCustomers = filter.Filter switch
+            {
+                "active" => allCustomers.Where(c =>
+                {
+                    var m = Latest(c);
+                    return m != null && (m.ExpireDate >= today || m.IsOnHold);
+                }),
+                "expired" => allCustomers.Where(c =>
+                {
+                    var m = Latest(c);
+                    return m != null && m.ExpireDate < today && !m.IsOnHold;
+                }),
+                "soon" => allCustomers.Where(c =>
+                {
+                    var m = Latest(c);
+                    return m != null && m.ExpireDate >= today && m.ExpireDate <= today.AddDays(7);
+                }),
+                "hold" => allCustomers.Where(c =>
+                {
+                    var m = Latest(c);
+                    return m != null && m.IsOnHold;
+                }),
+                _ => allCustomers
             };
 
-            // Shift filter
-            if (!string.IsNullOrEmpty(filter.Shift))
-            {
-                query = query.Where(c => c.Shift == filter.Shift);
-            }
-
-            // Gender filter
-            if (!string.IsNullOrEmpty(filter.Gender))
-            {
-                query = query.Where(c => c.Gender == filter.Gender);
-            }
-
-            // Payment status filter
+            // Payment status filter (latest membership)
             if (!string.IsNullOrEmpty(filter.PaymentStatus))
             {
-                query = filter.PaymentStatus switch
+                allCustomers = filter.PaymentStatus switch
                 {
-                    "paid" => query.Where(c =>
-                        c.Memberships.Any() &&
-                        c.Memberships.OrderByDescending(m => m.StartDate).First().DueAmount == 0),
-                    "due" => query.Where(c =>
-                        c.Memberships.Any() &&
-                        c.Memberships.OrderByDescending(m => m.StartDate).First().DueAmount > 0),
-                    _ => query
+                    "paid" => allCustomers.Where(c => Latest(c)?.DueAmount == 0),
+                    "due" => allCustomers.Where(c => (Latest(c)?.DueAmount ?? 0) > 0),
+                    _ => allCustomers
                 };
             }
 
-            // Load all matching customers to memory for plan filtering
-            var allCustomers = await query.ToListAsync();
+            // Materialize once for plan / duration / sort / paging
+            var list = allCustomers.ToList();
 
-            // Plan name filter - EXACT matching logic (in-memory)
+            // Plan name filter
             if (!string.IsNullOrEmpty(filter.PlanName))
             {
                 var planFilter = filter.PlanName.ToLower();
-
-                allCustomers = planFilter switch
+                list = planFilter switch
                 {
-                    "custom2" or "custom-2" => allCustomers.Where(c => IsCustomPlan(c, 2)).ToList(),
-                    "custom3" or "custom-3" => allCustomers.Where(c => IsCustomPlan(c, 3)).ToList(),
-                    "gym" => allCustomers.Where(c => IsExactPlan(c, "Gym")).ToList(),
-                    "cardio" => allCustomers.Where(c => IsExactPlan(c, "Cardio")).ToList(),
-                    "premium" => allCustomers.Where(c => IsPlanContains(c, "Premium")).ToList(),
-                    "zumba" => allCustomers.Where(c => IsExactPlanMultiple(c, new[] { "Zumba", "Aerobics" })).ToList(),
-                    "sauna" => allCustomers.Where(c => IsExactPlanMultiple(c, new[] { "Sauna", "Steam" })).ToList(),
-                    _ => allCustomers.Where(c => IsPlanContains(c, filter.PlanName)).ToList()
+                    "custom2" or "custom-2" => list.Where(c => IsCustomPlan(c, 2)).ToList(),
+                    "custom3" or "custom-3" => list.Where(c => IsCustomPlan(c, 3)).ToList(),
+                    "gym" => list.Where(c => IsExactPlan(c, "Gym")).ToList(),
+                    "cardio" => list.Where(c => IsExactPlan(c, "Cardio")).ToList(),
+                    "premium" => list.Where(c => IsPlanContains(c, "Premium")).ToList(),
+                    "zumba" => list.Where(c => IsExactPlanMultiple(c, new[] { "Zumba", "Aerobics" })).ToList(),
+                    "sauna" => list.Where(c => IsExactPlanMultiple(c, new[] { "Sauna", "Steam" })).ToList(),
+                    _ => list.Where(c => IsPlanContains(c, filter.PlanName)).ToList()
                 };
             }
 
             // Duration filter
             if (filter.Duration.HasValue)
             {
-                allCustomers = allCustomers.Where(c =>
-                    c.Memberships.OrderByDescending(m => m.StartDate).FirstOrDefault()?.Duration == filter.Duration.Value
-                ).ToList();
+                list = list.Where(c => Latest(c)?.Duration == filter.Duration.Value).ToList();
             }
 
-            // Calculate duration counts
+            // Duration counts
             var durationCounts = new DurationCounts
             {
-                Count1M = allCustomers.Count(c =>
-                    c.Memberships.OrderByDescending(m => m.StartDate).FirstOrDefault()?.Duration == 1),
-                Count3M = allCustomers.Count(c =>
-                    c.Memberships.OrderByDescending(m => m.StartDate).FirstOrDefault()?.Duration == 3),
-                Count6M = allCustomers.Count(c =>
-                    c.Memberships.OrderByDescending(m => m.StartDate).FirstOrDefault()?.Duration == 6),
-                Count12M = allCustomers.Count(c =>
-                    c.Memberships.OrderByDescending(m => m.StartDate).FirstOrDefault()?.Duration == 12),
-                CountAll = allCustomers.Count
+                Count1M = list.Count(c => Latest(c)?.Duration == 1),
+                Count3M = list.Count(c => Latest(c)?.Duration == 3),
+                Count6M = list.Count(c => Latest(c)?.Duration == 6),
+                Count12M = list.Count(c => Latest(c)?.Duration == 12),
+                CountAll = list.Count
             };
 
             // Sorting
-            allCustomers = filter.Sort switch
+            list = filter.Sort switch
             {
-                "name_desc" => allCustomers.OrderByDescending(c => c.FullName).ToList(),
-                "expire" => allCustomers.OrderBy(c =>
-                    c.Memberships.OrderByDescending(m => m.StartDate).FirstOrDefault()?.ExpireDate).ToList(),
-                "expire_desc" => allCustomers.OrderByDescending(c =>
-                    c.Memberships.OrderByDescending(m => m.StartDate).FirstOrDefault()?.ExpireDate).ToList(),
-                "join" => allCustomers.OrderBy(c => c.JoinDate).ToList(),
-                "join_desc" => allCustomers.OrderByDescending(c => c.JoinDate).ToList(),
-                "update" => allCustomers.OrderBy(c => c.UpdatedAt).ToList(),
-                "update_desc" => allCustomers.OrderByDescending(c => c.UpdatedAt).ToList(),
+                "name_desc" => list.OrderByDescending(c => c.FullName).ToList(),
+                "expire" => list.OrderBy(c => Latest(c)?.ExpireDate).ToList(),
+                "expire_desc" => list.OrderByDescending(c => Latest(c)?.ExpireDate).ToList(),
+                "join" => list.OrderBy(c => c.JoinDate).ToList(),
+                "join_desc" => list.OrderByDescending(c => c.JoinDate).ToList(),
+                "update" => list.OrderBy(c => c.UpdatedAt).ToList(),
+                "update_desc" => list.OrderByDescending(c => c.UpdatedAt).ToList(),
                 _ => filter.Filter == "new"
-                    ? allCustomers.OrderByDescending(c => c.JoinDate).ToList()
+                    ? list.OrderByDescending(c => c.JoinDate).ToList()
                     : filter.Filter == "thismonth"
-                        ? allCustomers.OrderByDescending(c => c.JoinDate).ToList()
+                        ? list.OrderByDescending(c => c.JoinDate).ToList()
                         : filter.Filter == "updated"
-                            ? allCustomers.OrderByDescending(c => c.UpdatedAt).ToList()
-                            : allCustomers.OrderBy(c => c.FullName).ToList()
+                            ? list.OrderByDescending(c => c.UpdatedAt).ToList()
+                            : list.OrderBy(c => c.FullName).ToList()
             };
 
-            var total = allCustomers.Count;
-            var customers = allCustomers
+            var total = list.Count;
+            var customers = list
                 .Skip((filter.Page - 1) * filter.PageSize)
                 .Take(filter.PageSize)
                 .ToList();
