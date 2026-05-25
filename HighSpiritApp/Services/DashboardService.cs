@@ -2,6 +2,7 @@ using HighSpiritApp.DataContext;
 using HighSpiritApp.Repositories.Interfaces;
 using HighSpiritApp.Services.Interfaces;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Caching.Memory;
 
 namespace HighSpiritApp.Services
 {
@@ -15,22 +16,36 @@ namespace HighSpiritApp.Services
         private readonly IBoxingRepository _boxingRepository;
         private readonly ILockerRepository _lockerRepository;
         private readonly GymDbContext _db;
+        private readonly IMemoryCache _cache;
+        private const string CacheKey = "DashboardStats";
 
         public DashboardService(
             ICustomerRepository customerRepository,
             IMembershipRepository membershipRepository,
             IBoxingRepository boxingRepository,
             ILockerRepository lockerRepository,
-            GymDbContext db)
+            GymDbContext db,
+            IMemoryCache cache)
         {
             _customerRepository = customerRepository;
             _membershipRepository = membershipRepository;
             _boxingRepository = boxingRepository;
             _lockerRepository = lockerRepository;
             _db = db;
+            _cache = cache;
         }
 
         public async Task<DashboardStats> GetDashboardStatsAsync()
+        {
+            var cached = await _cache.GetOrCreateAsync(CacheKey, async entry =>
+            {
+                entry.AbsoluteExpirationRelativeToNow = TimeSpan.FromSeconds(60);
+                return await ComputeStatsAsync();
+            });
+            return cached!;
+        }
+
+        private async Task<DashboardStats> ComputeStatsAsync()
         {
             var today = DateTime.Today;
             var monthStart = new DateTime(today.Year, today.Month, 1);

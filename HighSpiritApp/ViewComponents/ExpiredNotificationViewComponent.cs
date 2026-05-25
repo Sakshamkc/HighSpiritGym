@@ -1,5 +1,7 @@
-﻿using HighSpiritApp.Services.Interfaces;
+﻿using HighSpiritApp.Models;
+using HighSpiritApp.Services.Interfaces;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Caching.Memory;
 
 namespace HighSpiritApp.ViewComponents
 {
@@ -9,15 +11,23 @@ namespace HighSpiritApp.ViewComponents
     public class ExpiredNotificationViewComponent : ViewComponent
     {
         private readonly IMembershipService _membershipService;
+        private readonly IMemoryCache _cache;
+        private const string CacheKey = "ExpiredMemberships_All";
 
-        public ExpiredNotificationViewComponent(IMembershipService membershipService)
+        public ExpiredNotificationViewComponent(IMembershipService membershipService, IMemoryCache cache)
         {
             _membershipService = membershipService;
+            _cache = cache;
         }
 
         public async Task<IViewComponentResult> InvokeAsync(string? planName = null)
         {
-            var expiredMemberships = (await _membershipService.GetExpiredMembershipsAsync()).ToList();
+            var cached = await _cache.GetOrCreateAsync(CacheKey, async entry =>
+            {
+                entry.AbsoluteExpirationRelativeToNow = TimeSpan.FromSeconds(60);
+                return (await _membershipService.GetExpiredMembershipsAsync()).ToList();
+            });
+            var expiredMemberships = cached?.ToList() ?? new List<CustomerMembership>();
 
             // Filter by plan if specified - using same logic as CustomerService
             if (!string.IsNullOrEmpty(planName))

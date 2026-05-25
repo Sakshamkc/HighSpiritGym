@@ -100,6 +100,9 @@ builder.Services.AddCors(options =>
 // =============================================================
 builder.Services.AddControllersWithViews();
 
+// In-memory cache (used by notification ViewComponents to avoid hitting DB on every page)
+builder.Services.AddMemoryCache();
+
 // =============================================================
 // RESPONSE COMPRESSION (gzip/brotli) - speeds up page loads
 // =============================================================
