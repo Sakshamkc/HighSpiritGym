@@ -26,9 +26,10 @@
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/HighSpiritApp.styles.css" asp-append-version="true" />
 
+    <!-- FontAwesome: load synchronously to prevent icon-flash/reflow -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+
     <!-- Non-critical CSS: load asynchronously (no render-block) -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"
-          media="print" onload="this.media='all'" />
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.css" media="print"
           onload="this.media='all'" />
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css" media="print"
@@ -2315,51 +2316,22 @@
 
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
     <script src="~/js/site.js" asp-append-version="true"></script>
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" defer></script>
-    <script src="https://cdn.jsdelivr.net/npm/flatpickr" defer></script>
-    <script src="~/js/nepali-datepicker.js" asp-append-version="true" defer></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+    <script src="~/js/nepali-datepicker.js" asp-append-version="true"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js"></script>
     @await RenderSectionAsync("Scripts", required: false)
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js" defer></script>
 
     <script>
-        toastr.options = {
-        "closeButton": true,
-        "progressBar": true,
-        "positionClass": "toast-top-right",
-        "timeOut": "3000"
+        toastr.options = {             "closeButton": true,             "progressBar": true,             "positionClass": "toast-top-right",             "timeOut": "3000"
         };
 
-        document.addEventListener('DOMContentLoaded', function () {
-        // Initialize Date Picker Manager (handles EN/NP mode)
-        NepaliDatePickerManager.init();
-
-        // Apply session timer visibility from settings
-        if (localStorage.getItem('sessionTimerHidden') === 'true') {
-        var stDisplay = document.getElementById('sessionTimerDisplay');
-        if (stDisplay) stDisplay.style.display = 'none';
-        }
-
-        // Apply header quick actions visibility from settings
-        if (localStorage.getItem('headerActionsHidden') === 'true') {
-        var dtBtn = document.getElementById('dateToggleBtn');
-        var tmBtn = document.getElementById('themeToggle');
-        if (dtBtn) dtBtn.style.display = 'none';
-        if (tmBtn) tmBtn.style.display = 'none';
-        }
-
-        // Apply animations setting
-        if (localStorage.getItem('animationsDisabled') === 'true') {
-        document.documentElement.classList.add('no-animations');
-        }
-
-        // Apply toast position from settings
-        var savedToastPos = localStorage.getItem('toastPosition');
-        if (savedToastPos && typeof toastr !== 'undefined') {
-        toastr.options.positionClass = savedToastPos;
-        }
-
-        // Initialize session timeout
-        initSessionTimeout();
+        document.addEventListener('DOMContentLoaded', function () {             // Initialize Date Picker Manager (handles EN/NP mode)             NepaliDatePickerManager.init();
+        // Apply session timer visibility from settings             if (localStorage.getItem('sessionTimerHidden') === 'true') {                 var stDisplay = document.getElementById('sessionTimerDisplay');                 if (stDisplay) stDisplay.style.display = 'none';             }
+        // Apply header quick actions visibility from settings             if (localStorage.getItem('headerActionsHidden') === 'true') {                 var dtBtn = document.getElementById('dateToggleBtn');                 var tmBtn = document.getElementById('themeToggle');                 if (dtBtn) dtBtn.style.display = 'none';                 if (tmBtn) tmBtn.style.display = 'none';             }
+        // Apply animations setting             if (localStorage.getItem('animationsDisabled') === 'true') {                 document.documentElement.classList.add('no-animations');             }
+        // Apply toast position from settings             var savedToastPos = localStorage.getItem('toastPosition');             if (savedToastPos && typeof toastr !== 'undefined') {                 toastr.options.positionClass = savedToastPos;             }
+        // Initialize session timeout             initSessionTimeout();
         });
 
         // =====================================================
@@ -2379,197 +2351,49 @@
         const COUNTDOWN_SECONDS = 120;               // 2 minutes countdown
         const IDLE_THRESHOLD_MS = 5 * 60 * 1000;    // Show idle notification after 5 minutes of no activity
 
-        function initSessionTimeout() {
-        console.log('Session timeout initialized: ' + (SESSION_TIMEOUT_MS / 1000) + ' seconds');
-        resetSessionTimer();
-
-        // Reset timer on user activity (debounced to avoid too many resets)
-        // Note: scroll and mousemove are excluded as they don't indicate real user activity
-        const activityHandler = debounce(function () {
-        if (isIdle) {
-        hideIdleToast();
-        isIdle = false;
-        }
-        resetSessionTimer();
-        }, 1000);
-
-        // Only track meaningful user interactions (click, keypress, touch)
-        // Scroll and mousemove are NOT included as they don't indicate active usage
-        ['click', 'keypress', 'touchstart'].forEach(function (event) {
-        document.addEventListener(event, activityHandler, { passive: true });
-        });
+        function initSessionTimeout() {             console.log('Session timeout initialized: ' + (SESSION_TIMEOUT_MS / 1000) + ' seconds');             resetSessionTimer();
+        // Reset timer on user activity (debounced to avoid too many resets)             // Note: scroll and mousemove are excluded as they don't indicate real user activity             const activityHandler = debounce(function () {                 if (isIdle) {                     hideIdleToast();                     isIdle = false;                 }                 resetSessionTimer();             }, 1000);
+        // Only track meaningful user interactions (click, keypress, touch)             // Scroll and mousemove are NOT included as they don't indicate active usage             ['click', 'keypress', 'touchstart'].forEach(function (event) {                 document.addEventListener(event, activityHandler, { passive: true });             });
         }
 
-        function resetSessionTimer() {
-        // Clear existing timers
-        if (sessionTimer) clearTimeout(sessionTimer);
-        if (warningTimer) clearTimeout(warningTimer);
-        if (countdownInterval) clearInterval(countdownInterval);
-        if (timerDisplayInterval) clearInterval(timerDisplayInterval);
-        if (idleTimer) clearTimeout(idleTimer);
-
-        // Reset session start time
-        sessionStartTime = Date.now();
-
-        // Hide warning modal if shown
-        const warningModal = document.getElementById('sessionWarningModal');
-        if (warningModal) {
-        const modalInstance = bootstrap.Modal.getInstance(warningModal);
-        if (modalInstance) {
-        modalInstance.hide();
-        }
+        function resetSessionTimer() {             // Clear existing timers             if (sessionTimer) clearTimeout(sessionTimer);             if (warningTimer) clearTimeout(warningTimer);             if (countdownInterval) clearInterval(countdownInterval);             if (timerDisplayInterval) clearInterval(timerDisplayInterval);             if (idleTimer) clearTimeout(idleTimer);
+        // Reset session start time             sessionStartTime = Date.now();
+        // Hide warning modal if shown             const warningModal = document.getElementById('sessionWarningModal');             if (warningModal) {                 const modalInstance = bootstrap.Modal.getInstance(warningModal);                 if (modalInstance) {                     modalInstance.hide();                 }             }
+        // Reset timer display style             const timerDisplay = document.getElementById('sessionTimerDisplay');             if (timerDisplay) {                 timerDisplay.classList.remove('warning', 'danger');             }
+        // Start the visible timer display             updateTimerDisplay();             timerDisplayInterval = setInterval(updateTimerDisplay, 1000);
+        // Set idle notification timer (5 minutes)             idleTimer = setTimeout(function () {                 showIdleToast();                 isIdle = true;             }, IDLE_THRESHOLD_MS);
+        // Set warning timer             warningTimer = setTimeout(function () {                 showSessionWarning();             }, WARNING_TIME_MS);
+        // Set logout timer             sessionTimer = setTimeout(function () {                 window.location.href = '/Account/Logout?expired=true';             }, SESSION_TIMEOUT_MS);
         }
 
-        // Reset timer display style
-        const timerDisplay = document.getElementById('sessionTimerDisplay');
-        if (timerDisplay) {
-        timerDisplay.classList.remove('warning', 'danger');
+        function updateTimerDisplay() {             const elapsed = Date.now() - sessionStartTime;             const remaining = Math.max(0, SESSION_TIMEOUT_MS - elapsed);             const minutes = Math.floor(remaining / 60000);             const seconds = Math.floor((remaining % 60000) / 1000);
+        const timerText = document.getElementById('sessionTimerText');             const timerDisplay = document.getElementById('sessionTimerDisplay');
+        if (timerText) {                 timerText.textContent = minutes + ':' + seconds.toString().padStart(2, '0');             }
+        if (timerDisplay) {                 // Update timer style based on remaining time                 if (remaining <= 60000) { // Less than 1 minute                     timerDisplay.classList.remove('warning');                     timerDisplay.classList.add('danger');                 } else if (remaining <= 120000) { // Less than 2 minutes                     timerDisplay.classList.remove('danger');                     timerDisplay.classList.add('warning');                 } else {                     timerDisplay.classList.remove('warning', 'danger');                 }             }
+        if (remaining <= 0) {                 clearInterval(timerDisplayInterval);             }
         }
 
-        // Start the visible timer display
-        updateTimerDisplay();
-        timerDisplayInterval = setInterval(updateTimerDisplay, 1000);
-
-        // Set idle notification timer (5 minutes)
-        idleTimer = setTimeout(function () {
-        showIdleToast();
-        isIdle = true;
-        }, IDLE_THRESHOLD_MS);
-
-        // Set warning timer
-        warningTimer = setTimeout(function () {
-        showSessionWarning();
-        }, WARNING_TIME_MS);
-
-        // Set logout timer
-        sessionTimer = setTimeout(function () {
-        window.location.href = '/Account/Logout?expired=true';
-        }, SESSION_TIMEOUT_MS);
+        function showIdleToast() {             const toast = document.getElementById('idleToast');             if (toast) {                 toast.classList.add('show');             }
         }
 
-        function updateTimerDisplay() {
-        const elapsed = Date.now() - sessionStartTime;
-        const remaining = Math.max(0, SESSION_TIMEOUT_MS - elapsed);
-        const minutes = Math.floor(remaining / 60000);
-        const seconds = Math.floor((remaining % 60000) / 1000);
-
-        const timerText = document.getElementById('sessionTimerText');
-        const timerDisplay = document.getElementById('sessionTimerDisplay');
-
-        if (timerText) {
-        timerText.textContent = minutes + ':' + seconds.toString().padStart(2, '0');
+        function hideIdleToast() {             const toast = document.getElementById('idleToast');             if (toast) {                 toast.classList.remove('show');             }
         }
 
-        if (timerDisplay) {
-        // Update timer style based on remaining time
-        if (remaining <= 60000) { // Less than 1 minute
-        timerDisplay.classList.remove('warning');
-        timerDisplay.classList.add('danger');
-        } else if (remaining <= 120000) { // Less than 2 minutes
-        timerDisplay.classList.remove('danger');
-        timerDisplay.classList.add('warning');
-        } else {
-        timerDisplay.classList.remove('warning', 'danger');
-        }
+        function showSessionWarning() {             const warningModal = document.getElementById('sessionWarningModal');             if (!warningModal) {                 console.error('Warning modal not found');                 return;             }
+        // Hide idle toast if shown             hideIdleToast();
+        // Clear any existing countdown             if (countdownInterval) clearInterval(countdownInterval);
+        // Show the modal             const modal = new bootstrap.Modal(warningModal, {                 backdrop: 'static',                 keyboard: false             });             modal.show();
+        // Start countdown             let countdown = COUNTDOWN_SECONDS;             const countdownEl = document.getElementById('sessionCountdown');
+        // Update display immediately             if (countdownEl) {                 const mins = Math.floor(countdown / 60);                 const secs = countdown % 60;                 countdownEl.textContent = mins + ':' + secs.toString().padStart(2, '0');             }
+        countdownInterval = setInterval(function () {                 countdown--;                 if (countdownEl) {                     const mins = Math.floor(countdown / 60);                     const secs = countdown % 60;                     countdownEl.textContent = mins + ':' + secs.toString().padStart(2, '0');                 }                 if (countdown <= 0) {                     clearInterval(countdownInterval);                 }             }, 1000);
         }
 
-        if (remaining <= 0) {
-        clearInterval(timerDisplayInterval);
-        }
-        }
-
-        function showIdleToast() {
-        const toast = document.getElementById('idleToast');
-        if (toast) {
-        toast.classList.add('show');
-        }
-        }
-
-        function hideIdleToast() {
-        const toast = document.getElementById('idleToast');
-        if (toast) {
-        toast.classList.remove('show');
-        }
-        }
-
-        function showSessionWarning() {
-        const warningModal = document.getElementById('sessionWarningModal');
-        if (!warningModal) {
-        console.error('Warning modal not found');
-        return;
-        }
-
-        // Hide idle toast if shown
-        hideIdleToast();
-
-        // Clear any existing countdown
-        if (countdownInterval) clearInterval(countdownInterval);
-
-        // Show the modal
-        const modal = new bootstrap.Modal(warningModal, {
-        backdrop: 'static',
-        keyboard: false
-        });
-        modal.show();
-
-        // Start countdown
-        let countdown = COUNTDOWN_SECONDS;
-        const countdownEl = document.getElementById('sessionCountdown');
-
-        // Update display immediately
-        if (countdownEl) {
-        const mins = Math.floor(countdown / 60);
-        const secs = countdown % 60;
-        countdownEl.textContent = mins + ':' + secs.toString().padStart(2, '0');
-        }
-
-        countdownInterval = setInterval(function () {
-        countdown--;
-        if (countdownEl) {
-        const mins = Math.floor(countdown / 60);
-        const secs = countdown % 60;
-        countdownEl.textContent = mins + ':' + secs.toString().padStart(2, '0');
-        }
-        if (countdown <= 0) {
-        clearInterval(countdownInterval);
-        }
-        }, 1000);
-        }
-
-        function extendSession() {
-        // Clear countdown
-        if (countdownInterval) clearInterval(countdownInterval);
-
-        // Make a request to extend session
-        fetch('/Account/ExtendSession', {
-        method: 'POST',
-        credentials: 'same-origin'
-        })
-        .then(function (response) {
-        if (response.ok) {
-        resetSessionTimer();
-        toastr.success('Session extended!');
-        } else {
-        window.location.href = '/Account/Login';
-        }
-        })
-        .catch(function (error) {
-        console.error('Error extending session:', error);
-        resetSessionTimer();
-        });
+        function extendSession() {             // Clear countdown             if (countdownInterval) clearInterval(countdownInterval);
+        // Make a request to extend session             fetch('/Account/ExtendSession', {                 method: 'POST',                 credentials: 'same-origin'             })                 .then(function (response) {                     if (response.ok) {                         resetSessionTimer();                         toastr.success('Session extended!');                     } else {                         window.location.href = '/Account/Login';                     }                 })                 .catch(function (error) {                     console.error('Error extending session:', error);                     resetSessionTimer();                 });
         }
 
         // Debounce function to limit activity detection calls
-        function debounce(func, wait) {
-        let timeout;
-        return function () {
-        const context = this;
-        const args = arguments;
-        clearTimeout(timeout);
-        timeout = setTimeout(function () {
-        func.apply(context, args);
-        }, wait);
-        };
+        function debounce(func, wait) {             let timeout;             return function () {                 const context = this;                 const args = arguments;                 clearTimeout(timeout);                 timeout = setTimeout(function () {                     func.apply(context, args);                 }, wait);             };
         }
     </script>
 
@@ -2622,137 +2446,63 @@
             </div>
         </div>
 
-        <script>
-            function toggleProfileMenu() {
+        <script>         function toggleProfileMenu() {
             const menu = document.getElementById('profileMenu');
-            menu.classList.toggle('show');
-            }
-
+            menu.classList.toggle('show');         }
             document.addEventListener('click', function (event) {
             const profileDropdown = document.querySelector('.profile-dropdown');
             const menu = document.getElementById('profileMenu');
-            if (profileDropdown && !profileDropdown.contains(event.target)) {
-            menu.classList.remove('show');
-            }
-            });
-
+            if (profileDropdown && !profileDropdown.contains(event.target)) {                 menu.classList.remove('show');
+            }         });
             function toggleSidebar() {
             const sidebar = document.getElementById('sidebar');
             const content = document.getElementById('content');
             const overlay = document.querySelector('.sidebar-overlay');
             const hamburger = document.getElementById('hamburgerBtn');
 
-            if (window.innerWidth >= 992) {
-            // Desktop: Toggle collapsed state
-            sidebar.classList.toggle('collapsed');
-            content.classList.toggle('expanded');
-            hamburger.classList.toggle('active');
-            localStorage.setItem('sidebarCollapsed', sidebar.classList.contains('collapsed'));
-            } else {
-            // Mobile: Slide in/out
-            sidebar.classList.toggle('show');
-            overlay.classList.toggle('show');
-            hamburger.classList.toggle('active');
-            }
-            }
-
+            if (window.innerWidth >= 992) {                 // Desktop: Toggle collapsed state                 sidebar.classList.toggle('collapsed');                 content.classList.toggle('expanded');                 hamburger.classList.toggle('active');                 localStorage.setItem('sidebarCollapsed', sidebar.classList.contains('collapsed'));
+            } else {                 // Mobile: Slide in/out                 sidebar.classList.toggle('show');                 overlay.classList.toggle('show');                 hamburger.classList.toggle('active');
+            }         }
             function closeSidebarOnMobile() {
-            if (window.innerWidth < 992) {
-            const sidebar = document.getElementById('sidebar');
-            const overlay = document.querySelector('.sidebar-overlay');
-            const hamburger = document.getElementById('hamburgerBtn');
-
-            sidebar.classList.remove('show');
-            overlay.classList.remove('show');
-            hamburger.classList.remove('active');
-            }
-            }
-
-            // =====================================================
-            // FULLSCREEN TOGGLE
-            // =====================================================
-            function toggleFullScreen() {
-            if (!document.fullscreenElement) {
-            document.documentElement.requestFullscreen();
-            } else {
-            document.exitFullscreen();
-            }
-            }
-            function updateFullscreenIcons(isFs) {
+            if (window.innerWidth < 992) {                 const sidebar = document.getElementById('sidebar');                 const overlay = document.querySelector('.sidebar-overlay');                 const hamburger = document.getElementById('hamburgerBtn');
+            sidebar.classList.remove('show');                 overlay.classList.remove('show');                 hamburger.classList.remove('active');
+            }         }
+            // =====================================================         // FULLSCREEN TOGGLE         // =====================================================         function toggleFullScreen() {
+            if (!document.fullscreenElement) {                 document.documentElement.requestFullscreen();
+            } else {                 document.exitFullscreen();
+            }         }         function updateFullscreenIcons(isFs) {
             var icons = document.querySelectorAll('#dashboardFullscreenIcon, #navFullscreenIcon');
-            icons.forEach(function (icon) {
-            if (isFs) { icon.classList.remove('fa-expand'); icon.classList.add('fa-compress'); }
-            else { icon.classList.remove('fa-compress'); icon.classList.add('fa-expand'); }
+            icons.forEach(function (icon) {                 if (isFs) { icon.classList.remove('fa-expand'); icon.classList.add('fa-compress'); }                 else { icon.classList.remove('fa-compress'); icon.classList.add('fa-expand'); }
             });
             var cb = document.getElementById('settingFullscreen');
-            if (cb) cb.checked = isFs;
-            }
-            document.addEventListener('fullscreenchange', function () {
-            updateFullscreenIcons(!!document.fullscreenElement);
-            });
-
-            // =====================================================
-            // DARK MODE TOGGLE
-            // =====================================================
-            function toggleTheme() {
+            if (cb) cb.checked = isFs;         }         document.addEventListener('fullscreenchange', function () {
+            updateFullscreenIcons(!!document.fullscreenElement);         });
+            // =====================================================         // DARK MODE TOGGLE         // =====================================================         function toggleTheme() {
             const html = document.documentElement;
             const currentTheme = html.getAttribute('data-theme');
             const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
             html.setAttribute('data-theme', newTheme);
-            localStorage.setItem('theme', newTheme);
-            }
-
-            // Apply saved theme immediately (before DOMContentLoaded to prevent flash)
-            (function () {
+            localStorage.setItem('theme', newTheme);         }
+            // Apply saved theme immediately (before DOMContentLoaded to prevent flash)         (function () {
             const savedTheme = localStorage.getItem('theme') || 'light';
-            document.documentElement.setAttribute('data-theme', savedTheme);
-            })();
-
-            // Initialize on page load
-            document.addEventListener('DOMContentLoaded', function () {
+            document.documentElement.setAttribute('data-theme', savedTheme);         })();
+            // Initialize on page load         document.addEventListener('DOMContentLoaded', function () {
             const isCollapsed = localStorage.getItem('sidebarCollapsed') === 'true';
             const hamburger = document.getElementById('hamburgerBtn');
 
-            if (isCollapsed && window.innerWidth >= 992) {
-            document.getElementById('sidebar').classList.add('collapsed');
-            document.getElementById('content').classList.add('expanded');
-            hamburger.classList.add('active');
-            }
-            });
-
-            // Handle window resize
-            window.addEventListener('resize', function () {
+            if (isCollapsed && window.innerWidth >= 992) {                 document.getElementById('sidebar').classList.add('collapsed');                 document.getElementById('content').classList.add('expanded');                 hamburger.classList.add('active');
+            }         });
+            // Handle window resize         window.addEventListener('resize', function () {
             const sidebar = document.getElementById('sidebar');
             const content = document.getElementById('content');
             const overlay = document.querySelector('.sidebar-overlay');
             const hamburger = document.getElementById('hamburgerBtn');
 
-            if (window.innerWidth >= 992) {
-            // Desktop mode
-            sidebar.classList.remove('show');
-            overlay.classList.remove('show');
-
-            // Restore collapsed state from localStorage
-            if (localStorage.getItem('sidebarCollapsed') === 'true') {
-            sidebar.classList.add('collapsed');
-            content.classList.add('expanded');
-            hamburger.classList.add('active');
-            } else {
-            sidebar.classList.remove('collapsed');
-            content.classList.remove('expanded');
-            hamburger.classList.remove('active');
-            }
-            } else {
-            // Mobile mode - reset collapsed state
-            sidebar.classList.remove('collapsed');
-            content.classList.remove('expanded');
-
-            // Update hamburger based on sidebar visibility
-            if (!sidebar.classList.contains('show')) {
-            hamburger.classList.remove('active');
-            }
-            }
-            });
+            if (window.innerWidth >= 992) {                 // Desktop mode                 sidebar.classList.remove('show');                 overlay.classList.remove('show');
+            // Restore collapsed state from localStorage                 if (localStorage.getItem('sidebarCollapsed') === 'true') {                     sidebar.classList.add('collapsed');                     content.classList.add('expanded');                     hamburger.classList.add('active');                 } else {                     sidebar.classList.remove('collapsed');                     content.classList.remove('expanded');                     hamburger.classList.remove('active');                 }
+            } else {                 // Mobile mode - reset collapsed state                 sidebar.classList.remove('collapsed');                 content.classList.remove('expanded');
+            // Update hamburger based on sidebar visibility                 if (!sidebar.classList.contains('show')) {                     hamburger.classList.remove('active');                 }
+            }         });
         </script>
     </body>
 
