@@ -57,11 +57,11 @@
         @if (!isAll)
         {
             <a href="/Boxing/Create?category=@category" class="btn btn-primary ms-auto"
-                   style="border-radius:10px; font-weight:500; padding:10px 18px;">
+               style="border-radius:10px; font-weight:500; padding:10px 18px;">
                 <i class="fa-solid fa-user-plus me-1"></i> Add Member
             </a>
             <a href="/Boxing/Import?category=@category" class="btn btn-warning"
-                   style="border-radius:10px; font-weight:500; padding:10px 18px;">
+               style="border-radius:10px; font-weight:500; padding:10px 18px;">
                 <i class="fa-solid fa-file-import me-1"></i> Import
             </a>
         }
@@ -69,7 +69,7 @@
             <i class="fa-solid fa-file-excel me-1"></i> Export
         </a>
         <a href="/Boxing/ExportDiary?category=@category" class="btn export-btn"
-               style="background: linear-gradient(135deg, #4f46e5, #7c3aed) !important; color: #fff !important; border: none;">
+           style="background: linear-gradient(135deg, #4f46e5, #7c3aed) !important; color: #fff !important; border: none;">
             <i class="fa-solid fa-address-book me-1"></i> Contact Book
         </a>
     </div>
@@ -132,18 +132,18 @@
             <!-- Status Filter Buttons -->
             <div class="status-filter-group d-flex gap-2">
                 <a class="status-pill status-all @(string.IsNullOrEmpty(ViewBag.PaymentStatus as string) ? "active" : "")"
-                       href="@BuildQuery(overridePayment: "")">
+                   href="@BuildQuery(overridePayment: "")">
                     <i class="fa-solid fa-users"></i>
                     <span>All</span>
                     <span class="pill-count">@ViewBag.CountAll</span>
                 </a>
                 <a class="status-pill status-active @(ViewBag.PaymentStatus == "paid" ? "active" : "")"
-                       href="@BuildQuery(overridePayment: "paid")">
+                   href="@BuildQuery(overridePayment: "paid")">
                     <i class="fa-solid fa-check-circle"></i>
                     <span>Paid</span>
                 </a>
                 <a class="status-pill status-expired @(ViewBag.PaymentStatus == "due" ? "active" : "")"
-                       href="@BuildQuery(overridePayment: "due")">
+                   href="@BuildQuery(overridePayment: "due")">
                     <i class="fa-solid fa-exclamation-triangle"></i>
                     <span>With Due</span>
                 </a>
@@ -170,7 +170,7 @@
                     <span class="filter-tag @(ViewBag.PaymentStatus == "due" ? "tag-due" : "tag-paid")">
                         <i
                         class="fa-solid @(ViewBag.PaymentStatus == "due" ? "fa-exclamation-triangle" : "fa-check-circle") me-1"></i>@(ViewBag.PaymentStatus
-                                                                                        == "due" ? "With Due" : "Fully Paid")
+                                                                                                                == "due" ? "With Due" : "Fully Paid")
                         <a href="@BuildQuery(overridePayment: "")" class="tag-close"><i class="fa-solid fa-times"></i></a>
                     </span>
                 }
@@ -744,8 +744,8 @@
                         <td>
                             @if (b.Photo != null)
                             {
-                                <img src="data:image/jpeg;base64,@Convert.ToBase64String(b.Photo)" class="rounded-circle"
-                                     style="width:40px;height:40px;object-fit:cover;" />
+                                <img src="@Url.Action("Photo", "Boxing", new { id = b.BoxingMemberID })" loading="lazy"
+                                     class="rounded-circle" style="width:40px;height:40px;object-fit:cover;" />
                             }
                             else
                             {
@@ -829,8 +829,9 @@
                             {
                                 var isExpired = b.ExpireDate.Value.Date < DateTime.Today;
                                 var isExpiringSoon = !isExpired && b.ExpireDate.Value.Date <= DateTime.Today.AddDays(7);
-                                <span class="badge rounded-pill @(isExpired ? "bg-danger" : isExpiringSoon ? "bg-warning text-dark" : "bg-success")"
-                                      style="font-size: 11px; padding: 5px 10px;">
+                                <span
+                                    class="badge rounded-pill @(isExpired ? "bg-danger" : isExpiringSoon ? "bg-warning text-dark" : "bg-success")"
+                                    style="font-size: 11px; padding: 5px 10px;">
                                     <i class="fa-solid @(isExpired ? "fa-calendar-xmark" : "fa-calendar-check") me-1"></i>
                                     @b.ExpireDate.Value.ToString("dd MMM yy")
                                 </span>
@@ -842,10 +843,12 @@
                         </td>
                         <td>
                             <div class="btn-group btn-group-sm">
-                                <a class="btn btn-outline-primary" href="/Boxing/Details/@b.BoxingMemberID?returnUrl=@returnUrl" title="View">
+                                <a class="btn btn-outline-primary"
+                                   href="/Boxing/Details/@b.BoxingMemberID?returnUrl=@returnUrl" title="View">
                                     <i class="fa-solid fa-eye"></i>
                                 </a>
-                                <a class="btn btn-outline-secondary" href="/Boxing/Edit/@b.BoxingMemberID?returnUrl=@returnUrl" title="Edit">
+                                <a class="btn btn-outline-secondary"
+                                   href="/Boxing/Edit/@b.BoxingMemberID?returnUrl=@returnUrl" title="Edit">
                                     <i class="fa-solid fa-edit"></i>
                                 </a>
                                 <button class="btn btn-outline-danger" data-bs-toggle="modal"

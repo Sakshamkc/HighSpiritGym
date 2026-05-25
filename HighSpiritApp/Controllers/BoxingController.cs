@@ -168,6 +168,19 @@ namespace HighSpiritApp.Controllers
             return View(member);
         }
 
+        // Serve boxing member photo as a separate cacheable image endpoint.
+        [Microsoft.AspNetCore.Authorization.AllowAnonymous]
+        [ResponseCache(Duration = 86400, Location = ResponseCacheLocation.Any)]
+        public async Task<IActionResult> Photo(int id)
+        {
+            var member = await _boxingService.GetByIdAsync(id);
+            if (member?.Photo == null || member.Photo.Length == 0)
+            {
+                return NotFound();
+            }
+            return File(member.Photo, "image/jpeg");
+        }
+
         [HttpPost]
         public async Task<IActionResult> Delete(int id)
         {

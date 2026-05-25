@@ -1229,7 +1229,7 @@
                                                                                                     <td>
                                                                                                         @if (c.Photo != null)
                                                                                                         {
-                                                                                                            <img src="data:image/jpeg;base64,@Convert.ToBase64String(c.Photo)"        class="rounded-circle"
+                                                                                                            <img src="@Url.Action("Photo", "Customers", new { id = c.CustomerID })" loading="lazy" class="rounded-circle"
                                                                                                                  style="width:40px;height:40px;object-fit:cover;" />
                                                                                                         }
                                                                                                         else

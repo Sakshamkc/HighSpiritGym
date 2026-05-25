@@ -82,6 +82,20 @@ namespace HighSpiritApp.Controllers
             return View(customer);
         }
 
+        // Serve customer photo as a separate cacheable image endpoint.
+        // Lets the browser cache photos individually instead of inlining base64 into the HTML.
+        [AllowAnonymous]
+        [ResponseCache(Duration = 86400, Location = ResponseCacheLocation.Any)]
+        public async Task<IActionResult> Photo(int id)
+        {
+            var customer = await _customerService.GetByIdAsync(id);
+            if (customer?.Photo == null || customer.Photo.Length == 0)
+            {
+                return NotFound();
+            }
+            return File(customer.Photo, "image/jpeg");
+        }
+
         public IActionResult Create(string? planName = null)
         {
             ViewBag.PreselectedPlan = planName;
