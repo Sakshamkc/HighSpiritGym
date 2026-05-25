@@ -2446,63 +2446,126 @@
             </div>
         </div>
 
-        <script>         function toggleProfileMenu() {
-            const menu = document.getElementById('profileMenu');
-            menu.classList.toggle('show');         }
+        <script>
+            function toggleProfileMenu() {
+                const menu = document.getElementById('profileMenu');
+                menu.classList.toggle('show');
+            }
+
             document.addEventListener('click', function (event) {
-            const profileDropdown = document.querySelector('.profile-dropdown');
-            const menu = document.getElementById('profileMenu');
-            if (profileDropdown && !profileDropdown.contains(event.target)) {                 menu.classList.remove('show');
-            }         });
-            function toggleSidebar() {
-            const sidebar = document.getElementById('sidebar');
-            const content = document.getElementById('content');
-            const overlay = document.querySelector('.sidebar-overlay');
-            const hamburger = document.getElementById('hamburgerBtn');
-
-            if (window.innerWidth >= 992) {                 // Desktop: Toggle collapsed state                 sidebar.classList.toggle('collapsed');                 content.classList.toggle('expanded');                 hamburger.classList.toggle('active');                 localStorage.setItem('sidebarCollapsed', sidebar.classList.contains('collapsed'));
-            } else {                 // Mobile: Slide in/out                 sidebar.classList.toggle('show');                 overlay.classList.toggle('show');                 hamburger.classList.toggle('active');
-            }         }
-            function closeSidebarOnMobile() {
-            if (window.innerWidth < 992) {                 const sidebar = document.getElementById('sidebar');                 const overlay = document.querySelector('.sidebar-overlay');                 const hamburger = document.getElementById('hamburgerBtn');
-            sidebar.classList.remove('show');                 overlay.classList.remove('show');                 hamburger.classList.remove('active');
-            }         }
-            // =====================================================         // FULLSCREEN TOGGLE         // =====================================================         function toggleFullScreen() {
-            if (!document.fullscreenElement) {                 document.documentElement.requestFullscreen();
-            } else {                 document.exitFullscreen();
-            }         }         function updateFullscreenIcons(isFs) {
-            var icons = document.querySelectorAll('#dashboardFullscreenIcon, #navFullscreenIcon');
-            icons.forEach(function (icon) {                 if (isFs) { icon.classList.remove('fa-expand'); icon.classList.add('fa-compress'); }                 else { icon.classList.remove('fa-compress'); icon.classList.add('fa-expand'); }
+                const profileDropdown = document.querySelector('.profile-dropdown');
+                const menu = document.getElementById('profileMenu');
+                if (profileDropdown && !profileDropdown.contains(event.target)) {
+                    menu.classList.remove('show');
+                }
             });
-            var cb = document.getElementById('settingFullscreen');
-            if (cb) cb.checked = isFs;         }         document.addEventListener('fullscreenchange', function () {
-            updateFullscreenIcons(!!document.fullscreenElement);         });
-            // =====================================================         // DARK MODE TOGGLE         // =====================================================         function toggleTheme() {
-            const html = document.documentElement;
-            const currentTheme = html.getAttribute('data-theme');
-            const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
-            html.setAttribute('data-theme', newTheme);
-            localStorage.setItem('theme', newTheme);         }
-            // Apply saved theme immediately (before DOMContentLoaded to prevent flash)         (function () {
-            const savedTheme = localStorage.getItem('theme') || 'light';
-            document.documentElement.setAttribute('data-theme', savedTheme);         })();
-            // Initialize on page load         document.addEventListener('DOMContentLoaded', function () {
-            const isCollapsed = localStorage.getItem('sidebarCollapsed') === 'true';
-            const hamburger = document.getElementById('hamburgerBtn');
 
-            if (isCollapsed && window.innerWidth >= 992) {                 document.getElementById('sidebar').classList.add('collapsed');                 document.getElementById('content').classList.add('expanded');                 hamburger.classList.add('active');
-            }         });
-            // Handle window resize         window.addEventListener('resize', function () {
-            const sidebar = document.getElementById('sidebar');
-            const content = document.getElementById('content');
-            const overlay = document.querySelector('.sidebar-overlay');
-            const hamburger = document.getElementById('hamburgerBtn');
+            function toggleSidebar() {
+                const sidebar = document.getElementById('sidebar');
+                const content = document.getElementById('content');
+                const overlay = document.querySelector('.sidebar-overlay');
+                const hamburger = document.getElementById('hamburgerBtn');
 
-            if (window.innerWidth >= 992) {                 // Desktop mode                 sidebar.classList.remove('show');                 overlay.classList.remove('show');
-            // Restore collapsed state from localStorage                 if (localStorage.getItem('sidebarCollapsed') === 'true') {                     sidebar.classList.add('collapsed');                     content.classList.add('expanded');                     hamburger.classList.add('active');                 } else {                     sidebar.classList.remove('collapsed');                     content.classList.remove('expanded');                     hamburger.classList.remove('active');                 }
-            } else {                 // Mobile mode - reset collapsed state                 sidebar.classList.remove('collapsed');                 content.classList.remove('expanded');
-            // Update hamburger based on sidebar visibility                 if (!sidebar.classList.contains('show')) {                     hamburger.classList.remove('active');                 }
-            }         });
+                if (window.innerWidth >= 992) {
+                    sidebar.classList.toggle('collapsed');
+                    content.classList.toggle('expanded');
+                    hamburger.classList.toggle('active');
+                    localStorage.setItem('sidebarCollapsed', sidebar.classList.contains('collapsed'));
+                } else {
+                    sidebar.classList.toggle('show');
+                    overlay.classList.toggle('show');
+                    hamburger.classList.toggle('active');
+                }
+            }
+
+            function closeSidebarOnMobile() {
+                if (window.innerWidth < 992) {
+                    const sidebar = document.getElementById('sidebar');
+                    const overlay = document.querySelector('.sidebar-overlay');
+                    const hamburger = document.getElementById('hamburgerBtn');
+                    sidebar.classList.remove('show');
+                    overlay.classList.remove('show');
+                    hamburger.classList.remove('active');
+                }
+            }
+
+            // FULLSCREEN TOGGLE
+            function toggleFullScreen() {
+                if (!document.fullscreenElement) {
+                    document.documentElement.requestFullscreen();
+                } else {
+                    document.exitFullscreen();
+                }
+            }
+
+            function updateFullscreenIcons(isFs) {
+                var icons = document.querySelectorAll('#dashboardFullscreenIcon, #navFullscreenIcon');
+                icons.forEach(function (icon) {
+                    if (isFs) { icon.classList.remove('fa-expand'); icon.classList.add('fa-compress'); }
+                    else { icon.classList.remove('fa-compress'); icon.classList.add('fa-expand'); }
+                });
+                var cb = document.getElementById('settingFullscreen');
+                if (cb) cb.checked = isFs;
+            }
+
+            document.addEventListener('fullscreenchange', function () {
+                updateFullscreenIcons(!!document.fullscreenElement);
+            });
+
+            // DARK MODE TOGGLE
+            function toggleTheme() {
+                const html = document.documentElement;
+                const currentTheme = html.getAttribute('data-theme');
+                const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+                html.setAttribute('data-theme', newTheme);
+                localStorage.setItem('theme', newTheme);
+            }
+
+            // Apply saved theme immediately (before DOMContentLoaded to prevent flash)
+            (function () {
+                const savedTheme = localStorage.getItem('theme') || 'light';
+                document.documentElement.setAttribute('data-theme', savedTheme);
+            })();
+
+            // Initialize on page load
+            document.addEventListener('DOMContentLoaded', function () {
+                const isCollapsed = localStorage.getItem('sidebarCollapsed') === 'true';
+                const hamburger = document.getElementById('hamburgerBtn');
+
+                if (isCollapsed && window.innerWidth >= 992) {
+                    document.getElementById('sidebar').classList.add('collapsed');
+                    document.getElementById('content').classList.add('expanded');
+                    hamburger.classList.add('active');
+                }
+            });
+
+            // Handle window resize
+            window.addEventListener('resize', function () {
+                const sidebar = document.getElementById('sidebar');
+                const content = document.getElementById('content');
+                const overlay = document.querySelector('.sidebar-overlay');
+                const hamburger = document.getElementById('hamburgerBtn');
+
+                if (window.innerWidth >= 992) {
+                    sidebar.classList.remove('show');
+                    overlay.classList.remove('show');
+                    if (localStorage.getItem('sidebarCollapsed') === 'true') {
+                        sidebar.classList.add('collapsed');
+                        content.classList.add('expanded');
+                        hamburger.classList.add('active');
+                    } else {
+                        sidebar.classList.remove('collapsed');
+                        content.classList.remove('expanded');
+                        hamburger.classList.remove('active');
+                    }
+                } else {
+                    sidebar.classList.remove('collapsed');
+                    content.classList.remove('expanded');
+                    if (!sidebar.classList.contains('show')) {
+                        hamburger.classList.remove('active');
+                    }
+                }
+            });
         </script>
     </body>
 
