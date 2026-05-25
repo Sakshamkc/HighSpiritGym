@@ -36,15 +36,16 @@ namespace HighSpiritApp.Services
             var monthStart = new DateTime(today.Year, today.Month, 1);
             var weekAhead = today.AddDays(7);
 
-            // === Gym stats: compute latest membership per customer in SQL ===
-            var latestMembershipsQuery =
-                from m in _db.CustomerMemberships.AsNoTracking()
-                group m by m.CustomerID into g
-                select g.OrderByDescending(x => x.StartDate).FirstOrDefault();
-
-            var latestMemberships = await latestMembershipsQuery
-                .Select(m => new { m!.ExpireDate, m.IsOnHold, m.DueAmount })
+            // === Gym stats: get latest membership per customer ===
+            // Load only the fields we need, then compute "latest per customer" in memory.
+            var allMemberships = await _db.CustomerMemberships.AsNoTracking()
+                .Select(m => new { m.CustomerID, m.StartDate, m.ExpireDate, m.IsOnHold, m.DueAmount })
                 .ToListAsync();
+
+            var latestMemberships = allMemberships
+                .GroupBy(m => m.CustomerID)
+                .Select(g => g.OrderByDescending(x => x.StartDate).First())
+                .ToList();
 
             var gymTotal = await _db.Customers.AsNoTracking().CountAsync();
             var gymJoinedThisMonth = await _db.Customers.AsNoTracking()
