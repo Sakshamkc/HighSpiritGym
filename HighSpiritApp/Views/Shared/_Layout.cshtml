@@ -2323,15 +2323,44 @@
     @await RenderSectionAsync("Scripts", required: false)
 
     <script>
-        toastr.options = {             "closeButton": true,             "progressBar": true,             "positionClass": "toast-top-right",             "timeOut": "3000"
+        toastr.options = {
+            "closeButton": true,
+            "progressBar": true,
+            "positionClass": "toast-top-right",
+            "timeOut": "3000"
         };
 
-        document.addEventListener('DOMContentLoaded', function () {             // Initialize Date Picker Manager (handles EN/NP mode)             NepaliDatePickerManager.init();
-        // Apply session timer visibility from settings             if (localStorage.getItem('sessionTimerHidden') === 'true') {                 var stDisplay = document.getElementById('sessionTimerDisplay');                 if (stDisplay) stDisplay.style.display = 'none';             }
-        // Apply header quick actions visibility from settings             if (localStorage.getItem('headerActionsHidden') === 'true') {                 var dtBtn = document.getElementById('dateToggleBtn');                 var tmBtn = document.getElementById('themeToggle');                 if (dtBtn) dtBtn.style.display = 'none';                 if (tmBtn) tmBtn.style.display = 'none';             }
-        // Apply animations setting             if (localStorage.getItem('animationsDisabled') === 'true') {                 document.documentElement.classList.add('no-animations');             }
-        // Apply toast position from settings             var savedToastPos = localStorage.getItem('toastPosition');             if (savedToastPos && typeof toastr !== 'undefined') {                 toastr.options.positionClass = savedToastPos;             }
-        // Initialize session timeout             initSessionTimeout();
+        document.addEventListener('DOMContentLoaded', function () {
+            // Initialize Date Picker Manager (handles EN/NP mode)
+            NepaliDatePickerManager.init();
+
+            // Apply session timer visibility from settings
+            if (localStorage.getItem('sessionTimerHidden') === 'true') {
+                var stDisplay = document.getElementById('sessionTimerDisplay');
+                if (stDisplay) stDisplay.style.display = 'none';
+            }
+
+            // Apply header quick actions visibility from settings
+            if (localStorage.getItem('headerActionsHidden') === 'true') {
+                var dtBtn = document.getElementById('dateToggleBtn');
+                var tmBtn = document.getElementById('themeToggle');
+                if (dtBtn) dtBtn.style.display = 'none';
+                if (tmBtn) tmBtn.style.display = 'none';
+            }
+
+            // Apply animations setting
+            if (localStorage.getItem('animationsDisabled') === 'true') {
+                document.documentElement.classList.add('no-animations');
+            }
+
+            // Apply toast position from settings
+            var savedToastPos = localStorage.getItem('toastPosition');
+            if (savedToastPos && typeof toastr !== 'undefined') {
+                toastr.options.positionClass = savedToastPos;
+            }
+
+            // Initialize session timeout
+            initSessionTimeout();
         });
 
         // =====================================================
@@ -2351,49 +2380,194 @@
         const COUNTDOWN_SECONDS = 120;               // 2 minutes countdown
         const IDLE_THRESHOLD_MS = 5 * 60 * 1000;    // Show idle notification after 5 minutes of no activity
 
-        function initSessionTimeout() {             console.log('Session timeout initialized: ' + (SESSION_TIMEOUT_MS / 1000) + ' seconds');             resetSessionTimer();
-        // Reset timer on user activity (debounced to avoid too many resets)             // Note: scroll and mousemove are excluded as they don't indicate real user activity             const activityHandler = debounce(function () {                 if (isIdle) {                     hideIdleToast();                     isIdle = false;                 }                 resetSessionTimer();             }, 1000);
-        // Only track meaningful user interactions (click, keypress, touch)             // Scroll and mousemove are NOT included as they don't indicate active usage             ['click', 'keypress', 'touchstart'].forEach(function (event) {                 document.addEventListener(event, activityHandler, { passive: true });             });
+        function initSessionTimeout() {
+            console.log('Session timeout initialized: ' + (SESSION_TIMEOUT_MS / 1000) + ' seconds');
+            resetSessionTimer();
+
+            // Reset timer on user activity (debounced)
+            const activityHandler = debounce(function () {
+                if (isIdle) {
+                    hideIdleToast();
+                    isIdle = false;
+                }
+                resetSessionTimer();
+            }, 1000);
+
+            // Only track meaningful user interactions
+            ['click', 'keypress', 'touchstart'].forEach(function (event) {
+                document.addEventListener(event, activityHandler, { passive: true });
+            });
         }
 
-        function resetSessionTimer() {             // Clear existing timers             if (sessionTimer) clearTimeout(sessionTimer);             if (warningTimer) clearTimeout(warningTimer);             if (countdownInterval) clearInterval(countdownInterval);             if (timerDisplayInterval) clearInterval(timerDisplayInterval);             if (idleTimer) clearTimeout(idleTimer);
-        // Reset session start time             sessionStartTime = Date.now();
-        // Hide warning modal if shown             const warningModal = document.getElementById('sessionWarningModal');             if (warningModal) {                 const modalInstance = bootstrap.Modal.getInstance(warningModal);                 if (modalInstance) {                     modalInstance.hide();                 }             }
-        // Reset timer display style             const timerDisplay = document.getElementById('sessionTimerDisplay');             if (timerDisplay) {                 timerDisplay.classList.remove('warning', 'danger');             }
-        // Start the visible timer display             updateTimerDisplay();             timerDisplayInterval = setInterval(updateTimerDisplay, 1000);
-        // Set idle notification timer (5 minutes)             idleTimer = setTimeout(function () {                 showIdleToast();                 isIdle = true;             }, IDLE_THRESHOLD_MS);
-        // Set warning timer             warningTimer = setTimeout(function () {                 showSessionWarning();             }, WARNING_TIME_MS);
-        // Set logout timer             sessionTimer = setTimeout(function () {                 window.location.href = '/Account/Logout?expired=true';             }, SESSION_TIMEOUT_MS);
+        function resetSessionTimer() {
+            // Clear existing timers
+            if (sessionTimer) clearTimeout(sessionTimer);
+            if (warningTimer) clearTimeout(warningTimer);
+            if (countdownInterval) clearInterval(countdownInterval);
+            if (timerDisplayInterval) clearInterval(timerDisplayInterval);
+            if (idleTimer) clearTimeout(idleTimer);
+
+            // Reset session start time
+            sessionStartTime = Date.now();
+
+            // Hide warning modal if shown
+            const warningModal = document.getElementById('sessionWarningModal');
+            if (warningModal) {
+                const modalInstance = bootstrap.Modal.getInstance(warningModal);
+                if (modalInstance) {
+                    modalInstance.hide();
+                }
+            }
+
+            // Reset timer display style
+            const timerDisplay = document.getElementById('sessionTimerDisplay');
+            if (timerDisplay) {
+                timerDisplay.classList.remove('warning', 'danger');
+            }
+
+            // Start the visible timer display
+            updateTimerDisplay();
+            timerDisplayInterval = setInterval(updateTimerDisplay, 1000);
+
+            // Set idle notification timer
+            idleTimer = setTimeout(function () {
+                showIdleToast();
+                isIdle = true;
+            }, IDLE_THRESHOLD_MS);
+
+            // Set warning timer
+            warningTimer = setTimeout(function () {
+                showSessionWarning();
+            }, WARNING_TIME_MS);
+
+            // Set logout timer
+            sessionTimer = setTimeout(function () {
+                window.location.href = '/Account/Logout?expired=true';
+            }, SESSION_TIMEOUT_MS);
         }
 
-        function updateTimerDisplay() {             const elapsed = Date.now() - sessionStartTime;             const remaining = Math.max(0, SESSION_TIMEOUT_MS - elapsed);             const minutes = Math.floor(remaining / 60000);             const seconds = Math.floor((remaining % 60000) / 1000);
-        const timerText = document.getElementById('sessionTimerText');             const timerDisplay = document.getElementById('sessionTimerDisplay');
-        if (timerText) {                 timerText.textContent = minutes + ':' + seconds.toString().padStart(2, '0');             }
-        if (timerDisplay) {                 // Update timer style based on remaining time                 if (remaining <= 60000) { // Less than 1 minute                     timerDisplay.classList.remove('warning');                     timerDisplay.classList.add('danger');                 } else if (remaining <= 120000) { // Less than 2 minutes                     timerDisplay.classList.remove('danger');                     timerDisplay.classList.add('warning');                 } else {                     timerDisplay.classList.remove('warning', 'danger');                 }             }
-        if (remaining <= 0) {                 clearInterval(timerDisplayInterval);             }
+        function updateTimerDisplay() {
+            const elapsed = Date.now() - sessionStartTime;
+            const remaining = Math.max(0, SESSION_TIMEOUT_MS - elapsed);
+            const minutes = Math.floor(remaining / 60000);
+            const seconds = Math.floor((remaining % 60000) / 1000);
+
+            const timerText = document.getElementById('sessionTimerText');
+            const timerDisplay = document.getElementById('sessionTimerDisplay');
+
+            if (timerText) {
+                timerText.textContent = minutes + ':' + seconds.toString().padStart(2, '0');
+            }
+
+            if (timerDisplay) {
+                if (remaining <= 60000) {
+                    timerDisplay.classList.remove('warning');
+                    timerDisplay.classList.add('danger');
+                } else if (remaining <= 120000) {
+                    timerDisplay.classList.remove('danger');
+                    timerDisplay.classList.add('warning');
+                } else {
+                    timerDisplay.classList.remove('warning', 'danger');
+                }
+            }
+
+            if (remaining <= 0) {
+                clearInterval(timerDisplayInterval);
+            }
         }
 
-        function showIdleToast() {             const toast = document.getElementById('idleToast');             if (toast) {                 toast.classList.add('show');             }
+        function showIdleToast() {
+            const toast = document.getElementById('idleToast');
+            if (toast) {
+                toast.classList.add('show');
+            }
         }
 
-        function hideIdleToast() {             const toast = document.getElementById('idleToast');             if (toast) {                 toast.classList.remove('show');             }
+        function hideIdleToast() {
+            const toast = document.getElementById('idleToast');
+            if (toast) {
+                toast.classList.remove('show');
+            }
         }
 
-        function showSessionWarning() {             const warningModal = document.getElementById('sessionWarningModal');             if (!warningModal) {                 console.error('Warning modal not found');                 return;             }
-        // Hide idle toast if shown             hideIdleToast();
-        // Clear any existing countdown             if (countdownInterval) clearInterval(countdownInterval);
-        // Show the modal             const modal = new bootstrap.Modal(warningModal, {                 backdrop: 'static',                 keyboard: false             });             modal.show();
-        // Start countdown             let countdown = COUNTDOWN_SECONDS;             const countdownEl = document.getElementById('sessionCountdown');
-        // Update display immediately             if (countdownEl) {                 const mins = Math.floor(countdown / 60);                 const secs = countdown % 60;                 countdownEl.textContent = mins + ':' + secs.toString().padStart(2, '0');             }
-        countdownInterval = setInterval(function () {                 countdown--;                 if (countdownEl) {                     const mins = Math.floor(countdown / 60);                     const secs = countdown % 60;                     countdownEl.textContent = mins + ':' + secs.toString().padStart(2, '0');                 }                 if (countdown <= 0) {                     clearInterval(countdownInterval);                 }             }, 1000);
+        function showSessionWarning() {
+            const warningModal = document.getElementById('sessionWarningModal');
+            if (!warningModal) {
+                console.error('Warning modal not found');
+                return;
+            }
+
+            // Hide idle toast if shown
+            hideIdleToast();
+
+            // Clear any existing countdown
+            if (countdownInterval) clearInterval(countdownInterval);
+
+            // Show the modal
+            const modal = new bootstrap.Modal(warningModal, {
+                backdrop: 'static',
+                keyboard: false
+            });
+            modal.show();
+
+            // Start countdown
+            let countdown = COUNTDOWN_SECONDS;
+            const countdownEl = document.getElementById('sessionCountdown');
+
+            // Update display immediately
+            if (countdownEl) {
+                const mins = Math.floor(countdown / 60);
+                const secs = countdown % 60;
+                countdownEl.textContent = mins + ':' + secs.toString().padStart(2, '0');
+            }
+
+            countdownInterval = setInterval(function () {
+                countdown--;
+                if (countdownEl) {
+                    const mins = Math.floor(countdown / 60);
+                    const secs = countdown % 60;
+                    countdownEl.textContent = mins + ':' + secs.toString().padStart(2, '0');
+                }
+                if (countdown <= 0) {
+                    clearInterval(countdownInterval);
+                }
+            }, 1000);
         }
 
-        function extendSession() {             // Clear countdown             if (countdownInterval) clearInterval(countdownInterval);
-        // Make a request to extend session             fetch('/Account/ExtendSession', {                 method: 'POST',                 credentials: 'same-origin'             })                 .then(function (response) {                     if (response.ok) {                         resetSessionTimer();                         toastr.success('Session extended!');                     } else {                         window.location.href = '/Account/Login';                     }                 })                 .catch(function (error) {                     console.error('Error extending session:', error);                     resetSessionTimer();                 });
+        function extendSession() {
+            // Clear countdown
+            if (countdownInterval) clearInterval(countdownInterval);
+
+            // Make a request to extend session
+            fetch('/Account/ExtendSession', {
+                method: 'POST',
+                credentials: 'same-origin'
+            })
+                .then(function (response) {
+                    if (response.ok) {
+                        resetSessionTimer();
+                        toastr.success('Session extended!');
+                    } else {
+                        window.location.href = '/Account/Login';
+                    }
+                })
+                .catch(function (error) {
+                    console.error('Error extending session:', error);
+                    resetSessionTimer();
+                });
         }
 
         // Debounce function to limit activity detection calls
-        function debounce(func, wait) {             let timeout;             return function () {                 const context = this;                 const args = arguments;                 clearTimeout(timeout);                 timeout = setTimeout(function () {                     func.apply(context, args);                 }, wait);             };
+        function debounce(func, wait) {
+            let timeout;
+            return function () {
+                const context = this;
+                const args = arguments;
+                clearTimeout(timeout);
+                timeout = setTimeout(function () {
+                    func.apply(context, args);
+                }, wait);
+            };
         }
     </script>
 
