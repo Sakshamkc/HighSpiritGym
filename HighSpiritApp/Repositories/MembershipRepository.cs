@@ -33,9 +33,37 @@ namespace HighSpiritApp.Repositories
         {
             var today = DateTime.Today;
 
-            // Get all memberships, no IsActive filter
+            // Project memberships and customer fields WITHOUT loading the heavy Photo byte[].
+            // Loading the full Customer (with Photo blob) for every membership was causing
+            // huge DB transfers and slow page loads on every notification render.
             var memberships = await _context.CustomerMemberships
-                .Include(m => m.Customer)
+                .AsNoTracking()
+                .Select(m => new CustomerMembership
+                {
+                    MembershipID = m.MembershipID,
+                    CustomerID = m.CustomerID,
+                    PlanName = m.PlanName,
+                    StartDate = m.StartDate,
+                    ExpireDate = m.ExpireDate,
+                    Duration = m.Duration,
+                    PaidPrice = m.PaidPrice,
+                    DueAmount = m.DueAmount,
+                    IsActive = m.IsActive,
+                    IsOnHold = m.IsOnHold,
+                    HoldStartDate = m.HoldStartDate,
+                    TotalHoldDays = m.TotalHoldDays,
+                    CreatedAt = m.CreatedAt,
+                    UpdatedAt = m.UpdatedAt,
+                    Customer = new Customer
+                    {
+                        CustomerID = m.Customer!.CustomerID,
+                        FullName = m.Customer.FullName,
+                        Phone = m.Customer.Phone,
+                        Gender = m.Customer.Gender,
+                        Shift = m.Customer.Shift,
+                        JoinDate = m.Customer.JoinDate
+                    }
+                })
                 .ToListAsync();
 
             // Group by customer and get the latest by StartDate, then filter expired
@@ -52,9 +80,35 @@ namespace HighSpiritApp.Repositories
             var today = DateTime.Today;
             var endDate = today.AddDays(days);
 
-            // Get all memberships, no IsActive filter
+            // Project without the heavy Photo blob (see GetExpiredMembershipsAsync above).
             var memberships = await _context.CustomerMemberships
-                .Include(m => m.Customer)
+                .AsNoTracking()
+                .Select(m => new CustomerMembership
+                {
+                    MembershipID = m.MembershipID,
+                    CustomerID = m.CustomerID,
+                    PlanName = m.PlanName,
+                    StartDate = m.StartDate,
+                    ExpireDate = m.ExpireDate,
+                    Duration = m.Duration,
+                    PaidPrice = m.PaidPrice,
+                    DueAmount = m.DueAmount,
+                    IsActive = m.IsActive,
+                    IsOnHold = m.IsOnHold,
+                    HoldStartDate = m.HoldStartDate,
+                    TotalHoldDays = m.TotalHoldDays,
+                    CreatedAt = m.CreatedAt,
+                    UpdatedAt = m.UpdatedAt,
+                    Customer = new Customer
+                    {
+                        CustomerID = m.Customer!.CustomerID,
+                        FullName = m.Customer.FullName,
+                        Phone = m.Customer.Phone,
+                        Gender = m.Customer.Gender,
+                        Shift = m.Customer.Shift,
+                        JoinDate = m.Customer.JoinDate
+                    }
+                })
                 .ToListAsync();
 
             // Group by customer and get the latest by StartDate, then filter expiring soon
@@ -89,9 +143,36 @@ namespace HighSpiritApp.Repositories
 
         public async Task<IEnumerable<CustomerMembership>> GetAllWithCustomerAsync()
         {
+            // Project without heavy Photo blob
             return await _context.CustomerMemberships
-                .Include(m => m.Customer)
+                .AsNoTracking()
                 .OrderByDescending(m => m.StartDate)
+                .Select(m => new CustomerMembership
+                {
+                    MembershipID = m.MembershipID,
+                    CustomerID = m.CustomerID,
+                    PlanName = m.PlanName,
+                    StartDate = m.StartDate,
+                    ExpireDate = m.ExpireDate,
+                    Duration = m.Duration,
+                    PaidPrice = m.PaidPrice,
+                    DueAmount = m.DueAmount,
+                    IsActive = m.IsActive,
+                    IsOnHold = m.IsOnHold,
+                    HoldStartDate = m.HoldStartDate,
+                    TotalHoldDays = m.TotalHoldDays,
+                    CreatedAt = m.CreatedAt,
+                    UpdatedAt = m.UpdatedAt,
+                    Customer = new Customer
+                    {
+                        CustomerID = m.Customer!.CustomerID,
+                        FullName = m.Customer.FullName,
+                        Phone = m.Customer.Phone,
+                        Gender = m.Customer.Gender,
+                        Shift = m.Customer.Shift,
+                        JoinDate = m.Customer.JoinDate
+                    }
+                })
                 .ToListAsync();
         }
     }

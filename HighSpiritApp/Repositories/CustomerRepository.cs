@@ -33,7 +33,7 @@ namespace HighSpiritApp.Repositories
 
             return await _context.Customers
                 .Include(c => c.Memberships)
-                .Where(c => c.FullName.Contains(searchTerm) || 
+                .Where(c => c.FullName.Contains(searchTerm) ||
                            (c.Phone != null && c.Phone.Contains(searchTerm)))
                 .ToListAsync();
         }
@@ -46,7 +46,7 @@ namespace HighSpiritApp.Repositories
 
         public IQueryable<Customer> GetQueryable()
         {
-            return _context.Customers.Include(c => c.Memberships).AsQueryable();
+            return _context.Customers.Include(c => c.Memberships).AsNoTracking().AsQueryable();
         }
     }
 }
