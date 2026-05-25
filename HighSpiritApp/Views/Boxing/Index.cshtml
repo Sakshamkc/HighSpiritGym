@@ -170,7 +170,7 @@
                     <span class="filter-tag @(ViewBag.PaymentStatus == "due" ? "tag-due" : "tag-paid")">
                         <i
                         class="fa-solid @(ViewBag.PaymentStatus == "due" ? "fa-exclamation-triangle" : "fa-check-circle") me-1"></i>@(ViewBag.PaymentStatus
-                                                                                                                == "due" ? "With Due" : "Fully Paid")
+                                                                                                                                        == "due" ? "With Due" : "Fully Paid")
                         <a href="@BuildQuery(overridePayment: "")" class="tag-close"><i class="fa-solid fa-times"></i></a>
                     </span>
                 }
