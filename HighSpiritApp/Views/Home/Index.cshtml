@@ -929,7 +929,7 @@
                     <div class="stat-icon">
                         <i class="fa-solid fa-money-bill-wave"></i>
                     </div>
-                    <h2>Rs @ViewBag.BoxingDue</h2>
+                    <h2>Rs @(((decimal)(ViewBag.BoxingDue ?? 0m)).ToString("N0"))</h2>
                     <p class="mb-0">Total Due Amount</p>
                 </div>
             </div>
