@@ -1,0 +1,265 @@
+@model List<HighSpiritApp.Models.ActivityLog>
+@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    ViewData["Title"] = "Activity Log";
+
+    var currentEntityType = ViewBag.CurrentEntityType as string;
+    var currentAction = ViewBag.CurrentAction as string;
+    var currentSearch = ViewBag.CurrentSearch as string;
+    int currentPage = ViewBag.CurrentPage;
+    int totalPages = ViewBag.TotalPages;
+    int totalCount = ViewBag.TotalCount;
+
+    string BuildQuery(string? entityType = null, string? action = null, string? search = null, int? page = null)
+    {
+        var parts = new List<string>();
+        var et = entityType ?? currentEntityType;
+        var act = action ?? currentAction;
+        var s = search ?? currentSearch;
+        var p = page ?? currentPage;
+
+        if (!string.IsNullOrEmpty(et)) parts.Add($"entityType={et}");
+        if (!string.IsNullOrEmpty(act)) parts.Add($"action={act}");
+        if (!string.IsNullOrEmpty(s)) parts.Add($"search={Uri.EscapeDataString(s)}");
+        if (p > 1) parts.Add($"page={p}");
+
+        return parts.Count > 0 ? "?" + string.Join("&", parts) : "";
+    }
+
+    string GetActionIcon(string action) => action switch
+    {
+        "Created" => "fa-plus-circle",
+        "Updated" => "fa-pen-to-square",
+        "Deleted" => "fa-trash-can",
+        "Renewed" => "fa-rotate",
+        "Imported" => "fa-file-import",
+        _ => "fa-circle-info"
+    };
+
+    string GetActionColor(string action) => action switch
+    {
+        "Created" => "#22c55e",
+        "Updated" => "#3b82f6",
+        "Deleted" => "#ef4444",
+        "Renewed" => "#8b5cf6",
+        "Imported" => "#f59e0b",
+        _ => "#64748b"
+    };
+
+    string GetEntityIcon(string entityType) => entityType switch
+    {
+        "Customer" => "fa-user",
+        "Membership" => "fa-id-card",
+        "Boxing" => "fa-hand-fist",
+        "Locker" => "fa-lock",
+        _ => "fa-circle"
+    };
+
+    string TimeAgo(DateTime dt)
+    {
+        var diff = DateTime.Now - dt;
+        if (diff.TotalMinutes < 1) return "Just now";
+        if (diff.TotalMinutes < 60) return $"{(int)diff.TotalMinutes}m ago";
+        if (diff.TotalHours < 24) return $"{(int)diff.TotalHours}h ago";
+        if (diff.TotalDays < 7) return $"{(int)diff.TotalDays}d ago";
+        return dt.ToString("dd MMM yyyy");
+    }
+}
+
+<style>
+    .activity-page { max-width: 1200px; margin: 0 auto; }
+    .activity-header { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 16px; margin-bottom: 24px; }
+    .activity-header h2 { font-weight: 700; margin: 0; display: flex; align-items: center; gap: 10px; }
+    .activity-header h2 i { color: #3b82f6; }
+    .activity-count { background: #eff6ff; color: #3b82f6; font-size: 14px; font-weight: 600; padding: 4px 12px; border-radius: 20px; }
+
+    .activity-filters { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 20px; }
+    .filter-btn { padding: 6px 16px; border-radius: 20px; border: 1.5px solid #e2e8f0; background: #fff; color: #475569; font-size: 13px; font-weight: 500; cursor: pointer; transition: all 0.2s; text-decoration: none; }
+    .filter-btn:hover { border-color: #3b82f6; color: #3b82f6; }
+    .filter-btn.active { background: #3b82f6; color: #fff; border-color: #3b82f6; }
+
+    .search-box { position: relative; max-width: 320px; }
+    .search-box input { width: 100%; padding: 8px 16px 8px 38px; border: 1.5px solid #e2e8f0; border-radius: 10px; font-size: 14px; outline: none; transition: border 0.2s; }
+    .search-box input:focus { border-color: #3b82f6; }
+    .search-box i { position: absolute; left: 12px; top: 50%; transform: translateY(-50%); color: #94a3b8; }
+
+    .activity-timeline { position: relative; }
+    .activity-item { display: flex; gap: 16px; padding: 16px 0; border-bottom: 1px solid #f1f5f9; position: relative; }
+    .activity-item:last-child { border-bottom: none; }
+
+    .activity-icon-wrap { width: 40px; height: 40px; border-radius: 10px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+    .activity-icon-wrap i { font-size: 16px; color: #fff; }
+
+    .activity-body { flex: 1; min-width: 0; }
+    .activity-body .action-text { font-weight: 600; font-size: 14px; color: #1e293b; }
+    .activity-body .action-text .entity-name { color: #3b82f6; }
+    .activity-body .desc { font-size: 13px; color: #64748b; margin-top: 2px; }
+
+    .activity-meta { display: flex; align-items: center; gap: 12px; flex-shrink: 0; }
+    .activity-meta .time { font-size: 12px; color: #94a3b8; white-space: nowrap; }
+    .activity-meta .user-badge { font-size: 12px; color: #64748b; background: #f1f5f9; padding: 2px 10px; border-radius: 12px; font-weight: 500; }
+    .entity-badge { display: inline-block; font-size: 11px; font-weight: 600; padding: 2px 8px; border-radius: 6px; margin-left: 6px; }
+    .entity-badge.Customer { background: #dbeafe; color: #2563eb; }
+    .entity-badge.Membership { background: #f3e8ff; color: #7c3aed; }
+    .entity-badge.Boxing { background: #fee2e2; color: #dc2626; }
+    .entity-badge.Locker { background: #fef3c7; color: #d97706; }
+
+    .pagination-wrap { display: flex; justify-content: center; gap: 4px; margin-top: 24px; }
+    .page-btn { width: 36px; height: 36px; border-radius: 8px; border: 1.5px solid #e2e8f0; background: #fff; color: #475569; font-size: 13px; font-weight: 600; cursor: pointer; display: flex; align-items: center; justify-content: center; text-decoration: none; transition: all 0.2s; }
+    .page-btn:hover { border-color: #3b82f6; color: #3b82f6; }
+    .page-btn.active { background: #3b82f6; color: #fff; border-color: #3b82f6; }
+    .page-btn.disabled { opacity: 0.4; pointer-events: none; }
+
+    .empty-state { text-align: center; padding: 60px 20px; color: #94a3b8; }
+    .empty-state i { font-size: 48px; margin-bottom: 16px; display: block; }
+    .empty-state p { font-size: 16px; }
+
+    [data-theme="dark"] .filter-btn { background: #1e293b; color: #cbd5e1; border-color: #334155; }
+    [data-theme="dark"] .filter-btn:hover { border-color: #60a5fa; color: #60a5fa; }
+    [data-theme="dark"] .filter-btn.active { background: #3b82f6; color: #fff; }
+    [data-theme="dark"] .search-box input { background: #1e293b; color: #e2e8f0; border-color: #334155; }
+    [data-theme="dark"] .activity-item { border-color: #1e293b; }
+    [data-theme="dark"] .activity-body .action-text { color: #e2e8f0; }
+    [data-theme="dark"] .activity-body .desc { color: #94a3b8; }
+    [data-theme="dark"] .activity-meta .user-badge { background: #334155; color: #cbd5e1; }
+    [data-theme="dark"] .activity-count { background: #1e3a5f; }
+    [data-theme="dark"] .page-btn { background: #1e293b; color: #cbd5e1; border-color: #334155; }
+    [data-theme="dark"] .empty-state { color: #64748b; }
+
+    @@media (max-width: 768px) {
+        .activity-item { flex-wrap: wrap; }
+        .activity-meta { width: 100%; margin-top: 6px; }
+        .activity-header { flex-direction: column; align-items: flex-start; }
+    }
+</style>
+
+<div class="activity-page">
+    <!-- Header -->
+    <div class="activity-header">
+        <h2><i class="fa-solid fa-clock-rotate-left"></i> Activity Log <span class="activity-count">@totalCount total</span></h2>
+        <div class="search-box">
+            <i class="fa-solid fa-magnifying-glass"></i>
+            <form method="get" asp-action="Index">
+                <input type="hidden" name="entityType" value="@currentEntityType" />
+                <input type="hidden" name="action" value="@currentAction" />
+                <input type="text" name="search" value="@currentSearch" placeholder="Search by name..." />
+            </form>
+        </div>
+    </div>
+
+    <!-- Entity Type Filters -->
+    <div class="activity-filters">
+        <a href="@Url.Action("Index")@BuildQuery(entityType: "", action: currentAction, search: currentSearch, page: 1)"
+           class="filter-btn @(string.IsNullOrEmpty(currentEntityType) ? "active" : "")">
+            <i class="fa-solid fa-layer-group"></i> All
+        </a>
+        <a href="@Url.Action("Index")@BuildQuery(entityType: "Customer", action: currentAction, search: currentSearch, page: 1)"
+           class="filter-btn @(currentEntityType == "Customer" ? "active" : "")">
+            <i class="fa-solid fa-user"></i> Customer
+        </a>
+        <a href="@Url.Action("Index")@BuildQuery(entityType: "Membership", action: currentAction, search: currentSearch, page: 1)"
+           class="filter-btn @(currentEntityType == "Membership" ? "active" : "")">
+            <i class="fa-solid fa-id-card"></i> Membership
+        </a>
+        <a href="@Url.Action("Index")@BuildQuery(entityType: "Boxing", action: currentAction, search: currentSearch, page: 1)"
+           class="filter-btn @(currentEntityType == "Boxing" ? "active" : "")">
+            <i class="fa-solid fa-hand-fist"></i> Boxing
+        </a>
+        <a href="@Url.Action("Index")@BuildQuery(entityType: "Locker", action: currentAction, search: currentSearch, page: 1)"
+           class="filter-btn @(currentEntityType == "Locker" ? "active" : "")">
+            <i class="fa-solid fa-lock"></i> Locker
+        </a>
+    </div>
+
+    <!-- Action Filters -->
+    <div class="activity-filters" style="margin-bottom: 24px;">
+        <a href="@Url.Action("Index")@BuildQuery(entityType: currentEntityType, action: "", search: currentSearch, page: 1)"
+           class="filter-btn @(string.IsNullOrEmpty(currentAction) ? "active" : "")">All Actions</a>
+        <a href="@Url.Action("Index")@BuildQuery(entityType: currentEntityType, action: "Created", search: currentSearch, page: 1)"
+           class="filter-btn @(currentAction == "Created" ? "active" : "")" style="border-color: #bbf7d0; color: #16a34a;">
+            <i class="fa-solid fa-plus-circle"></i> Created
+        </a>
+        <a href="@Url.Action("Index")@BuildQuery(entityType: currentEntityType, action: "Updated", search: currentSearch, page: 1)"
+           class="filter-btn @(currentAction == "Updated" ? "active" : "")" style="border-color: #bfdbfe; color: #2563eb;">
+            <i class="fa-solid fa-pen-to-square"></i> Updated
+        </a>
+        <a href="@Url.Action("Index")@BuildQuery(entityType: currentEntityType, action: "Deleted", search: currentSearch, page: 1)"
+           class="filter-btn @(currentAction == "Deleted" ? "active" : "")" style="border-color: #fecaca; color: #dc2626;">
+            <i class="fa-solid fa-trash-can"></i> Deleted
+        </a>
+        <a href="@Url.Action("Index")@BuildQuery(entityType: currentEntityType, action: "Renewed", search: currentSearch, page: 1)"
+           class="filter-btn @(currentAction == "Renewed" ? "active" : "")" style="border-color: #e9d5ff; color: #7c3aed;">
+            <i class="fa-solid fa-rotate"></i> Renewed
+        </a>
+    </div>
+
+    <!-- Timeline -->
+    @if (Model.Count == 0)
+    {
+        <div class="empty-state">
+            <i class="fa-solid fa-clock-rotate-left"></i>
+            <p>No activity found</p>
+        </div>
+    }
+    else
+    {
+        <div class="card shadow-sm" style="border-radius: 16px; border: none; overflow: hidden;">
+            <div class="card-body p-0">
+                <div class="activity-timeline" style="padding: 8px 20px;">
+                    @foreach (var item in Model)
+                    {
+                        <div class="activity-item">
+                            <div class="activity-icon-wrap" style="background: @GetActionColor(item.Action);">
+                                <i class="fa-solid @GetActionIcon(item.Action)"></i>
+                            </div>
+                            <div class="activity-body">
+                                <div class="action-text">
+                                    @item.Action
+                                    <span class="entity-name">@item.EntityName</span>
+                                    <span class="entity-badge @item.EntityType">
+                                        <i class="fa-solid @GetEntityIcon(item.EntityType)"></i> @item.EntityType
+                                    </span>
+                                </div>
+                                @if (!string.IsNullOrEmpty(item.Description))
+                                {
+                                    <div class="desc">@item.Description</div>
+                                }
+                            </div>
+                            <div class="activity-meta">
+                                <span class="user-badge"><i class="fa-solid fa-user-shield"></i> @item.PerformedBy</span>
+                                <span class="time" title="@item.PerformedAt.ToString("dd MMM yyyy hh:mm tt")">@TimeAgo(item.PerformedAt)</span>
+                            </div>
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+
+        <!-- Pagination -->
+        @if (totalPages > 1)
+        {
+            <div class="pagination-wrap">
+                <a href="@Url.Action("Index")@BuildQuery(page: currentPage - 1)"
+                   class="page-btn @(currentPage <= 1 ? "disabled" : "")">
+                    <i class="fa-solid fa-chevron-left"></i>
+                </a>
+                @for (int i = 1; i <= totalPages; i++)
+                {
+                    if (i == 1 || i == totalPages || (i >= currentPage - 2 && i <= currentPage + 2))
+                    {
+                        <a href="@Url.Action("Index")@BuildQuery(page: i)"
+                           class="page-btn @(i == currentPage ? "active" : "")">@i</a>
+                    }
+                    else if (i == currentPage - 3 || i == currentPage + 3)
+                    {
+                        <span class="page-btn disabled">...</span>
+                    }
+                }
+                <a href="@Url.Action("Index")@BuildQuery(page: currentPage + 1)"
+                   class="page-btn @(currentPage >= totalPages ? "disabled" : "")">
+                    <i class="fa-solid fa-chevron-right"></i>
+                </a>
+            </div>
+        }
+    }
+</div>

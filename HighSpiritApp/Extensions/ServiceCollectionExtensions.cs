@@ -36,6 +36,7 @@ namespace HighSpiritApp.Extensions
             services.AddScoped<IDashboardService, DashboardService>();
             services.AddScoped<IReportService, ReportService>();
             services.AddScoped<IAuthService, AuthService>();
+            services.AddScoped<IActivityLogService, ActivityLogService>();
 
             return services;
         }

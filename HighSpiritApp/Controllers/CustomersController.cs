@@ -14,15 +14,18 @@ namespace HighSpiritApp.Controllers
         private readonly ICustomerService _customerService;
         private readonly IMembershipService _membershipService;
         private readonly ILockerService _lockerService;
+        private readonly IActivityLogService _activityLogService;
 
         public CustomersController(
             ICustomerService customerService,
             IMembershipService membershipService,
-            ILockerService lockerService)
+            ILockerService lockerService,
+            IActivityLogService activityLogService)
         {
             _customerService = customerService;
             _membershipService = membershipService;
             _lockerService = lockerService;
+            _activityLogService = activityLogService;
         }
 
         public async Task<IActionResult> Index(string search, string sort, string filter, int? duration, string planName, string shift, string gender, string paymentStatus, int page = 1)
@@ -144,13 +147,18 @@ namespace HighSpiritApp.Controllers
 
             await _membershipService.CreateAsync(membership);
 
+            await _activityLogService.LogAsync("Created", "Customer", createdCustomer.CustomerID, createdCustomer.FullName, $"Created customer {createdCustomer.FullName} with {PlanName} plan", User.Identity?.Name ?? "Admin");
+
             TempData["success"] = "Customer added successfully!";
             return RedirectToAction("Index");
         }
 
         public async Task<IActionResult> Delete(int id)
         {
+            var customer = await _customerService.GetByIdWithMembershipsAsync(id);
+            var name = customer?.FullName ?? $"ID:{id}";
             await _customerService.DeleteAsync(id);
+            await _activityLogService.LogAsync("Deleted", "Customer", id, name, $"Deleted customer {name}", User.Identity?.Name ?? "Admin");
             TempData["success"] = "Customer deleted successfully!";
             return RedirectToAction("Index");
         }
@@ -239,6 +247,8 @@ namespace HighSpiritApp.Controllers
             }
 
             await _customerService.UpdateAsync(vm, photo);
+
+            await _activityLogService.LogAsync("Updated", "Customer", vm.CustomerID, vm.FullName, $"Updated customer {vm.FullName}", User.Identity?.Name ?? "Admin");
 
             TempData["success"] = "User Details updated successfully!";
             return RedirectToAction("Index");

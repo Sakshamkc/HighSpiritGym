@@ -12,10 +12,12 @@ namespace HighSpiritApp.Controllers
     public class MembershipsController : Controller
     {
         private readonly IMembershipService _membershipService;
+        private readonly IActivityLogService _activityLogService;
 
-        public MembershipsController(IMembershipService membershipService)
+        public MembershipsController(IMembershipService membershipService, IActivityLogService activityLogService)
         {
             _membershipService = membershipService;
+            _activityLogService = activityLogService;
         }
 
         public IActionResult Create(int customerId)
@@ -28,6 +30,7 @@ namespace HighSpiritApp.Controllers
         public async Task<IActionResult> Create(CustomerMembership membership)
         {
             await _membershipService.CreateAsync(membership);
+            await _activityLogService.LogAsync("Created", "Membership", membership.MembershipID, $"Customer #{membership.CustomerID}", $"Created {membership.PlanName} membership for customer #{membership.CustomerID}", User.Identity?.Name ?? "Admin");
             return RedirectToAction("Index", "Customers");
         }
 
@@ -62,6 +65,7 @@ namespace HighSpiritApp.Controllers
             {
                 membership.DueAmount = DueAmount;
                 await _membershipService.RenewAsync(membership);
+                await _activityLogService.LogAsync("Renewed", "Membership", membership.MembershipID, $"Customer #{membership.CustomerID}", $"Renewed {membership.PlanName} membership for customer #{membership.CustomerID}", User.Identity?.Name ?? "Admin");
                 TempData["success"] = "Membership renewed successfully!";
                 return RedirectToAction("Index", "Customers");
             }
@@ -78,6 +82,7 @@ namespace HighSpiritApp.Controllers
             try
             {
                 await _membershipService.DeleteAsync(id);
+                await _activityLogService.LogAsync("Deleted", "Membership", id, $"Customer #{customerId}", $"Deleted membership #{id} for customer #{customerId}", User.Identity?.Name ?? "Admin");
                 TempData["success"] = "Membership record deleted successfully.";
             }
             catch (KeyNotFoundException)

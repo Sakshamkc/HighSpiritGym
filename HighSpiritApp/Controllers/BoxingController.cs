@@ -13,10 +13,12 @@ namespace HighSpiritApp.Controllers
     public class BoxingController : Controller
     {
         private readonly IBoxingService _boxingService;
+        private readonly IActivityLogService _activityLogService;
 
-        public BoxingController(IBoxingService boxingService)
+        public BoxingController(IBoxingService boxingService, IActivityLogService activityLogService)
         {
             _boxingService = boxingService;
+            _activityLogService = activityLogService;
         }
 
         public async Task<IActionResult> Index(string category = "Children", string search = "", string filter = "all", string paymentStatus = "", int page = 1)
@@ -112,6 +114,8 @@ namespace HighSpiritApp.Controllers
 
             await _boxingService.CreateAsync(model);
 
+            await _activityLogService.LogAsync("Created", "Boxing", model.BoxingMemberID, model.Name, $"Created {category} boxing member {model.Name}", User.Identity?.Name ?? "Admin");
+
             TempData["success"] = $"{category} boxing member added successfully!";
             return RedirectToAction("Index", new { category });
         }
@@ -155,6 +159,8 @@ namespace HighSpiritApp.Controllers
 
             await _boxingService.UpdateAsync(member);
 
+            await _activityLogService.LogAsync("Updated", "Boxing", member.BoxingMemberID, member.Name, $"Updated boxing member {member.Name}", User.Identity?.Name ?? "Admin");
+
             TempData["success"] = "Boxing member updated successfully!";
             return RedirectToAction("Index", new { category });
         }
@@ -188,6 +194,7 @@ namespace HighSpiritApp.Controllers
             var category = member?.Category ?? "Children";
 
             await _boxingService.DeleteAsync(id);
+            await _activityLogService.LogAsync("Deleted", "Boxing", id, member?.Name ?? $"ID:{id}", $"Deleted boxing member {member?.Name ?? $"ID:{id}"}", User.Identity?.Name ?? "Admin");
             TempData["success"] = "Boxing member deleted successfully.";
             return RedirectToAction("Index", new { category });
         }

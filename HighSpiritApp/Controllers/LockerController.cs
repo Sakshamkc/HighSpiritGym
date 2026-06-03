@@ -13,11 +13,13 @@ namespace HighSpiritApp.Controllers
     {
         private readonly ILockerService _lockerService;
         private readonly ICustomerService _customerService;
+        private readonly IActivityLogService _activityLogService;
 
-        public LockerController(ILockerService lockerService, ICustomerService customerService)
+        public LockerController(ILockerService lockerService, ICustomerService customerService, IActivityLogService activityLogService)
         {
             _lockerService = lockerService;
             _customerService = customerService;
+            _activityLogService = activityLogService;
         }
 
         public async Task<IActionResult> Index(string search, string gender = "Gents", string status = "", string filter = "", int page = 1)
@@ -89,6 +91,7 @@ namespace HighSpiritApp.Controllers
             try
             {
                 await _lockerService.CreateAsync(model);
+                await _activityLogService.LogAsync("Created", "Locker", model.LockerID, $"Locker {model.LockerNumber}", $"Created locker {model.LockerNumber} ({model.Gender})", User.Identity?.Name ?? "Admin");
                 TempData["success"] = $"Locker {model.LockerNumber} created successfully!";
                 return RedirectToAction("Index", new { gender = model.Gender });
             }
@@ -113,6 +116,7 @@ namespace HighSpiritApp.Controllers
             {
                 model.DueAmount = Math.Max(0, model.TotalAmount - model.PaidAmount);
                 await _lockerService.UpdateAsync(model);
+                await _activityLogService.LogAsync("Updated", "Locker", model.LockerID, $"Locker {model.LockerNumber}", $"Updated locker {model.LockerNumber} ({model.Gender})", User.Identity?.Name ?? "Admin");
                 TempData["success"] = $"Locker {model.LockerNumber} updated successfully!";
                 return RedirectToAction("Index", new { gender = model.Gender });
             }
@@ -155,6 +159,7 @@ namespace HighSpiritApp.Controllers
 
             var gender = locker.Gender;
             await _lockerService.DeleteAsync(id);
+            await _activityLogService.LogAsync("Deleted", "Locker", id, $"Locker {locker.LockerNumber}", $"Deleted locker {locker.LockerNumber} ({locker.Gender})", User.Identity?.Name ?? "Admin");
             TempData["success"] = $"Locker {locker.LockerNumber} deleted successfully.";
             return RedirectToAction("Index", new { gender });
         }
