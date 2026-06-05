@@ -236,10 +236,6 @@ using (var scope = app.Services.CreateScope())
         var userRoles = await userManager.GetRolesAsync(adminUser);
         if (!userRoles.Contains("Admin"))
             await userManager.AddToRoleAsync(adminUser, "Admin");
-
-        // One-time password reset — remove this block after first deploy
-        var token = await userManager.GeneratePasswordResetTokenAsync(adminUser);
-        await userManager.ResetPasswordAsync(adminUser, token, "HighSpirit@2026!");
     }
 }
 
