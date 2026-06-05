@@ -3,6 +3,7 @@
 }
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
@@ -11,147 +12,208 @@
     <title>High Spirit Gym - Attendance</title>
     <link rel="icon" type="image/png" href="/images/highspirit.jpg" />
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
+            * {
+                margin: 0;
+                padding: 0;
+                box-sizing: border-box;
+            }
 
-        body {
-            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
-            background: linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #0f172a 100%);
-            min-height: 100vh;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            color: #ffffff;
-            overflow: hidden;
-        }
+            body {
+                font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+                background: linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #0f172a 100%);
+                min-height: 100vh;
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                justify-content: center;
+                color: #ffffff;
+                overflow: hidden;
+            }
 
-        .container {
-            text-align: center;
-            padding: 2rem;
-            width: 100%;
-            max-width: 600px;
-        }
+            .container {
+                text-align: center;
+                padding: 2rem;
+                width: 100%;
+                max-width: 600px;
+            }
 
-        .logo-section {
-            margin-bottom: 1.5rem;
-        }
+            .logo-section {
+                margin-bottom: 1.5rem;
+            }
 
-        .logo-section img {
-            width: 80px;
-            height: 80px;
-            border-radius: 50%;
-            border: 3px solid rgba(59, 130, 246, 0.5);
-            box-shadow: 0 0 20px rgba(59, 130, 246, 0.3);
-        }
+            .logo-section img {
+                width: 80px;
+                height: 80px;
+                border-radius: 50%;
+                border: 3px solid rgba(59, 130, 246, 0.5);
+                box-shadow: 0 0 20px rgba(59, 130, 246, 0.3);
+            }
 
-        .logo-section h1 {
-            font-size: 1.8rem;
-            font-weight: 700;
-            margin-top: 0.75rem;
-            background: linear-gradient(135deg, #60a5fa, #a78bfa);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-        }
+            .logo-section h1 {
+                font-size: 1.8rem;
+                font-weight: 700;
+                margin-top: 0.75rem;
+                background: linear-gradient(135deg, #60a5fa, #a78bfa);
+                -webkit-background-clip: text;
+                -webkit-text-fill-color: transparent;
+                background-clip: text;
+            }
 
-        .qr-container {
-            background: #ffffff;
-            border-radius: 20px;
-            padding: 2rem;
-            display: inline-block;
-            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3), 0 0 40px rgba(59, 130, 246, 0.1);
-            position: relative;
-            animation: pulse-glow 3s ease-in-out infinite;
-        }
+            .qr-container {
+                background: #ffffff;
+                border-radius: 20px;
+                padding: 2rem;
+                display: inline-block;
+                box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3), 0 0 40px rgba(59, 130, 246, 0.1);
+                position: relative;
+                animation: pulse-glow 3s ease-in-out infinite;
+            }
 
-        @@keyframes pulse-glow {
-            0%, 100% { box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3), 0 0 40px rgba(59, 130, 246, 0.1); }
-            50% { box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3), 0 0 60px rgba(59, 130, 246, 0.25); }
-        }
+            @@keyframes pulse-glow {
 
-        #qrcode {
-            width: 220px;
-            height: 220px;
-        }
+                0%,
+                100% {
+                    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3), 0 0 40px rgba(59, 130, 246, 0.1);
+                }
 
-        #qrcode img, #qrcode canvas {
-            width: 220px !important;
-            height: 220px !important;
-        }
+                50% {
+                    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3), 0 0 60px rgba(59, 130, 246, 0.25);
+                }
+            }
 
-        .scan-text {
-            margin-top: 1.5rem;
-            font-size: 1.1rem;
-            color: #94a3b8;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 0.5rem;
-        }
+            #qrcode {
+                width: 220px;
+                height: 220px;
+            }
 
-        .scan-text i {
-            font-size: 1.3rem;
-            color: #60a5fa;
-        }
+            #qrcode img,
+            #qrcode canvas {
+                width: 220px !important;
+                height: 220px !important;
+            }
 
-        /* Greeting overlay */
-        .greeting-container {
-            position: fixed;
-            bottom: 0;
-            left: 0;
-            right: 0;
-            padding: 2rem;
-            display: flex;
-            justify-content: center;
-            pointer-events: none;
-        }
+            .scan-text {
+                margin-top: 1.5rem;
+                font-size: 1.1rem;
+                color: #94a3b8;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                gap: 0.5rem;
+            }
 
-        .greeting {
-            background: linear-gradient(135deg, rgba(16, 185, 129, 0.95), rgba(5, 150, 105, 0.95));
-            padding: 1.2rem 2.5rem;
-            border-radius: 16px;
-            font-size: 1.4rem;
-            font-weight: 600;
-            color: #ffffff;
-            box-shadow: 0 10px 40px rgba(16, 185, 129, 0.4);
-            transform: translateY(100px);
-            opacity: 0;
-            transition: all 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
-        }
+            .scan-text i {
+                font-size: 1.3rem;
+                color: #60a5fa;
+            }
 
-        .greeting.show {
-            transform: translateY(0);
-            opacity: 1;
-        }
+            /* Greeting overlay */
+            .greeting-container {
+                position: fixed;
+                bottom: 0;
+                left: 0;
+                right: 0;
+                padding: 2rem;
+                display: flex;
+                justify-content: center;
+                pointer-events: none;
+            }
 
-        .greeting.punch-out {
-            background: linear-gradient(135deg, rgba(245, 158, 11, 0.95), rgba(217, 119, 6, 0.95));
-            box-shadow: 0 10px 40px rgba(245, 158, 11, 0.4);
-        }
+            .greeting {
+                background: linear-gradient(135deg, rgba(16, 185, 129, 0.95), rgba(5, 150, 105, 0.95));
+                padding: 1.2rem 2.5rem;
+                border-radius: 16px;
+                font-size: 1.4rem;
+                font-weight: 600;
+                color: #ffffff;
+                box-shadow: 0 10px 40px rgba(16, 185, 129, 0.4);
+                transform: translateY(100px);
+                opacity: 0;
+                transition: all 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+            }
 
-        .clock {
-            position: fixed;
-            bottom: 1.5rem;
-            right: 2rem;
-            font-size: 0.9rem;
-            color: #64748b;
-            display: flex;
-            align-items: center;
-            gap: 1rem;
-        }
+            .greeting.show {
+                transform: translateY(0);
+                opacity: 1;
+            }
 
-        .clock span {
-            display: flex;
-            align-items: center;
-            gap: 0.4rem;
-        }
+            .greeting.punch-out {
+                background: linear-gradient(135deg, rgba(245, 158, 11, 0.95), rgba(217, 119, 6, 0.95));
+                box-shadow: 0 10px 40px rgba(245, 158, 11, 0.4);
+            }
+
+            .clock {
+                position: fixed;
+                bottom: 1.5rem;
+                right: 2rem;
+                font-size: 0.9rem;
+                color: #64748b;
+                display: flex;
+                align-items: center;
+                gap: 1rem;
+            }
+
+            .clock span {
+                display: flex;
+                align-items: center;
+                gap: 0.4rem;
+            }
+
+            /* Audio unlock overlay */
+            .audio-overlay {
+                position: fixed;
+                inset: 0;
+                background: rgba(15, 23, 42, 0.95);
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                justify-content: center;
+                z-index: 9999;
+                cursor: pointer;
+            }
+
+            .audio-overlay .tap-icon {
+                width: 100px;
+                height: 100px;
+                border-radius: 50%;
+                background: linear-gradient(135deg, #3b82f6, #60a5fa);
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                font-size: 2.5rem;
+                color: #fff;
+                margin-bottom: 1.5rem;
+                animation: tap-pulse 2s ease-in-out infinite;
+            }
+
+            @@keyframes tap-pulse {
+
+                0%,
+                100% {
+                    transform: scale(1);
+                    box-shadow: 0 0 0 0 rgba(59, 130, 246, 0.4);
+                }
+
+                50% {
+                    transform: scale(1.05);
+                    box-shadow: 0 0 0 20px rgba(59, 130, 246, 0);
+                }
+            }
+
+            .audio-overlay h2 {
+                color: #fff;
+                font-size: 1.4rem;
+                margin-bottom: 0.5rem;
+            }
+
+            .audio-overlay p {
+                color: #94a3b8;
+                font-size: 1rem;
+            }
     </style>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
 </head>
+
 <body>
     <div class="container">
         <div class="logo-section">
@@ -167,6 +229,15 @@
             <i class="fa-solid fa-mobile-screen"></i>
             <span>Scan to Check In / Out</span>
         </div>
+    </div>
+
+    <!-- Audio unlock overlay (required by Safari/iOS) -->
+    <div class="audio-overlay" id="audio-overlay" onclick="unlockAudio()">
+        <div class="tap-icon">
+            <i class="fa-solid fa-volume-high"></i>
+        </div>
+        <h2>Tap to Enable Voice</h2>
+        <p>Required for greeting announcements</p>
     </div>
 
     <div class="greeting-container">
@@ -189,103 +260,123 @@
         const checkInUrl = `${baseUrl}/Attendance/CheckIn`;
 
         new QRCode(document.getElementById("qrcode"), {
-            text: checkInUrl,
-            width: 220,
-            height: 220,
-            colorDark: "#1e293b",
-            colorLight: "#ffffff",
-            correctLevel: QRCode.CorrectLevel.H
+        text: checkInUrl,
+        width: 220,
+        height: 220,
+        colorDark: "#1e293b",
+        colorLight: "#ffffff",
+        correctLevel: QRCode.CorrectLevel.H
         });
 
         // Clock
         function updateClock() {
-            const now = new Date();
-            document.getElementById('clock-time').textContent = now.toLocaleTimeString('en-US', {
-                hour: '2-digit', minute: '2-digit', second: '2-digit'
-            });
-            document.getElementById('clock-date').textContent = now.toLocaleDateString('en-US', {
-                weekday: 'long', year: 'numeric', month: 'long', day: 'numeric'
-            });
+        const now = new Date();
+        document.getElementById('clock-time').textContent = now.toLocaleTimeString('en-US', {
+        hour: '2-digit', minute: '2-digit', second: '2-digit'
+        });
+        document.getElementById('clock-date').textContent = now.toLocaleDateString('en-US', {
+        weekday: 'long', year: 'numeric', month: 'long', day: 'numeric'
+        });
         }
         updateClock();
         setInterval(updateClock, 1000);
 
+        // Audio unlock
+        let audioUnlocked = false;
+
+        function unlockAudio() {
+        // Speak a silent/short utterance to unlock audio on Safari/iOS
+        if ('speechSynthesis' in window) {
+        const unlock = new SpeechSynthesisUtterance('');
+        unlock.volume = 0;
+        speechSynthesis.speak(unlock);
+        }
+        audioUnlocked = true;
+        document.getElementById('audio-overlay').style.display = 'none';
+        // Test with a confirmation voice
+        setTimeout(() => speak('Voice enabled. Ready for attendance.'), 300);
+        }
+
         // Speech synthesis
         function speak(text) {
-            if ('speechSynthesis' in window) {
-                // Cancel any ongoing speech
-                speechSynthesis.cancel();
-                const utterance = new SpeechSynthesisUtterance(text);
-                utterance.rate = 0.9;
-                utterance.pitch = 1.1;
-                utterance.volume = 1;
-                // Try to use a female voice
-                const voices = speechSynthesis.getVoices();
-                const preferred = voices.find(v => v.lang.startsWith('en') && v.name.includes('Female'))
-                    || voices.find(v => v.lang.startsWith('en'))
-                    || voices[0];
-                if (preferred) utterance.voice = preferred;
-                speechSynthesis.speak(utterance);
-            }
+        if (!audioUnlocked || !('speechSynthesis' in window)) return;
+
+        // Cancel any ongoing speech
+        speechSynthesis.cancel();
+        const utterance = new SpeechSynthesisUtterance(text);
+        utterance.rate = 0.9;
+        utterance.pitch = 1.1;
+        utterance.volume = 1;
+        utterance.lang = 'en-US';
+        // Try to use a good voice
+        const voices = speechSynthesis.getVoices();
+        const preferred = voices.find(v => v.lang === 'en-US' && v.name.includes('Samantha'))
+        || voices.find(v => v.lang === 'en-US' && v.name.includes('Female'))
+        || voices.find(v => v.lang.startsWith('en-US'))
+        || voices.find(v => v.lang.startsWith('en'))
+        || voices[0];
+        if (preferred) utterance.voice = preferred;
+        speechSynthesis.speak(utterance);
         }
 
         // Ensure voices are loaded
         if ('speechSynthesis' in window) {
-            speechSynthesis.getVoices();
-            speechSynthesis.onvoiceschanged = () => speechSynthesis.getVoices();
+        speechSynthesis.getVoices();
+        speechSynthesis.onvoiceschanged = () => speechSynthesis.getVoices();
         }
 
         // Show greeting
         function showGreeting(message, type) {
-            const el = document.getElementById('greeting');
-            el.textContent = message;
-            el.className = 'greeting' + (type === 'out' ? ' punch-out' : '');
+        const el = document.getElementById('greeting');
+        el.textContent = message;
+        el.className = 'greeting' + (type === 'out' ? ' punch-out' : '');
 
-            // Trigger animation
-            setTimeout(() => el.classList.add('show'), 50);
+        // Trigger animation
+        setTimeout(() => el.classList.add('show'), 50);
 
-            // Hide after 5 seconds
-            setTimeout(() => {
-                el.classList.remove('show');
-            }, 5000);
+        // Hide after 5 seconds
+        setTimeout(() => {
+        el.classList.remove('show');
+        }, 5000);
         }
 
         // SignalR connection
         const connection = new signalR.HubConnectionBuilder()
-            .withUrl("/hubs/attendance")
-            .withAutomaticReconnect()
-            .build();
+        .withUrl("/hubs/attendance")
+        .withAutomaticReconnect()
+        .build();
 
         connection.on("PunchIn", (data) => {
-            const message = `🙏 Hello Namaste, ${data.name}!`;
-            showGreeting(message, 'in');
-            speak(`Hello Namaste, ${data.name}!`);
+        const message = `🙏 Hello Namaste, ${data.name}!`;
+        showGreeting(message, 'in');
+        speak(`Hello Namaste, ${data.name}!`);
         });
 
         connection.on("PunchOut", (data) => {
-            const message = `🙏 Thank you, Namaste ${data.name}!`;
-            showGreeting(message, 'out');
-            speak(`Thank you, Namaste ${data.name}!`);
+        const message = `🙏 Thank you, Namaste ${data.name}!`;
+        showGreeting(message, 'out');
+        speak(`Thank you, Namaste ${data.name}!`);
         });
 
         connection.start().then(() => {
-            // Join the display group to receive notifications
-            connection.invoke("JoinDisplayGroup");
-            console.log("Connected to attendance hub");
+        // Join the display group to receive notifications
+        connection.invoke("JoinDisplayGroup");
+        console.log("Connected to attendance hub");
         }).catch(err => console.error("SignalR connection error:", err));
 
         // Keep screen awake (prevent iPad sleep via Wake Lock API)
         async function requestWakeLock() {
-            try {
-                if ('wakeLock' in navigator) {
-                    await navigator.wakeLock.request('screen');
-                }
-            } catch (e) { }
+        try {
+        if ('wakeLock' in navigator) {
+        await navigator.wakeLock.request('screen');
+        }
+        } catch (e) { }
         }
         requestWakeLock();
         document.addEventListener('visibilitychange', () => {
-            if (document.visibilityState === 'visible') requestWakeLock();
+        if (document.visibilityState === 'visible') requestWakeLock();
         });
     </script>
 </body>
+
 </html>
