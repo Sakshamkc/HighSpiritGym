@@ -268,15 +268,34 @@
         correctLevel: QRCode.CorrectLevel.H
         });
 
+        // Nepal time (UTC+5:45)
+        function getNepalTime() {
+            const now = new Date();
+            const nepalOffset = 5 * 60 + 45; // minutes
+            const utc = now.getTime() + now.getTimezoneOffset() * 60000;
+            return new Date(utc + nepalOffset * 60000);
+        }
+
+        function getNepalHour() {
+            return getNepalTime().getHours();
+        }
+
+        function getTimeGreeting() {
+            const hour = getNepalHour();
+            if (hour < 12) return 'Good Morning';
+            if (hour < 17) return 'Good Afternoon';
+            return 'Good Evening';
+        }
+
         // Clock
         function updateClock() {
-        const now = new Date();
-        document.getElementById('clock-time').textContent = now.toLocaleTimeString('en-US', {
-        hour: '2-digit', minute: '2-digit', second: '2-digit'
-        });
-        document.getElementById('clock-date').textContent = now.toLocaleDateString('en-US', {
-        weekday: 'long', year: 'numeric', month: 'long', day: 'numeric'
-        });
+            const nepal = getNepalTime();
+            document.getElementById('clock-time').textContent = nepal.toLocaleTimeString('en-US', {
+                hour: '2-digit', minute: '2-digit', second: '2-digit'
+            });
+            document.getElementById('clock-date').textContent = nepal.toLocaleDateString('en-US', {
+                weekday: 'long', year: 'numeric', month: 'long', day: 'numeric'
+            });
         }
         updateClock();
         setInterval(updateClock, 1000);
@@ -347,15 +366,16 @@
         .build();
 
         connection.on("PunchIn", (data) => {
-        const message = `🙏 Hello Namaste, ${data.name}!`;
-        showGreeting(message, 'in');
-        speak(`Hello Namaste, ${data.name}!`);
+            const greeting = getTimeGreeting();
+            const message = `🙏 ${greeting}, Namaste ${data.name}!`;
+            showGreeting(message, 'in');
+            speak(`${greeting}, Namaste ${data.name}!`);
         });
 
         connection.on("PunchOut", (data) => {
-        const message = `🙏 Thank you, Namaste ${data.name}!`;
-        showGreeting(message, 'out');
-        speak(`Thank you, Namaste ${data.name}!`);
+            const message = `🙏 Thank you, Namaste ${data.name}!`;
+            showGreeting(message, 'out');
+            speak(`Thank you, Namaste ${data.name}!`);
         });
 
         connection.start().then(() => {

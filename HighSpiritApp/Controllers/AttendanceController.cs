@@ -13,6 +13,11 @@ namespace HighSpiritApp.Controllers
         private readonly GymDbContext _context;
         private readonly IHubContext<AttendanceHub> _hubContext;
 
+        // Nepal is UTC+5:45
+        private static readonly TimeSpan NepalOffset = new TimeSpan(5, 45, 0);
+        private static DateTime NepalNow => DateTime.UtcNow.Add(NepalOffset);
+        private static DateTime NepalToday => NepalNow.Date;
+
         public AttendanceController(GymDbContext context, IHubContext<AttendanceHub> hubContext)
         {
             _context = context;
@@ -23,7 +28,7 @@ namespace HighSpiritApp.Controllers
         [Authorize]
         public async Task<IActionResult> Index(string? search, DateTime? date)
         {
-            var targetDate = date ?? DateTime.Today;
+            var targetDate = date ?? NepalToday;
             var query = _context.Attendances
                 .Where(a => a.CheckInTime.Date == targetDate.Date)
                 .OrderByDescending(a => a.CheckInTime)
@@ -68,9 +73,10 @@ namespace HighSpiritApp.Controllers
             var name = request.Name.Trim();
 
             // Check if already punched in today (not yet punched out)
+            var today = NepalToday;
             var existing = await _context.Attendances
                 .Where(a => a.CustomerName.ToLower() == name.ToLower()
-                         && a.CheckInTime.Date == DateTime.Today
+                         && a.CheckInTime.Date == today
                          && a.CheckOutTime == null)
                 .FirstOrDefaultAsync();
 
@@ -83,11 +89,12 @@ namespace HighSpiritApp.Controllers
             var customer = await _context.Customers
                 .FirstOrDefaultAsync(c => c.FullName.ToLower() == name.ToLower());
 
+            var nepalNow = NepalNow;
             var attendance = new Attendance
             {
                 CustomerID = customer?.CustomerID ?? 0,
                 CustomerName = customer?.FullName ?? name,
-                CheckInTime = DateTime.Now,
+                CheckInTime = nepalNow,
                 CheckOutTime = null
             };
 
@@ -115,9 +122,10 @@ namespace HighSpiritApp.Controllers
             var name = request.Name.Trim();
 
             // Find active check-in for today
+            var today = NepalToday;
             var attendance = await _context.Attendances
                 .Where(a => a.CustomerName.ToLower() == name.ToLower()
-                         && a.CheckInTime.Date == DateTime.Today
+                         && a.CheckInTime.Date == today
                          && a.CheckOutTime == null)
                 .FirstOrDefaultAsync();
 
@@ -126,7 +134,7 @@ namespace HighSpiritApp.Controllers
                 return Json(new { success = false, message = "No active check-in found. Please punch in first.", notIn = true });
             }
 
-            attendance.CheckOutTime = DateTime.Now;
+            attendance.CheckOutTime = NepalNow;
             await _context.SaveChangesAsync();
 
             // Notify iPad display via SignalR
@@ -147,9 +155,10 @@ namespace HighSpiritApp.Controllers
             if (string.IsNullOrWhiteSpace(name))
                 return Json(new { checkedIn = false });
 
+            var today = NepalToday;
             var active = await _context.Attendances
                 .Where(a => a.CustomerName.ToLower() == name.Trim().ToLower()
-                         && a.CheckInTime.Date == DateTime.Today
+                         && a.CheckInTime.Date == today
                          && a.CheckOutTime == null)
                 .FirstOrDefaultAsync();
 
@@ -159,10 +168,37 @@ namespace HighSpiritApp.Controllers
                 checkInTime = active?.CheckInTime.ToString("hh:mm tt")
             });
         }
+
+        // POST: /Attendance/ClearAll - Clear all attendance records for a date (admin only)
+        [HttpPost]
+        [Authorize]
+        public async Task<IActionResult> ClearAll([FromBody] ClearAllRequest request)
+        {
+            var targetDate = string.IsNullOrEmpty(request?.Date)
+                ? NepalToday
+                : DateTime.Parse(request.Date).Date;
+
+            var records = await _context.Attendances
+                .Where(a => a.CheckInTime.Date == targetDate)
+                .ToListAsync();
+
+            if (records.Count == 0)
+                return Json(new { success = false, message = "No records found for this date." });
+
+            _context.Attendances.RemoveRange(records);
+            await _context.SaveChangesAsync();
+
+            return Json(new { success = true, message = $"Cleared {records.Count} records." });
+        }
     }
 
     public class PunchRequest
     {
         public string? Name { get; set; }
+    }
+
+    public class ClearAllRequest
+    {
+        public string? Date { get; set; }
     }
 }
