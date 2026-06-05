@@ -109,6 +109,11 @@ builder.Services.AddCors(options =>
 builder.Services.AddSignalR();
 
 // =============================================================
+// BACKGROUND SERVICES
+// =============================================================
+builder.Services.AddHostedService<HighSpiritApp.Services.AutoPunchOutService>();
+
+// =============================================================
 // MVC CONFIGURATION
 // =============================================================
 builder.Services.AddControllersWithViews();

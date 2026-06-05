@@ -263,6 +263,11 @@
             <input type="text" id="nameInput" placeholder="Enter your name" autocomplete="off" />
         </div>
 
+        <div class="input-group">
+            <i class="fa-solid fa-phone"></i>
+            <input type="tel" id="phoneInput" placeholder="Enter your phone number" autocomplete="off" />
+        </div>
+
         <div class="time-display">
             <span><i class="fa-regular fa-clock"></i> <span id="current-time"></span></span>
             <span><i class="fa-regular fa-calendar"></i> <span id="current-date"></span></span>
@@ -292,6 +297,7 @@
 
     <script>
             const nameInput = document.getElementById('nameInput');
+            const phoneInput = document.getElementById('phoneInput');
             const btnIn = document.getElementById('btn-punch-in');
             const btnOut = document.getElementById('btn-punch-out');
             const result = document.getElementById('result');
@@ -300,11 +306,15 @@
             const welcomeBack = document.getElementById('welcome-back');
             const greetingText = document.getElementById('greeting-text');
 
-            // Restore saved name
+            // Restore saved name and phone
             const savedName = localStorage.getItem('hs_attendance_name');
-            if (savedName) {
-                nameInput.value = savedName;
-                checkStatus(savedName);
+            const savedPhone = localStorage.getItem('hs_attendance_phone');
+            if (savedName) nameInput.value = savedName;
+            if (savedPhone) phoneInput.value = savedPhone;
+
+            // Auto check status on load
+            if (savedPhone || savedName) {
+                checkStatus();
             }
 
             // Nepal time (UTC+5:45)
@@ -337,13 +347,17 @@
             }
             greetingText.textContent = getTimeGreeting();
 
-            // Check if name input changes
+            // Check status when inputs change
             let statusTimeout;
+            phoneInput.addEventListener('input', function () {
+                clearTimeout(statusTimeout);
+                statusTimeout = setTimeout(() => checkStatus(), 500);
+            });
             nameInput.addEventListener('input', function () {
                 clearTimeout(statusTimeout);
                 const name = this.value.trim();
                 if (name.length > 1) {
-                    statusTimeout = setTimeout(() => checkStatus(name), 500);
+                    statusTimeout = setTimeout(() => checkStatus(), 500);
                 } else {
                     resetUI();
                 }
@@ -357,9 +371,17 @@
                 result.className = 'result';
             }
 
-            async function checkStatus(name) {
+            async function checkStatus() {
+                const phone = phoneInput.value.trim();
+                const name = nameInput.value.trim();
+                if (!phone && !name) return;
+
                 try {
-                    const res = await fetch(`/Attendance/CheckStatus?name=${encodeURIComponent(name)}`);
+                    let url = '/Attendance/CheckStatus?';
+                    if (phone) url += `phone=${encodeURIComponent(phone)}`;
+                    else url += `name=${encodeURIComponent(name)}`;
+
+                    const res = await fetch(url);
                     const data = await res.json();
 
                     if (data.checkedIn) {
@@ -370,7 +392,7 @@
                         statusBadge.className = 'status-badge checked-in';
                         statusBadge.innerHTML = '<i class="fa-solid fa-circle-check"></i> Checked in at ' + data.checkInTime;
                         welcomeBack.style.display = 'block';
-                        document.getElementById('wb-name').textContent = name;
+                        document.getElementById('wb-name').textContent = data.name || nameInput.value;
                         document.getElementById('wb-status').textContent = 'You checked in at ' + data.checkInTime;
                         greetingText.style.display = 'none';
                     } else {
@@ -389,6 +411,7 @@
 
             async function punchIn() {
                 const name = nameInput.value.trim();
+                const phone = phoneInput.value.trim();
                 if (!name) {
                     showResult('Please enter your name.', 'error');
                     nameInput.focus();
@@ -402,18 +425,19 @@
                     const res = await fetch('/Attendance/PunchIn', {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ name: name })
+                        body: JSON.stringify({ name: name, phone: phone || null })
                     });
                     const data = await res.json();
 
                     if (data.success) {
                         localStorage.setItem('hs_attendance_name', name);
+                        if (phone) localStorage.setItem('hs_attendance_phone', phone);
                         showResult('✅ ' + data.message, 'success');
                         // Switch to punch out mode
-                        setTimeout(() => checkStatus(name), 500);
+                        setTimeout(() => checkStatus(), 500);
                     } else {
                         if (data.alreadyIn) {
-                            checkStatus(name);
+                            checkStatus();
                         }
                         showResult('⚠️ ' + data.message, 'error');
                     }
@@ -427,8 +451,10 @@
 
             async function punchOut() {
                 const name = nameInput.value.trim();
-                if (!name) {
+                const phone = phoneInput.value.trim();
+                if (!name && !phone) {
                     showResult('Please enter your name.', 'error');
+                    nameInput.focus();
                     return;
                 }
 
@@ -439,7 +465,7 @@
                     const res = await fetch('/Attendance/PunchOut', {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ name: name })
+                        body: JSON.stringify({ name: name, phone: phone || null })
                     });
                     const data = await res.json();
 
