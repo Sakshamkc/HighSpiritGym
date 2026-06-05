@@ -1,0 +1,291 @@
+@{
+    Layout = null;
+}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <title>High Spirit Gym - Attendance</title>
+    <link rel="icon" type="image/png" href="/images/highspirit.jpg" />
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+            background: linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #0f172a 100%);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            color: #ffffff;
+            overflow: hidden;
+        }
+
+        .container {
+            text-align: center;
+            padding: 2rem;
+            width: 100%;
+            max-width: 600px;
+        }
+
+        .logo-section {
+            margin-bottom: 1.5rem;
+        }
+
+        .logo-section img {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            border: 3px solid rgba(59, 130, 246, 0.5);
+            box-shadow: 0 0 20px rgba(59, 130, 246, 0.3);
+        }
+
+        .logo-section h1 {
+            font-size: 1.8rem;
+            font-weight: 700;
+            margin-top: 0.75rem;
+            background: linear-gradient(135deg, #60a5fa, #a78bfa);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .qr-container {
+            background: #ffffff;
+            border-radius: 20px;
+            padding: 2rem;
+            display: inline-block;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3), 0 0 40px rgba(59, 130, 246, 0.1);
+            position: relative;
+            animation: pulse-glow 3s ease-in-out infinite;
+        }
+
+        @@keyframes pulse-glow {
+            0%, 100% { box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3), 0 0 40px rgba(59, 130, 246, 0.1); }
+            50% { box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3), 0 0 60px rgba(59, 130, 246, 0.25); }
+        }
+
+        #qrcode {
+            width: 220px;
+            height: 220px;
+        }
+
+        #qrcode img, #qrcode canvas {
+            width: 220px !important;
+            height: 220px !important;
+        }
+
+        .scan-text {
+            margin-top: 1.5rem;
+            font-size: 1.1rem;
+            color: #94a3b8;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+        }
+
+        .scan-text i {
+            font-size: 1.3rem;
+            color: #60a5fa;
+        }
+
+        /* Greeting overlay */
+        .greeting-container {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            padding: 2rem;
+            display: flex;
+            justify-content: center;
+            pointer-events: none;
+        }
+
+        .greeting {
+            background: linear-gradient(135deg, rgba(16, 185, 129, 0.95), rgba(5, 150, 105, 0.95));
+            padding: 1.2rem 2.5rem;
+            border-radius: 16px;
+            font-size: 1.4rem;
+            font-weight: 600;
+            color: #ffffff;
+            box-shadow: 0 10px 40px rgba(16, 185, 129, 0.4);
+            transform: translateY(100px);
+            opacity: 0;
+            transition: all 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+
+        .greeting.show {
+            transform: translateY(0);
+            opacity: 1;
+        }
+
+        .greeting.punch-out {
+            background: linear-gradient(135deg, rgba(245, 158, 11, 0.95), rgba(217, 119, 6, 0.95));
+            box-shadow: 0 10px 40px rgba(245, 158, 11, 0.4);
+        }
+
+        .clock {
+            position: fixed;
+            bottom: 1.5rem;
+            right: 2rem;
+            font-size: 0.9rem;
+            color: #64748b;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .clock span {
+            display: flex;
+            align-items: center;
+            gap: 0.4rem;
+        }
+    </style>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+</head>
+<body>
+    <div class="container">
+        <div class="logo-section">
+            <img src="/images/highspirit.jpg" alt="High Spirit Gym" />
+            <h1>HIGH SPIRIT GYM</h1>
+        </div>
+
+        <div class="qr-container">
+            <div id="qrcode"></div>
+        </div>
+
+        <div class="scan-text">
+            <i class="fa-solid fa-mobile-screen"></i>
+            <span>Scan to Check In / Out</span>
+        </div>
+    </div>
+
+    <div class="greeting-container">
+        <div class="greeting" id="greeting"></div>
+    </div>
+
+    <div class="clock">
+        <span><i class="fa-regular fa-clock"></i> <span id="clock-time"></span></span>
+        <span><i class="fa-regular fa-calendar"></i> <span id="clock-date"></span></span>
+    </div>
+
+    <!-- QR Code library -->
+    <script src="https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js"></script>
+    <!-- SignalR -->
+    <script src="https://cdn.jsdelivr.net/npm/@@microsoft/signalr@8.0.0/dist/browser/signalr.min.js"></script>
+
+    <script>
+        // Generate QR Code pointing to the check-in page
+        const baseUrl = window.location.origin;
+        const checkInUrl = `${baseUrl}/Attendance/CheckIn`;
+
+        new QRCode(document.getElementById("qrcode"), {
+            text: checkInUrl,
+            width: 220,
+            height: 220,
+            colorDark: "#1e293b",
+            colorLight: "#ffffff",
+            correctLevel: QRCode.CorrectLevel.H
+        });
+
+        // Clock
+        function updateClock() {
+            const now = new Date();
+            document.getElementById('clock-time').textContent = now.toLocaleTimeString('en-US', {
+                hour: '2-digit', minute: '2-digit', second: '2-digit'
+            });
+            document.getElementById('clock-date').textContent = now.toLocaleDateString('en-US', {
+                weekday: 'long', year: 'numeric', month: 'long', day: 'numeric'
+            });
+        }
+        updateClock();
+        setInterval(updateClock, 1000);
+
+        // Speech synthesis
+        function speak(text) {
+            if ('speechSynthesis' in window) {
+                // Cancel any ongoing speech
+                speechSynthesis.cancel();
+                const utterance = new SpeechSynthesisUtterance(text);
+                utterance.rate = 0.9;
+                utterance.pitch = 1.1;
+                utterance.volume = 1;
+                // Try to use a female voice
+                const voices = speechSynthesis.getVoices();
+                const preferred = voices.find(v => v.lang.startsWith('en') && v.name.includes('Female'))
+                    || voices.find(v => v.lang.startsWith('en'))
+                    || voices[0];
+                if (preferred) utterance.voice = preferred;
+                speechSynthesis.speak(utterance);
+            }
+        }
+
+        // Ensure voices are loaded
+        if ('speechSynthesis' in window) {
+            speechSynthesis.getVoices();
+            speechSynthesis.onvoiceschanged = () => speechSynthesis.getVoices();
+        }
+
+        // Show greeting
+        function showGreeting(message, type) {
+            const el = document.getElementById('greeting');
+            el.textContent = message;
+            el.className = 'greeting' + (type === 'out' ? ' punch-out' : '');
+
+            // Trigger animation
+            setTimeout(() => el.classList.add('show'), 50);
+
+            // Hide after 5 seconds
+            setTimeout(() => {
+                el.classList.remove('show');
+            }, 5000);
+        }
+
+        // SignalR connection
+        const connection = new signalR.HubConnectionBuilder()
+            .withUrl("/hubs/attendance")
+            .withAutomaticReconnect()
+            .build();
+
+        connection.on("PunchIn", (data) => {
+            const message = `🙏 Hello Namaste, ${data.name}!`;
+            showGreeting(message, 'in');
+            speak(`Hello Namaste, ${data.name}!`);
+        });
+
+        connection.on("PunchOut", (data) => {
+            const message = `🙏 Thank you, Namaste ${data.name}!`;
+            showGreeting(message, 'out');
+            speak(`Thank you, Namaste ${data.name}!`);
+        });
+
+        connection.start().then(() => {
+            // Join the display group to receive notifications
+            connection.invoke("JoinDisplayGroup");
+            console.log("Connected to attendance hub");
+        }).catch(err => console.error("SignalR connection error:", err));
+
+        // Keep screen awake (prevent iPad sleep via Wake Lock API)
+        async function requestWakeLock() {
+            try {
+                if ('wakeLock' in navigator) {
+                    await navigator.wakeLock.request('screen');
+                }
+            } catch (e) { }
+        }
+        requestWakeLock();
+        document.addEventListener('visibilitychange', () => {
+            if (document.visibilityState === 'visible') requestWakeLock();
+        });
+    </script>
+</body>
+</html>

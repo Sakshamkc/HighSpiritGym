@@ -1,5 +1,6 @@
 using HighSpiritApp.DataContext;
 using HighSpiritApp.Extensions;
+using HighSpiritApp.Hubs;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
@@ -83,7 +84,7 @@ builder.Services.AddAuthentication()
     });
 
 // =============================================================
-// CORS (for mobile app access)
+// CORS (for mobile app access + SignalR)
 // =============================================================
 builder.Services.AddCors(options =>
 {
@@ -93,7 +94,19 @@ builder.Services.AddCors(options =>
               .AllowAnyMethod()
               .AllowAnyHeader();
     });
+    options.AddPolicy("SignalRPolicy", policy =>
+    {
+        policy.SetIsOriginAllowed(_ => true)
+              .AllowAnyMethod()
+              .AllowAnyHeader()
+              .AllowCredentials();
+    });
 });
+
+// =============================================================
+// SIGNALR (real-time attendance notifications)
+// =============================================================
+builder.Services.AddSignalR();
 
 // =============================================================
 // MVC CONFIGURATION
@@ -158,6 +171,9 @@ app.MapControllerRoute(
 
 // Map API controllers (attribute-routed)
 app.MapControllers();
+
+// Map SignalR Hubs
+app.MapHub<AttendanceHub>("/hubs/attendance").RequireCors("SignalRPolicy");
 
 // =============================================================
 // SEED ROLES

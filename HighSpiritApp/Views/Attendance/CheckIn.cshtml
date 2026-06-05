@@ -1,0 +1,451 @@
+@{
+    Layout = null;
+}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <title>High Spirit Gym - Check In</title>
+    <link rel="icon" type="image/png" href="/images/highspirit.jpg" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+            background: linear-gradient(180deg, #f8fafc 0%, #e2e8f0 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 1rem;
+        }
+
+        .card {
+            background: #ffffff;
+            border-radius: 24px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.08), 0 4px 16px rgba(0, 0, 0, 0.04);
+            padding: 2rem 1.5rem;
+            width: 100%;
+            max-width: 400px;
+            text-align: center;
+        }
+
+        .logo {
+            width: 64px;
+            height: 64px;
+            border-radius: 50%;
+            margin: 0 auto 0.75rem;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+
+        .brand {
+            font-size: 1.2rem;
+            font-weight: 700;
+            color: #1e293b;
+            margin-bottom: 0.25rem;
+        }
+
+        .greeting-text {
+            font-size: 0.95rem;
+            color: #64748b;
+            margin-bottom: 1.5rem;
+        }
+
+        .input-group {
+            position: relative;
+            margin-bottom: 1.25rem;
+        }
+
+        .input-group i {
+            position: absolute;
+            left: 1rem;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #94a3b8;
+            font-size: 1.1rem;
+        }
+
+        .input-group input {
+            width: 100%;
+            padding: 1rem 1rem 1rem 3rem;
+            border: 2px solid #e2e8f0;
+            border-radius: 14px;
+            font-size: 1rem;
+            color: #1e293b;
+            background: #f8fafc;
+            transition: all 0.2s;
+            outline: none;
+        }
+
+        .input-group input:focus {
+            border-color: #3b82f6;
+            background: #ffffff;
+            box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.1);
+        }
+
+        .input-group input::placeholder {
+            color: #94a3b8;
+        }
+
+        .time-display {
+            display: flex;
+            justify-content: center;
+            gap: 1.5rem;
+            margin-bottom: 1.5rem;
+            color: #64748b;
+            font-size: 0.9rem;
+        }
+
+        .time-display span {
+            display: flex;
+            align-items: center;
+            gap: 0.4rem;
+        }
+
+        .btn {
+            width: 100%;
+            padding: 1rem;
+            border: none;
+            border-radius: 14px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+        }
+
+        .btn:active {
+            transform: scale(0.97);
+        }
+
+        .btn-punch-in {
+            background: linear-gradient(135deg, #10b981, #059669);
+            color: #ffffff;
+            box-shadow: 0 6px 20px rgba(16, 185, 129, 0.3);
+        }
+
+        .btn-punch-in:hover {
+            box-shadow: 0 8px 24px rgba(16, 185, 129, 0.4);
+        }
+
+        .btn-punch-out {
+            background: linear-gradient(135deg, #f59e0b, #d97706);
+            color: #ffffff;
+            box-shadow: 0 6px 20px rgba(245, 158, 11, 0.3);
+        }
+
+        .btn-punch-out:hover {
+            box-shadow: 0 8px 24px rgba(245, 158, 11, 0.4);
+        }
+
+        .btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .status-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.4rem;
+            padding: 0.5rem 1rem;
+            border-radius: 30px;
+            font-size: 0.85rem;
+            font-weight: 500;
+            margin-bottom: 1.25rem;
+        }
+
+        .status-badge.checked-in {
+            background: #ecfdf5;
+            color: #059669;
+            border: 1px solid #a7f3d0;
+        }
+
+        .status-badge.not-in {
+            background: #f0f9ff;
+            color: #0284c7;
+            border: 1px solid #bae6fd;
+        }
+
+        /* Result message */
+        .result {
+            margin-top: 1.25rem;
+            padding: 1rem;
+            border-radius: 14px;
+            font-size: 0.95rem;
+            font-weight: 500;
+            display: none;
+            animation: slideUp 0.3s ease;
+        }
+
+        .result.success {
+            background: #ecfdf5;
+            color: #065f46;
+            border: 1px solid #a7f3d0;
+            display: block;
+        }
+
+        .result.error {
+            background: #fef2f2;
+            color: #991b1b;
+            border: 1px solid #fecaca;
+            display: block;
+        }
+
+        @@keyframes slideUp {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .loading-spinner {
+            display: none;
+            width: 20px;
+            height: 20px;
+            border: 3px solid rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            border-top-color: #fff;
+            animation: spin 0.8s linear infinite;
+        }
+
+        @@keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .welcome-back {
+            background: linear-gradient(135deg, #fef3c7, #fde68a);
+            border-radius: 14px;
+            padding: 1rem;
+            margin-bottom: 1.25rem;
+            font-size: 0.9rem;
+            color: #92400e;
+        }
+
+        .welcome-back strong {
+            font-size: 1rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="card">
+        <img src="/images/highspirit.jpg" alt="High Spirit Gym" class="logo" />
+        <div class="brand">HIGH SPIRIT GYM</div>
+        <div class="greeting-text" id="greeting-text">Welcome! Please check in.</div>
+
+        <!-- Welcome back section (shown if returning user) -->
+        <div class="welcome-back" id="welcome-back" style="display:none;">
+            <strong>Welcome back, <span id="wb-name"></span>! 👋</strong>
+            <div id="wb-status"></div>
+        </div>
+
+        <div class="input-group">
+            <i class="fa-solid fa-user"></i>
+            <input type="text" id="nameInput" placeholder="Enter your name" autocomplete="off" />
+        </div>
+
+        <div class="time-display">
+            <span><i class="fa-regular fa-clock"></i> <span id="current-time"></span></span>
+            <span><i class="fa-regular fa-calendar"></i> <span id="current-date"></span></span>
+        </div>
+
+        <!-- Status badge -->
+        <div id="status-section" style="display:none;">
+            <div class="status-badge" id="status-badge"></div>
+        </div>
+
+        <!-- Action buttons -->
+        <button class="btn btn-punch-in" id="btn-punch-in" onclick="punchIn()">
+            <i class="fa-solid fa-right-to-bracket"></i>
+            <span>PUNCH IN</span>
+            <div class="loading-spinner" id="spinner-in"></div>
+        </button>
+
+        <button class="btn btn-punch-out" id="btn-punch-out" onclick="punchOut()" style="display:none;">
+            <i class="fa-solid fa-right-from-bracket"></i>
+            <span>PUNCH OUT</span>
+            <div class="loading-spinner" id="spinner-out"></div>
+        </button>
+
+        <!-- Result message -->
+        <div class="result" id="result"></div>
+    </div>
+
+    <script>
+        const nameInput = document.getElementById('nameInput');
+        const btnIn = document.getElementById('btn-punch-in');
+        const btnOut = document.getElementById('btn-punch-out');
+        const result = document.getElementById('result');
+        const statusSection = document.getElementById('status-section');
+        const statusBadge = document.getElementById('status-badge');
+        const welcomeBack = document.getElementById('welcome-back');
+        const greetingText = document.getElementById('greeting-text');
+
+        // Restore saved name
+        const savedName = localStorage.getItem('hs_attendance_name');
+        if (savedName) {
+            nameInput.value = savedName;
+            checkStatus(savedName);
+        }
+
+        // Update time
+        function updateTime() {
+            const now = new Date();
+            document.getElementById('current-time').textContent = now.toLocaleTimeString('en-US', {
+                hour: '2-digit', minute: '2-digit'
+            });
+            document.getElementById('current-date').textContent = now.toLocaleDateString('en-US', {
+                month: 'short', day: 'numeric', year: 'numeric'
+            });
+        }
+        updateTime();
+        setInterval(updateTime, 1000);
+
+        // Update greeting based on time
+        function getTimeGreeting() {
+            const hour = new Date().getHours();
+            if (hour < 12) return 'Good Morning! ☀️';
+            if (hour < 17) return 'Good Afternoon! 🌤️';
+            return 'Good Evening! 🌙';
+        }
+        greetingText.textContent = getTimeGreeting();
+
+        // Check if name input changes
+        let statusTimeout;
+        nameInput.addEventListener('input', function () {
+            clearTimeout(statusTimeout);
+            const name = this.value.trim();
+            if (name.length > 1) {
+                statusTimeout = setTimeout(() => checkStatus(name), 500);
+            } else {
+                resetUI();
+            }
+        });
+
+        function resetUI() {
+            btnIn.style.display = 'flex';
+            btnOut.style.display = 'none';
+            statusSection.style.display = 'none';
+            welcomeBack.style.display = 'none';
+            result.className = 'result';
+        }
+
+        async function checkStatus(name) {
+            try {
+                const res = await fetch(`/Attendance/CheckStatus?name=${encodeURIComponent(name)}`);
+                const data = await res.json();
+
+                if (data.checkedIn) {
+                    // Already checked in - show punch out
+                    btnIn.style.display = 'none';
+                    btnOut.style.display = 'flex';
+                    statusSection.style.display = 'block';
+                    statusBadge.className = 'status-badge checked-in';
+                    statusBadge.innerHTML = '<i class="fa-solid fa-circle-check"></i> Checked in at ' + data.checkInTime;
+                    welcomeBack.style.display = 'block';
+                    document.getElementById('wb-name').textContent = name;
+                    document.getElementById('wb-status').textContent = 'You checked in at ' + data.checkInTime;
+                    greetingText.style.display = 'none';
+                } else {
+                    // Not checked in - show punch in
+                    btnIn.style.display = 'flex';
+                    btnOut.style.display = 'none';
+                    statusSection.style.display = 'none';
+                    welcomeBack.style.display = 'none';
+                    greetingText.style.display = 'block';
+                    greetingText.textContent = getTimeGreeting();
+                }
+            } catch (e) {
+                console.error('Status check failed:', e);
+            }
+        }
+
+        async function punchIn() {
+            const name = nameInput.value.trim();
+            if (!name) {
+                showResult('Please enter your name.', 'error');
+                nameInput.focus();
+                return;
+            }
+
+            btnIn.disabled = true;
+            document.getElementById('spinner-in').style.display = 'block';
+
+            try {
+                const res = await fetch('/Attendance/PunchIn', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ name: name })
+                });
+                const data = await res.json();
+
+                if (data.success) {
+                    localStorage.setItem('hs_attendance_name', name);
+                    showResult('✅ ' + data.message, 'success');
+                    // Switch to punch out mode
+                    setTimeout(() => checkStatus(name), 500);
+                } else {
+                    if (data.alreadyIn) {
+                        checkStatus(name);
+                    }
+                    showResult('⚠️ ' + data.message, 'error');
+                }
+            } catch (e) {
+                showResult('❌ Network error. Please try again.', 'error');
+            } finally {
+                btnIn.disabled = false;
+                document.getElementById('spinner-in').style.display = 'none';
+            }
+        }
+
+        async function punchOut() {
+            const name = nameInput.value.trim();
+            if (!name) {
+                showResult('Please enter your name.', 'error');
+                return;
+            }
+
+            btnOut.disabled = true;
+            document.getElementById('spinner-out').style.display = 'block';
+
+            try {
+                const res = await fetch('/Attendance/PunchOut', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ name: name })
+                });
+                const data = await res.json();
+
+                if (data.success) {
+                    showResult('👋 ' + data.message, 'success');
+                    // Switch back to punch in mode
+                    setTimeout(() => {
+                        resetUI();
+                        greetingText.textContent = 'See you next time! 🙏';
+                    }, 1000);
+                } else {
+                    showResult('⚠️ ' + data.message, 'error');
+                }
+            } catch (e) {
+                showResult('❌ Network error. Please try again.', 'error');
+            } finally {
+                btnOut.disabled = false;
+                document.getElementById('spinner-out').style.display = 'none';
+            }
+        }
+
+        function showResult(message, type) {
+            result.textContent = message;
+            result.className = 'result ' + type;
+        }
+    </script>
+</body>
+</html>

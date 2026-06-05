@@ -2256,6 +2256,14 @@
             <p class="nav-section-title">Analytics</p>
 
             <div class="nav-item">
+                <a href="/Attendance" class="nav-link @(controller == "Attendance" ? "active" : "")"
+                   onclick="closeSidebarOnMobile()">
+                    <i class="fa-solid fa-clipboard-user"></i>
+                    <span class="nav-text">Attendance</span>
+                </a>
+            </div>
+
+            <div class="nav-item">
                 <a href="/Report" class="nav-link report-link @(controller == "Report" ? "active" : "")"
                    onclick="closeSidebarOnMobile()">
                     <i class="fa-solid fa-chart-line"></i>
