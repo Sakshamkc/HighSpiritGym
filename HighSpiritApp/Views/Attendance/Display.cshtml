@@ -255,9 +255,9 @@
     <script src="https://cdn.jsdelivr.net/npm/@@microsoft/signalr@8.0.0/dist/browser/signalr.min.js"></script>
 
     <script>
-        // Generate QR Code pointing to the check-in page
+        // Generate QR Code pointing to the static check-in page
         const baseUrl = window.location.origin;
-        const checkInUrl = `${baseUrl}/Attendance/CheckIn`;
+        const checkInUrl = `${baseUrl}/checkin.html`;
 
         new QRCode(document.getElementById("qrcode"), {
         text: checkInUrl,

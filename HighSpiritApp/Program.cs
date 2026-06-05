@@ -31,6 +31,11 @@ builder.Services.AddIdentity<IdentityUser, IdentityRole>(options =>
     options.Password.RequireNonAlphanumeric = false;
     options.Password.RequireUppercase = false;
     options.Password.RequireLowercase = false;
+
+    // Lockout settings
+    options.Lockout.MaxFailedAccessAttempts = 3;
+    options.Lockout.DefaultLockoutTimeSpan = TimeSpan.FromMinutes(15);
+    options.Lockout.AllowedForNewUsers = true;
 })
 .AddEntityFrameworkStores<ApplicationDbContext>()
 .AddDefaultTokenProviders();
@@ -53,6 +58,25 @@ builder.Services.ConfigureApplicationCookie(options =>
     options.Cookie.HttpOnly = true;
     options.Cookie.SecurePolicy = CookieSecurePolicy.SameAsRequest;
     options.Cookie.SameSite = SameSiteMode.Lax;
+
+    // Return 404 instead of redirecting to login (hides the system)
+    options.Events.OnRedirectToLogin = context =>
+    {
+        // If it's an AJAX/API request or the user is browsing normally
+        // Show 404 instead of revealing a login page exists
+        if (!context.Request.Path.StartsWithSegments("/Account"))
+        {
+            context.Response.StatusCode = 404;
+            return Task.CompletedTask;
+        }
+        context.Response.Redirect(context.RedirectUri);
+        return Task.CompletedTask;
+    };
+    options.Events.OnRedirectToAccessDenied = context =>
+    {
+        context.Response.StatusCode = 404;
+        return Task.CompletedTask;
+    };
 });
 
 // =============================================================
@@ -170,6 +194,17 @@ app.UseCors("MobileApp");
 app.UseAuthentication();
 app.UseAuthorization();
 
+// Redirect unauthenticated root "/" to checkin.html
+app.Use(async (context, next) =>
+{
+    if (context.Request.Path == "/" && !context.User.Identity!.IsAuthenticated)
+    {
+        context.Response.Redirect("/checkin.html");
+        return;
+    }
+    await next();
+});
+
 app.MapControllerRoute(
     name: "default",
     pattern: "{controller=Home}/{action=Index}/{id?}");
@@ -201,6 +236,10 @@ using (var scope = app.Services.CreateScope())
         var userRoles = await userManager.GetRolesAsync(adminUser);
         if (!userRoles.Contains("Admin"))
             await userManager.AddToRoleAsync(adminUser, "Admin");
+
+        // One-time password reset — remove this block after first deploy
+        var token = await userManager.GeneratePasswordResetTokenAsync(adminUser);
+        await userManager.ResetPasswordAsync(adminUser, token, "HighSpirit@2026!");
     }
 }
 

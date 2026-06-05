@@ -33,7 +33,7 @@ namespace HighSpiritApp.Services
             }
 
             var result = await _signInManager.PasswordSignInAsync(
-                user, password, isPersistent: true, lockoutOnFailure: false);
+                user, password, isPersistent: true, lockoutOnFailure: true);
 
             if (result.Succeeded)
             {
