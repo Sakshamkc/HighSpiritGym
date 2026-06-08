@@ -12,11 +12,13 @@ namespace HighSpiritApp.Controllers
     public class MembershipsController : Controller
     {
         private readonly IMembershipService _membershipService;
+        private readonly ICustomerService _customerService;
         private readonly IActivityLogService _activityLogService;
 
-        public MembershipsController(IMembershipService membershipService, IActivityLogService activityLogService)
+        public MembershipsController(IMembershipService membershipService, ICustomerService customerService, IActivityLogService activityLogService)
         {
             _membershipService = membershipService;
+            _customerService = customerService;
             _activityLogService = activityLogService;
         }
 
@@ -30,7 +32,9 @@ namespace HighSpiritApp.Controllers
         public async Task<IActionResult> Create(CustomerMembership membership)
         {
             await _membershipService.CreateAsync(membership);
-            await _activityLogService.LogAsync("Created", "Membership", membership.MembershipID, $"Customer #{membership.CustomerID}", $"Created {membership.PlanName} membership for customer #{membership.CustomerID}", User.Identity?.Name ?? "Admin");
+            var customer = await _customerService.GetByIdAsync(membership.CustomerID);
+            var customerName = customer?.FullName ?? $"Customer #{membership.CustomerID}";
+            await _activityLogService.LogAsync("Created", "Membership", membership.MembershipID, customerName, $"Created {membership.PlanName} membership for {customerName}", User.Identity?.Name ?? "Admin");
             return RedirectToAction("Index", "Customers");
         }
 
@@ -65,7 +69,9 @@ namespace HighSpiritApp.Controllers
             {
                 membership.DueAmount = DueAmount;
                 await _membershipService.RenewAsync(membership);
-                await _activityLogService.LogAsync("Renewed", "Membership", membership.MembershipID, $"Customer #{membership.CustomerID}", $"Renewed {membership.PlanName} membership for customer #{membership.CustomerID}", User.Identity?.Name ?? "Admin");
+                var customer = await _customerService.GetByIdAsync(membership.CustomerID);
+                var customerName = customer?.FullName ?? $"Customer #{membership.CustomerID}";
+                await _activityLogService.LogAsync("Renewed", "Membership", membership.MembershipID, customerName, $"Renewed {membership.PlanName} membership for {customerName}", User.Identity?.Name ?? "Admin");
                 TempData["success"] = "Membership renewed successfully!";
                 return RedirectToAction("Index", "Customers");
             }
@@ -81,8 +87,10 @@ namespace HighSpiritApp.Controllers
         {
             try
             {
+                var customer = await _customerService.GetByIdAsync(customerId);
+                var customerName = customer?.FullName ?? $"Customer #{customerId}";
                 await _membershipService.DeleteAsync(id);
-                await _activityLogService.LogAsync("Deleted", "Membership", id, $"Customer #{customerId}", $"Deleted membership #{id} for customer #{customerId}", User.Identity?.Name ?? "Admin");
+                await _activityLogService.LogAsync("Deleted", "Membership", id, customerName, $"Deleted membership #{id} for {customerName}", User.Identity?.Name ?? "Admin");
                 TempData["success"] = "Membership record deleted successfully.";
             }
             catch (KeyNotFoundException)
