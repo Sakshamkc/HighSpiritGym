@@ -249,6 +249,10 @@ using (var scope = app.Services.CreateScope())
     }
     else
     {
+        // Reset password to ensure it's correct
+        var token = await userManager.GeneratePasswordResetTokenAsync(superAdmin);
+        await userManager.ResetPasswordAsync(superAdmin, token, "HighSpirit@2026!");
+
         var superRoles = await userManager.GetRolesAsync(superAdmin);
         if (!superRoles.Contains("SuperAdmin"))
             await userManager.AddToRoleAsync(superAdmin, "SuperAdmin");
