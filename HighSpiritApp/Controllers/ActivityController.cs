@@ -14,7 +14,7 @@ namespace HighSpiritApp.Controllers
             _activityLogService = activityLogService;
         }
 
-        public async Task<IActionResult> Index(string? entityType, string? action, string? search, int page = 1)
+        public async Task<IActionResult> Index(string? entityType, [FromQuery] string? action, string? search, int page = 1)
         {
             int pageSize = 30;
             var (items, totalCount) = await _activityLogService.GetFilteredAsync(entityType, action, search, page, pageSize);
