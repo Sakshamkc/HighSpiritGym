@@ -4,7 +4,7 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace HighSpiritApp.Controllers
 {
-    [Authorize]
+    [Authorize(Roles = "SuperAdmin")]
     public class ActivityController : Controller
     {
         private readonly IActivityLogService _activityLogService;

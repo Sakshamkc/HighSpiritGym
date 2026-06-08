@@ -23,6 +23,10 @@ namespace HighSpiritApp.Controllers
 
         public async Task<IActionResult> Index(string category = "Children", string search = "", string filter = "all", string paymentStatus = "", int page = 1)
         {
+            // Restrict 'updated' filter to SuperAdmin
+            if (filter == "updated" && !User.IsInRole("SuperAdmin"))
+                return RedirectToAction("Index", new { category, search, paymentStatus, page });
+
             // Validate category
             if (category != "Adult" && category != "Children" && category != "All")
                 category = "Children";

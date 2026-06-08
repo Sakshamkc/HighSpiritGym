@@ -30,6 +30,10 @@ namespace HighSpiritApp.Controllers
 
         public async Task<IActionResult> Index(string search, string sort, string filter, int? duration, string planName, string shift, string gender, string paymentStatus, int page = 1)
         {
+            // Restrict sensitive filters to SuperAdmin
+            if ((filter == "updated" || filter == "new" || filter == "thismonth") && !User.IsInRole("SuperAdmin"))
+                return RedirectToAction("Index", new { search, sort, duration, planName, shift, gender, paymentStatus, page });
+
             var result = await _customerService.GetFilteredCustomersAsync(new CustomerFilterRequest
             {
                 Search = search,

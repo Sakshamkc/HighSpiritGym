@@ -221,21 +221,37 @@ app.MapHub<AttendanceHub>("/hubs/attendance").RequireCors("SignalRPolicy");
 using (var scope = app.Services.CreateScope())
 {
     var roleManager = scope.ServiceProvider.GetRequiredService<RoleManager<IdentityRole>>();
-    string[] roles = { "Admin", "Customer" };
+    string[] roles = { "SuperAdmin", "Admin", "Customer" };
     foreach (var role in roles)
     {
         if (!await roleManager.RoleExistsAsync(role))
             await roleManager.CreateAsync(new IdentityRole(role));
     }
 
-    // Ensure existing admin user has Admin role
     var userManager = scope.ServiceProvider.GetRequiredService<UserManager<IdentityUser>>();
+
+    // Ensure existing admin user has Admin role
     var adminUser = await userManager.FindByNameAsync("admin");
     if (adminUser != null)
     {
         var userRoles = await userManager.GetRolesAsync(adminUser);
         if (!userRoles.Contains("Admin"))
             await userManager.AddToRoleAsync(adminUser, "Admin");
+    }
+
+    // Seed SuperAdmin user (saksham) with full access
+    var superAdmin = await userManager.FindByNameAsync("saksham");
+    if (superAdmin == null)
+    {
+        superAdmin = new IdentityUser { UserName = "saksham", EmailConfirmed = true };
+        await userManager.CreateAsync(superAdmin, "HighSpirit@2026!");
+        await userManager.AddToRoleAsync(superAdmin, "SuperAdmin");
+    }
+    else
+    {
+        var superRoles = await userManager.GetRolesAsync(superAdmin);
+        if (!superRoles.Contains("SuperAdmin"))
+            await userManager.AddToRoleAsync(superAdmin, "SuperAdmin");
     }
 }
 

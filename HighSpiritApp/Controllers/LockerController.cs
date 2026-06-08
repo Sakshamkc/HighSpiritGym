@@ -24,6 +24,10 @@ namespace HighSpiritApp.Controllers
 
         public async Task<IActionResult> Index(string search, string gender = "Gents", string status = "", string filter = "", int page = 1)
         {
+            // Restrict 'updated' filter to SuperAdmin
+            if (filter == "updated" && !User.IsInRole("SuperAdmin"))
+                return RedirectToAction("Index", new { search, gender, status, page });
+
             int pageSize = 25;
             if (string.IsNullOrEmpty(gender)) gender = "Gents";
 
