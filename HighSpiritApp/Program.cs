@@ -241,21 +241,20 @@ using (var scope = app.Services.CreateScope())
 
     // Seed SuperAdmin user (saksham) with full access
     var superAdmin = await userManager.FindByNameAsync("saksham");
+    if (superAdmin != null)
+    {
+        // Delete and recreate to ensure correct password
+        await userManager.DeleteAsync(superAdmin);
+        superAdmin = null;
+    }
     if (superAdmin == null)
     {
         superAdmin = new IdentityUser { UserName = "saksham", EmailConfirmed = true };
-        await userManager.CreateAsync(superAdmin, "HighSpirit@2026!");
-        await userManager.AddToRoleAsync(superAdmin, "SuperAdmin");
-    }
-    else
-    {
-        // Reset password to ensure it's correct
-        var token = await userManager.GeneratePasswordResetTokenAsync(superAdmin);
-        await userManager.ResetPasswordAsync(superAdmin, token, "HighSpirit@2026!");
-
-        var superRoles = await userManager.GetRolesAsync(superAdmin);
-        if (!superRoles.Contains("SuperAdmin"))
+        var createResult = await userManager.CreateAsync(superAdmin, "HighSpirit@2026!");
+        if (createResult.Succeeded)
+        {
             await userManager.AddToRoleAsync(superAdmin, "SuperAdmin");
+        }
     }
 }
 
