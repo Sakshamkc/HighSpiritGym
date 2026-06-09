@@ -20,6 +20,7 @@ namespace HighSpiritApp.Extensions
             services.AddScoped<IMembershipRepository, MembershipRepository>();
             services.AddScoped<IBoxingRepository, BoxingRepository>();
             services.AddScoped<ILockerRepository, LockerRepository>();
+            services.AddScoped<IStaffRepository, StaffRepository>();
 
             return services;
         }
@@ -37,6 +38,7 @@ namespace HighSpiritApp.Extensions
             services.AddScoped<IReportService, ReportService>();
             services.AddScoped<IAuthService, AuthService>();
             services.AddScoped<IActivityLogService, ActivityLogService>();
+            services.AddScoped<IStaffService, StaffService>();
 
             return services;
         }

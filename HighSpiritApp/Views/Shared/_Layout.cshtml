@@ -2294,6 +2294,23 @@
                 </div>
             }
 
+            <p class="nav-section-title">Staff</p>
+
+            <div class="nav-item">
+                <a href="/Staff" class="nav-link @(controller == "Staff" && ViewContext.RouteData.Values["action"]?.ToString() != "Attendance" ? "active" : "")"
+                   onclick="closeSidebarOnMobile()">
+                    <i class="fa-solid fa-users-gear"></i>
+                    <span class="nav-text">Staff Members</span>
+                </a>
+            </div>
+            <div class="nav-item">
+                <a href="/Staff/Attendance" class="nav-link @(controller == "Staff" && ViewContext.RouteData.Values["action"]?.ToString() == "Attendance" ? "active" : "")"
+                   onclick="closeSidebarOnMobile()">
+                    <i class="fa-solid fa-user-clock"></i>
+                    <span class="nav-text">Staff Attendance</span>
+                </a>
+            </div>
+
             <p class="nav-section-title">System</p>
 
             <div class="nav-item">

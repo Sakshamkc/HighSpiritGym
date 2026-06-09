@@ -1,0 +1,383 @@
+@model HighSpiritApp.Models.Staff
+@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    ViewData["Title"] = Model.FullName;
+    var activeCheckIn = ViewBag.ActiveCheckIn as HighSpiritApp.Models.StaffAttendance;
+    var history = ViewBag.AttendanceHistory as List<HighSpiritApp.Models.StaffAttendance> ?? new
+List<HighSpiritApp.Models.StaffAttendance>();
+}
+
+<style>
+    .detail-header {
+        background: linear-gradient(135deg, #4f46e5 0%, #6366f1 100%);
+        border-radius: 16px;
+        padding: 24px;
+        color: white;
+        margin-bottom: 25px;
+        display: flex;
+        align-items: center;
+        gap: 20px;
+        flex-wrap: wrap;
+    }
+
+    .detail-photo {
+        width: 90px;
+        height: 90px;
+        border-radius: 50%;
+        overflow: hidden;
+        border: 3px solid rgba(255, 255, 255, 0.3);
+        flex-shrink: 0;
+    }
+
+    .detail-photo img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+
+    .detail-photo .placeholder {
+        width: 100%;
+        height: 100%;
+        background: rgba(255, 255, 255, 0.15);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 32px;
+    }
+
+    .detail-name h3 {
+        margin: 0;
+        font-weight: 700;
+    }
+
+    .detail-name .position {
+        opacity: 0.85;
+        font-size: 0.95rem;
+    }
+
+    .detail-actions {
+        margin-left: auto;
+        display: flex;
+        gap: 8px;
+    }
+
+    .detail-actions a,
+    .detail-actions button {
+        padding: 8px 16px;
+        border-radius: 10px;
+        font-size: 0.85rem;
+        font-weight: 500;
+        text-decoration: none;
+        border: 1px solid rgba(255, 255, 255, 0.3);
+        color: white;
+        background: rgba(255, 255, 255, 0.1);
+        transition: all 0.2s;
+        cursor: pointer;
+    }
+
+    .detail-actions a:hover,
+    .detail-actions button:hover {
+        background: rgba(255, 255, 255, 0.2);
+    }
+
+    .info-card {
+        background: white;
+        border-radius: 14px;
+        border: 1px solid #e2e8f0;
+        padding: 24px;
+        margin-bottom: 20px;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+    }
+
+    .info-card h5 {
+        font-weight: 600;
+        color: #1e293b;
+        margin-bottom: 16px;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .info-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+        gap: 16px;
+    }
+
+    .info-item label {
+        font-size: 0.8rem;
+        color: #94a3b8;
+        text-transform: uppercase;
+        font-weight: 600;
+        letter-spacing: 0.5px;
+    }
+
+    .info-item p {
+        font-size: 1rem;
+        color: #1e293b;
+        font-weight: 500;
+        margin: 4px 0 0;
+    }
+
+    .qr-section {
+        text-align: center;
+        padding: 24px;
+    }
+
+    .qr-section canvas {
+        border: 8px solid white;
+        border-radius: 12px;
+        box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+    }
+
+    .attendance-status {
+        padding: 12px 20px;
+        border-radius: 10px;
+        margin-bottom: 16px;
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        font-weight: 500;
+    }
+
+    .attendance-status.in {
+        background: #ecfdf5;
+        color: #059669;
+        border: 1px solid #a7f3d0;
+    }
+
+    .attendance-status.out {
+        background: #f8fafc;
+        color: #64748b;
+        border: 1px solid #e2e8f0;
+    }
+
+    .history-table {
+        width: 100%;
+        border-collapse: collapse;
+    }
+
+    .history-table th {
+        background: #f8fafc;
+        padding: 10px 14px;
+        text-align: left;
+        font-size: 0.8rem;
+        color: #64748b;
+        text-transform: uppercase;
+        font-weight: 600;
+        border-bottom: 1px solid #e2e8f0;
+    }
+
+    .history-table td {
+        padding: 12px 14px;
+        border-bottom: 1px solid #f1f5f9;
+        font-size: 0.9rem;
+        color: #1e293b;
+    }
+
+    [data-theme="dark"] .info-card {
+        background: #1e293b;
+        border-color: #334155;
+    }
+
+    [data-theme="dark"] .info-card h5 {
+        color: #e2e8f0;
+    }
+
+    [data-theme="dark"] .info-item p {
+        color: #e2e8f0;
+    }
+
+    [data-theme="dark"] .history-table th {
+        background: #0f172a;
+        color: #94a3b8;
+        border-color: #334155;
+    }
+
+    [data-theme="dark"] .history-table td {
+        color: #e2e8f0;
+        border-color: #334155;
+    }
+</style>
+
+<div class="detail-header">
+    <div class="detail-photo">
+        @if (Model.Photo != null && Model.Photo.Length > 0)
+        {
+            <img src="/Staff/Photo/@Model.StaffID" alt="@Model.FullName" />
+        }
+        else
+        {
+            <div class="placeholder"><i class="fa-solid fa-user"></i></div>
+        }
+    </div>
+    <div class="detail-name">
+        <h3>@Model.FullName</h3>
+        <div class="position">@(Model.Position ?? "Staff") &middot; @(Model.IsActive ? "Active" : "Inactive")</div>
+    </div>
+    <div class="detail-actions">
+        <a href="/Staff/Edit/@Model.StaffID"><i class="fa-solid fa-pen me-1"></i> Edit</a>
+        @if (activeCheckIn == null)
+        {
+            <form method="post" action="/Staff/PunchIn" style="display:inline;">
+                <input type="hidden" name="staffId" value="@Model.StaffID" />
+                <button type="submit"><i class="fa-solid fa-right-to-bracket me-1"></i> Punch In</button>
+            </form>
+        }
+        else
+        {
+            <form method="post" action="/Staff/PunchOut" style="display:inline;">
+                <input type="hidden" name="staffId" value="@Model.StaffID" />
+                <button type="submit" style="background:rgba(245,158,11,0.2);border-color:rgba(245,158,11,0.4);"><i
+                    class="fa-solid fa-right-from-bracket me-1"></i> Punch Out</button>
+                </form>
+            }
+            <a href="/Staff"><i class="fa-solid fa-arrow-left me-1"></i> Back</a>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-7">
+            <!-- Info -->
+            <div class="info-card">
+                <h5><i class="fa-solid fa-circle-info text-primary"></i> Personal Details</h5>
+                <div class="info-grid">
+                    <div class="info-item">
+                        <label>Phone</label>
+                        <p>@Model.Phone</p>
+                    </div>
+                    <div class="info-item">
+                        <label>Gender</label>
+                        <p>@(Model.Gender ?? "—")</p>
+                    </div>
+                    <div class="info-item">
+                        <label>Age</label>
+                        <p>@(Model.Age?.ToString() ?? "—")</p>
+                    </div>
+                    <div class="info-item">
+                        <label>Position</label>
+                        <p>@(Model.Position ?? "—")</p>
+                    </div>
+                    <div class="info-item">
+                        <label>Join Date</label>
+                        <p>@Model.JoinDate.ToString("dd MMM yyyy")</p>
+                    </div>
+                    <div class="info-item">
+                        <label>Status</label>
+                        <p>@(Model.IsActive ? "✅ Active" : "❌ Inactive")</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Attendance Status -->
+            <div class="info-card">
+                <h5><i class="fa-solid fa-clock text-warning"></i> Today's Attendance</h5>
+                @if (activeCheckIn != null)
+                {
+                    <div class="attendance-status in">
+                        <i class="fa-solid fa-circle-check"></i>
+                        Checked in at @activeCheckIn.CheckInTime.ToString("hh:mm tt")
+                    </div>
+                }
+                else
+                {
+                    <div class="attendance-status out">
+                        <i class="fa-solid fa-circle-minus"></i>
+                        Not checked in today
+                    </div>
+                }
+            </div>
+
+            <!-- Recent Attendance History -->
+            <div class="info-card">
+                <h5><i class="fa-solid fa-history text-secondary"></i> Recent Attendance (Last 30 days)</h5>
+                @if (history.Count == 0)
+                {
+                    <p class="text-muted">No attendance records found.</p>
+                }
+                else
+                {
+                    <div style="max-height: 400px; overflow-y: auto;">
+                        <table class="history-table">
+                            <thead>
+                                <tr>
+                                    <th>Date</th>
+                                    <th>Check In</th>
+                                    <th>Check Out</th>
+                                    <th>Duration</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var a in history.Take(30))
+                                {
+                                    var duration = a.CheckOutTime.HasValue ? (a.CheckOutTime.Value - a.CheckInTime) :
+                            (TimeSpan?)null;
+                                    <tr>
+                                        <td>@a.CheckInTime.ToString("dd MMM")</td>
+                                        <td>@a.CheckInTime.ToString("hh:mm tt")</td>
+                                        <td>@(a.CheckOutTime?.ToString("hh:mm tt") ?? "—")</td>
+                                        <td>@(duration.HasValue ? $"{(int)duration.Value.TotalHours}h {duration.Value.Minutes}m" :
+                                                                            "—")</td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                    }
+                </div>
+            </div>
+
+            <div class="col-md-5">
+                <!-- QR Code -->
+                <div class="info-card">
+                    <h5><i class="fa-solid fa-qrcode text-primary"></i> Attendance QR Code</h5>
+                    <div class="qr-section">
+                        @if (!string.IsNullOrEmpty(Model.QrToken))
+                        {
+                            <canvas id="qrCanvas"></canvas>
+                            <p class="text-muted mt-3" style="font-size:0.85rem;">Staff scans this QR to punch in/out</p>
+                            <div class="d-flex justify-content-center gap-2 mt-2">
+                                <button class="btn btn-primary btn-sm" style="border-radius:8px;" onclick="downloadQr()"><i
+                                    class="fa-solid fa-download me-1"></i> Download</button>
+                                    <form method="post" action="/Staff/RegenerateQr" style="display:inline;">
+                                        <input type="hidden" name="id" value="@Model.StaffID" />
+                                        <button type="submit" class="btn btn-outline-secondary btn-sm" style="border-radius:8px;"><i
+                                            class="fa-solid fa-rotate me-1"></i> Regenerate</button>
+                                        </form>
+                                    </div>
+                                }
+                else
+                                {
+                                    <p class="text-muted">No QR token generated yet.</p>
+                                    <form method="post" action="/Staff/RegenerateQr">
+                                        <input type="hidden" name="id" value="@Model.StaffID" />
+                                        <button type="submit" class="btn btn-primary btn-sm" style="border-radius:8px;"><i
+                                            class="fa-solid fa-qrcode me-1"></i> Generate QR</button>
+                                        </form>
+                                    }
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    @if (!string.IsNullOrEmpty(Model.QrToken))
+                    {
+                        <script src="https://cdnjs.cloudflare.com/ajax/libs/qrious/4.0.2/qrious.min.js"></script>
+                        <script>
+                            var qr = new QRious({
+                            element: document.getElementById('qrCanvas'),
+                            value: 'STAFF:@Model.QrToken',
+                            size: 200,
+                            foreground: '#1e293b',
+                            background: '#ffffff',
+                            level: 'H'
+                            });
+
+                            function downloadQr() {
+                            var link = document.createElement('a');
+                            link.download = '@(Model.FullName.Replace(" ", "_"))_QR.png';
+                            link.href = document.getElementById('qrCanvas').toDataURL();
+                            link.click();
+                            }
+                        </script>
+                    }

@@ -1,0 +1,397 @@
+@{
+    Layout = null;
+}
+<!doctype html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Staff QR Scanner - High Spirit Gym</title>
+    <link rel="icon" type="image/png" href="/images/highspirit.jpg" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+    <style>
+            * {
+                margin: 0;
+                padding: 0;
+                box-sizing: border-box;
+            }
+
+            body {
+                font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+                background: linear-gradient(135deg, #1e1b4b 0%, #312e81 50%, #4338ca 100%);
+                min-height: 100vh;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                padding: 1rem;
+            }
+
+            .scanner-card {
+                background: #ffffff;
+                border-radius: 24px;
+                box-shadow: 0 25px 80px rgba(0, 0, 0, 0.3);
+                padding: 2.5rem 2rem;
+                width: 100%;
+                max-width: 480px;
+                text-align: center;
+            }
+
+            .logo {
+                width: 64px;
+                height: 64px;
+                border-radius: 50%;
+                margin: 0 auto 1rem;
+                box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            }
+
+            .brand {
+                font-size: 1.2rem;
+                font-weight: 700;
+                color: #1e293b;
+                margin-bottom: 0.25rem;
+            }
+
+            .subtitle {
+                font-size: 0.9rem;
+                color: #6366f1;
+                font-weight: 500;
+                margin-bottom: 2rem;
+            }
+
+            .scan-area {
+                background: #f8fafc;
+                border: 2px dashed #e2e8f0;
+                border-radius: 16px;
+                padding: 2rem;
+                margin-bottom: 1.5rem;
+                transition: all 0.3s;
+            }
+
+            .scan-area.active {
+                border-color: #6366f1;
+                background: #eef2ff;
+            }
+
+            .scan-area .icon {
+                font-size: 3rem;
+                color: #6366f1;
+                margin-bottom: 0.75rem;
+            }
+
+            .scan-area p {
+                color: #64748b;
+                font-size: 0.95rem;
+            }
+
+            .scan-input {
+                position: absolute;
+                left: -9999px;
+                opacity: 0;
+            }
+
+            .result-area {
+                display: none;
+                padding: 1.5rem;
+                border-radius: 16px;
+                margin-bottom: 1.5rem;
+                animation: slideUp 0.3s ease;
+            }
+
+            .result-area.punch-in {
+                background: #ecfdf5;
+                border: 1px solid #a7f3d0;
+            }
+
+            .result-area.punch-out {
+                background: #fef3c7;
+                border: 1px solid #fde68a;
+            }
+
+            .result-area.error {
+                background: #fef2f2;
+                border: 1px solid #fecaca;
+            }
+
+            .result-area .result-icon {
+                font-size: 2.5rem;
+                margin-bottom: 0.5rem;
+            }
+
+            .result-area .result-name {
+                font-size: 1.3rem;
+                font-weight: 700;
+                color: #1e293b;
+                margin-bottom: 0.25rem;
+            }
+
+            .result-area .result-message {
+                font-size: 0.95rem;
+                color: #475569;
+            }
+
+            .time-display {
+                color: #94a3b8;
+                font-size: 0.85rem;
+                margin-top: 1rem;
+            }
+
+            .time-display span {
+                margin: 0 8px;
+            }
+
+            .history-section {
+                margin-top: 1.5rem;
+                text-align: left;
+            }
+
+            .history-title {
+                font-size: 0.85rem;
+                font-weight: 600;
+                color: #64748b;
+                text-transform: uppercase;
+                margin-bottom: 8px;
+                letter-spacing: 0.5px;
+            }
+
+            .history-list {
+                max-height: 200px;
+                overflow-y: auto;
+            }
+
+            .history-item {
+                display: flex;
+                align-items: center;
+                gap: 10px;
+                padding: 8px 12px;
+                border-radius: 10px;
+                margin-bottom: 4px;
+                font-size: 0.85rem;
+            }
+
+            .history-item.in {
+                background: #ecfdf5;
+            }
+
+            .history-item.out {
+                background: #fef3c7;
+            }
+
+            .history-item .h-icon {
+                width: 28px;
+                height: 28px;
+                border-radius: 50%;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                font-size: 12px;
+            }
+
+            .history-item.in .h-icon {
+                background: #10b981;
+                color: white;
+            }
+
+            .history-item.out .h-icon {
+                background: #f59e0b;
+                color: white;
+            }
+
+            .history-item .h-name {
+                font-weight: 600;
+                color: #1e293b;
+                flex: 1;
+            }
+
+            .history-item .h-time {
+                color: #64748b;
+                font-size: 0.8rem;
+            }
+
+            @@keyframes slideUp {
+                from {
+                    opacity: 0;
+                    transform: translateY(10px);
+                }
+
+                to {
+                    opacity: 1;
+                    transform: translateY(0);
+                }
+            }
+
+            @@keyframes pulse {
+
+                0%,
+                100% {
+                    transform: scale(1);
+                }
+
+                50% {
+                    transform: scale(1.05);
+                }
+            }
+
+            .scanning {
+                animation: pulse 1.5s infinite;
+            }
+    </style>
+</head>
+
+<body>
+    <div class="scanner-card">
+        <img src="/images/highspirit.jpg" alt="High Spirit Gym" class="logo" />
+        <div class="brand">HIGH SPIRIT GYM</div>
+        <div class="subtitle"><i class="fa-solid fa-qrcode"></i> Staff Attendance Scanner</div>
+
+        <div class="scan-area scanning" id="scanArea">
+            <div class="icon"><i class="fa-solid fa-qrcode"></i></div>
+            <p>Waiting for QR scan...</p>
+            <p style="font-size:0.8rem; color:#94a3b8; margin-top:8px;">Place staff QR card in front of the reader</p>
+        </div>
+
+        <!-- Hidden input for QR reader (acts as keyboard) -->
+        <input type="text" class="scan-input" id="qrInput" autofocus autocomplete="off" />
+
+        <div class="result-area" id="resultArea">
+            <div class="result-icon" id="resultIcon"></div>
+            <div class="result-name" id="resultName"></div>
+            <div class="result-message" id="resultMessage"></div>
+        </div>
+
+        <div class="time-display">
+            <span><i class="fa-regular fa-clock"></i> <span id="currentTime"></span></span>
+            <span><i class="fa-regular fa-calendar"></i> <span id="currentDate"></span></span>
+        </div>
+
+        <div class="history-section">
+            <div class="history-title"><i class="fa-solid fa-history"></i> Recent Scans</div>
+            <div class="history-list" id="historyList">
+                <p style="color:#94a3b8; font-size:0.85rem; text-align:center; padding:16px;">No scans yet today</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+            const qrInput = document.getElementById('qrInput');
+            const scanArea = document.getElementById('scanArea');
+            const resultArea = document.getElementById('resultArea');
+            const historyList = document.getElementById('historyList');
+            let processing = false;
+            let firstScan = true;
+
+            // Keep input focused at all times
+            function focusInput() { qrInput.focus(); }
+            document.addEventListener('click', focusInput);
+            setInterval(focusInput, 1000);
+            focusInput();
+
+            // Nepal time
+            function getNepalTime() {
+                const now = new Date();
+                const nepalOffset = 5 * 60 + 45;
+                const utc = now.getTime() + now.getTimezoneOffset() * 60000;
+                return new Date(utc + nepalOffset * 60000);
+            }
+
+            function updateTime() {
+                const nepal = getNepalTime();
+                document.getElementById('currentTime').textContent = nepal.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+                document.getElementById('currentDate').textContent = nepal.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric', year: 'numeric' });
+            }
+            updateTime();
+            setInterval(updateTime, 1000);
+
+            // QR reader sends input as keystrokes ending with Enter
+            qrInput.addEventListener('keydown', function (e) {
+                if (e.key === 'Enter') {
+                    e.preventDefault();
+                    const scannedValue = qrInput.value.trim();
+                    qrInput.value = '';
+                    if (scannedValue && !processing) {
+                        processQrScan(scannedValue);
+                    }
+                }
+            });
+
+            async function processQrScan(scannedValue) {
+                processing = true;
+                scanArea.classList.remove('scanning');
+                scanArea.querySelector('p').textContent = 'Processing...';
+
+                // Extract token from QR value (format: "STAFF:token")
+                let token = scannedValue;
+                if (scannedValue.startsWith('STAFF:')) {
+                    token = scannedValue.substring(6);
+                }
+
+                try {
+                    const res = await fetch('/Staff/QrCheckIn', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ qrToken: token })
+                    });
+                    const data = await res.json();
+
+                    if (data.success) {
+                        const isPunchOut = data.type === 'out';
+                        showResult(data.name, data.message, isPunchOut ? 'punch-out' : 'punch-in');
+                        addToHistory(data.name, isPunchOut);
+                    } else {
+                        showResult('Error', data.message, 'error');
+                    }
+                } catch (e) {
+                    showResult('Error', 'Network error. Please try again.', 'error');
+                }
+
+                // Reset after 4 seconds
+                setTimeout(() => {
+                    resultArea.style.display = 'none';
+                    scanArea.classList.add('scanning');
+                    scanArea.querySelector('p').textContent = 'Waiting for QR scan...';
+                    processing = false;
+                    focusInput();
+                }, 4000);
+            }
+
+            function showResult(name, message, type) {
+                resultArea.className = 'result-area ' + type;
+                resultArea.style.display = 'block';
+
+                const icon = document.getElementById('resultIcon');
+                if (type === 'punch-in') {
+                    icon.innerHTML = '<i class="fa-solid fa-circle-check" style="color:#10b981;"></i>';
+                } else if (type === 'punch-out') {
+                    icon.innerHTML = '<i class="fa-solid fa-right-from-bracket" style="color:#f59e0b;"></i>';
+                } else {
+                    icon.innerHTML = '<i class="fa-solid fa-circle-xmark" style="color:#ef4444;"></i>';
+                }
+
+                document.getElementById('resultName').textContent = name;
+                document.getElementById('resultMessage').textContent = message;
+            }
+
+            function addToHistory(name, isPunchOut) {
+                if (firstScan) {
+                    historyList.innerHTML = '';
+                    firstScan = false;
+                }
+                const nepal = getNepalTime();
+                const time = nepal.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
+                const type = isPunchOut ? 'out' : 'in';
+                const iconClass = isPunchOut ? 'fa-right-from-bracket' : 'fa-right-to-bracket';
+                const label = isPunchOut ? 'OUT' : 'IN';
+
+                const item = document.createElement('div');
+                item.className = 'history-item ' + type;
+                item.innerHTML = `
+                    <div class="h-icon"><i class="fa-solid ${iconClass}"></i></div>
+                    <span class="h-name">${name}</span>
+                    <span class="h-time">${time} - ${label}</span>
+                `;
+                historyList.insertBefore(item, historyList.firstChild);
+            }
+    </script>
+</body>
+
+</html>

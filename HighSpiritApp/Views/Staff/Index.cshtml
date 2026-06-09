@@ -1,0 +1,291 @@
+@model List<HighSpiritApp.Models.Staff>
+@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    ViewData["Title"] = "Staff Management";
+    var search = ViewBag.Search as string;
+    int totalStaff = ViewBag.TotalStaff;
+    int activeStaff = ViewBag.ActiveStaff;
+}
+
+<style>
+    .staff-header {
+        background: linear-gradient(135deg, #4f46e5 0%, #6366f1 100%);
+        border-radius: 16px;
+        padding: 20px 25px;
+        color: white;
+        margin-bottom: 25px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        flex-wrap: wrap;
+        gap: 12px;
+    }
+
+    .staff-header h4 {
+        margin: 0;
+        font-weight: 600;
+        display: flex;
+        align-items: center;
+        gap: 12px;
+    }
+
+    .staff-stats {
+        display: flex;
+        gap: 16px;
+    }
+
+    .staff-stat {
+        background: rgba(255, 255, 255, 0.15);
+        padding: 6px 14px;
+        border-radius: 10px;
+        font-size: 13px;
+        font-weight: 500;
+    }
+
+    .staff-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+        gap: 16px;
+    }
+
+    .staff-card {
+        background: white;
+        border-radius: 14px;
+        border: 1px solid #e2e8f0;
+        overflow: hidden;
+        transition: all 0.2s;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+    }
+
+    .staff-card:hover {
+        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
+        transform: translateY(-2px);
+    }
+
+    .staff-card-body {
+        padding: 20px;
+        display: flex;
+        gap: 16px;
+        align-items: flex-start;
+    }
+
+    .staff-photo {
+        width: 64px;
+        height: 64px;
+        border-radius: 50%;
+        object-fit: cover;
+        background: #f1f5f9;
+        flex-shrink: 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        overflow: hidden;
+    }
+
+    .staff-photo img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+
+    .staff-photo .placeholder {
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(135deg, #e2e8f0, #cbd5e1);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #94a3b8;
+        font-size: 24px;
+    }
+
+    .staff-info {
+        flex: 1;
+        min-width: 0;
+    }
+
+    .staff-info h5 {
+        margin: 0 0 4px;
+        font-weight: 600;
+        font-size: 1rem;
+        color: #1e293b;
+    }
+
+    .staff-info .position {
+        font-size: 0.85rem;
+        color: #6366f1;
+        font-weight: 500;
+        margin-bottom: 6px;
+    }
+
+    .staff-meta {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+        font-size: 0.8rem;
+        color: #64748b;
+    }
+
+    .staff-meta span {
+        display: flex;
+        align-items: center;
+        gap: 4px;
+    }
+
+    .staff-card-footer {
+        padding: 12px 20px;
+        background: #f8fafc;
+        border-top: 1px solid #f1f5f9;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .staff-badge {
+        padding: 3px 10px;
+        border-radius: 20px;
+        font-size: 11px;
+        font-weight: 600;
+    }
+
+    .staff-badge.active {
+        background: #ecfdf5;
+        color: #059669;
+    }
+
+    .staff-badge.inactive {
+        background: #fef2f2;
+        color: #dc2626;
+    }
+
+    .staff-actions a {
+        color: #64748b;
+        padding: 4px 8px;
+        border-radius: 6px;
+        transition: all 0.2s;
+        text-decoration: none;
+        font-size: 14px;
+    }
+
+    .staff-actions a:hover {
+        color: #4f46e5;
+        background: #eef2ff;
+    }
+
+    .empty-state {
+        text-align: center;
+        padding: 60px 20px;
+        color: #94a3b8;
+    }
+
+    .empty-state i {
+        font-size: 48px;
+        margin-bottom: 16px;
+        display: block;
+    }
+
+    [data-theme="dark"] .staff-card {
+        background: #1e293b;
+        border-color: #334155;
+    }
+
+    [data-theme="dark"] .staff-info h5 {
+        color: #e2e8f0;
+    }
+
+    [data-theme="dark"] .staff-card-footer {
+        background: #0f172a;
+        border-color: #334155;
+    }
+</style>
+
+<div class="staff-header">
+    <h4><i class="fa-solid fa-users-gear"></i> Staff Management</h4>
+    <div class="staff-stats">
+        <span class="staff-stat"><i class="fa-solid fa-users"></i> @totalStaff Total</span>
+        <span class="staff-stat"><i class="fa-solid fa-circle-check"></i> @activeStaff Active</span>
+    </div>
+</div>
+
+<!-- Search + Actions -->
+<div class="d-flex flex-wrap gap-2 mb-3 align-items-center justify-content-between">
+    <form method="get" class="d-flex gap-2" style="max-width: 350px; flex: 1;">
+        <div class="position-relative flex-grow-1">
+            <i class="fa-solid fa-search"
+               style="position:absolute;left:12px;top:50%;transform:translateY(-50%);color:#94a3b8;"></i>
+            <input name="search" value="@search" class="form-control" style="padding-left:38px;border-radius:10px;"
+                   placeholder="Search staff..." autocomplete="off" />
+        </div>
+        <button type="submit" class="btn btn-primary" style="border-radius:10px;"><i
+            class="fa-solid fa-magnifying-glass"></i></button>
+        </form>
+        <div class="d-flex gap-2">
+            <a href="/Staff/Attendance" class="btn btn-outline-secondary" style="border-radius:10px;"><i
+                class="fa-solid fa-clock me-1"></i> Attendance</a>
+                <a href="/Staff/Create" class="btn btn-primary" style="border-radius:10px;"><i
+                    class="fa-solid fa-plus me-1"></i> Add Staff</a>
+                </div>
+            </div>
+
+            @if (Model.Count == 0)
+            {
+                <div class="empty-state">
+                    <i class="fa-solid fa-users-gear"></i>
+                    <p>No staff members found</p>
+                    <a href="/Staff/Create" class="btn btn-primary mt-3" style="border-radius:10px;">Add First Staff Member</a>
+                </div>
+            }
+            else
+            {
+                <div class="staff-grid">
+                    @foreach (var s in Model)
+                    {
+                        <div class="staff-card">
+                            <div class="staff-card-body">
+                                <div class="staff-photo">
+                                    @if (s.Photo != null && s.Photo.Length > 0)
+                                    {
+                                        <img src="/Staff/Photo/@s.StaffID" alt="@s.FullName" />
+                                    }
+                                    else
+                                    {
+                                        <div class="placeholder"><i class="fa-solid fa-user"></i></div>
+                                    }
+                                </div>
+                                <div class="staff-info">
+                                    <h5>@s.FullName</h5>
+                                    @if (!string.IsNullOrEmpty(s.Position))
+                                    {
+                                        <div class="position">@s.Position</div>
+                                    }
+                                    <div class="staff-meta">
+                                        <span><i class="fa-solid fa-phone"></i> @s.Phone</span>
+                                        @if (!string.IsNullOrEmpty(s.Gender))
+                                        {
+                                            <span><i class="fa-solid fa-venus-mars"></i> @s.Gender</span>
+                                        }
+                                        @if (s.Age.HasValue)
+                                        {
+                                            <span><i class="fa-solid fa-cake-candles"></i> @s.Age yrs</span>
+                                        }
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="staff-card-footer">
+                                <span class="staff-badge @(s.IsActive ? "active" : "inactive")">
+                                    @(s.IsActive ? "Active" : "Inactive")
+                                </span>
+                                <div class="staff-actions">
+                                    <a href="/Staff/Details/@s.StaffID" title="View Details"><i class="fa-solid fa-eye"></i></a>
+                                    <a href="/Staff/Edit/@s.StaffID" title="Edit"><i class="fa-solid fa-pen"></i></a>
+                                    <a href="#"
+                                       onclick="if(confirm('Delete @s.FullName?')){document.getElementById('delete-@s.StaffID').submit();}return false;"
+                                       title="Delete" style="color:#ef4444;"><i class="fa-solid fa-trash"></i></a>
+                                    <form id="delete-@s.StaffID" method="post" action="/Staff/Delete/@s.StaffID" style="display:none;">
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                    }
+                </div>
+            }

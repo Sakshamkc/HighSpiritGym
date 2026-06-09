@@ -1,0 +1,520 @@
+@{
+    Layout = null;
+}
+<!doctype html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <title>Staff Scanner - High Spirit Gym</title>
+    <link rel="icon" type="image/png" href="/images/highspirit.jpg" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+    <style>
+            * {
+                margin: 0;
+                padding: 0;
+                box-sizing: border-box;
+            }
+
+            body {
+                font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+                background: #0f172a;
+                min-height: 100vh;
+                display: flex;
+                flex-direction: column;
+                color: white;
+                overflow: hidden;
+            }
+
+            .top-bar {
+                background: linear-gradient(135deg, #4f46e5 0%, #6366f1 100%);
+                padding: 14px 20px;
+                display: flex;
+                align-items: center;
+                gap: 12px;
+                z-index: 10;
+            }
+
+            .top-bar img {
+                width: 36px;
+                height: 36px;
+                border-radius: 50%;
+            }
+
+            .top-bar .title {
+                font-weight: 600;
+                font-size: 1rem;
+            }
+
+            .top-bar .subtitle {
+                font-size: 0.75rem;
+                opacity: 0.8;
+            }
+
+            .scanner-container {
+                flex: 1;
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                justify-content: center;
+                position: relative;
+                padding: 16px;
+            }
+
+            #reader {
+                width: 100%;
+                max-width: 400px;
+                border-radius: 16px;
+                overflow: hidden;
+            }
+
+            #reader video {
+                border-radius: 16px;
+            }
+
+            .scan-frame {
+                position: relative;
+                width: 100%;
+                max-width: 400px;
+                aspect-ratio: 1;
+                border-radius: 16px;
+                overflow: hidden;
+            }
+
+            .scan-overlay {
+                position: absolute;
+                inset: 0;
+                border: 3px solid rgba(99, 102, 241, 0.5);
+                border-radius: 16px;
+                pointer-events: none;
+                z-index: 5;
+            }
+
+            .scan-corners {
+                position: absolute;
+                inset: 20%;
+                border: 3px solid #6366f1;
+                border-radius: 8px;
+                pointer-events: none;
+                z-index: 5;
+            }
+
+            .scan-line {
+                position: absolute;
+                left: 20%;
+                right: 20%;
+                top: 20%;
+                height: 2px;
+                background: linear-gradient(90deg, transparent, #6366f1, transparent);
+                z-index: 5;
+                animation: scanLine 2s ease-in-out infinite;
+            }
+
+            .result-popup {
+                position: fixed;
+                top: 0;
+                left: 0;
+                right: 0;
+                bottom: 0;
+                background: rgba(0, 0, 0, 0.85);
+                display: none;
+                align-items: center;
+                justify-content: center;
+                z-index: 100;
+                padding: 20px;
+            }
+
+            .result-popup.show {
+                display: flex;
+            }
+
+            .result-card {
+                background: white;
+                border-radius: 24px;
+                padding: 2rem;
+                text-align: center;
+                width: 100%;
+                max-width: 340px;
+                animation: popIn 0.3s ease;
+            }
+
+            .result-card.success-in {
+                border-top: 5px solid #10b981;
+            }
+
+            .result-card.success-out {
+                border-top: 5px solid #f59e0b;
+            }
+
+            .result-card.error {
+                border-top: 5px solid #ef4444;
+            }
+
+            .result-card .r-icon {
+                font-size: 3rem;
+                margin-bottom: 12px;
+            }
+
+            .result-card .r-name {
+                font-size: 1.4rem;
+                font-weight: 700;
+                color: #1e293b;
+                margin-bottom: 4px;
+            }
+
+            .result-card .r-message {
+                font-size: 0.95rem;
+                color: #64748b;
+                margin-bottom: 16px;
+            }
+
+            .result-card .r-time {
+                font-size: 0.8rem;
+                color: #94a3b8;
+            }
+
+            .bottom-bar {
+                background: #1e293b;
+                padding: 12px 20px;
+                display: flex;
+                align-items: center;
+                justify-content: space-between;
+                border-top: 1px solid #334155;
+            }
+
+            .bottom-bar .scan-count {
+                font-size: 0.85rem;
+                color: #94a3b8;
+            }
+
+            .bottom-bar .status {
+                display: flex;
+                align-items: center;
+                gap: 6px;
+                font-size: 0.85rem;
+            }
+
+            .bottom-bar .status-dot {
+                width: 8px;
+                height: 8px;
+                border-radius: 50%;
+                background: #10b981;
+                animation: blink 1.5s infinite;
+            }
+
+            .instruction {
+                text-align: center;
+                margin-top: 16px;
+                font-size: 0.85rem;
+                color: #94a3b8;
+            }
+
+            .history-section {
+                background: #1e293b;
+                border-radius: 16px;
+                padding: 12px 16px;
+                margin-top: 16px;
+                width: 100%;
+                max-width: 400px;
+                max-height: 150px;
+                overflow-y: auto;
+            }
+
+            .history-section .h-title {
+                font-size: 0.75rem;
+                text-transform: uppercase;
+                color: #64748b;
+                margin-bottom: 8px;
+                font-weight: 600;
+            }
+
+            .h-item {
+                display: flex;
+                align-items: center;
+                gap: 8px;
+                padding: 6px 0;
+                border-bottom: 1px solid #334155;
+                font-size: 0.8rem;
+            }
+
+            .h-item:last-child {
+                border-bottom: none;
+            }
+
+            .h-item .h-badge {
+                padding: 2px 8px;
+                border-radius: 10px;
+                font-size: 0.7rem;
+                font-weight: 600;
+            }
+
+            .h-item .h-badge.in {
+                background: #065f46;
+                color: #6ee7b7;
+            }
+
+            .h-item .h-badge.out {
+                background: #78350f;
+                color: #fde68a;
+            }
+
+            .h-item .h-name {
+                flex: 1;
+                color: #e2e8f0;
+            }
+
+            .h-item .h-time {
+                color: #64748b;
+            }
+
+            .camera-error {
+                text-align: center;
+                padding: 40px 20px;
+                color: #94a3b8;
+            }
+
+            .camera-error i {
+                font-size: 3rem;
+                margin-bottom: 16px;
+                display: block;
+                color: #ef4444;
+            }
+
+            .camera-error p {
+                margin-bottom: 12px;
+            }
+
+            .camera-error .btn-retry {
+                background: #6366f1;
+                color: white;
+                border: none;
+                padding: 10px 24px;
+                border-radius: 10px;
+                font-size: 0.9rem;
+                cursor: pointer;
+            }
+
+            @@keyframes scanLine {
+
+                0%,
+                100% {
+                    top: 20%;
+                }
+
+                50% {
+                    top: 75%;
+                }
+            }
+
+            @@keyframes popIn {
+                from {
+                    transform: scale(0.8);
+                    opacity: 0;
+                }
+
+                to {
+                    transform: scale(1);
+                    opacity: 1;
+                }
+            }
+
+            @@keyframes blink {
+
+                0%,
+                100% {
+                    opacity: 1;
+                }
+
+                50% {
+                    opacity: 0.3;
+                }
+            }
+    </style>
+</head>
+
+<body>
+    <div class="top-bar">
+        <img src="/images/highspirit.jpg" alt="Logo" />
+        <div>
+            <div class="title">Staff QR Scanner</div>
+            <div class="subtitle">Scan staff QR to record attendance</div>
+        </div>
+    </div>
+
+    <div class="scanner-container">
+        <div class="scan-frame">
+            <div id="reader"></div>
+            <div class="scan-overlay"></div>
+            <div class="scan-line" id="scanLine"></div>
+        </div>
+
+        <div class="instruction" id="instruction">
+            <i class="fa-solid fa-camera"></i> Point camera at staff QR code
+        </div>
+
+        <div class="history-section" id="historySection" style="display:none;">
+            <div class="h-title"><i class="fa-solid fa-history"></i> Today's Scans</div>
+            <div id="historyList"></div>
+        </div>
+    </div>
+
+    <div class="bottom-bar">
+        <div class="scan-count"><i class="fa-solid fa-qrcode me-1"></i> <span id="scanCount">0</span> scans today</div>
+        <div class="status">
+            <span class="status-dot" id="statusDot"></span>
+            <span id="statusText">Scanner active</span>
+        </div>
+    </div>
+
+    <!-- Result Popup -->
+    <div class="result-popup" id="resultPopup">
+        <div class="result-card" id="resultCard">
+            <div class="r-icon" id="rIcon"></div>
+            <div class="r-name" id="rName"></div>
+            <div class="r-message" id="rMessage"></div>
+            <div class="r-time" id="rTime"></div>
+        </div>
+    </div>
+
+    <script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
+    <script>
+        let scanCount = 0;
+        let processing = false;
+        let html5QrCode;
+
+        function getNepalTime() {
+        const now = new Date();
+        const nepalOffset = 5 * 60 + 45;
+        const utc = now.getTime() + now.getTimezoneOffset() * 60000;
+        return new Date(utc + nepalOffset * 60000);
+        }
+
+        function formatTime(date) {
+        return date.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
+        }
+
+        async function onScanSuccess(decodedText) {
+        if (processing) return;
+        processing = true;
+
+        // Vibrate for feedback (if supported)
+        if (navigator.vibrate) navigator.vibrate(200);
+
+        // Extract token
+        let token = decodedText;
+        if (decodedText.startsWith('STAFF:')) {
+        token = decodedText.substring(6);
+        }
+
+        try {
+        const res = await fetch('/Staff/QrCheckIn', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ qrToken: token })
+        });
+        const data = await res.json();
+
+        if (data.success) {
+        const isPunchOut = data.type === 'out';
+        showResult(data.name, data.message, isPunchOut ? 'out' : 'in');
+        addHistory(data.name, isPunchOut);
+        scanCount++;
+        document.getElementById('scanCount').textContent = scanCount;
+        } else {
+        showResult('Error', data.message, 'error');
+        }
+        } catch (e) {
+        showResult('Error', 'Network error. Check your connection.', 'error');
+        }
+
+        // Resume scanning after 3 seconds
+        setTimeout(() => {
+        processing = false;
+        document.getElementById('resultPopup').classList.remove('show');
+        }, 3000);
+        }
+
+        function showResult(name, message, type) {
+        const popup = document.getElementById('resultPopup');
+        const card = document.getElementById('resultCard');
+
+        card.className = 'result-card';
+        if (type === 'in') {
+        card.classList.add('success-in');
+        document.getElementById('rIcon').innerHTML = '<i class="fa-solid fa-circle-check" style="color:#10b981;"></i>';
+        } else if (type === 'out') {
+        card.classList.add('success-out');
+        document.getElementById('rIcon').innerHTML = '<i class="fa-solid fa-right-from-bracket" style="color:#f59e0b;"></i>';
+        } else {
+        card.classList.add('error');
+        document.getElementById('rIcon').innerHTML = '<i class="fa-solid fa-circle-xmark" style="color:#ef4444;"></i>';
+        }
+
+        document.getElementById('rName').textContent = name;
+        document.getElementById('rMessage').textContent = message;
+        document.getElementById('rTime').textContent = formatTime(getNepalTime());
+        popup.classList.add('show');
+        }
+
+        function addHistory(name, isPunchOut) {
+        const section = document.getElementById('historySection');
+        const list = document.getElementById('historyList');
+        section.style.display = 'block';
+
+        const type = isPunchOut ? 'out' : 'in';
+        const label = isPunchOut ? 'OUT' : 'IN';
+        const time = formatTime(getNepalTime());
+
+        const item = document.createElement('div');
+        item.className = 'h-item';
+        item.innerHTML = `
+        <span class="h-badge ${type}">${label}</span>
+        <span class="h-name">${name}</span>
+        <span class="h-time">${time}</span>
+        `;
+        list.insertBefore(item, list.firstChild);
+        }
+
+        // Initialize camera scanner
+        function startScanner() {
+        html5QrCode = new Html5Qrcode("reader");
+
+        const config = {
+        fps: 10,
+        qrbox: { width: 250, height: 250 },
+        aspectRatio: 1.0
+        };
+
+        html5QrCode.start(
+        { facingMode: "environment" },
+        config,
+        onScanSuccess,
+        () => { } // ignore scan failures (no QR found in frame)
+        ).then(() => {
+        document.getElementById('statusText').textContent = 'Scanner active';
+        document.getElementById('statusDot').style.background = '#10b981';
+        }).catch(err => {
+        console.error('Camera error:', err);
+        document.getElementById('reader').innerHTML = `
+        <div class="camera-error">
+        <i class="fa-solid fa-video-slash"></i>
+        <p>Camera access denied or not available</p>
+        <p style="font-size:0.8rem;">Please allow camera permission and reload</p>
+        <button class="btn-retry" onclick="location.reload()">
+        <i class="fa-solid fa-rotate-right"></i> Retry
+        </button>
+        </div>
+        `;
+        document.getElementById('scanLine').style.display = 'none';
+        document.getElementById('statusText').textContent = 'Camera error';
+        document.getElementById('statusDot').style.background = '#ef4444';
+        document.getElementById('statusDot').style.animation = 'none';
+        });
+        }
+
+        startScanner();
+    </script>
+</body>
+
+</html>
