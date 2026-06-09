@@ -177,6 +177,14 @@ namespace HighSpiritApp.Services
             if (staff == null)
                 throw new KeyNotFoundException("Staff not found.");
 
+            // Prevent punch in if already has a record on that date
+            var existsOnDate = await _db.StaffAttendances
+                .Where(a => a.StaffID == staffId && a.CheckInTime.Date == checkInTime.Date)
+                .AnyAsync();
+
+            if (existsOnDate)
+                throw new InvalidOperationException("Staff already has attendance record for this date. Cannot punch in again.");
+
             var attendance = new StaffAttendance
             {
                 StaffID = staffId,

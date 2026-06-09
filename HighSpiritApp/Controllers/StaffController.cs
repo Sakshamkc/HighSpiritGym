@@ -235,13 +235,17 @@ namespace HighSpiritApp.Controllers
                 var attendance = await _staffService.PunchInAsync(staff.StaffID);
                 return Json(new { success = true, message = $"{staff.FullName} punched in at {attendance.CheckInTime:hh:mm tt}", name = staff.FullName });
             }
-            catch (InvalidOperationException)
+            catch (InvalidOperationException ex)
             {
-                // Already checked in - try punch out
+                // If already completed shift today, don't allow anything
+                if (ex.Message.Contains("completed shift"))
+                    return Json(new { success = false, message = $"{staff.FullName} already completed shift today.", name = staff.FullName });
+
+                // Already checked in (active) - try punch out
                 var result = await _staffService.PunchOutAsync(staff.StaffID);
                 if (result != null)
                     return Json(new { success = true, message = $"{staff.FullName} punched out at {result.CheckOutTime:hh:mm tt}", name = staff.FullName, type = "out" });
-                return Json(new { success = false, message = "Already checked in today." });
+                return Json(new { success = false, message = "Error processing attendance." });
             }
         }
     }
