@@ -210,8 +210,7 @@
             style="background:white;border-radius:14px;border:1px solid #e2e8f0;padding:16px 20px;margin-bottom:20px;display:flex;flex-wrap:wrap;gap:12px;align-items:end;">
             <div style="flex:1;min-width:200px;">
                 <label
-                    style="font-size:0.8rem;font-weight:600;color:#64748b;text-transform:uppercase;display:block;margin-bottom:4px;">Manual
-                    Punch</label>
+                    style="font-size:0.8rem;font-weight:600;color:#64748b;text-transform:uppercase;display:block;margin-bottom:4px;">Staff</label>
                     <select id="manualStaffSelect"
                             style="width:100%;padding:8px 12px;border:1.5px solid #e2e8f0;border-radius:8px;font-size:0.9rem;">
                         <option value="">-- Select Staff --</option>
@@ -221,31 +220,56 @@
                         }
                     </select>
                 </div>
-                <form method="post" asp-action="PunchIn" id="punchInForm" style="margin:0;">
-                    <input type="hidden" name="staffId" id="punchInStaffId" />
-                    <input type="hidden" name="returnTo" value="attendance" />
-                    <button type="submit" class="btn btn-success" style="border-radius:8px;height:38px;" disabled id="btnPunchIn">
+                <div style="min-width:180px;">
+                    <label style="font-size:0.8rem;font-weight:600;color:#64748b;text-transform:uppercase;display:block;margin-bottom:4px;">Date & Time</label>
+                    <input type="datetime-local" id="manualDateTime" style="width:100%;padding:8px 12px;border:1.5px solid #e2e8f0;border-radius:8px;font-size:0.9rem;" />
+                </div>
+                <form method="post" asp-action="ManualPunchIn" id="manualPunchInForm" style="margin:0;">
+                    <input type="hidden" name="staffId" id="manualPunchInStaffId" />
+                    <input type="hidden" name="checkInTime" id="manualPunchInTime" />
+                    <button type="submit" class="btn btn-success" style="border-radius:8px;height:38px;" disabled id="btnManualPunchIn">
                         <i class="fa-solid fa-right-to-bracket me-1"></i> Punch In
                     </button>
                 </form>
-                <form method="post" asp-action="PunchOut" id="punchOutForm" style="margin:0;">
+                <form method="post" asp-action="PunchIn" id="punchInForm" style="margin:0;display:none;">
+                    <input type="hidden" name="staffId" id="punchInStaffId" />
+                    <input type="hidden" name="returnTo" value="attendance" />
+                </form>
+                <form method="post" asp-action="PunchOut" id="punchOutForm" style="margin:0;display:none;">
                     <input type="hidden" name="staffId" id="punchOutStaffId" />
                     <input type="hidden" name="returnTo" value="attendance" />
-                    <button type="submit" class="btn btn-warning" style="border-radius:8px;height:38px;" disabled id="btnPunchOut">
-                        <i class="fa-solid fa-right-from-bracket me-1"></i> Punch Out
-                    </button>
                 </form>
+                <button type="button" class="btn btn-primary" style="border-radius:8px;height:38px;" disabled id="btnQuickPunchIn" onclick="document.getElementById('punchInForm').submit();">
+                    <i class="fa-solid fa-bolt me-1"></i> Quick In (Now)
+                </button>
+                <button type="button" class="btn btn-warning" style="border-radius:8px;height:38px;" disabled id="btnQuickPunchOut" onclick="document.getElementById('punchOutForm').submit();">
+                    <i class="fa-solid fa-bolt me-1"></i> Quick Out (Now)
+                </button>
             </div>
 
             <script>
+                // Set default datetime to now (Nepal time approx)
+                (function() {
+                    var now = new Date();
+                    var nepalOffset = 5 * 60 + 45;
+                    var utc = now.getTime() + now.getTimezoneOffset() * 60000;
+                    var nepal = new Date(utc + nepalOffset * 60000);
+                    var iso = nepal.toISOString().slice(0, 16);
+                    document.getElementById('manualDateTime').value = iso;
+                })();
+
                 document.getElementById('manualStaffSelect').addEventListener('change', function () {
                     var staffId = this.value;
-                    var btnIn = document.getElementById('btnPunchIn');
-                    var btnOut = document.getElementById('btnPunchOut');
+                    document.getElementById('manualPunchInStaffId').value = staffId;
                     document.getElementById('punchInStaffId').value = staffId;
                     document.getElementById('punchOutStaffId').value = staffId;
-                    btnIn.disabled = !staffId;
-                    btnOut.disabled = !staffId;
+                    document.getElementById('btnManualPunchIn').disabled = !staffId;
+                    document.getElementById('btnQuickPunchIn').disabled = !staffId;
+                    document.getElementById('btnQuickPunchOut').disabled = !staffId;
+                });
+
+                document.getElementById('manualPunchInForm').addEventListener('submit', function() {
+                    document.getElementById('manualPunchInTime').value = document.getElementById('manualDateTime').value;
                 });
             </script>
 
@@ -267,6 +291,7 @@
                             <th>Check Out</th>
                             <th>Duration</th>
                             <th>Status</th>
+                            <th>Actions</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -293,10 +318,41 @@
                                     <span class="status-dot @(isActive ? "in" : "out")"></span>
                                     @(isActive ? "Active" : "Completed")
                                 </td>
+                                <td style="white-space:nowrap;">
+                                    @if (isActive)
+                                    {
+                                        <form method="post" asp-action="ManualPunchOut" style="display:inline;">
+                                            <input type="hidden" name="attendanceId" value="@a.Id" />
+                                            <input type="hidden" name="checkOutTime" class="punchout-time" />
+                                            <button type="submit" class="btn btn-sm btn-outline-warning punchout-btn" style="border-radius:6px;font-size:0.75rem;" title="Punch Out">
+                                                <i class="fa-solid fa-right-from-bracket"></i>
+                                            </button>
+                                        </form>
+                                    }
+                                    <form method="post" asp-action="DeleteAttendance" style="display:inline;" onsubmit="return confirm('Delete this attendance record?');">
+                                        <input type="hidden" name="attendanceId" value="@a.Id" />
+                                        <button type="submit" class="btn btn-sm btn-outline-danger" style="border-radius:6px;font-size:0.75rem;" title="Delete">
+                                            <i class="fa-solid fa-trash"></i>
+                                        </button>
+                                    </form>
+                                </td>
                             </tr>
                         }
                     </tbody>
                 </table>
+
+                <script>
+                    // Set punch out time to now (Nepal) for manual punch out buttons
+                    document.querySelectorAll('.punchout-btn').forEach(function(btn) {
+                        btn.closest('form').addEventListener('submit', function() {
+                            var now = new Date();
+                            var nepalOffset = 5 * 60 + 45;
+                            var utc = now.getTime() + now.getTimezoneOffset() * 60000;
+                            var nepal = new Date(utc + nepalOffset * 60000);
+                            this.querySelector('.punchout-time').value = nepal.toISOString().slice(0, 16);
+                        });
+                    });
+                </script>
             }
 
             <div class="mt-3">

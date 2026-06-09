@@ -168,8 +168,42 @@ namespace HighSpiritApp.Controllers
             return RedirectToAction("Details", new { id = staffId });
         }
 
+        [HttpPost]
+        public async Task<IActionResult> ManualPunchIn(int staffId, DateTime checkInTime)
+        {
+            try
+            {
+                await _staffService.ManualPunchInAsync(staffId, checkInTime);
+                TempData["success"] = "Manual punch in recorded!";
+            }
+            catch (Exception ex)
+            {
+                TempData["error"] = ex.Message;
+            }
+            return RedirectToAction("Attendance");
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> ManualPunchOut(int attendanceId, DateTime checkOutTime)
+        {
+            var result = await _staffService.ManualPunchOutAsync(attendanceId, checkOutTime);
+            if (result == null)
+                TempData["error"] = "Attendance record not found.";
+            else
+                TempData["success"] = "Manual punch out recorded!";
+            return RedirectToAction("Attendance");
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> DeleteAttendance(int attendanceId)
+        {
+            await _staffService.DeleteAttendanceAsync(attendanceId);
+            TempData["success"] = "Attendance record deleted.";
+            return RedirectToAction("Attendance");
+        }
+
         // GET: /Staff/QrScan - Reception page for USB QR scanner
-        [AllowAnonymous]
+        [Authorize]
         public IActionResult QrScan()
         {
             return View();
@@ -182,9 +216,9 @@ namespace HighSpiritApp.Controllers
             return View();
         }
 
-        // QR-based staff check-in (public endpoint for QR scan)
+        // QR-based staff check-in (requires login)
         [HttpPost]
-        [AllowAnonymous]
+        [Authorize]
         public async Task<IActionResult> QrCheckIn([FromBody] StaffQrRequest request)
         {
             if (string.IsNullOrWhiteSpace(request?.QrToken))

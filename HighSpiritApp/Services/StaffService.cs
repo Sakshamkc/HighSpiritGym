@@ -163,6 +163,45 @@ namespace HighSpiritApp.Services
                 .FirstOrDefaultAsync();
         }
 
+        public async Task<StaffAttendance> ManualPunchInAsync(int staffId, DateTime checkInTime)
+        {
+            var staff = await _staffRepository.GetByIdAsync(staffId);
+            if (staff == null)
+                throw new KeyNotFoundException("Staff not found.");
+
+            var attendance = new StaffAttendance
+            {
+                StaffID = staffId,
+                StaffName = staff.FullName,
+                CheckInTime = checkInTime
+            };
+
+            _db.StaffAttendances.Add(attendance);
+            await _db.SaveChangesAsync();
+            return attendance;
+        }
+
+        public async Task<StaffAttendance?> ManualPunchOutAsync(int attendanceId, DateTime checkOutTime)
+        {
+            var attendance = await _db.StaffAttendances.FindAsync(attendanceId);
+            if (attendance == null)
+                return null;
+
+            attendance.CheckOutTime = checkOutTime;
+            await _db.SaveChangesAsync();
+            return attendance;
+        }
+
+        public async Task DeleteAttendanceAsync(int attendanceId)
+        {
+            var attendance = await _db.StaffAttendances.FindAsync(attendanceId);
+            if (attendance != null)
+            {
+                _db.StaffAttendances.Remove(attendance);
+                await _db.SaveChangesAsync();
+            }
+        }
+
         private static string GenerateToken()
         {
             var tokenBytes = RandomNumberGenerator.GetBytes(16);

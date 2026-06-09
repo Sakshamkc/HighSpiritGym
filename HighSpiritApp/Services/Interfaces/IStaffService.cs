@@ -16,6 +16,9 @@ namespace HighSpiritApp.Services.Interfaces
         // Staff attendance
         Task<StaffAttendance> PunchInAsync(int staffId);
         Task<StaffAttendance?> PunchOutAsync(int staffId);
+        Task<StaffAttendance> ManualPunchInAsync(int staffId, DateTime checkInTime);
+        Task<StaffAttendance?> ManualPunchOutAsync(int attendanceId, DateTime checkOutTime);
+        Task DeleteAttendanceAsync(int attendanceId);
         Task<List<StaffAttendance>> GetAttendanceHistoryAsync(int? staffId, DateTime? from, DateTime? to);
         Task<StaffAttendance?> GetActiveCheckInAsync(int staffId);
     }
