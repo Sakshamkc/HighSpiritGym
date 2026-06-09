@@ -9,10 +9,12 @@ namespace HighSpiritApp.Controllers
     public class StaffController : Controller
     {
         private readonly IStaffService _staffService;
+        private readonly IActivityLogService _activityLogService;
 
-        public StaffController(IStaffService staffService)
+        public StaffController(IStaffService staffService, IActivityLogService activityLogService)
         {
             _staffService = staffService;
+            _activityLogService = activityLogService;
         }
 
         public async Task<IActionResult> Index(string? search)
@@ -41,6 +43,7 @@ namespace HighSpiritApp.Controllers
             }
 
             await _staffService.CreateAsync(staff, photo);
+            await _activityLogService.LogAsync("Created", "Staff", staff.StaffID, staff.FullName, $"Added new staff member: {staff.FullName} ({staff.Position})", User.Identity?.Name ?? "System");
             TempData["success"] = $"Staff member {staff.FullName} added successfully!";
             return RedirectToAction("Index");
         }
@@ -64,6 +67,7 @@ namespace HighSpiritApp.Controllers
             }
 
             await _staffService.UpdateAsync(staff, photo);
+            await _activityLogService.LogAsync("Updated", "Staff", staff.StaffID, staff.FullName, $"Updated staff member: {staff.FullName}", User.Identity?.Name ?? "System");
             TempData["success"] = $"Staff member {staff.FullName} updated successfully!";
             return RedirectToAction("Index");
         }
@@ -84,7 +88,9 @@ namespace HighSpiritApp.Controllers
         [HttpPost]
         public async Task<IActionResult> Delete(int id)
         {
+            var staff = await _staffService.GetByIdAsync(id);
             await _staffService.DeleteAsync(id);
+            await _activityLogService.LogAsync("Deleted", "Staff", id, staff?.FullName ?? "Unknown", $"Deleted staff member", User.Identity?.Name ?? "System");
             TempData["success"] = "Staff member deleted successfully!";
             return RedirectToAction("Index");
         }
@@ -104,6 +110,8 @@ namespace HighSpiritApp.Controllers
         public async Task<IActionResult> RegenerateQr(int id)
         {
             await _staffService.GenerateQrTokenAsync(id);
+            var staff = await _staffService.GetByIdAsync(id);
+            await _activityLogService.LogAsync("RegenerateQR", "Staff", id, staff?.FullName ?? "Unknown", $"Regenerated QR code", User.Identity?.Name ?? "System");
             TempData["success"] = "QR code regenerated!";
             return RedirectToAction("Details", new { id });
         }
@@ -144,6 +152,8 @@ namespace HighSpiritApp.Controllers
             try
             {
                 await _staffService.PunchInAsync(staffId);
+                var staff = await _staffService.GetByIdAsync(staffId);
+                await _activityLogService.LogAsync("PunchIn", "StaffAttendance", staffId, staff?.FullName ?? "Unknown", $"Staff punched in", User.Identity?.Name ?? "System");
                 TempData["success"] = "Staff punched in successfully!";
             }
             catch (InvalidOperationException ex)
@@ -162,7 +172,11 @@ namespace HighSpiritApp.Controllers
             if (result == null)
                 TempData["error"] = "No active check-in found.";
             else
+            {
+                var staff = await _staffService.GetByIdAsync(staffId);
+                await _activityLogService.LogAsync("PunchOut", "StaffAttendance", staffId, staff?.FullName ?? "Unknown", $"Staff punched out", User.Identity?.Name ?? "System");
                 TempData["success"] = "Staff punched out successfully!";
+            }
             if (returnTo == "attendance")
                 return RedirectToAction("Attendance");
             return RedirectToAction("Details", new { id = staffId });
@@ -174,6 +188,8 @@ namespace HighSpiritApp.Controllers
             try
             {
                 await _staffService.ManualPunchInAsync(staffId, checkInTime);
+                var staff = await _staffService.GetByIdAsync(staffId);
+                await _activityLogService.LogAsync("ManualPunchIn", "StaffAttendance", staffId, staff?.FullName ?? "Unknown", $"Manual punch in at {checkInTime:dd MMM yyyy hh:mm tt}", User.Identity?.Name ?? "System");
                 TempData["success"] = "Manual punch in recorded!";
             }
             catch (Exception ex)
@@ -190,7 +206,10 @@ namespace HighSpiritApp.Controllers
             if (result == null)
                 TempData["error"] = "Attendance record not found.";
             else
+            {
+                await _activityLogService.LogAsync("ManualPunchOut", "StaffAttendance", result.StaffID, result.StaffName, $"Manual punch out at {checkOutTime:dd MMM yyyy hh:mm tt}", User.Identity?.Name ?? "System");
                 TempData["success"] = "Manual punch out recorded!";
+            }
             return RedirectToAction("Attendance");
         }
 
@@ -198,6 +217,7 @@ namespace HighSpiritApp.Controllers
         public async Task<IActionResult> DeleteAttendance(int attendanceId)
         {
             await _staffService.DeleteAttendanceAsync(attendanceId);
+            await _activityLogService.LogAsync("Deleted", "StaffAttendance", attendanceId, "Attendance Record", $"Deleted staff attendance record", User.Identity?.Name ?? "System");
             TempData["success"] = "Attendance record deleted.";
             return RedirectToAction("Attendance");
         }
@@ -233,6 +253,7 @@ namespace HighSpiritApp.Controllers
             try
             {
                 var attendance = await _staffService.PunchInAsync(staff.StaffID);
+                await _activityLogService.LogAsync("QrPunchIn", "StaffAttendance", staff.StaffID, staff.FullName, $"QR scan punch in", User.Identity?.Name ?? "QrScanner");
                 return Json(new { success = true, message = $"{staff.FullName} punched in at {attendance.CheckInTime:hh:mm tt}", name = staff.FullName });
             }
             catch (InvalidOperationException ex)
@@ -244,7 +265,10 @@ namespace HighSpiritApp.Controllers
                 // Already checked in (active) - try punch out
                 var result = await _staffService.PunchOutAsync(staff.StaffID);
                 if (result != null)
+                {
+                    await _activityLogService.LogAsync("QrPunchOut", "StaffAttendance", staff.StaffID, staff.FullName, $"QR scan punch out", User.Identity?.Name ?? "QrScanner");
                     return Json(new { success = true, message = $"{staff.FullName} punched out at {result.CheckOutTime:hh:mm tt}", name = staff.FullName, type = "out" });
+                }
                 return Json(new { success = false, message = "Error processing attendance." });
             }
         }
