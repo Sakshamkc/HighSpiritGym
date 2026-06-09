@@ -107,13 +107,21 @@ namespace HighSpiritApp.Services
             if (staff == null)
                 throw new KeyNotFoundException("Staff not found.");
 
-            // Check if already checked in today
-            var existing = await _db.StaffAttendances
+            // Check if already checked in today (still active)
+            var activeCheckin = await _db.StaffAttendances
                 .Where(a => a.StaffID == staffId && a.CheckInTime.Date == NepalToday && a.CheckOutTime == null)
                 .FirstOrDefaultAsync();
 
-            if (existing != null)
+            if (activeCheckin != null)
                 throw new InvalidOperationException("Already checked in today.");
+
+            // Check if already punched out today (completed shift)
+            var completedToday = await _db.StaffAttendances
+                .Where(a => a.StaffID == staffId && a.CheckInTime.Date == NepalToday && a.CheckOutTime != null)
+                .AnyAsync();
+
+            if (completedToday)
+                throw new InvalidOperationException("Already completed shift today. Cannot punch in again.");
 
             var attendance = new StaffAttendance
             {

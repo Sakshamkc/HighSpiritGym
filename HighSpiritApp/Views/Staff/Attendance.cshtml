@@ -220,9 +220,34 @@
                         }
                     </select>
                 </div>
-                <div style="min-width:180px;">
-                    <label style="font-size:0.8rem;font-weight:600;color:#64748b;text-transform:uppercase;display:block;margin-bottom:4px;">Date & Time</label>
-                    <input type="datetime-local" id="manualDateTime" style="width:100%;padding:8px 12px;border:1.5px solid #e2e8f0;border-radius:8px;font-size:0.9rem;" />
+                <div style="min-width:140px;">
+                    <label style="font-size:0.8rem;font-weight:600;color:#64748b;text-transform:uppercase;display:block;margin-bottom:4px;">Date</label>
+                    <input type="date" id="manualDate" style="width:100%;padding:8px 12px;border:1.5px solid #e2e8f0;border-radius:8px;font-size:0.9rem;" />
+                </div>
+                <div style="min-width:80px;">
+                    <label style="font-size:0.8rem;font-weight:600;color:#64748b;text-transform:uppercase;display:block;margin-bottom:4px;">Hour</label>
+                    <select id="manualHour" style="width:100%;padding:8px 12px;border:1.5px solid #e2e8f0;border-radius:8px;font-size:0.9rem;">
+                        @for (int h = 1; h <= 12; h++)
+                        {
+                            <option value="@h">@h</option>
+                        }
+                    </select>
+                </div>
+                <div style="min-width:80px;">
+                    <label style="font-size:0.8rem;font-weight:600;color:#64748b;text-transform:uppercase;display:block;margin-bottom:4px;">Min</label>
+                    <select id="manualMinute" style="width:100%;padding:8px 12px;border:1.5px solid #e2e8f0;border-radius:8px;font-size:0.9rem;">
+                        @for (int m = 0; m < 60; m += 5)
+                        {
+                            <option value="@m">@m.ToString("D2")</option>
+                        }
+                    </select>
+                </div>
+                <div style="min-width:70px;">
+                    <label style="font-size:0.8rem;font-weight:600;color:#64748b;text-transform:uppercase;display:block;margin-bottom:4px;">AM/PM</label>
+                    <select id="manualAmPm" style="width:100%;padding:8px 12px;border:1.5px solid #e2e8f0;border-radius:8px;font-size:0.9rem;">
+                        <option value="AM">AM</option>
+                        <option value="PM">PM</option>
+                    </select>
                 </div>
                 <form method="post" asp-action="ManualPunchIn" id="manualPunchInForm" style="margin:0;">
                     <input type="hidden" name="staffId" id="manualPunchInStaffId" />
@@ -248,14 +273,23 @@
             </div>
 
             <script>
-                // Set default datetime to now (Nepal time approx)
+                // Set defaults to Nepal time now
                 (function() {
                     var now = new Date();
                     var nepalOffset = 5 * 60 + 45;
                     var utc = now.getTime() + now.getTimezoneOffset() * 60000;
                     var nepal = new Date(utc + nepalOffset * 60000);
-                    var iso = nepal.toISOString().slice(0, 16);
-                    document.getElementById('manualDateTime').value = iso;
+                    document.getElementById('manualDate').value = nepal.toISOString().slice(0, 10);
+                    var h = nepal.getHours();
+                    var m = nepal.getMinutes();
+                    var ampm = h >= 12 ? 'PM' : 'AM';
+                    h = h % 12 || 12;
+                    document.getElementById('manualHour').value = h;
+                    // Round to nearest 5 min
+                    var roundedMin = Math.round(m / 5) * 5;
+                    if (roundedMin === 60) roundedMin = 55;
+                    document.getElementById('manualMinute').value = roundedMin;
+                    document.getElementById('manualAmPm').value = ampm;
                 })();
 
                 document.getElementById('manualStaffSelect').addEventListener('change', function () {
@@ -269,7 +303,15 @@
                 });
 
                 document.getElementById('manualPunchInForm').addEventListener('submit', function() {
-                    document.getElementById('manualPunchInTime').value = document.getElementById('manualDateTime').value;
+                    var date = document.getElementById('manualDate').value;
+                    var hour = parseInt(document.getElementById('manualHour').value);
+                    var min = document.getElementById('manualMinute').value.padStart(2, '0');
+                    var ampm = document.getElementById('manualAmPm').value;
+                    // Convert to 24hr
+                    if (ampm === 'PM' && hour !== 12) hour += 12;
+                    if (ampm === 'AM' && hour === 12) hour = 0;
+                    var h24 = hour.toString().padStart(2, '0');
+                    document.getElementById('manualPunchInTime').value = date + 'T' + h24 + ':' + min;
                 });
             </script>
 
