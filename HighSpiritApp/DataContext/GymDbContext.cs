@@ -16,6 +16,7 @@ namespace HighSpiritApp.DataContext
         public DbSet<Attendance> Attendances { get; set; }
         public DbSet<GymSchedule> GymSchedules { get; set; }
         public DbSet<ActivityLog> ActivityLogs { get; set; }
+        public DbSet<DeviceToken> DeviceTokens { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {

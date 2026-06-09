@@ -285,8 +285,9 @@
           id="phoneInput"
           placeholder="Phone number"
           autocomplete="off"
+          required
         />
-        <span class="optional-label">Optional</span>
+        <span class="optional-label" style="color: #ef4444">Required</span>
       </div>
 
       <div class="time-display">
@@ -333,12 +334,7 @@
       const welcomeBack = document.getElementById("welcome-back");
       const greetingText = document.getElementById("greeting-text");
 
-      // Restore saved data
-      const savedName = localStorage.getItem("hs_attendance_name");
-      const savedPhone = localStorage.getItem("hs_attendance_phone");
-      if (savedName) nameInput.value = savedName;
-      if (savedPhone) phoneInput.value = savedPhone;
-      if (savedPhone || savedName) checkStatus();
+      const DEVICE_TOKEN_KEY = "hs_device_token";
 
       // Nepal time (UTC+5:45)
       function getNepalTime() {
@@ -372,6 +368,93 @@
         return "Good Evening! 🌙";
       }
       greetingText.textContent = getTimeGreeting();
+
+      // ============================================================
+      // AUTO CHECK-IN WITH DEVICE TOKEN
+      // ============================================================
+      (async function autoCheckIn() {
+        const token = localStorage.getItem(DEVICE_TOKEN_KEY);
+        if (!token) {
+          // No token - restore saved inputs and use normal flow
+          const savedName = localStorage.getItem("hs_attendance_name");
+          const savedPhone = localStorage.getItem("hs_attendance_phone");
+          if (savedName) nameInput.value = savedName;
+          if (savedPhone) phoneInput.value = savedPhone;
+          if (savedPhone || savedName) checkStatus();
+          return;
+        }
+
+        // Show loading state
+        greetingText.textContent = "Recognizing your device...";
+        btnIn.disabled = true;
+
+        try {
+          const res = await fetch("/Attendance/AutoCheckIn", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ token: token }),
+          });
+          const data = await res.json();
+
+          if (data.invalidToken) {
+            // Token expired/invalid - remove it, use normal flow
+            localStorage.removeItem(DEVICE_TOKEN_KEY);
+            greetingText.textContent = getTimeGreeting();
+            btnIn.disabled = false;
+            return;
+          }
+
+          if (data.success) {
+            if (data.alreadyIn) {
+              // Already checked in today - show status
+              nameInput.value = data.name || "";
+              welcomeBack.style.display = "block";
+              document.getElementById("wb-name").textContent = data.name;
+              document.getElementById("wb-status").textContent =
+                "You checked in at " + data.checkInTime;
+              greetingText.style.display = "none";
+              btnIn.style.display = "none";
+              btnOut.style.display = "flex";
+              statusSection.style.display = "block";
+              statusBadge.className = "status-badge checked-in";
+              statusBadge.innerHTML =
+                '<i class="fa-solid fa-circle-check"></i> Checked in at ' +
+                data.checkInTime;
+              btnIn.disabled = false;
+            } else {
+              // Auto punch-in successful - show thank you
+              showAutoCheckinSuccess(data.name, data.message);
+            }
+          } else {
+            // Some other failure
+            greetingText.textContent = getTimeGreeting();
+            btnIn.disabled = false;
+          }
+        } catch (e) {
+          console.error("Auto check-in failed:", e);
+          greetingText.textContent = getTimeGreeting();
+          btnIn.disabled = false;
+        }
+      })();
+
+      function showAutoCheckinSuccess(name, message) {
+        document.querySelector(".card").innerHTML = `
+          <img src="/images/highspirit.jpg" alt="High Spirit Gym" class="logo" />
+          <div class="brand">HIGH SPIRIT GYM</div>
+          <div style="margin: 1.5rem 0;">
+            <i class="fa-solid fa-circle-check" style="font-size: 3rem; color: #10b981;"></i>
+          </div>
+          <div style="font-size: 1.3rem; font-weight: 700; color: #1e293b; margin-bottom: 0.5rem;">
+            Welcome, ${name}! 👋
+          </div>
+          <div style="font-size: 1rem; color: #64748b; margin-bottom: 1rem;">
+            ✅ ${message}
+          </div>
+          <div style="font-size: 0.85rem; color: #94a3b8;">
+            Have a great workout! 💪
+          </div>
+        `;
+      }
 
       // Status check on input change
       let statusTimeout;
@@ -443,6 +526,11 @@
           nameInput.focus();
           return;
         }
+        if (!phone) {
+          showResult("Please enter your phone number.", "error");
+          phoneInput.focus();
+          return;
+        }
 
         btnIn.disabled = true;
         document.getElementById("spinner-in").style.display = "block";
@@ -451,14 +539,18 @@
           const res = await fetch("/Attendance/PunchIn", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ name: name, phone: phone || null }),
+            body: JSON.stringify({ name: name, phone: phone }),
           });
           const data = await res.json();
 
           if (data.success) {
             localStorage.setItem("hs_attendance_name", name);
-            if (phone) localStorage.setItem("hs_attendance_phone", phone);
+            localStorage.setItem("hs_attendance_phone", phone);
             showResult("✅ " + data.message, "success");
+
+            // Register device token for future auto check-in
+            registerDeviceToken(name, phone);
+
             setTimeout(() => checkStatus(), 500);
           } else {
             if (data.alreadyIn) checkStatus();
@@ -469,6 +561,25 @@
         } finally {
           btnIn.disabled = false;
           document.getElementById("spinner-in").style.display = "none";
+        }
+      }
+
+      async function registerDeviceToken(name, phone) {
+        // Only register if not already registered
+        if (localStorage.getItem(DEVICE_TOKEN_KEY)) return;
+
+        try {
+          const res = await fetch("/Attendance/RegisterDevice", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ name: name, phone: phone }),
+          });
+          const data = await res.json();
+          if (data.success && data.token) {
+            localStorage.setItem(DEVICE_TOKEN_KEY, data.token);
+          }
+        } catch (e) {
+          console.error("Device registration failed:", e);
         }
       }
 

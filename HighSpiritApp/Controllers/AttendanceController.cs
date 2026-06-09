@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.SignalR;
 using Microsoft.EntityFrameworkCore;
+using System.Security.Cryptography;
 
 namespace HighSpiritApp.Controllers
 {
@@ -262,6 +263,126 @@ namespace HighSpiritApp.Controllers
 
             return View(records);
         }
+
+        // POST: /Attendance/AutoCheckIn - Automatic check-in using device token
+        [HttpPost]
+        [AllowAnonymous]
+        public async Task<IActionResult> AutoCheckIn([FromBody] DeviceTokenRequest request)
+        {
+            if (string.IsNullOrWhiteSpace(request?.Token))
+                return Json(new { success = false, message = "No device token." });
+
+            var device = await _context.DeviceTokens
+                .FirstOrDefaultAsync(d => d.Token == request.Token && d.IsActive);
+
+            if (device == null)
+                return Json(new { success = false, message = "Invalid or expired token.", invalidToken = true });
+
+            // Check if already punched in today
+            var today = NepalToday;
+            var existing = await _context.Attendances
+                .Where(a => a.Notes == device.Phone
+                         && a.CheckInTime.Date == today
+                         && a.CheckOutTime == null)
+                .FirstOrDefaultAsync();
+
+            if (existing != null)
+            {
+                return Json(new { success = true, message = $"Already checked in at {existing.CheckInTime:hh:mm tt}.", alreadyIn = true, name = device.CustomerName, checkInTime = existing.CheckInTime.ToString("hh:mm tt") });
+            }
+
+            // Find linked customer
+            var customer = await _context.Customers.FirstOrDefaultAsync(c => c.Phone == device.Phone);
+
+            var nepalNow = NepalNow;
+            var attendance = new Attendance
+            {
+                CustomerID = customer?.CustomerID ?? device.CustomerID ?? 0,
+                CustomerName = customer?.FullName ?? device.CustomerName,
+                CheckInTime = nepalNow,
+                CheckOutTime = null,
+                Notes = device.Phone
+            };
+
+            _context.Attendances.Add(attendance);
+
+            // Update last used
+            device.LastUsedAt = DateTime.UtcNow;
+            await _context.SaveChangesAsync();
+
+            // Notify iPad display via SignalR
+            await _hubContext.Clients.Group("Display").SendAsync("PunchIn", new
+            {
+                name = attendance.CustomerName,
+                time = attendance.CheckInTime.ToString("hh:mm tt")
+            });
+
+            return Json(new { success = true, message = $"Punched in at {attendance.CheckInTime:hh:mm tt}. Enjoy your workout!", name = attendance.CustomerName, type = "in" });
+        }
+
+        // POST: /Attendance/RegisterDevice - Register device token after first successful punch-in
+        [HttpPost]
+        [AllowAnonymous]
+        public async Task<IActionResult> RegisterDevice([FromBody] RegisterDeviceRequest request)
+        {
+            if (string.IsNullOrWhiteSpace(request?.Name) || string.IsNullOrWhiteSpace(request?.Phone))
+                return Json(new { success = false, message = "Name and phone are required." });
+
+            var phone = request.Phone.Trim();
+            var name = request.Name.Trim();
+
+            // Generate a secure random token
+            var tokenBytes = RandomNumberGenerator.GetBytes(32);
+            var token = Convert.ToHexString(tokenBytes).ToLower();
+
+            // Check if device already registered with this phone
+            var existing = await _context.DeviceTokens
+                .FirstOrDefaultAsync(d => d.Phone == phone && d.IsActive);
+            if (existing != null)
+            {
+                // Return existing token
+                existing.LastUsedAt = DateTime.UtcNow;
+                existing.CustomerName = name;
+                await _context.SaveChangesAsync();
+                return Json(new { success = true, token = existing.Token });
+            }
+
+            // Link to customer if found
+            var customer = await _context.Customers.FirstOrDefaultAsync(c => c.Phone == phone);
+
+            var deviceToken = new DeviceToken
+            {
+                Token = token,
+                CustomerName = customer?.FullName ?? name,
+                Phone = phone,
+                CustomerID = customer?.CustomerID,
+                CreatedAt = DateTime.UtcNow,
+                LastUsedAt = DateTime.UtcNow,
+                IsActive = true
+            };
+
+            _context.DeviceTokens.Add(deviceToken);
+            await _context.SaveChangesAsync();
+
+            return Json(new { success = true, token = token });
+        }
+
+        // POST: /Attendance/ValidateDevice - Check if device token is valid
+        [HttpPost]
+        [AllowAnonymous]
+        public async Task<IActionResult> ValidateDevice([FromBody] DeviceTokenRequest request)
+        {
+            if (string.IsNullOrWhiteSpace(request?.Token))
+                return Json(new { valid = false });
+
+            var device = await _context.DeviceTokens
+                .FirstOrDefaultAsync(d => d.Token == request.Token && d.IsActive);
+
+            if (device == null)
+                return Json(new { valid = false });
+
+            return Json(new { valid = true, name = device.CustomerName, phone = device.Phone });
+        }
     }
 
     public class PunchRequest
@@ -273,5 +394,16 @@ namespace HighSpiritApp.Controllers
     public class ClearAllRequest
     {
         public string? Date { get; set; }
+    }
+
+    public class DeviceTokenRequest
+    {
+        public string? Token { get; set; }
+    }
+
+    public class RegisterDeviceRequest
+    {
+        public string? Name { get; set; }
+        public string? Phone { get; set; }
     }
 }
