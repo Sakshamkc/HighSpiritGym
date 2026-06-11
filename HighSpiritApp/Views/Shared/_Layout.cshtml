@@ -2124,30 +2124,24 @@
                     <i class="fa-solid fa-user-check"></i>
                     <span class="nav-text">Active Members</span>
                 </a>
-                @if (User.IsInRole("SuperAdmin"))
-                {
-                    <a href="/Customers?filter=new"
-                       class="nav-link submenu @(controller == "Customers" && (ViewBag.Filter as string) == "new" && string.IsNullOrEmpty(ViewBag.PlanName as string) ? "active" : "")"
-                       onclick="closeSidebarOnMobile()">
-                        <i class="fa-solid fa-user-plus"></i>
-                        <span class="nav-text">New Arrivals</span>
-                    </a>
-                    <a href="/Customers?filter=thismonth"
-                       class="nav-link submenu @(controller == "Customers" && (ViewBag.Filter as string) == "thismonth" && string.IsNullOrEmpty(ViewBag.PlanName as string) ? "active" : "")"
-                       onclick="closeSidebarOnMobile()">
-                        <i class="fa-solid fa-calendar-day"></i>
-                        <span class="nav-text">Joined This Month</span>
-                    </a>
-                }
-                @if (User.IsInRole("SuperAdmin"))
-                {
-                    <a href="/Customers?filter=updated"
-                       class="nav-link submenu @(controller == "Customers" && (ViewBag.Filter as string) == "updated" && string.IsNullOrEmpty(ViewBag.PlanName as string) ? "active" : "")"
-                       onclick="closeSidebarOnMobile()">
-                        <i class="fa-solid fa-user-pen"></i>
-                        <span class="nav-text">Recently Updated</span>
-                    </a>
-                }
+                <a href="/Customers?filter=new"
+                   class="nav-link submenu @(controller == "Customers" && (ViewBag.Filter as string) == "new" && string.IsNullOrEmpty(ViewBag.PlanName as string) ? "active" : "")"
+                   onclick="closeSidebarOnMobile()">
+                    <i class="fa-solid fa-user-plus"></i>
+                    <span class="nav-text">New Arrivals</span>
+                </a>
+                <a href="/Customers?filter=thismonth"
+                   class="nav-link submenu @(controller == "Customers" && (ViewBag.Filter as string) == "thismonth" && string.IsNullOrEmpty(ViewBag.PlanName as string) ? "active" : "")"
+                   onclick="closeSidebarOnMobile()">
+                    <i class="fa-solid fa-calendar-day"></i>
+                    <span class="nav-text">Joined This Month</span>
+                </a>
+                <a href="/Customers?filter=updated"
+                   class="nav-link submenu @(controller == "Customers" && (ViewBag.Filter as string) == "updated" && string.IsNullOrEmpty(ViewBag.PlanName as string) ? "active" : "")"
+                   onclick="closeSidebarOnMobile()">
+                    <i class="fa-solid fa-user-pen"></i>
+                    <span class="nav-text">Recently Updated</span>
+                </a>
                 <a href="/Customers?planName=Gym"
                    class="nav-link submenu @(ViewBag.PlanName as string == "Gym" ? "active" : "")"
                    onclick="closeSidebarOnMobile()">
@@ -2219,15 +2213,12 @@
                     <i class="fa-solid fa-person"></i>
                     <span class="nav-text">Adult Boxing</span>
                 </a>
-                @if (User.IsInRole("SuperAdmin"))
-                {
-                    <a href="/Boxing?category=All&filter=updated"
-                       class="nav-link submenu @(controller == "Boxing" && (ViewBag.Filter as string) == "updated" ? "active" : "")"
-                       onclick="closeSidebarOnMobile()">
-                        <i class="fa-solid fa-user-pen"></i>
-                        <span class="nav-text">Recently Updated</span>
-                    </a>
-                }
+                <a href="/Boxing?category=All&filter=updated"
+                   class="nav-link submenu @(controller == "Boxing" && (ViewBag.Filter as string) == "updated" ? "active" : "")"
+                   onclick="closeSidebarOnMobile()">
+                    <i class="fa-solid fa-user-pen"></i>
+                    <span class="nav-text">Recently Updated</span>
+                </a>
             </div>
 
             <p class="nav-section-title">Lockers</p>
@@ -2252,15 +2243,12 @@
                     <i class="fa-solid fa-venus"></i>
                     <span class="nav-text">Female Locker</span>
                 </a>
-                @if (User.IsInRole("SuperAdmin"))
-                {
-                    <a href="/Locker?filter=updated"
-                       class="nav-link submenu @(controller == "Locker" && (ViewBag.Filter as string) == "updated" ? "active" : "")"
-                       onclick="closeSidebarOnMobile()">
-                        <i class="fa-solid fa-user-pen"></i>
-                        <span class="nav-text">Recently Updated</span>
-                    </a>
-                }
+                <a href="/Locker?filter=updated"
+                   class="nav-link submenu @(controller == "Locker" && (ViewBag.Filter as string) == "updated" ? "active" : "")"
+                   onclick="closeSidebarOnMobile()">
+                    <i class="fa-solid fa-user-pen"></i>
+                    <span class="nav-text">Recently Updated</span>
+                </a>
             </div>
 
             <p class="nav-section-title">Staff</p>
