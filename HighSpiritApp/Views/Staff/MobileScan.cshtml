@@ -377,6 +377,9 @@
         </div>
     </div>
 
+    <!-- Hidden element for file-based QR scanning -->
+    <div id="reader-hidden" style="display:none;"></div>
+
     <script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
     <script>
         let scanCount = 0;
@@ -496,20 +499,49 @@
         document.getElementById('statusDot').style.background = '#10b981';
         }).catch(err => {
         console.error('Camera error:', err);
+        showFileUploadFallback();
+        });
+        }
+
+        function showFileUploadFallback() {
         document.getElementById('reader').innerHTML = `
         <div class="camera-error">
         <i class="fa-solid fa-video-slash"></i>
-        <p>Camera access denied or not available</p>
-        <p style="font-size:0.8rem;">Please allow camera permission and reload</p>
-        <button class="btn-retry" onclick="location.reload()">
-        <i class="fa-solid fa-rotate-right"></i> Retry
+        <p>Camera not available (requires HTTPS)</p>
+        <p style="font-size:0.8rem;margin-bottom:16px;">Use the option below to scan QR from photo</p>
+        <label for="qrFileInput" class="btn-retry" style="cursor:pointer;display:inline-block;">
+        <i class="fa-solid fa-camera"></i> Take Photo / Upload QR
+        </label>
+        <input type="file" id="qrFileInput" accept="image/*" capture="environment" style="display:none;" />
+        <br/><br/>
+        <button class="btn-retry" onclick="location.reload()" style="background:#475569;">
+        <i class="fa-solid fa-rotate-right"></i> Retry Camera
         </button>
         </div>
         `;
         document.getElementById('scanLine').style.display = 'none';
-        document.getElementById('statusText').textContent = 'Camera error';
-        document.getElementById('statusDot').style.background = '#ef4444';
+        document.getElementById('statusText').textContent = 'Upload mode';
+        document.getElementById('statusDot').style.background = '#f59e0b';
         document.getElementById('statusDot').style.animation = 'none';
+        document.getElementById('instruction').textContent = 'Take a photo of staff QR code or select from gallery';
+
+        document.getElementById('qrFileInput').addEventListener('change', function (e) {
+        var file = e.target.files[0];
+        if (!file) return;
+        var html5QrScanner = new Html5Qrcode("reader-hidden");
+        html5QrScanner.scanFile(file, true)
+        .then(decodedText => {
+        onScanSuccess(decodedText);
+        // Reset file input for next scan
+        e.target.value = '';
+        })
+        .catch(err => {
+        showResult('Error', 'Could not read QR from image. Try again with a clearer photo.', 'error');
+        e.target.value = '';
+        setTimeout(() => {
+        document.getElementById('resultPopup').classList.remove('show');
+        }, 3000);
+        });
         });
         }
 
