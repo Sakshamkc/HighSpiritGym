@@ -202,13 +202,20 @@ namespace HighSpiritApp.Controllers
         [HttpPost]
         public async Task<IActionResult> ManualPunchOut(int attendanceId, DateTime checkOutTime)
         {
-            var result = await _staffService.ManualPunchOutAsync(attendanceId, checkOutTime);
-            if (result == null)
-                TempData["error"] = "Attendance record not found.";
-            else
+            try
             {
-                await _activityLogService.LogAsync("ManualPunchOut", "StaffAttendance", result.StaffID, result.StaffName, $"Manual punch out at {checkOutTime:dd MMM yyyy hh:mm tt}", User.Identity?.Name ?? "System");
-                TempData["success"] = "Manual punch out recorded!";
+                var result = await _staffService.ManualPunchOutAsync(attendanceId, checkOutTime);
+                if (result == null)
+                    TempData["error"] = "Attendance record not found.";
+                else
+                {
+                    await _activityLogService.LogAsync("ManualPunchOut", "StaffAttendance", result.StaffID, result.StaffName, $"Manual punch out at {checkOutTime:dd MMM yyyy hh:mm tt}", User.Identity?.Name ?? "System");
+                    TempData["success"] = "Manual punch out recorded!";
+                }
+            }
+            catch (InvalidOperationException ex)
+            {
+                TempData["error"] = ex.Message;
             }
             return RedirectToAction("Attendance");
         }

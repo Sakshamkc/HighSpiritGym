@@ -224,7 +224,7 @@ namespace HighSpiritApp.Services
                         ? list.OrderByDescending(c => c.JoinDate).ToList()
                         : filter.Filter == "updated"
                             ? list.OrderByDescending(c => c.UpdatedAt).ToList()
-                            : list.OrderBy(c => c.FullName).ToList()
+                            : list.OrderByDescending(c => c.JoinDate).ToList()
             };
 
             var total = list.Count;

@@ -203,6 +203,9 @@ namespace HighSpiritApp.Services
             if (attendance == null)
                 return null;
 
+            if (checkOutTime <= attendance.CheckInTime)
+                throw new InvalidOperationException($"Punch out time must be after check-in time ({attendance.CheckInTime:hh:mm tt}).");
+
             attendance.CheckOutTime = checkOutTime;
             await _db.SaveChangesAsync();
             return attendance;
