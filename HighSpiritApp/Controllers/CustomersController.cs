@@ -156,7 +156,10 @@ namespace HighSpiritApp.Controllers
         public async Task<IActionResult> Delete(int id)
         {
             var customer = await _customerService.GetByIdWithMembershipsAsync(id);
-            var name = customer?.FullName ?? $"ID:{id}";
+            if (customer == null)
+                return RedirectToAction("Index");
+
+            var name = customer.FullName;
             await _customerService.DeleteAsync(id);
             await _activityLogService.LogAsync("Deleted", "Customer", id, name, $"Deleted customer {name}", User.Identity?.Name ?? "Admin");
             TempData["success"] = "Customer deleted successfully!";
@@ -238,6 +241,10 @@ namespace HighSpiritApp.Controllers
         [HttpPost]
         public async Task<IActionResult> EditAll(CustomerEditVM vm, IFormFile photoFile)
         {
+            var existing = await _customerService.GetByIdWithMembershipsAsync(vm.CustomerID);
+            if (existing == null)
+                return RedirectToAction("Index");
+
             byte[]? photo = null;
             if (photoFile != null && photoFile.Length > 0)
             {
