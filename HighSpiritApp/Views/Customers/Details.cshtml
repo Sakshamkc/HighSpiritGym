@@ -406,8 +406,10 @@ today).Days : 0;
         <div class="col-md-4 text-center text-md-start">
             @if (Model.Photo != null)
             {
-                <img src="data:image/png;base64,@Convert.ToBase64String(Model.Photo)" class="profile-photo"
-                     alt="@Model.FullName" />
+                <a href="@Url.Action("Photo", "Customers", new { id = Model.CustomerID })" target="_blank">
+                    <img src="@Url.Action("Photo", "Customers", new { id = Model.CustomerID })" class="profile-photo"
+                         alt="@Model.FullName" />
+                </a>
             }
             else
             {

@@ -96,7 +96,10 @@ namespace HighSpiritApp.Controllers
             {
                 return NotFound();
             }
-            return File(customer.Photo, "image/jpeg");
+            // Detect PNG by magic bytes, otherwise default to JPEG
+            var contentType = customer.Photo.Length > 4 && customer.Photo[0] == 0x89 && customer.Photo[1] == 0x50
+                ? "image/png" : "image/jpeg";
+            return File(customer.Photo, contentType);
         }
 
         public IActionResult Create(string? planName = null)
