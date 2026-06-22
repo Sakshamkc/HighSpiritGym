@@ -92,14 +92,23 @@ namespace HighSpiritApp.Controllers
         public async Task<IActionResult> Photo(int id)
         {
             var customer = await _customerService.GetByIdAsync(id);
-            if (customer?.Photo == null || customer.Photo.Length == 0)
+            if (customer?.Photo == null || customer.Photo.Length <= 1)
             {
                 return NotFound();
             }
-            // Detect PNG by magic bytes, otherwise default to JPEG
-            var contentType = customer.Photo.Length > 4 && customer.Photo[0] == 0x89 && customer.Photo[1] == 0x50
-                ? "image/png" : "image/jpeg";
-            return File(customer.Photo, contentType);
+            // Detect format by magic bytes
+            var data = customer.Photo;
+            string contentType = "image/jpeg";
+            if (data.Length > 4)
+            {
+                if (data[0] == 0x89 && data[1] == 0x50 && data[2] == 0x4E && data[3] == 0x47)
+                    contentType = "image/png";
+                else if (data[0] == 0x52 && data[1] == 0x49 && data[2] == 0x46 && data[3] == 0x46)
+                    contentType = "image/webp";
+                else if (data[0] == 0x47 && data[1] == 0x49 && data[2] == 0x46)
+                    contentType = "image/gif";
+            }
+            return File(data, contentType);
         }
 
         public IActionResult Create(string? planName = null)
