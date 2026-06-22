@@ -79,6 +79,15 @@ namespace HighSpiritApp.Services
             membership.IsActive = true;
             membership.CreatedAt = DateTime.Now;
             await _membershipRepository.AddAsync(membership);
+
+            // Update customer's UpdatedAt so they appear in "Recently Updated"
+            var customer = await _customerRepository.GetByIdAsync(membership.CustomerID);
+            if (customer != null)
+            {
+                customer.UpdatedAt = DateTime.Now;
+                _customerRepository.Update(customer);
+            }
+
             await _membershipRepository.SaveChangesAsync();
         }
 
