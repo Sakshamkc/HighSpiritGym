@@ -9,11 +9,13 @@
         .FirstOrDefault();
 
     var isExpired = latestMembership != null && latestMembership.ExpireDate < today && !latestMembership.IsOnHold;
-    var isExpiringSoon = latestMembership != null && !latestMembership.IsOnHold && latestMembership.ExpireDate >= today && latestMembership.ExpireDate <=
+    var isExpiringSoon = latestMembership != null && !latestMembership.IsOnHold && latestMembership.ExpireDate >= today &&
+latestMembership.ExpireDate <=
 today.AddDays(7);
     var daysLeft = latestMembership != null ? (latestMembership.ExpireDate - today).Days : 0;
     var isOnHold = latestMembership != null && latestMembership.IsOnHold;
-    var holdDays = isOnHold && latestMembership!.HoldStartDate.HasValue ? (today - latestMembership.HoldStartDate.Value).Days : 0;
+    var holdDays = isOnHold && latestMembership!.HoldStartDate.HasValue ? (today -
+latestMembership.HoldStartDate.Value).Days : 0;
 
     // Locker info
     var assignedLocker = ViewBag.AssignedLocker as HighSpiritApp.Models.Locker.Locker;
@@ -433,7 +435,8 @@ today).Days : 0;
                     {
                         if (isOnHold)
                         {
-                            <span class="status-badge" style="background: linear-gradient(135deg, #f59e0b, #d97706); color: white;">
+                            <span class="status-badge"
+                                  style="background: linear-gradient(135deg, #f59e0b, #d97706); color: white;">
                                 <i class="fa-solid fa-pause-circle"></i> On Hold — @holdDays day(s)
                             </span>
                         }
@@ -458,23 +461,27 @@ today).Days : 0;
                     }
                 </div>
                 <div class="d-flex gap-2 flex-wrap justify-content-center">
-                    <a href="/Customers/EditAll/@Model.CustomerID@(encodedReturnUrl != "" ? "?returnUrl=" + encodedReturnUrl : "")" class="action-btn btn btn-light">
+                    <a href="/Customers/EditAll/@Model.CustomerID@(encodedReturnUrl != "" ? "?returnUrl=" + encodedReturnUrl : "")"
+                       class="action-btn btn btn-light">
                         <i class="fa-solid fa-edit"></i> Edit
                     </a>
-                    <a href="/Memberships/Renew/@Model.CustomerID@(encodedReturnUrl != "" ? "?returnUrl=" + encodedReturnUrl : "")" class="action-btn btn btn-success">
+                    <a href="/Memberships/Renew/@Model.CustomerID@(encodedReturnUrl != "" ? "?returnUrl=" + encodedReturnUrl : "")"
+                       class="action-btn btn btn-success">
                         <i class="fa-solid fa-rotate"></i> Renew
                     </a>
                     @if (latestMembership != null && !isExpired)
                     {
                         if (isOnHold)
                         {
-                            <button type="button" class="action-btn btn btn-info" onclick="confirmResume(@latestMembership.MembershipID)">
+                            <button type="button" class="action-btn btn btn-info"
+                                    onclick="confirmResume(@latestMembership.MembershipID)">
                                 <i class="fa-solid fa-play-circle"></i> Resume
                             </button>
                         }
                         else
                         {
-                            <button type="button" class="action-btn btn btn-warning" onclick="confirmHold(@latestMembership.MembershipID)">
+                            <button type="button" class="action-btn btn btn-warning"
+                                    onclick="confirmHold(@latestMembership.MembershipID)">
                                 <i class="fa-solid fa-pause-circle"></i> Hold
                             </button>
                         }
@@ -500,7 +507,8 @@ today).Days : 0;
 <!-- Current Membership Highlight -->
 @if (latestMembership != null)
 {
-    <div class="membership-highlight @(isOnHold ? "" : isExpired ? "expired" : isExpiringSoon ? "expiring" : "")" @(isOnHold ? "style=\"border-left: 5px solid #f59e0b;\"" : "")>
+    <div class="membership-highlight @(isOnHold ? "" : isExpired ? "expired" : isExpiringSoon ? "expiring" : "")" @(isOnHold
+             ? "style=\"border-left: 5px solid #f59e0b;\"" : "")>
         <div class="row">
             <div class="col-6 col-md-3">
                 <div class="membership-stat">
@@ -522,11 +530,13 @@ today).Days : 0;
                 </div>
             </div>
             <div class="col-6 col-md-3">
-                <div class="membership-stat @(isOnHold ? "" : isExpired ? "expired" : isExpiringSoon ? "expiring" : "highlight")">
+                <div
+                    class="membership-stat @(isOnHold ? "" : isExpired ? "expired" : isExpiringSoon ? "expiring" : "highlight")">
                     <div class="value">
                         @if (isOnHold)
                         {
-                            <i class="fa-solid fa-pause-circle" style="color: #f59e0b;"></i> <span style="color: #f59e0b;">Hold</span>
+                            <i class="fa-solid fa-pause-circle" style="color: #f59e0b;"></i> <span
+                            style="color: #f59e0b;">Hold</span>
                         }
                         else if (isExpired)
                         {
@@ -554,7 +564,8 @@ today).Days : 0;
                     <i class="fa-solid fa-lock"></i>#@assignedLocker.LockerNumber
                 </div>
                 <span class="badge @(assignedLocker.Gender == "Gents" ? "bg-primary" : "bg-danger") fs-6">
-                    <i class="fa-solid fa-@(assignedLocker.Gender == "Gents" ? "mars" : "venus") me-1"></i>@assignedLocker.Gender
+                    <i
+                    class="fa-solid fa-@(assignedLocker.Gender == "Gents" ? "mars" : "venus") me-1"></i>@assignedLocker.Gender
                 </span>
             </div>
             <div class="col-md-9">
@@ -718,7 +729,8 @@ today).Days : 0;
                                             }
                                             else if (history.TotalHoldDays > 0)
                                             {
-                                                <span class="badge bg-light text-muted ms-1" style="font-size: 10px;" title="Was held for @history.TotalHoldDays day(s)">
+                                                <span class="badge bg-light text-muted ms-1" style="font-size: 10px;"
+                                                      title="Was held for @history.TotalHoldDays day(s)">
                                                     <i class="fa-solid fa-pause"></i> +@history.TotalHoldDays d
                                                 </span>
                                             }
@@ -829,84 +841,87 @@ today).Days : 0;
         }
     </script>
 
-<!-- Hold Membership Confirmation Modal -->
-<div class="modal fade" id="holdMembershipModal" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content" style="border-radius: 12px; border: none; box-shadow: 0 20px 60px rgba(0,0,0,0.3);">
-            <div class="modal-header border-0 pb-0">
-                <h5 class="modal-title">
-                    <i class="fa-solid fa-pause-circle text-warning me-2"></i>Hold Membership
-                </h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <div class="modal-body pt-2">
-                <p class="text-muted mb-3">Are you sure you want to put this membership on hold?</p>
-                <div class="p-3 rounded-3" style="background: rgba(245, 158, 11, 0.1); border: 1px solid rgba(245, 158, 11, 0.2);">
-                    <div class="d-flex align-items-center gap-2 mb-2">
-                        <i class="fa-solid fa-info-circle text-warning"></i>
-                        <strong>What happens when you hold?</strong>
+    <!-- Hold Membership Confirmation Modal -->
+    <div class="modal fade" id="holdMembershipModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content" style="border-radius: 12px; border: none; box-shadow: 0 20px 60px rgba(0,0,0,0.3);">
+                <div class="modal-header border-0 pb-0">
+                    <h5 class="modal-title">
+                        <i class="fa-solid fa-pause-circle text-warning me-2"></i>Hold Membership
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body pt-2">
+                    <p class="text-muted mb-3">Are you sure you want to put this membership on hold?</p>
+                    <div class="p-3 rounded-3"
+                         style="background: rgba(245, 158, 11, 0.1); border: 1px solid rgba(245, 158, 11, 0.2);">
+                        <div class="d-flex align-items-center gap-2 mb-2">
+                            <i class="fa-solid fa-info-circle text-warning"></i>
+                            <strong>What happens when you hold?</strong>
+                        </div>
+                        <ul class="mb-0 small text-muted" style="padding-left: 20px;">
+                            <li>The membership timer pauses from today</li>
+                            <li>When resumed, the expire date will be extended by the number of days held</li>
+                            <li>The member won't appear in expired notifications</li>
+                        </ul>
                     </div>
-                    <ul class="mb-0 small text-muted" style="padding-left: 20px;">
-                        <li>The membership timer pauses from today</li>
-                        <li>When resumed, the expire date will be extended by the number of days held</li>
-                        <li>The member won't appear in expired notifications</li>
-                    </ul>
+                </div>
+                <div class="modal-footer border-0 pt-0">
+                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <form id="holdMembershipForm" method="post" style="display:inline;">
+                        <button type="submit" class="btn btn-warning">
+                            <i class="fa-solid fa-pause-circle me-1"></i>Hold Membership
+                        </button>
+                    </form>
                 </div>
             </div>
-            <div class="modal-footer border-0 pt-0">
-                <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
-                <form id="holdMembershipForm" method="post" style="display:inline;">
-                    <button type="submit" class="btn btn-warning">
-                        <i class="fa-solid fa-pause-circle me-1"></i>Hold Membership
-                    </button>
-                </form>
-            </div>
         </div>
     </div>
-</div>
 
-<!-- Resume Membership Confirmation Modal -->
-<div class="modal fade" id="resumeMembershipModal" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content" style="border-radius: 12px; border: none; box-shadow: 0 20px 60px rgba(0,0,0,0.3);">
-            <div class="modal-header border-0 pb-0">
-                <h5 class="modal-title">
-                    <i class="fa-solid fa-play-circle text-info me-2"></i>Resume Membership
-                </h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <div class="modal-body pt-2">
-                <p class="text-muted mb-3">Resume this membership? The expire date will be extended by the hold duration.</p>
-                @if (isOnHold && latestMembership != null)
-                {
-                    <div class="p-3 rounded-3" style="background: rgba(6, 182, 212, 0.1); border: 1px solid rgba(6, 182, 212, 0.2);">
-                        <div class="d-flex justify-content-between mb-1">
-                            <small class="text-muted">Hold started</small>
-                            <strong>@FormatDate(latestMembership.HoldStartDate!.Value)</strong>
-                        </div>
-                        <div class="d-flex justify-content-between mb-1">
-                            <small class="text-muted">Days on hold</small>
-                            <strong>@holdDays day(s)</strong>
-                        </div>
-                        <div class="d-flex justify-content-between mb-1">
-                            <small class="text-muted">Current expire date</small>
-                            <strong>@FormatDate(latestMembership.ExpireDate)</strong>
-                        </div>
-                        <div class="d-flex justify-content-between">
-                            <small class="text-muted">New expire date</small>
-                            <strong class="text-success">@FormatDate(latestMembership.ExpireDate.AddDays(holdDays))</strong>
-                        </div>
+    <!-- Resume Membership Confirmation Modal -->
+    <div class="modal fade" id="resumeMembershipModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content" style="border-radius: 12px; border: none; box-shadow: 0 20px 60px rgba(0,0,0,0.3);">
+                <div class="modal-header border-0 pb-0">
+                    <h5 class="modal-title">
+                        <i class="fa-solid fa-play-circle text-info me-2"></i>Resume Membership
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body pt-2">
+                    <p class="text-muted mb-3">Resume this membership? The expire date will be extended by the hold
+                        duration.</p>
+                        @if (isOnHold && latestMembership != null)
+                        {
+                            <div class="p-3 rounded-3"
+                                 style="background: rgba(6, 182, 212, 0.1); border: 1px solid rgba(6, 182, 212, 0.2);">
+                                <div class="d-flex justify-content-between mb-1">
+                                    <small class="text-muted">Hold started</small>
+                                    <strong>@FormatDate(latestMembership.HoldStartDate!.Value)</strong>
+                                </div>
+                                <div class="d-flex justify-content-between mb-1">
+                                    <small class="text-muted">Days on hold</small>
+                                    <strong>@holdDays day(s)</strong>
+                                </div>
+                                <div class="d-flex justify-content-between mb-1">
+                                    <small class="text-muted">Current expire date</small>
+                                    <strong>@FormatDate(latestMembership.ExpireDate)</strong>
+                                </div>
+                                <div class="d-flex justify-content-between">
+                                    <small class="text-muted">New expire date</small>
+                                    <strong class="text-success">@FormatDate(latestMembership.ExpireDate.AddDays(holdDays))</strong>
+                                </div>
+                            </div>
+                        }
                     </div>
-                }
-            </div>
-            <div class="modal-footer border-0 pt-0">
-                <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
-                <form id="resumeMembershipForm" method="post" style="display:inline;">
-                    <button type="submit" class="btn btn-info text-white">
-                        <i class="fa-solid fa-play-circle me-1"></i>Resume Membership
-                    </button>
-                </form>
+                    <div class="modal-footer border-0 pt-0">
+                        <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
+                        <form id="resumeMembershipForm" method="post" style="display:inline;">
+                            <button type="submit" class="btn btn-info text-white">
+                                <i class="fa-solid fa-play-circle me-1"></i>Resume Membership
+                            </button>
+                        </form>
+                    </div>
+                </div>
             </div>
         </div>
-    </div>
-</div>
