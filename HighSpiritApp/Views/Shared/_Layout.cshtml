@@ -2273,9 +2273,7 @@
                     <i class="fa-solid fa-user-clock"></i>
                     <span class="nav-text">Staff Attendance</span>
                 </a>
-                <a href="/Staff/MobileScan" target="_blank"
-                   class="nav-link submenu"
-                   onclick="closeSidebarOnMobile()">
+                <a href="/Staff/MobileScan" target="_blank" class="nav-link submenu" onclick="closeSidebarOnMobile()">
                     <i class="fa-solid fa-mobile-screen"></i>
                     <span class="nav-text">Mobile Scanner</span>
                 </a>
@@ -2306,6 +2304,13 @@
                        onclick="closeSidebarOnMobile()">
                         <i class="fa-solid fa-clock-rotate-left"></i>
                         <span class="nav-text">Activity Log</span>
+                    </a>
+                </div>
+                <div class="nav-item">
+                    <a href="/Transaction" class="nav-link @(controller == "Transaction" ? "active" : "")"
+                       onclick="closeSidebarOnMobile()">
+                        <i class="fa-solid fa-receipt"></i>
+                        <span class="nav-text">Transaction History</span>
                     </a>
                 </div>
             }

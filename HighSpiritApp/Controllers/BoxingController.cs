@@ -14,11 +14,13 @@ namespace HighSpiritApp.Controllers
     {
         private readonly IBoxingService _boxingService;
         private readonly IActivityLogService _activityLogService;
+        private readonly ITransactionLogService _transactionLogService;
 
-        public BoxingController(IBoxingService boxingService, IActivityLogService activityLogService)
+        public BoxingController(IBoxingService boxingService, IActivityLogService activityLogService, ITransactionLogService transactionLogService)
         {
             _boxingService = boxingService;
             _activityLogService = activityLogService;
+            _transactionLogService = transactionLogService;
         }
 
         public async Task<IActionResult> Index(string category = "Children", string search = "", string filter = "all", string paymentStatus = "", int page = 1)
@@ -115,6 +117,10 @@ namespace HighSpiritApp.Controllers
             await _boxingService.CreateAsync(model);
 
             await _activityLogService.LogAsync("Created", "Boxing", model.BoxingMemberID, model.Name, $"Created {category} boxing member {model.Name}", User.Identity?.Name ?? "Admin");
+
+            await _transactionLogService.LogAsync("Payment", "Boxing", model.BoxingMemberID, model.Name,
+                $"{category} Boxing", model.Price, model.DueAmount, null,
+                $"New {category} boxing member - Cash {model.CashAmount}, eSewa {model.EsewaAmount}", User.Identity?.Name ?? "Admin");
 
             TempData["success"] = $"{category} boxing member added successfully!";
             return RedirectToAction("Index", new { category });

@@ -14,12 +14,14 @@ namespace HighSpiritApp.Controllers
         private readonly IMembershipService _membershipService;
         private readonly ICustomerService _customerService;
         private readonly IActivityLogService _activityLogService;
+        private readonly ITransactionLogService _transactionLogService;
 
-        public MembershipsController(IMembershipService membershipService, ICustomerService customerService, IActivityLogService activityLogService)
+        public MembershipsController(IMembershipService membershipService, ICustomerService customerService, IActivityLogService activityLogService, ITransactionLogService transactionLogService)
         {
             _membershipService = membershipService;
             _customerService = customerService;
             _activityLogService = activityLogService;
+            _transactionLogService = transactionLogService;
         }
 
         public IActionResult Create(int customerId)
@@ -72,6 +74,9 @@ namespace HighSpiritApp.Controllers
                 var customer = await _customerService.GetByIdAsync(membership.CustomerID);
                 var customerName = customer?.FullName ?? $"Customer #{membership.CustomerID}";
                 await _activityLogService.LogAsync("Renewed", "Membership", membership.MembershipID, customerName, $"Renewed {membership.PlanName} membership for {customerName}", User.Identity?.Name ?? "Admin");
+                await _transactionLogService.LogAsync("Renewal", "Customer", membership.CustomerID, customerName,
+                    membership.PlanName, membership.PaidPrice, DueAmount, null,
+                    $"Renewed {membership.PlanName} - {membership.Duration} month(s)", User.Identity?.Name ?? "Admin");
                 TempData["success"] = "Membership renewed successfully!";
                 return RedirectToAction("Index", "Customers");
             }

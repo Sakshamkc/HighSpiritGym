@@ -39,6 +39,7 @@ namespace HighSpiritApp.Extensions
             services.AddScoped<IAuthService, AuthService>();
             services.AddScoped<IActivityLogService, ActivityLogService>();
             services.AddScoped<IStaffService, StaffService>();
+            services.AddScoped<ITransactionLogService, TransactionLogService>();
 
             return services;
         }

@@ -15,17 +15,20 @@ namespace HighSpiritApp.Controllers
         private readonly IMembershipService _membershipService;
         private readonly ILockerService _lockerService;
         private readonly IActivityLogService _activityLogService;
+        private readonly ITransactionLogService _transactionLogService;
 
         public CustomersController(
             ICustomerService customerService,
             IMembershipService membershipService,
             ILockerService lockerService,
-            IActivityLogService activityLogService)
+            IActivityLogService activityLogService,
+            ITransactionLogService transactionLogService)
         {
             _customerService = customerService;
             _membershipService = membershipService;
             _lockerService = lockerService;
             _activityLogService = activityLogService;
+            _transactionLogService = transactionLogService;
         }
 
         public async Task<IActionResult> Index(string search, string sort, string filter, int? duration, string planName, string shift, string gender, string paymentStatus, int page = 1)
@@ -160,6 +163,10 @@ namespace HighSpiritApp.Controllers
             await _membershipService.CreateAsync(membership);
 
             await _activityLogService.LogAsync("Created", "Customer", createdCustomer.CustomerID, createdCustomer.FullName, $"Created customer {createdCustomer.FullName} with {PlanName} plan", User.Identity?.Name ?? "Admin");
+
+            await _transactionLogService.LogAsync("Payment", "Customer", createdCustomer.CustomerID, createdCustomer.FullName,
+                PlanName, PaidPrice, DueAmount, null,
+                $"New membership ({PlanName}) - {Duration} month(s)", User.Identity?.Name ?? "Admin");
 
             TempData["success"] = "Customer added successfully!";
             return RedirectToAction("Index");

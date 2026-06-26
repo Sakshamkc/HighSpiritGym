@@ -14,12 +14,14 @@ namespace HighSpiritApp.Controllers
         private readonly ILockerService _lockerService;
         private readonly ICustomerService _customerService;
         private readonly IActivityLogService _activityLogService;
+        private readonly ITransactionLogService _transactionLogService;
 
-        public LockerController(ILockerService lockerService, ICustomerService customerService, IActivityLogService activityLogService)
+        public LockerController(ILockerService lockerService, ICustomerService customerService, IActivityLogService activityLogService, ITransactionLogService transactionLogService)
         {
             _lockerService = lockerService;
             _customerService = customerService;
             _activityLogService = activityLogService;
+            _transactionLogService = transactionLogService;
         }
 
         public async Task<IActionResult> Index(string search, string gender = "Gents", string status = "", string filter = "", int page = 1)
@@ -187,6 +189,9 @@ namespace HighSpiritApp.Controllers
                 if (locker == null) return NotFound();
 
                 await _lockerService.AssignLockerAsync(id, memberName, phone, null, package, months, totalAmount, paidAmount);
+                await _transactionLogService.LogAsync("Payment", "Locker", locker.LockerID, memberName,
+                    $"Locker {locker.LockerNumber}", paidAmount, totalAmount - paidAmount, null,
+                    $"Assigned locker {locker.LockerNumber} - {months} month(s){(string.IsNullOrEmpty(package) ? "" : $" ({package})")}", User.Identity?.Name ?? "Admin");
                 TempData["success"] = $"Locker {locker.LockerNumber} assigned to {memberName}!";
                 return RedirectToAction("Index", new { gender = locker.Gender });
             }
@@ -240,6 +245,9 @@ namespace HighSpiritApp.Controllers
                 if (locker == null) return NotFound();
 
                 await _lockerService.RenewLockerAsync(id, months, paidAmount);
+                await _transactionLogService.LogAsync("Renewal", "Locker", locker.LockerID, locker.AssignedTo ?? $"Locker {locker.LockerNumber}",
+                    $"Locker {locker.LockerNumber}", paidAmount, 0, null,
+                    $"Renewed locker {locker.LockerNumber} - {months} month(s)", User.Identity?.Name ?? "Admin");
                 TempData["success"] = $"Locker {locker.LockerNumber} renewed for {months} month(s)!";
                 return RedirectToAction("Index", new { gender = locker.Gender });
             }
