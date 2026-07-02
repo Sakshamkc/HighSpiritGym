@@ -9,6 +9,17 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
     <title>Staff Scanner - High Spirit Gym</title>
     <link rel="icon" type="image/png" href="/images/highspirit.jpg" />
+    <script>
+            // The camera (getUserMedia) only works over HTTPS. If this page is
+            // opened over plain HTTP or via the server IP, send it to the secure
+            // domain so the scanner camera works. (localhost is exempt for dev.)
+            (function () {
+                var isLocal = location.hostname === "localhost" || location.hostname === "127.0.0.1";
+                if (location.protocol !== "https:" && !isLocal) {
+                    location.replace("https://attendance.highspiritswr.com" + location.pathname + location.search);
+                }
+            })();
+    </script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
     <style>
             * {
