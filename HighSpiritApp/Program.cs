@@ -2,6 +2,7 @@ using HighSpiritApp.DataContext;
 using HighSpiritApp.Extensions;
 using HighSpiritApp.Hubs;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
@@ -166,11 +167,26 @@ builder.Services.AddResponseCompression(options =>
 builder.Services.Configure<Microsoft.AspNetCore.ResponseCompression.GzipCompressionProviderOptions>(o => o.Level = System.IO.Compression.CompressionLevel.Fastest);
 builder.Services.Configure<Microsoft.AspNetCore.ResponseCompression.BrotliCompressionProviderOptions>(o => o.Level = System.IO.Compression.CompressionLevel.Fastest);
 
+// =============================================================
+// FORWARDED HEADERS (app runs behind Nginx reverse proxy / HTTPS termination)
+// =============================================================
+builder.Services.Configure<ForwardedHeadersOptions>(options =>
+{
+    options.ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto;
+    // Nginx runs on the same host; trust it without an allow-list
+    options.KnownNetworks.Clear();
+    options.KnownProxies.Clear();
+});
+
 var app = builder.Build();
 
 // =============================================================
 // MIDDLEWARE PIPELINE
 // =============================================================
+
+// Must run first so the app sees the real scheme (https) and client IP from Nginx
+app.UseForwardedHeaders();
+
 if (!app.Environment.IsDevelopment())
 {
     app.UseExceptionHandler("/Home/Error");
