@@ -9,7 +9,8 @@
 
     // Build query string for links
     string BuildQuery(string? overrideFilter = null, int? overrideDuration = null, string? overridePlan = null,
-                      string? overrideShift = null, string? overrideGender = null, string? overridePayment = null, int? overridePage = null)
+                      string? overrideShift = null, string? overrideGender = null, string? overridePayment = null, int? overridePage = null,
+                      int? overrideJoinMonth = null, int? overrideJoinYear = null)
     {
         var parts = new List<string>();
         parts.Add($"filter={overrideFilter ?? ViewBag.Filter}");
@@ -25,10 +26,24 @@
             parts.Add($"gender={overrideGender ?? ViewBag.Gender}");
         if (!string.IsNullOrEmpty(overridePayment) || !string.IsNullOrEmpty(ViewBag.PaymentStatus as string))
             parts.Add($"paymentStatus={overridePayment ?? ViewBag.PaymentStatus}");
+        // For join month/year overrides, 0 means "clear this filter"
+        var qMonth = overrideJoinMonth ?? (int?)ViewBag.JoinMonth;
+        if (qMonth.HasValue && qMonth.Value != 0)
+            parts.Add($"joinMonth={qMonth}");
+        var qYear = overrideJoinYear ?? (int?)ViewBag.JoinYear;
+        if (qYear.HasValue && qYear.Value != 0)
+            parts.Add($"joinYear={qYear}");
         if (overridePage.HasValue)
             parts.Add($"page={overridePage}");
         return "?" + string.Join("&", parts);
     }
+
+    var joinMonthSel = (int?)ViewBag.JoinMonth;
+    var joinYearSel = (int?)ViewBag.JoinYear;
+    var availableJoinYears = (ViewBag.AvailableJoinYears as List<int>) ?? new List<int>();
+    string JoinLabel() => joinMonthSel.HasValue
+        ? System.Globalization.CultureInfo.InvariantCulture.DateTimeFormat.GetMonthName(joinMonthSel.Value) + (joinYearSel.HasValue ? " " + joinYearSel : "")
+        : (joinYearSel.HasValue ? joinYearSel.ToString()! : "");
 
     // Helper function to shorten plan names
     string ShortenPlan(string? planName)
@@ -65,7 +80,8 @@
     bool hasActiveFilters = !string.IsNullOrEmpty(ViewBag.PlanName as string) ||
                             !string.IsNullOrEmpty(ViewBag.Shift as string) ||
                             !string.IsNullOrEmpty(ViewBag.Gender as string) ||
-                            !string.IsNullOrEmpty(ViewBag.PaymentStatus as string);
+                            !string.IsNullOrEmpty(ViewBag.PaymentStatus as string) ||
+                            ViewBag.JoinMonth != null || ViewBag.JoinYear != null;
 
     // Capture current URL for back navigation
     var returnUrl = Uri.EscapeDataString(Context.Request.Path + Context.Request.QueryString);
@@ -116,11 +132,11 @@
 
     <!-- Action Buttons -->
     <div class="d-flex gap-2 flex-wrap action-buttons">
-        <a href="/Customers/ExportAll?search=@ViewBag.Search&filter=@ViewBag.Filter&duration=@ViewBag.Duration&planName=@ViewBag.PlanName&shift=@ViewBag.Shift&gender=@ViewBag.Gender&paymentStatus=@ViewBag.PaymentStatus"
+        <a href="/Customers/ExportAll?search=@ViewBag.Search&filter=@ViewBag.Filter&duration=@ViewBag.Duration&planName=@ViewBag.PlanName&shift=@ViewBag.Shift&gender=@ViewBag.Gender&paymentStatus=@ViewBag.PaymentStatus&joinMonth=@ViewBag.JoinMonth&joinYear=@ViewBag.JoinYear"
                class="btn btn-action btn-export" title="Export to Excel">
             <i class="fa-solid fa-file-excel"></i> <span>Export</span>
         </a>
-        <a href="/Customers/ExportDiary?search=@ViewBag.Search&filter=@ViewBag.Filter&duration=@ViewBag.Duration&planName=@ViewBag.PlanName&shift=@ViewBag.Shift&gender=@ViewBag.Gender&paymentStatus=@ViewBag.PaymentStatus"
+        <a href="/Customers/ExportDiary?search=@ViewBag.Search&filter=@ViewBag.Filter&duration=@ViewBag.Duration&planName=@ViewBag.PlanName&shift=@ViewBag.Shift&gender=@ViewBag.Gender&paymentStatus=@ViewBag.PaymentStatus&joinMonth=@ViewBag.JoinMonth&joinYear=@ViewBag.JoinYear"
                class="btn btn-action btn-contact-book" title="Export Contact Book">
             <i class="fa-solid fa-address-book"></i> <span>Contact Book</span>
         </a>
@@ -212,6 +228,8 @@
         <input type="hidden" name="shift" value="@ViewBag.Shift" />
         <input type="hidden" name="gender" value="@ViewBag.Gender" />
         <input type="hidden" name="paymentStatus" value="@ViewBag.PaymentStatus" />
+        <input type="hidden" name="joinMonth" value="@ViewBag.JoinMonth" />
+        <input type="hidden" name="joinYear" value="@ViewBag.JoinYear" />
     </div>
 </form>
 
@@ -476,6 +494,43 @@
                                                                                             </ul>
                                                                                         </div>
 
+                                                                                        <!-- Joined Month / Year Filter -->
+                                                                                        <div class="dropdown">
+                                                                                            <button
+                                                                                                class="btn filter-dropdown filter-joined @(joinMonthSel.HasValue || joinYearSel.HasValue ? "active" : "")"
+                                                                                                type="button" data-bs-toggle="dropdown" data-bs-auto-close="outside">
+                                                                                                <i class="fa-solid fa-calendar-days me-1"></i>
+                                                                                                @(joinMonthSel.HasValue || joinYearSel.HasValue ? "Joined: " + JoinLabel() : "Joined")
+                                                                                                <i class="fa-solid fa-chevron-down ms-1 small"></i>
+                                                                                            </button>
+                                                                                            <div class="dropdown-menu dropdown-menu-modern p-3" style="min-width: 260px;">
+                                                                                                <div class="dropdown-header px-0">Joined In</div>
+                                                                                                <div class="d-flex gap-2 mb-2">
+                                                                                                    <select id="joinMonthSelect" class="form-select form-select-sm">
+                                                                                                        <option value="0">Any month</option>
+                                                                                                        @for (int mo = 1; mo <= 12; mo++)
+                                                                                                        {
+                                                                                                            <option value="@mo" selected="@(joinMonthSel == mo)">@System.Globalization.CultureInfo.InvariantCulture.DateTimeFormat.GetMonthName(mo)</option>
+                                                                                                        }
+                                                                                                    </select>
+                                                                                                    <select id="joinYearSelect" class="form-select form-select-sm">
+                                                                                                        <option value="0">Any year</option>
+                                                                                                        @foreach (var yr in availableJoinYears)
+                                                                                                        {
+                                                                                                            <option value="@yr" selected="@(joinYearSel == yr)">@yr</option>
+                                                                                                        }
+                                                                                                    </select>
+                                                                                                </div>
+                                                                                                <div class="d-flex gap-2">
+                                                                                                    <a id="joinApplyBtn" class="btn btn-sm btn-primary flex-fill"
+                                                                                                       href="@BuildQuery(overrideJoinMonth: 0, overrideJoinYear: 0)"
+                                                                                                       data-base="@BuildQuery(overrideJoinMonth: 0, overrideJoinYear: 0)">Apply</a>
+                                                                                                    <a class="btn btn-sm btn-outline-secondary"
+                                                                                                       href="@BuildQuery(overrideJoinMonth: 0, overrideJoinYear: 0)">Clear</a>
+                                                                                                </div>
+                                                                                            </div>
+                                                                                        </div>
+
                                                                                         <!-- Clear Filters Button -->
                                                                                         @if (hasActiveFilters)
                                                                                         {
@@ -527,10 +582,33 @@
                                                                                                     <a href="@BuildQuery(overridePayment: "")" class="tag-close"><i class="fa-solid fa-times"></i></a>
                                                                                                 </span>
                                                                                             }
+                                                                                            @if (joinMonthSel.HasValue || joinYearSel.HasValue)
+                                                                                            {
+                                                                                                <span class="filter-tag tag-plan">
+                                                                                                    <i class="fa-solid fa-calendar-days me-1"></i>Joined @JoinLabel()
+                                                                                                    <a href="@BuildQuery(overrideJoinMonth: 0, overrideJoinYear: 0)" class="tag-close"><i class="fa-solid fa-times"></i></a>
+                                                                                                </span>
+                                                                                            }
                                                                                         </div>
                                                                                     }
                                                                                 </div>
                                                                             </div>
+
+                                                                            <script>
+                                                                                (function () {
+                                                                                    var btn = document.getElementById('joinApplyBtn');
+                                                                                    if (!btn) return;
+                                                                                    btn.addEventListener('click', function (e) {
+                                                                                        e.preventDefault();
+                                                                                        var m = document.getElementById('joinMonthSelect').value;
+                                                                                        var y = document.getElementById('joinYearSelect').value;
+                                                                                        var url = btn.getAttribute('data-base');
+                                                                                        if (m !== '0') url += '&joinMonth=' + encodeURIComponent(m);
+                                                                                        if (y !== '0') url += '&joinYear=' + encodeURIComponent(y);
+                                                                                        window.location.href = url;
+                                                                                    });
+                                                                                })();
+                                                                            </script>
 
                                                                             <style>
                                                                                 /* Page Header Row */
@@ -853,6 +931,17 @@
                                                                                 .filter-dropdown.filter-plan:hover,
                                                                                 .filter-dropdown.filter-plan.active {
                                                                                     box-shadow: 0 4px 15px rgba(139, 92, 246, 0.4);
+                                                                                }
+
+                                                                                /* Joined Month/Year Filter - Teal */
+                                                                                .filter-dropdown.filter-joined {
+                                                                                    background: linear-gradient(135deg, #2dd4bf 0%, #0d9488 100%);
+                                                                                    color: white;
+                                                                                }
+
+                                                                                .filter-dropdown.filter-joined:hover,
+                                                                                .filter-dropdown.filter-joined.active {
+                                                                                    box-shadow: 0 4px 15px rgba(13, 148, 136, 0.4);
                                                                                 }
 
                                                                                 /* Shift Filter - Orange/Amber */

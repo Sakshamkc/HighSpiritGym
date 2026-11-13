@@ -29,6 +29,8 @@ namespace HighSpiritApp.Services.Interfaces
         public string? Shift { get; set; }
         public string? Gender { get; set; }
         public string? PaymentStatus { get; set; }  // "paid", "due", or null for all
+        public int? JoinMonth { get; set; }  // 1-12, month the customer joined
+        public int? JoinYear { get; set; }   // year the customer joined (null = any year)
         public int Page { get; set; } = 1;
         public int PageSize { get; set; } = 10;
     }
@@ -40,6 +42,7 @@ namespace HighSpiritApp.Services.Interfaces
         public int TotalPages { get; set; }
         public int CurrentPage { get; set; }
         public DurationCounts DurationCounts { get; set; } = new();
+        public List<int> AvailableJoinYears { get; set; } = new();
     }
 
     public class DurationCounts

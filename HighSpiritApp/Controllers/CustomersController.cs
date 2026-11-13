@@ -31,7 +31,7 @@ namespace HighSpiritApp.Controllers
             _transactionLogService = transactionLogService;
         }
 
-        public async Task<IActionResult> Index(string search, string sort, string filter, int? duration, string planName, string shift, string gender, string paymentStatus, int page = 1)
+        public async Task<IActionResult> Index(string search, string sort, string filter, int? duration, string planName, string shift, string gender, string paymentStatus, int? joinMonth, int? joinYear, int page = 1)
         {
             var result = await _customerService.GetFilteredCustomersAsync(new CustomerFilterRequest
             {
@@ -43,6 +43,8 @@ namespace HighSpiritApp.Controllers
                 Shift = shift,
                 Gender = gender,
                 PaymentStatus = paymentStatus,
+                JoinMonth = joinMonth,
+                JoinYear = joinYear,
                 Page = page
             });
 
@@ -66,6 +68,9 @@ namespace HighSpiritApp.Controllers
             ViewBag.Shift = shift;
             ViewBag.Gender = gender;
             ViewBag.PaymentStatus = paymentStatus;
+            ViewBag.JoinMonth = joinMonth is >= 1 and <= 12 ? joinMonth : null;
+            ViewBag.JoinYear = joinYear;
+            ViewBag.AvailableJoinYears = result.AvailableJoinYears;
             ViewBag.Count1M = result.DurationCounts.Count1M;
             ViewBag.Count3M = result.DurationCounts.Count3M;
             ViewBag.Count6M = result.DurationCounts.Count6M;
@@ -281,7 +286,7 @@ namespace HighSpiritApp.Controllers
         }
 
         [HttpGet]
-        public async Task<IActionResult> ExportAll(string search, string filter, int? duration, string planName, string shift, string gender, string paymentStatus)
+        public async Task<IActionResult> ExportAll(string search, string filter, int? duration, string planName, string shift, string gender, string paymentStatus, int? joinMonth, int? joinYear)
         {
             var fileBytes = await _customerService.ExportToExcelAsync(new CustomerFilterRequest
             {
@@ -291,12 +296,18 @@ namespace HighSpiritApp.Controllers
                 PlanName = planName,
                 Shift = shift,
                 Gender = gender,
-                PaymentStatus = paymentStatus
+                PaymentStatus = paymentStatus,
+                JoinMonth = joinMonth,
+                JoinYear = joinYear
             });
 
             var fileName = duration.HasValue ? $"{duration}M Members" : "Gym Members";
             if (filter != null && filter != "all")
                 fileName += $" - {char.ToUpper(filter[0]) + filter.Substring(1)}";
+            if (joinMonth is >= 1 and <= 12)
+                fileName += $" - Joined {System.Globalization.CultureInfo.InvariantCulture.DateTimeFormat.GetAbbreviatedMonthName(joinMonth.Value)}{(joinYear.HasValue ? " " + joinYear : "")}";
+            else if (joinYear.HasValue)
+                fileName += $" - Joined {joinYear}";
             if (!string.IsNullOrEmpty(planName))
                 fileName += $" - {planName}";
             if (!string.IsNullOrEmpty(shift))
@@ -310,7 +321,7 @@ namespace HighSpiritApp.Controllers
         }
 
         [HttpGet]
-        public async Task<IActionResult> ExportDiary(string search, string filter, int? duration, string planName, string shift, string gender, string paymentStatus)
+        public async Task<IActionResult> ExportDiary(string search, string filter, int? duration, string planName, string shift, string gender, string paymentStatus, int? joinMonth, int? joinYear)
         {
             var fileBytes = await _customerService.ExportDiaryAsync(new CustomerFilterRequest
             {
@@ -320,7 +331,9 @@ namespace HighSpiritApp.Controllers
                 PlanName = planName,
                 Shift = shift,
                 Gender = gender,
-                PaymentStatus = paymentStatus
+                PaymentStatus = paymentStatus,
+                JoinMonth = joinMonth,
+                JoinYear = joinYear
             });
 
             var fileName = "Gym Members Contact Diary";

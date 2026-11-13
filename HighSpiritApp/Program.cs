@@ -208,9 +208,11 @@ app.UseRouting();
 app.UseCors("MobileApp");
 
 app.UseAuthentication();
-app.UseAuthorization();
 
 // Redirect unauthenticated root "/" to checkin.html
+// Must run before UseAuthorization: HomeController requires auth, so
+// UseAuthorization would otherwise 404 unauthenticated "/" requests
+// (via OnRedirectToLogin) before this redirect ever gets a chance to run.
 app.Use(async (context, next) =>
 {
     if (context.Request.Path == "/" && !context.User.Identity!.IsAuthenticated)
@@ -220,6 +222,8 @@ app.Use(async (context, next) =>
     }
     await next();
 });
+
+app.UseAuthorization();
 
 app.MapControllerRoute(
     name: "default",

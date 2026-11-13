@@ -69,6 +69,25 @@ namespace HighSpiritApp.Services
             else if (filter.Filter == "updated")
                 query = query.Where(c => c.UpdatedAt != null && c.UpdatedAt >= thirtyDaysAgo);
 
+            // Join month / year filter (ignore out-of-range values)
+            if (filter.JoinMonth is >= 1 and <= 12)
+            {
+                var joinMonth = filter.JoinMonth.Value;
+                query = query.Where(c => c.JoinDate.Month == joinMonth);
+            }
+            if (filter.JoinYear is >= 1900 and <= 9999)
+            {
+                var joinYear = filter.JoinYear.Value;
+                query = query.Where(c => c.JoinDate.Year == joinYear);
+            }
+
+            // Years that have at least one joiner (for the year dropdown)
+            var availableJoinYears = await _db.Customers.AsNoTracking()
+                .Select(c => c.JoinDate.Year)
+                .Distinct()
+                .OrderByDescending(y => y)
+                .ToListAsync();
+
             // Project WITHOUT the heavy Photo blob; include lightweight membership projection.
             // (Active/expired/soon/hold/paid/due all depend on "latest membership per customer"
             //  which MySQL provider translates badly as a subquery — filter those in memory.)
@@ -239,7 +258,8 @@ namespace HighSpiritApp.Services
                 TotalCount = total,
                 TotalPages = (int)Math.Ceiling(total / (double)filter.PageSize),
                 CurrentPage = filter.Page,
-                DurationCounts = durationCounts
+                DurationCounts = durationCounts,
+                AvailableJoinYears = availableJoinYears
             };
         }
 
@@ -489,6 +509,8 @@ namespace HighSpiritApp.Services
                 Shift = filter.Shift,
                 Gender = filter.Gender,
                 PaymentStatus = filter.PaymentStatus,
+                JoinMonth = filter.JoinMonth,
+                JoinYear = filter.JoinYear,
                 PageSize = int.MaxValue
             })).Customers.OrderBy(c => c.FullName);
 
@@ -554,6 +576,8 @@ namespace HighSpiritApp.Services
                 Shift = filter.Shift,
                 Gender = filter.Gender,
                 PaymentStatus = filter.PaymentStatus,
+                JoinMonth = filter.JoinMonth,
+                JoinYear = filter.JoinYear,
                 PageSize = int.MaxValue
             })).Customers.OrderBy(c => c.FullName);
 
