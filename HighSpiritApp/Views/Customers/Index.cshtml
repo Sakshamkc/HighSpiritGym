@@ -123,6 +123,11 @@
                 <text>Recently Updated</text>
                 <small class="text-muted" style="font-size: 0.55em; font-weight: 400;">Last 30 days</small>
             }
+            else if (joinMonthSel.HasValue || joinYearSel.HasValue)
+            {
+                <text>Members Joined</text>
+                <small class="text-muted" style="font-size: 0.55em; font-weight: 400;">@JoinLabel()</small>
+            }
             else
             {
                 <text>All Members</text>

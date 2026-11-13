@@ -62,7 +62,8 @@ namespace HighSpiritApp.Controllers
             ViewBag.TotalPages = result.TotalPages;
             ViewBag.Search = search;
             ViewBag.Sort = sort;
-            ViewBag.Filter = filter ?? "all";
+            var hasJoinFilter = joinMonth is >= 1 and <= 12 || joinYear.HasValue;
+            ViewBag.Filter = hasJoinFilter && (filter == "new" || filter == "thismonth") ? "all" : (filter ?? "all");
             ViewBag.Duration = duration;
             ViewBag.PlanName = planName;
             ViewBag.Shift = shift;

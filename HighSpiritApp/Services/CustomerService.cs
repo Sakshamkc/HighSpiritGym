@@ -47,6 +47,12 @@ namespace HighSpiritApp.Services
             var thirtyDaysAgo = today.AddDays(-30);
             filter.Filter ??= "all";
 
+            // An explicit join month/year replaces the "new" (last 30 days) and
+            // "thismonth" date-range filters, otherwise the two would be ANDed together.
+            bool hasJoinFilter = filter.JoinMonth is >= 1 and <= 12 || filter.JoinYear is >= 1900 and <= 9999;
+            if (hasJoinFilter && (filter.Filter == "new" || filter.Filter == "thismonth"))
+                filter.Filter = "all";
+
             // Build base SQL-translatable filters (avoid loading entities until needed)
             var query = _db.Customers.AsNoTracking().AsQueryable();
 
